@@ -1,0 +1,142 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreMusicClassRequest;
+use App\Http\Requests\Admin\StoreStudentRequest;
+use App\Http\Requests\Admin\StoreTeacherRequest;
+use App\Http\Requests\Admin\UpdateRegistrationStatusRequest;
+use App\Models\MusicClass;
+use App\Models\Registration;
+use App\Models\Student;
+use App\Models\Teacher;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
+
+class AcademicManagementController extends Controller
+{
+    public function classes(): View
+    {
+        return view('portal.admin.classes', [
+            'classes' => MusicClass::with('teacher')->latest()->get(),
+            'teachers' => Teacher::orderBy('name')->get(),
+        ]);
+    }
+
+    public function storeClass(StoreMusicClassRequest $request): RedirectResponse
+    {
+        MusicClass::create($request->validated());
+
+        return back()->with('success', 'Kelas berhasil ditambahkan.');
+    }
+
+    public function updateClass(StoreMusicClassRequest $request, MusicClass $class): RedirectResponse
+    {
+        $class->update($request->validated());
+
+        return back()->with('success', 'Kelas berhasil diperbarui.');
+    }
+
+    public function destroyClass(MusicClass $class): RedirectResponse
+    {
+        $class->delete();
+
+        return back()->with('success', 'Kelas berhasil dihapus.');
+    }
+
+    public function teachers(): View
+    {
+        return view('portal.admin.teachers', [
+            'teachers' => Teacher::latest()->get(),
+        ]);
+    }
+
+    public function storeTeacher(StoreTeacherRequest $request): RedirectResponse
+    {
+        $payload = $request->validated();
+        $payload['is_active'] = $request->boolean('is_active');
+
+        if ($request->hasFile('photo')) {
+            $payload['photo_path'] = $request->file('photo')->store('teachers', 'public');
+        }
+
+        Teacher::create($payload);
+
+        return back()->with('success', 'Guru berhasil ditambahkan.');
+    }
+
+    public function updateTeacher(StoreTeacherRequest $request, Teacher $teacher): RedirectResponse
+    {
+        $payload = $request->validated();
+        $payload['is_active'] = $request->boolean('is_active');
+
+        if ($request->hasFile('photo')) {
+            $payload['photo_path'] = $request->file('photo')->store('teachers', 'public');
+        }
+
+        $teacher->update($payload);
+
+        return back()->with('success', 'Data guru berhasil diperbarui.');
+    }
+
+    public function destroyTeacher(Teacher $teacher): RedirectResponse
+    {
+        $teacher->delete();
+
+        return back()->with('success', 'Guru berhasil dihapus.');
+    }
+
+    public function students(): View
+    {
+        return view('portal.admin.students', [
+            'students' => Student::with('classes')->latest()->get(),
+            'classes' => MusicClass::orderBy('name')->get(),
+        ]);
+    }
+
+    public function storeStudent(StoreStudentRequest $request): RedirectResponse
+    {
+        $payload = $request->validated();
+        $payload['is_active'] = $request->boolean('is_active');
+        unset($payload['class_ids']);
+
+        $student = Student::create($payload);
+        $student->classes()->sync($request->input('class_ids', []));
+
+        return back()->with('success', 'Siswa berhasil ditambahkan.');
+    }
+
+    public function updateStudent(StoreStudentRequest $request, Student $student): RedirectResponse
+    {
+        $payload = $request->validated();
+        $payload['is_active'] = $request->boolean('is_active');
+        unset($payload['class_ids']);
+
+        $student->update($payload);
+        $student->classes()->sync($request->input('class_ids', []));
+
+        return back()->with('success', 'Data siswa berhasil diperbarui.');
+    }
+
+    public function destroyStudent(Student $student): RedirectResponse
+    {
+        $student->delete();
+
+        return back()->with('success', 'Siswa berhasil dihapus.');
+    }
+
+    public function registrations(): View
+    {
+        return view('portal.admin.registrations', [
+            'registrations' => Registration::with('class')->latest()->get(),
+        ]);
+    }
+
+    public function updateRegistrationStatus(UpdateRegistrationStatusRequest $request, Registration $registration): RedirectResponse
+    {
+        $registration->update($request->validated());
+
+        return back()->with('success', 'Status pendaftaran berhasil diperbarui.');
+    }
+}

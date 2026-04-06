@@ -1,0 +1,6 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Financial Report PDF View</title><style>body{font-family:Arial,sans-serif;padding:20px}table{width:100%;border-collapse:collapse;margin-bottom:20px}th,td{border:1px solid #888;padding:6px;text-align:left}h2{margin-top:24px}</style></head><body>
+<h1>ROFC Financial Report</h1>
+<h2>Payments</h2><table><thead><tr><th>Date</th><th>Student</th><th>Amount</th><th>Status</th></tr></thead><tbody>@foreach($payments as $row)<tr><td>{{ optional($row->paid_at)->format('Y-m-d') }}</td><td>{{ $row->student?->name }}</td><td>{{ $row->amount }}</td><td>{{ $row->status }}</td></tr>@endforeach</tbody></table>
+<h2>Expenses</h2><table><thead><tr><th>Date</th><th>Category</th><th>Title</th><th>Amount</th></tr></thead><tbody>@foreach($expenses as $row)<tr><td>{{ optional($row->expense_date)->format('Y-m-d') }}</td><td>{{ $row->category }}</td><td>{{ $row->title }}</td><td>{{ $row->amount }}</td></tr>@endforeach</tbody></table>
+<h2>Teacher Salaries</h2><table><thead><tr><th>Teacher</th><th>Period</th><th>Total Paid</th></tr></thead><tbody>@foreach($salaries as $row)<tr><td>{{ $row->teacher?->name }}</td><td>{{ $row->period }}</td><td>{{ $row->total_paid }}</td></tr>@endforeach</tbody></table>
+</body></html>
