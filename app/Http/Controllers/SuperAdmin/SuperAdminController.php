@@ -21,6 +21,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class SuperAdminController extends Controller
@@ -30,19 +31,21 @@ class SuperAdminController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:120', 'unique:users,email'],
-            'role' => ['required', 'in:admin,teacher,student'],
+            'role' => ['required', 'string', 'max:60'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'instrument' => ['nullable', 'string', 'max:80'],
             'phone' => ['nullable', 'string', 'max:30'],
         ]);
 
-        $role = Role::query()->where('slug', $data['role'])->first();
+        $roleSlug = Str::of($data['role'])->trim()->lower()->replace('-', '_')->replace(' ', '_')->toString();
 
-        if (! $role) {
-            return back()->withErrors([
-                'role' => 'Role tidak ditemukan. Jalankan seeder role terlebih dahulu.',
-            ])->withInput();
-        }
+        $role = Role::query()->firstOrCreate(
+            ['slug' => $roleSlug],
+            [
+                'name' => Str::headline(str_replace('_', ' ', $roleSlug)),
+                'description' => 'Role dibuat dari dashboard Super Admin.',
+            ]
+        );
 
         $user = User::query()->create([
             'name' => $data['name'],
@@ -52,7 +55,7 @@ class SuperAdminController extends Controller
 
         $user->roles()->syncWithoutDetaching([$role->id]);
 
-        if ($data['role'] === 'teacher') {
+        if ($roleSlug === 'teacher') {
             Teacher::query()->firstOrCreate(
                 ['user_id' => $user->id],
                 [
@@ -63,7 +66,7 @@ class SuperAdminController extends Controller
             );
         }
 
-        if ($data['role'] === 'student') {
+        if ($roleSlug === 'student') {
             Student::query()->firstOrCreate(
                 ['user_id' => $user->id],
                 [
@@ -76,6 +79,33 @@ class SuperAdminController extends Controller
         }
 
         return back()->with('success', 'Akun login berhasil dibuat.');
+    }
+
+    public function storeRole(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'slug' => ['nullable', 'string', 'max:120', 'regex:/^[a-z0-9_-]+$/', 'unique:roles,slug'],
+            'description' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $slug = $data['slug']
+            ? Str::of($data['slug'])->trim()->lower()->replace('-', '_')->replace(' ', '_')->toString()
+            : Str::of($data['name'])->trim()->lower()->replace('-', '_')->replace(' ', '_')->toString();
+
+        if (Role::query()->where('slug', $slug)->exists()) {
+            return back()->withErrors([
+                'slug' => 'Slug role sudah digunakan. Gunakan slug lain.',
+            ])->withInput();
+        }
+
+        Role::query()->create([
+            'name' => $data['name'],
+            'slug' => $slug,
+            'description' => $data['description'] ?? null,
+        ]);
+
+        return back()->with('success', 'Role baru berhasil dibuat.');
     }
 
     public function dashboard(): View
@@ -121,6 +151,7 @@ class SuperAdminController extends Controller
             'moduleDescription' => $moduleData['description'],
             'columns' => $moduleData['columns'],
             'rows' => $moduleData['rows'],
+            'availableRoles' => Role::query()->orderBy('name')->get(['name', 'slug']),
         ]);
     }
 

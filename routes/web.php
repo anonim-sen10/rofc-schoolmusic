@@ -72,6 +72,7 @@ Route::middleware('auth')->group(function () {
 Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'role:super_admin'])->group(function () {
     Route::get('/', [SuperAdminController::class, 'dashboard'])->name('dashboard');
     Route::post('/users', [SuperAdminController::class, 'storeUser'])->name('users.store');
+    Route::post('/roles', [SuperAdminController::class, 'storeRole'])->name('roles.store');
     Route::get('/{module}', [SuperAdminController::class, 'module'])
         ->whereIn('module', ['users', 'roles', 'classes', 'teachers', 'students', 'registrations', 'finance', 'reports', 'blog', 'gallery', 'events', 'testimonials', 'settings', 'logs'])
         ->name('module');

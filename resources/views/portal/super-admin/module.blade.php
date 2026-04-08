@@ -38,9 +38,13 @@
             </label>
             <label>Role
                 <select name="role" required>
-                    <option value="admin" @selected(old('role') === 'admin')>Admin</option>
-                    <option value="teacher" @selected(old('role') === 'teacher')>Teacher</option>
-                    <option value="student" @selected(old('role') === 'student')>Siswa</option>
+                    @forelse ($availableRoles as $role)
+                        <option value="{{ $role->slug }}" @selected(old('role') === $role->slug)>{{ $role->name }}</option>
+                    @empty
+                        <option value="admin" @selected(old('role') === 'admin')>Admin</option>
+                        <option value="teacher" @selected(old('role') === 'teacher')>Teacher</option>
+                        <option value="student" @selected(old('role') === 'student')>Siswa</option>
+                    @endforelse
                 </select>
             </label>
             <label>Instrument (khusus teacher)
@@ -56,6 +60,25 @@
                 <input type="password" name="password_confirmation" required>
             </label>
             <button type="submit">Buat Akun</button>
+        </form>
+    </section>
+@endif
+
+@if ($moduleKey === 'roles')
+    <section class="card">
+        <h3>Buat Role Baru</h3>
+        <form class="module-form" method="POST" action="{{ route('super-admin.roles.store') }}">
+            @csrf
+            <label>Nama Role
+                <input type="text" name="name" value="{{ old('name') }}" placeholder="Contoh: Editor Konten" required>
+            </label>
+            <label>Slug (opsional)
+                <input type="text" name="slug" value="{{ old('slug') }}" placeholder="contoh: editor_konten">
+            </label>
+            <label>Deskripsi (opsional)
+                <textarea name="description" rows="3" placeholder="Deskripsi hak akses role">{{ old('description') }}</textarea>
+            </label>
+            <button type="submit">Simpan Role</button>
         </form>
     </section>
 @endif
