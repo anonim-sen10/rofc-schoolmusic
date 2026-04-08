@@ -324,6 +324,31 @@ th {
     font: inherit;
 }
 
+.action-icons {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.action-icons a,
+.action-icons button {
+    width: 2rem;
+    height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.45rem;
+    border: 1px solid var(--line);
+    background: #0f131b;
+    color: var(--text);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.action-icons form {
+    margin: 0;
+}
+
 .portal-footer {
     padding: 1rem 1.2rem;
     display: flex;

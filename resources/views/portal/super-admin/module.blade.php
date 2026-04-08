@@ -64,23 +64,55 @@
 
 @if ($moduleKey === 'roles')
     <section class="card">
-        <h3>Buat Role Baru</h3>
-        <form class="module-form" method="POST" action="{{ route('super-admin.roles.store') }}">
-            @csrf
-            <label>Nama Role
-                <input type="text" name="name" value="{{ old('name') }}" placeholder="Contoh: Editor Konten" required>
-            </label>
-            <label>Slug (opsional)
-                <input type="text" name="slug" value="{{ old('slug') }}" placeholder="contoh: editor_konten">
-            </label>
-            <label>Deskripsi (opsional)
-                <textarea name="description" rows="3" placeholder="Deskripsi hak akses role">{{ old('description') }}</textarea>
-            </label>
-            <button type="submit">Simpan Role</button>
-        </form>
+        <h3>Data User</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Created</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($usersForRoles as $userRow)
+                        <tr>
+                            <td>{{ $userRow->name }}</td>
+                            <td>{{ $userRow->email }}</td>
+                            <td>{{ $userRow->roles->pluck('slug')->implode(', ') }}</td>
+                            <td>{{ optional($userRow->created_at)->format('Y-m-d H:i') }}</td>
+                            <td>
+                                <div class="action-icons">
+                                    <a href="{{ route('super-admin.users.show', $userRow) }}" title="Detail" aria-label="Detail">&#128065;</a>
+                                    <a href="{{ route('super-admin.users.edit', $userRow) }}" title="Edit" aria-label="Edit">&#9998;</a>
+                                    <form method="POST" action="{{ route('super-admin.users.destroy', $userRow) }}" onsubmit="return confirm('Hapus user ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" title="Hapus" aria-label="Hapus">&#128465;</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5">Belum ada data user.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </section>
 @endif
 
+@if ($moduleKey === 'users')
+    <section class="card">
+        <p>Data user telah dipindahkan ke menu Roles agar pengelolaan role dan akun berada dalam satu halaman.</p>
+    </section>
+@endif
+
+@if (! in_array($moduleKey, ['users', 'roles'], true))
 <section class="card">
     <div class="table-wrap">
         <table>
@@ -107,4 +139,5 @@
         </table>
     </div>
 </section>
+@endif
 @endsection

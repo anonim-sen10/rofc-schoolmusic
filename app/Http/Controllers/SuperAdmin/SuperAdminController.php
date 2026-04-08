@@ -26,6 +26,14 @@ use Illuminate\View\View;
 
 class SuperAdminController extends Controller
 {
+    private const CORE_ROLES = [
+        'super_admin' => ['name' => 'Super Admin', 'description' => 'Akses penuh ke seluruh sistem.'],
+        'admin' => ['name' => 'Admin', 'description' => 'Operasional akademik dan konten website.'],
+        'finance' => ['name' => 'Finance', 'description' => 'Manajemen keuangan sekolah musik.'],
+        'teacher' => ['name' => 'Teacher', 'description' => 'Portal pengajar dan akademik.'],
+        'student' => ['name' => 'Student', 'description' => 'Portal siswa.'],
+    ];
+
     public function storeUser(Request $request): RedirectResponse
     {
         $data = $request->validate([
@@ -37,23 +45,9 @@ class SuperAdminController extends Controller
             'phone' => ['nullable', 'string', 'max:30'],
         ]);
 
-        $roleCatalog = [
-            'super_admin' => ['name' => 'Super Admin', 'description' => 'Akses penuh ke seluruh sistem.'],
-            'admin' => ['name' => 'Admin', 'description' => 'Operasional akademik dan konten website.'],
-            'finance' => ['name' => 'Finance', 'description' => 'Manajemen keuangan sekolah musik.'],
-            'teacher' => ['name' => 'Teacher', 'description' => 'Portal pengajar dan akademik.'],
-            'student' => ['name' => 'Student', 'description' => 'Portal siswa.'],
-        ];
-
         $roleSlug = $data['role'];
 
-        $role = Role::query()->firstOrCreate(
-            ['slug' => $roleSlug],
-            [
-                'name' => $roleCatalog[$roleSlug]['name'],
-                'description' => $roleCatalog[$roleSlug]['description'],
-            ]
-        );
+        $role = $this->resolveCoreRole($roleSlug);
 
         $user = User::query()->create([
             'name' => $data['name'],
@@ -87,6 +81,91 @@ class SuperAdminController extends Controller
         }
 
         return back()->with('success', 'Akun login berhasil dibuat.');
+    }
+
+    public function showUser(User $user): View
+    {
+        $user->load('roles');
+
+        return view('portal.super-admin.user-detail', [
+            'roleKey' => 'super_admin',
+            'portal' => $this->portalConfig(),
+            'user' => $user,
+        ]);
+    }
+
+    public function editUser(User $user): View
+    {
+        $user->load('roles');
+
+        return view('portal.super-admin.user-edit', [
+            'roleKey' => 'super_admin',
+            'portal' => $this->portalConfig(),
+            'user' => $user,
+            'roleOptions' => self::CORE_ROLES,
+        ]);
+    }
+
+    public function updateUser(Request $request, User $user): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'email' => ['required', 'email', 'max:120', 'unique:users,email,'.$user->id],
+            'role' => ['required', 'in:super_admin,admin,finance,teacher,student'],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'instrument' => ['nullable', 'string', 'max:80'],
+            'phone' => ['nullable', 'string', 'max:30'],
+        ]);
+
+        $user->name = $data['name'];
+        $user->email = $data['email'];
+
+        if (! empty($data['password'])) {
+            $user->password = Hash::make($data['password']);
+        }
+
+        $user->save();
+
+        $role = $this->resolveCoreRole($data['role']);
+        $user->roles()->sync([$role->id]);
+
+        if ($data['role'] === 'teacher') {
+            Teacher::query()->firstOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'name' => $user->name,
+                    'instrument' => $data['instrument'] ?? 'General',
+                    'is_active' => true,
+                ]
+            );
+        }
+
+        if ($data['role'] === 'student') {
+            Student::query()->firstOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'phone' => $data['phone'] ?? null,
+                    'is_active' => true,
+                ]
+            );
+        }
+
+        return redirect()->route('super-admin.module', ['module' => 'roles'])->with('success', 'Data user berhasil diperbarui.');
+    }
+
+    public function destroyUser(Request $request, User $user): RedirectResponse
+    {
+        if ((int) $request->user()->id === (int) $user->id) {
+            return back()->withErrors([
+                'user' => 'Akun yang sedang dipakai tidak bisa dihapus.',
+            ]);
+        }
+
+        $user->delete();
+
+        return back()->with('success', 'User berhasil dihapus.');
     }
 
     public function storeRole(Request $request): RedirectResponse
@@ -159,7 +238,7 @@ class SuperAdminController extends Controller
             'moduleDescription' => $moduleData['description'],
             'columns' => $moduleData['columns'],
             'rows' => $moduleData['rows'],
-            'availableRoles' => Role::query()->orderBy('name')->get(['name', 'slug']),
+            'usersForRoles' => User::with('roles')->latest()->take(50)->get(),
         ]);
     }
 
@@ -171,7 +250,7 @@ class SuperAdminController extends Controller
             'menu' => [
                 ['key' => 'dashboard', 'label' => 'Dashboard'],
                 ['key' => 'users', 'label' => 'Users'],
-                ['key' => 'roles', 'label' => 'Roles'],
+                ['key' => 'roles', 'label' => 'Manajemen User'],
                 ['key' => 'classes', 'label' => 'Classes'],
                 ['key' => 'teachers', 'label' => 'Teachers'],
                 ['key' => 'students', 'label' => 'Students'],
@@ -203,8 +282,8 @@ class SuperAdminController extends Controller
                 ])->all(),
             ],
             'roles' => [
-                'title' => 'Roles',
-                'description' => 'Role dan jumlah user pada masing-masing role.',
+                'title' => 'Manajemen User',
+                'description' => 'Kelola data akun user dalam satu halaman.',
                 'columns' => ['Role', 'Slug', 'Total User'],
                 'rows' => Role::withCount('users')->orderBy('id')->get()->map(fn (Role $role) => [
                     $role->name,
@@ -341,5 +420,16 @@ class SuperAdminController extends Controller
             ],
             default => abort(404),
         };
+    }
+
+    private function resolveCoreRole(string $roleSlug): Role
+    {
+        return Role::query()->firstOrCreate(
+            ['slug' => $roleSlug],
+            [
+                'name' => self::CORE_ROLES[$roleSlug]['name'],
+                'description' => self::CORE_ROLES[$roleSlug]['description'],
+            ]
+        );
     }
 }
