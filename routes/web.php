@@ -67,6 +67,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('/portal', [PortalController::class, 'redirectByRole'])->name('portal.redirect');
+    Route::get('/portal/custom', [PortalController::class, 'customDashboard'])->name('portal.custom.dashboard');
 });
 
 Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'role:super_admin'])->group(function () {
