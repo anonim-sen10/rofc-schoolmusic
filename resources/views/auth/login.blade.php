@@ -26,8 +26,17 @@
                     <input type="email" name="email" value="{{ old('email') }}" required>
                 </label>
                 <label>Password
-                    <input type="password" name="password" required>
+                    <input type="password" name="password" id="login-password" required>
                 </label>
+                <button
+                    type="button"
+                    id="toggle-login-password"
+                    aria-controls="login-password"
+                    aria-label="Show password"
+                    style="justify-self: start; border: 1px solid #31384a; border-radius: 0.5rem; padding: 0.35rem 0.6rem; background: #0f131b; color: #e8ebf4; font-size: 0.85rem;"
+                >
+                    Show password
+                </button>
                 <label class="remember">
                     <input type="checkbox" name="remember" value="1"> Remember me
                 </label>
@@ -37,5 +46,23 @@
             <small class="hint">Demo credential akan tersedia setelah menjalankan seeder.</small>
         </section>
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const passwordInput = document.getElementById('login-password');
+            const toggleButton = document.getElementById('toggle-login-password');
+
+            if (!passwordInput || !toggleButton) {
+                return;
+            }
+
+            toggleButton.addEventListener('click', function () {
+                const showing = passwordInput.type === 'text';
+                passwordInput.type = showing ? 'password' : 'text';
+                toggleButton.textContent = showing ? 'Show password' : 'Hide password';
+                toggleButton.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+            });
+        });
+    </script>
 </body>
 </html>
