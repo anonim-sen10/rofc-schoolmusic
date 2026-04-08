@@ -31,19 +31,27 @@ class SuperAdminController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:120', 'unique:users,email'],
-            'role' => ['required', 'string', 'max:60'],
+            'role' => ['required', 'in:super_admin,admin,finance,teacher,student'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'instrument' => ['nullable', 'string', 'max:80'],
             'phone' => ['nullable', 'string', 'max:30'],
         ]);
 
-        $roleSlug = Str::of($data['role'])->trim()->lower()->replace('-', '_')->replace(' ', '_')->toString();
+        $roleCatalog = [
+            'super_admin' => ['name' => 'Super Admin', 'description' => 'Akses penuh ke seluruh sistem.'],
+            'admin' => ['name' => 'Admin', 'description' => 'Operasional akademik dan konten website.'],
+            'finance' => ['name' => 'Finance', 'description' => 'Manajemen keuangan sekolah musik.'],
+            'teacher' => ['name' => 'Teacher', 'description' => 'Portal pengajar dan akademik.'],
+            'student' => ['name' => 'Student', 'description' => 'Portal siswa.'],
+        ];
+
+        $roleSlug = $data['role'];
 
         $role = Role::query()->firstOrCreate(
             ['slug' => $roleSlug],
             [
-                'name' => Str::headline(str_replace('_', ' ', $roleSlug)),
-                'description' => 'Role dibuat dari dashboard Super Admin.',
+                'name' => $roleCatalog[$roleSlug]['name'],
+                'description' => $roleCatalog[$roleSlug]['description'],
             ]
         );
 

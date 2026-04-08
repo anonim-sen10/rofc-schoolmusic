@@ -38,13 +38,11 @@
             </label>
             <label>Role
                 <select name="role" required>
-                    @forelse ($availableRoles as $role)
-                        <option value="{{ $role->slug }}" @selected(old('role') === $role->slug)>{{ $role->name }}</option>
-                    @empty
-                        <option value="admin" @selected(old('role') === 'admin')>Admin</option>
-                        <option value="teacher" @selected(old('role') === 'teacher')>Teacher</option>
-                        <option value="student" @selected(old('role') === 'student')>Siswa</option>
-                    @endforelse
+                    <option value="super_admin" @selected(old('role') === 'super_admin')>Super Admin</option>
+                    <option value="admin" @selected(old('role') === 'admin')>Admin</option>
+                    <option value="finance" @selected(old('role') === 'finance')>Finance</option>
+                    <option value="teacher" @selected(old('role') === 'teacher')>Teacher</option>
+                    <option value="student" @selected(old('role') === 'student')>Siswa</option>
                 </select>
             </label>
             <label>Instrument (khusus teacher)
