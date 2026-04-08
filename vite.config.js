@@ -7,8 +7,9 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/css/app.css',
-                'resources/css/portal.css', // 🔥 INI YANG KURANG
-                'resources/js/app.js'
+                'resources/css/portal.css',
+                'resources/js/app.js',
+                'resources/js/portal.js',
             ],
             refresh: true,
         }),
