@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Portal;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class PortalController extends Controller
@@ -13,13 +14,23 @@ class PortalController extends Controller
     {
         $role = $request->user()->primaryRole();
 
+        if (! in_array($role, ['super_admin', 'admin', 'finance', 'teacher', 'student'], true)) {
+            Auth::logout();
+
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'Akun Anda belum memiliki role portal. Silakan hubungi admin.',
+            ]);
+        }
+
         return match ($role) {
             'super_admin' => redirect()->route('super-admin.dashboard'),
             'admin' => redirect()->route('admin.dashboard'),
             'finance' => redirect()->route('finance.dashboard'),
             'teacher' => redirect()->route('teacher.dashboard'),
             'student' => redirect()->route('student.dashboard'),
-            default => redirect()->route('home'),
         };
     }
 
