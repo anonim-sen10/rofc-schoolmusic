@@ -60,15 +60,19 @@
                         <input type="search" placeholder="Search in dashboard..." data-global-search>
                     </label>
 
-                    @if ($roleKey === 'super_admin')
-                        <a href="{{ route('super-admin.module', ['module' => 'students']) }}" class="quick-btn" title="Add Student">
-                            <i data-lucide="user-plus"></i>
-                            <span>Add Student</span>
-                        </a>
-                        <a href="{{ route('super-admin.module', ['module' => 'classes']) }}" class="quick-btn" title="Add Class">
-                            <i data-lucide="plus-circle"></i>
-                            <span>Add Class</span>
-                        </a>
+                    @if (in_array($roleKey, ['admin', 'super_admin'], true))
+                        @if (Route::has('admin.students.index'))
+                            <a href="{{ route('admin.students.index') }}" class="quick-btn" title="Open students">
+                                <i data-lucide="user-plus"></i>
+                                <span>Students</span>
+                            </a>
+                        @endif
+                        @if (Route::has('admin.classes.index'))
+                            <a href="{{ route('admin.classes.index') }}" class="quick-btn" title="Open classes">
+                                <i data-lucide="plus-circle"></i>
+                                <span>Classes</span>
+                            </a>
+                        @endif
                     @endif
 
                     <button type="button" class="icon-btn" title="Notifications" aria-label="Notifications">

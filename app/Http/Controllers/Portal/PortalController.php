@@ -127,6 +127,7 @@ class PortalController extends Controller
                     ['key' => 'teachers', 'label' => 'Teachers', 'icon' => 'music-2'],
                     ['key' => 'students', 'label' => 'Students', 'icon' => 'graduation-cap'],
                     ['key' => 'registrations', 'label' => 'Registrations', 'icon' => 'clipboard-list'],
+                    ['key' => 'schedule', 'label' => 'Schedule', 'icon' => 'calendar-days'],
                     ['key' => 'gallery', 'label' => 'Gallery', 'icon' => 'image'],
                     ['key' => 'blog', 'label' => 'Blog', 'icon' => 'newspaper'],
                     ['key' => 'events', 'label' => 'Events', 'icon' => 'calendar'],

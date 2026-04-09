@@ -6,6 +6,10 @@ $menuItems = [
     ['label' => 'Students', 'url' => route('admin.students.index')],
     ['label' => 'Registrations', 'url' => route('admin.registrations.index')],
     ['label' => 'Schedule', 'url' => route('admin.schedule.index')],
+    ['label' => 'Gallery', 'url' => route('admin.module', ['module' => 'gallery'])],
+    ['label' => 'Blog', 'url' => route('admin.module', ['module' => 'blog'])],
+    ['label' => 'Events', 'url' => route('admin.module', ['module' => 'events'])],
+    ['label' => 'Testimonials', 'url' => route('admin.module', ['module' => 'testimonials'])],
 ];
 $panelTitle = 'Admin Dashboard';
 $homeRoute = route('admin.dashboard');
@@ -14,10 +18,20 @@ $homeRoute = route('admin.dashboard');
 @section('title', 'Schedule Management')
 @section('page-title', 'Schedule Management')
 @section('content')
-<div class="split-grid">
-    <section class="card">
-        <h3>Tentukan Pengajar per Class</h3>
-        <form class="module-form" method="POST" action="{{ route('admin.schedule.teacher') }}">
+<section class="dashboard-hero" data-searchable>
+    <div>
+        <p class="eyebrow">Academic Operation</p>
+        <h2>Schedule Management</h2>
+        <p>Tentukan assignment pengajar dan siswa per kelas agar jadwal belajar sinkron di semua portal.</p>
+    </div>
+    <div class="hero-actions">
+        <a href="{{ route('admin.classes.index') }}" class="ghost-btn">Open Classes</a>
+    </div>
+</section>
+
+<div class="split-grid-sa" data-searchable>
+    <x-ui.card title="Tentukan Pengajar per Class" subtitle="Assignment pengajar utama tiap kelas">
+        <form class="module-form module-form-grid" method="POST" action="{{ route('admin.schedule.teacher') }}">
             @csrf
             <label>Class
                 <select name="class_id" required>
@@ -35,12 +49,15 @@ $homeRoute = route('admin.dashboard');
                     @endforeach
                 </select>
             </label>
-            <button type="submit">Simpan Pengajar</button>
+            <div class="form-actions">
+                <button type="submit">Simpan Pengajar</button>
+                <button type="reset" class="btn-secondary">Cancel</button>
+            </div>
         </form>
-    </section>
-    <section class="card">
-        <h3>Tentukan Siswa per Class</h3>
-        <form class="module-form" method="POST" action="{{ route('admin.schedule.students') }}">
+    </x-ui.card>
+
+    <x-ui.card title="Tentukan Siswa per Class" subtitle="Attach siswa aktif ke kelas terkait">
+        <form class="module-form module-form-grid" method="POST" action="{{ route('admin.schedule.students') }}">
             @csrf
             <label>Class
                 <select name="class_id" required>
@@ -57,42 +74,34 @@ $homeRoute = route('admin.dashboard');
                     @endforeach
                 </select>
             </label>
-            <button type="submit">Tambah Siswa ke Class</button>
+            <div class="form-actions">
+                <button type="submit">Tambah Siswa ke Class</button>
+                <button type="reset" class="btn-secondary">Cancel</button>
+            </div>
         </form>
-    </section>
+    </x-ui.card>
 </div>
 
-<section class="card">
-    <h3>Ringkasan Schedule</h3>
-    <div class="table-wrap">
-        <table>
-            <thead>
+<x-ui.card title="Ringkasan Schedule" subtitle="Status assignment terbaru per kelas" data-searchable>
+    @if ($classList->isNotEmpty())
+        <x-ui.table :headers="['Class', 'Pengajar', 'Status Jadwal', 'Jumlah Siswa', 'Daftar Siswa', 'Catatan Respon']">
+            @foreach($classList as $classItem)
+                @php
+                    $assignmentStatus = strtolower($classItem->assignment_status ?? 'pending');
+                    $assignmentBadge = $assignmentStatus === 'accepted' ? 'success' : ($assignmentStatus === 'rejected' ? 'danger' : 'warning');
+                @endphp
                 <tr>
-                    <th>Class</th>
-                    <th>Pengajar</th>
-                    <th>Status Jadwal</th>
-                    <th>Jumlah Siswa</th>
-                    <th>Daftar Siswa</th>
-                    <th>Catatan Respon</th>
+                    <td>{{ $classItem->name }}</td>
+                    <td>{{ $classItem->teacher?->name ?? '-' }}</td>
+                    <td><x-ui.badge :type="$assignmentBadge">{{ strtoupper($assignmentStatus) }}</x-ui.badge></td>
+                    <td>{{ $classItem->students->count() }}</td>
+                    <td>{{ $classItem->students->pluck('name')->implode(', ') ?: '-' }}</td>
+                    <td>{{ $classItem->assignment_note ?? '-' }}</td>
                 </tr>
-            </thead>
-            <tbody>
-                @forelse($classList as $classItem)
-                    <tr>
-                        <td>{{ $classItem->name }}</td>
-                        <td>{{ $classItem->teacher?->name ?? '-' }}</td>
-                        <td>{{ $classItem->assignment_status ?? 'pending' }}</td>
-                        <td>{{ $classItem->students->count() }}</td>
-                        <td>{{ $classItem->students->pluck('name')->implode(', ') ?: '-' }}</td>
-                        <td>{{ $classItem->assignment_note ?? '-' }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6">Belum ada class.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-</section>
+            @endforeach
+        </x-ui.table>
+    @else
+        <x-ui.empty-state title="No schedule data yet" description="Buat kelas dan assignment guru terlebih dahulu agar ringkasan tampil." icon="calendar-days" />
+    @endif
+</x-ui.card>
 @endsection
