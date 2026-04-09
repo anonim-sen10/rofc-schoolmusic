@@ -304,8 +304,10 @@
                     <tr>
                         <th>Class</th>
                         <th>Pengajar</th>
+                        <th>Status Jadwal</th>
                         <th>Jumlah Siswa</th>
                         <th>Daftar Siswa</th>
+                        <th>Catatan Respon</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -313,12 +315,14 @@
                         <tr>
                             <td>{{ $class->name }}</td>
                             <td>{{ $class->teacher?->name ?? '-' }}</td>
+                            <td>{{ $class->assignment_status ?? 'pending' }}</td>
                             <td>{{ $class->students->count() }}</td>
                             <td>{{ $class->students->pluck('name')->implode(', ') ?: '-' }}</td>
+                            <td>{{ $class->assignment_note ?? '-' }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4">Belum ada class.</td>
+                            <td colspan="6">Belum ada class.</td>
                         </tr>
                     @endforelse
                 </tbody>

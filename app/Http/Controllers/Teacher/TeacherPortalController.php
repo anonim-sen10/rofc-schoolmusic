@@ -27,7 +27,7 @@ class TeacherPortalController extends Controller
     public function dashboard(Request $request): View
     {
         $teacher = $this->teacherFromUser($request->user()->id);
-        $classIds = $teacher->classes()->pluck('id');
+        $classIds = $teacher->classes()->where('assignment_status', 'accepted')->pluck('id');
 
         return view('portal.teacher.dashboard', [
             'teacher' => $teacher,
@@ -41,7 +41,7 @@ class TeacherPortalController extends Controller
     public function attendance(Request $request): View
     {
         $teacher = $this->teacherFromUser($request->user()->id);
-        $classes = MusicClass::where('teacher_id', $teacher->id)->get();
+        $classes = MusicClass::where('teacher_id', $teacher->id)->where('assignment_status', 'accepted')->get();
         $today = now()->toDateString();
         $hasTeacherAttendanceToday = TeacherAttendance::query()
             ->where('teacher_id', $teacher->id)
@@ -64,6 +64,7 @@ class TeacherPortalController extends Controller
     {
         $teacher = $this->teacherFromUser($request->user()->id);
         $teacherClassIds = MusicClass::query()->where('teacher_id', $teacher->id)->pluck('id');
+        $teacherClassIds = MusicClass::query()->where('teacher_id', $teacher->id)->where('assignment_status', 'accepted')->pluck('id');
 
         if ($teacherClassIds->isEmpty()) {
             return back()->withErrors([
@@ -82,6 +83,7 @@ class TeacherPortalController extends Controller
         $class = MusicClass::query()
             ->where('id', $data['class_id'])
             ->where('teacher_id', $teacher->id)
+            ->where('assignment_status', 'accepted')
             ->first();
 
         if (! $class) {
@@ -149,7 +151,7 @@ class TeacherPortalController extends Controller
     public function progress(Request $request): View
     {
         $teacher = $this->teacherFromUser($request->user()->id);
-        $classes = MusicClass::where('teacher_id', $teacher->id)->get();
+        $classes = MusicClass::where('teacher_id', $teacher->id)->where('assignment_status', 'accepted')->get();
 
         return view('portal.teacher.progress', [
             'teacher' => $teacher,
@@ -184,9 +186,41 @@ class TeacherPortalController extends Controller
 
         return view('portal.teacher.materials', [
             'teacher' => $teacher,
-            'classes' => MusicClass::where('teacher_id', $teacher->id)->get(),
+            'classes' => MusicClass::where('teacher_id', $teacher->id)->where('assignment_status', 'accepted')->get(),
             'materials' => Material::where('teacher_id', $teacher->id)->latest()->get(),
         ]);
+    }
+
+    public function schedule(Request $request): View
+    {
+        $teacher = $this->teacherFromUser($request->user()->id);
+
+        return view('portal.teacher.schedule', [
+            'teacher' => $teacher,
+            'schedules' => MusicClass::where('teacher_id', $teacher->id)->withCount('students')->orderBy('name')->get(),
+        ]);
+    }
+
+    public function respondSchedule(Request $request, MusicClass $class): RedirectResponse
+    {
+        $teacher = $this->teacherFromUser($request->user()->id);
+
+        if ((int) $class->teacher_id !== (int) $teacher->id) {
+            abort(403, 'Jadwal ini bukan untuk teacher yang sedang login.');
+        }
+
+        $data = $request->validate([
+            'action' => ['required', 'in:accepted,rejected'],
+            'note' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $class->update([
+            'assignment_status' => $data['action'],
+            'assignment_note' => $data['note'] ?? null,
+            'responded_at' => now(),
+        ]);
+
+        return back()->with('success', 'Respon jadwal berhasil disimpan.');
     }
 
     public function storeMaterial(Request $request): RedirectResponse

@@ -144,7 +144,8 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'role:teacher'])
     Route::post('/materials', [TeacherPortalController::class, 'storeMaterial'])->name('materials.store');
     Route::get('/my-classes', [TeacherPortalController::class, 'attendance'])->name('my-classes.index');
     Route::get('/my-students', [TeacherPortalController::class, 'progress'])->name('my-students.index');
-    Route::get('/schedule', [TeacherPortalController::class, 'attendance'])->name('schedule.index');
+    Route::get('/schedule', [TeacherPortalController::class, 'schedule'])->name('schedule.index');
+    Route::post('/schedule/{class}/respond', [TeacherPortalController::class, 'respondSchedule'])->name('schedule.respond');
 });
 
 Route::prefix('student')->name('student.')->middleware(['auth', 'role:student'])->group(function () {

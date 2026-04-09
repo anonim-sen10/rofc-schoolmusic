@@ -152,6 +152,10 @@ class AcademicManagementController extends Controller
 
         MusicClass::query()->whereKey($data['class_id'])->update([
             'teacher_id' => $data['teacher_id'],
+            'assignment_status' => 'pending',
+            'assignment_note' => null,
+            'assigned_at' => now(),
+            'responded_at' => null,
         ]);
 
         return back()->with('success', 'Pengajar berhasil ditentukan untuk class.');

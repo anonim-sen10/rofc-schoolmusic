@@ -19,11 +19,17 @@ class MusicClass extends Model
         'price',
         'schedule',
         'teacher_id',
+        'assignment_status',
+        'assignment_note',
+        'assigned_at',
+        'responded_at',
         'status',
     ];
 
     protected $casts = [
         'price' => 'float',
+        'assigned_at' => 'datetime',
+        'responded_at' => 'datetime',
     ];
 
     public function teacher(): BelongsTo

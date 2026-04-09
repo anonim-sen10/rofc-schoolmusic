@@ -268,6 +268,10 @@ class SuperAdminController extends Controller
 
         MusicClass::query()->whereKey($data['class_id'])->update([
             'teacher_id' => $data['teacher_id'],
+            'assignment_status' => 'pending',
+            'assignment_note' => null,
+            'assigned_at' => now(),
+            'responded_at' => null,
         ]);
 
         return back()->with('success', 'Pengajar berhasil ditentukan untuk class.');
@@ -529,7 +533,7 @@ class SuperAdminController extends Controller
                 'columns' => ['Class', 'Pengajar', 'Jumlah Siswa'],
                 'rows' => MusicClass::with(['teacher', 'students'])->orderBy('name')->get()->map(fn (MusicClass $class) => [
                     $class->name,
-                    $class->teacher?->name ?? '-',
+                    ($class->teacher?->name ?? '-').' ('.strtoupper($class->assignment_status ?? 'pending').')',
                     (string) $class->students->count(),
                 ])->all(),
             ],
