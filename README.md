@@ -5,15 +5,15 @@ Sistem informasi manajemen sekolah musik berbasis Laravel untuk pengelolaan role
 ## Menjalankan Lokal
 
 1. Salin environment:
-	cp .env.example .env
+   cp .env.example .env
 2. Generate key:
-	php artisan key:generate
+   php artisan key:generate
 3. Migrasi database:
-	php artisan migrate
+   php artisan migrate
 4. Jalankan server aplikasi:
-	php artisan serve
+   php artisan serve
 5. Build asset frontend:
-	npm run build
+   npm run build
 
 ## Auto Deploy Setelah Push
 

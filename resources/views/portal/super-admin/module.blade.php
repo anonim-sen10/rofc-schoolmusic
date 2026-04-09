@@ -264,41 +264,47 @@
                 <tbody>
                     @forelse($classesForManagement as $classItem)
                         <tr>
-                            <td colspan="6">
-                                <form class="module-form" method="POST" action="{{ route('super-admin.classes.update', $classItem) }}">
-                                    @csrf
-                                    @method('PUT')
-                                    <label>Nama Kelas
-                                        <input type="text" name="name" value="{{ $classItem->name }}" required>
-                                    </label>
-                                    <label>Deskripsi
-                                        <textarea name="description" rows="2">{{ $classItem->description }}</textarea>
-                                    </label>
-                                    <label>Harga
-                                        <input type="number" name="price" min="0" step="1000" value="{{ (int) ($classItem->price ?? 0) }}">
-                                    </label>
-                                    <label>Jadwal
-                                        <input type="text" name="schedule" value="{{ $classItem->schedule }}">
-                                    </label>
-                                    <label>Guru
-                                        <select name="teacher_id">
-                                            <option value="">Tanpa guru</option>
-                                            @foreach ($teachersForClassOptions as $teacherOption)
-                                                <option value="{{ $teacherOption->id }}" @selected((int) $classItem->teacher_id === (int) $teacherOption->id)>{{ $teacherOption->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </label>
-                                    <label>Status
-                                        <select name="status" required>
-                                            <option value="active" @selected($classItem->status === 'active')>Active</option>
-                                            <option value="inactive" @selected($classItem->status === 'inactive')>Inactive</option>
-                                        </select>
-                                    </label>
-                                    <div class="action-icons">
+                            <td>{{ $classItem->name }}</td>
+                            <td>{{ $classItem->teacher?->name ?? '-' }}</td>
+                            <td>Rp{{ number_format((int) ($classItem->price ?? 0), 0, ',', '.') }}</td>
+                            <td>{{ $classItem->schedule ?? '-' }}</td>
+                            <td>{{ $classItem->status }}</td>
+                            <td>
+                                <details>
+                                    <summary>Edit</summary>
+                                    <form class="module-form" method="POST" action="{{ route('super-admin.classes.update', $classItem) }}">
+                                        @csrf
+                                        @method('PUT')
+                                        <label>Nama Kelas
+                                            <input type="text" name="name" value="{{ $classItem->name }}" required>
+                                        </label>
+                                        <label>Deskripsi
+                                            <textarea name="description" rows="2">{{ $classItem->description }}</textarea>
+                                        </label>
+                                        <label>Harga
+                                            <input type="number" name="price" min="0" step="1000" value="{{ (int) ($classItem->price ?? 0) }}">
+                                        </label>
+                                        <label>Jadwal
+                                            <input type="text" name="schedule" value="{{ $classItem->schedule }}">
+                                        </label>
+                                        <label>Guru
+                                            <select name="teacher_id">
+                                                <option value="">Tanpa guru</option>
+                                                @foreach ($teachersForClassOptions as $teacherOption)
+                                                    <option value="{{ $teacherOption->id }}" @selected((int) $classItem->teacher_id === (int) $teacherOption->id)>{{ $teacherOption->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </label>
+                                        <label>Status
+                                            <select name="status" required>
+                                                <option value="active" @selected($classItem->status === 'active')>Active</option>
+                                                <option value="inactive" @selected($classItem->status === 'inactive')>Inactive</option>
+                                            </select>
+                                        </label>
                                         <button type="submit" title="Update" aria-label="Update">Update</button>
-                                    </div>
-                                </form>
-                                <form method="POST" action="{{ route('super-admin.classes.destroy', $classItem) }}" onsubmit="return confirm('Hapus class ini?');">
+                                    </form>
+                                </details>
+                                <form method="POST" action="{{ route('super-admin.classes.destroy', $classItem) }}" onsubmit="return confirm('Hapus class ini?');" style="margin-top: 0.35rem;">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" title="Hapus" aria-label="Hapus">Hapus</button>
