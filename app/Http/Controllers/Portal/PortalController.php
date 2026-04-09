@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Portal;
 
 use App\Http\Controllers\Controller;
+use App\Models\MusicClass;
+use App\Models\Registration;
+use App\Models\Student;
+use App\Models\Teacher;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -129,10 +133,10 @@ class PortalController extends Controller
                     ['key' => 'testimonials', 'label' => 'Testimonials'],
                 ],
                 'stats' => [
-                    ['label' => 'Active Classes', 'value' => 19],
-                    ['label' => 'Teachers', 'value' => 28],
-                    ['label' => 'Students', 'value' => 486],
-                    ['label' => 'Pending Registrations', 'value' => 24],
+                    ['label' => 'Active Classes', 'value' => MusicClass::query()->where('status', 'active')->count()],
+                    ['label' => 'Teachers', 'value' => Teacher::query()->where('is_active', true)->count()],
+                    ['label' => 'Students', 'value' => Student::query()->where('is_active', true)->count()],
+                    ['label' => 'Pending Registrations', 'value' => Registration::query()->where('status', 'pending')->count()],
                 ],
                 'modules' => [
                     'classes' => ['title' => 'Classes', 'description' => 'CRUD kelas musik.'],
