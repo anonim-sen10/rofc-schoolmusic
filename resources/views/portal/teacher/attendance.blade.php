@@ -22,15 +22,16 @@
 @if($hasAssignedClasses)
 <form class="module-form" method="POST" action="{{ route('teacher.attendance.store') }}">@csrf
 <label>Kelas
-	<select name="class_id" required>
+	<select name="class_id" id="class-id-select" required>
 		@foreach($classOptions as $musicClass)
-			<option value="{{ $musicClass->id }}">{{ $musicClass->name }}</option>
+			<option value="{{ $musicClass->id }}" @selected(old('class_id') == $musicClass->id)>{{ $musicClass->name }}</option>
 		@endforeach
 	</select>
 </label>
 <label>Nama Siswa
-	<input type="text" name="student_name" list="student-name-list" placeholder="Ketik nama siswa" required>
-	<datalist id="student-name-list">@foreach($students as $student)<option value="{{ $student->name }}"></option>@endforeach</datalist>
+	<select name="student_id" id="student-id-select" required>
+		<option value="">Pilih siswa</option>
+	</select>
 </label>
 <label>Tanggal<input type="date" name="attendance_date" value="{{ now()->format('Y-m-d') }}" required></label>
 <label>Status<select name="status"><option value="present">present</option><option value="absent">absent</option><option value="late">late</option></select></label>
@@ -52,6 +53,40 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+	const classStudents = @json($classStudents);
+	const classSelect = document.getElementById('class-id-select');
+	const studentSelect = document.getElementById('student-id-select');
+	const oldStudentId = @json(old('student_id'));
+
+	const renderStudentOptions = (classId) => {
+		if (!studentSelect) {
+			return;
+		}
+
+		const students = classStudents[classId] ?? [];
+		studentSelect.innerHTML = '';
+
+		const placeholderOption = document.createElement('option');
+		placeholderOption.value = '';
+		placeholderOption.textContent = students.length ? 'Pilih siswa' : 'Belum ada siswa di kelas ini';
+		studentSelect.appendChild(placeholderOption);
+
+		students.forEach((student) => {
+			const option = document.createElement('option');
+			option.value = student.id;
+			option.textContent = student.name;
+			if (oldStudentId && Number(oldStudentId) === Number(student.id)) {
+				option.selected = true;
+			}
+			studentSelect.appendChild(option);
+		});
+	};
+
+	if (classSelect) {
+		renderStudentOptions(classSelect.value);
+		classSelect.addEventListener('change', () => renderStudentOptions(classSelect.value));
+	}
+
 	const button = document.getElementById('btn-get-location');
 	const textInput = document.getElementById('teacher-location-text');
 	const latInput = document.getElementById('teacher-latitude');

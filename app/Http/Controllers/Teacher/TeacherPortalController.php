@@ -58,19 +58,32 @@ class TeacherPortalController extends Controller
     public function attendance(Request $request): View
     {
         $teacher = $this->teacherFromUser($request->user()->id);
-        $classes = $this->teacherAcceptedClassesQuery($teacher->id)->get();
+        $classes = $this->teacherAcceptedClassesQuery($teacher->id)
+            ->with(['students:id,name'])
+            ->get();
         $today = now()->toDateString();
         $hasTeacherAttendanceToday = TeacherAttendance::query()
             ->where('teacher_id', $teacher->id)
             ->whereDate('attendance_date', $today)
             ->exists();
         $hasAssignedClasses = $classes->isNotEmpty();
+        $classStudents = $classes->mapWithKeys(function (MusicClass $class) {
+            return [
+                $class->id => $class->students
+                    ->sortBy('name')
+                    ->map(fn (Student $student) => [
+                        'id' => $student->id,
+                        'name' => $student->name,
+                    ])
+                    ->values(),
+            ];
+        });
 
         return view('portal.teacher.attendance', [
             'teacher' => $teacher,
             'classOptions' => $classes,
             'hasAssignedClasses' => $hasAssignedClasses,
-            'students' => Student::whereHas('classes', fn ($q) => $q->whereIn('classes.id', $classes->pluck('id')))->get(),
+            'classStudents' => $classStudents,
             'records' => Attendance::with(['class', 'student'])->where('teacher_id', $teacher->id)->latest('attendance_date')->take(20)->get(),
             'teacherRecords' => TeacherAttendance::with('teacher')->where('teacher_id', $teacher->id)->latest('attendance_date')->take(20)->get(),
             'hasTeacherAttendanceToday' => $hasTeacherAttendanceToday,
@@ -90,7 +103,7 @@ class TeacherPortalController extends Controller
 
         $data = $request->validate([
             'class_id' => ['required', 'exists:classes,id'],
-            'student_name' => ['required', 'string', 'max:120'],
+            'student_id' => ['required', 'exists:students,id'],
             'attendance_date' => ['required', 'date'],
             'status' => ['required', 'in:present,absent,late'],
             'note' => ['nullable', 'string'],
@@ -115,6 +128,13 @@ class TeacherPortalController extends Controller
             ])->withInput();
         }
 
+        $student = Student::query()->find($data['student_id']);
+        if (! $student || ! $class->students()->where('students.id', $student->id)->exists()) {
+            return back()->withErrors([
+                'student_id' => 'Siswa tidak terdaftar pada kelas yang dipilih.',
+            ])->withInput();
+        }
+
         $teacherHasAttendance = TeacherAttendance::query()
             ->where('teacher_id', $teacher->id)
             ->whereDate('attendance_date', $data['attendance_date'])
@@ -125,20 +145,6 @@ class TeacherPortalController extends Controller
                 'attendance_date' => 'Guru wajib absen terlebih dahulu pada tanggal tersebut sebelum mengisi absen siswa.',
             ])->withInput();
         }
-
-        $studentName = trim($data['student_name']);
-        $student = Student::query()
-            ->whereRaw('LOWER(name) = ?', [mb_strtolower($studentName)])
-            ->first();
-
-        if (! $student) {
-            $student = Student::create([
-                'name' => $studentName,
-                'is_active' => true,
-            ]);
-        }
-
-        $student->classes()->syncWithoutDetaching([$class->id]);
 
         Attendance::create([
             'class_id' => $class->id,
@@ -220,7 +226,11 @@ class TeacherPortalController extends Controller
 
         return view('portal.teacher.schedule', [
             'teacher' => $teacher,
-            'schedules' => MusicClass::where('teacher_id', $teacher->id)->withCount('students')->orderBy('name')->get(),
+            'schedules' => MusicClass::where('teacher_id', $teacher->id)
+                ->with(['students:id,name'])
+                ->withCount('students')
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 

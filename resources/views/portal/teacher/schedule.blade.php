@@ -12,6 +12,7 @@
                     <th>Class</th>
                     <th>Jadwal</th>
                     <th>Jumlah Siswa</th>
+                    <th>Nama Siswa</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
@@ -22,6 +23,13 @@
                         <td>{{ $schedule->name }}</td>
                         <td>{{ $schedule->schedule ?? '-' }}</td>
                         <td>{{ $schedule->students_count }}</td>
+                        <td>
+                            @if($schedule->students->isNotEmpty())
+                                {{ $schedule->students->pluck('name')->sort()->implode(', ') }}
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td>{{ $schedule->assignment_status ?? 'pending' }}</td>
                         <td>
                             @if(($schedule->assignment_status ?? 'pending') === 'pending')
@@ -43,7 +51,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5">Belum ada jadwal class yang di-assign.</td>
+                        <td colspan="6">Belum ada jadwal class yang di-assign.</td>
                     </tr>
                 @endforelse
             </tbody>
