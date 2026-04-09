@@ -270,9 +270,10 @@
                             <td>{{ $classItem->schedule ?? '-' }}</td>
                             <td>{{ $classItem->status }}</td>
                             <td>
-                                <details>
-                                    <summary>Edit</summary>
-                                    <form class="module-form" method="POST" action="{{ route('super-admin.classes.update', $classItem) }}">
+                                <div class="action-icons class-action-icons">
+                                    <details class="action-popover">
+                                        <summary title="Edit" aria-label="Edit">&#9998;</summary>
+                                        <form class="module-form action-popover-form" method="POST" action="{{ route('super-admin.classes.update', $classItem) }}">
                                         @csrf
                                         @method('PUT')
                                         <label>Nama Kelas
@@ -301,14 +302,15 @@
                                                 <option value="inactive" @selected($classItem->status === 'inactive')>Inactive</option>
                                             </select>
                                         </label>
-                                        <button type="submit" title="Update" aria-label="Update">Update</button>
+                                        <button type="submit">Update</button>
+                                        </form>
+                                    </details>
+                                    <form method="POST" action="{{ route('super-admin.classes.destroy', $classItem) }}" onsubmit="return confirm('Hapus class ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" title="Hapus" aria-label="Hapus">&#128465;</button>
                                     </form>
-                                </details>
-                                <form method="POST" action="{{ route('super-admin.classes.destroy', $classItem) }}" onsubmit="return confirm('Hapus class ini?');" style="margin-top: 0.35rem;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" title="Hapus" aria-label="Hapus">Hapus</button>
-                                </form>
+                                </div>
                             </td>
                         </tr>
                     @empty

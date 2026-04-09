@@ -349,6 +349,62 @@ th {
     margin: 0;
 }
 
+.action-popover {
+    position: relative;
+}
+
+.action-popover summary {
+    width: 2rem;
+    height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.45rem;
+    border: 1px solid var(--line);
+    background: #0f131b;
+    color: var(--text);
+    cursor: pointer;
+    list-style: none;
+}
+
+.action-popover summary::-webkit-details-marker {
+    display: none;
+}
+
+.action-popover[open] summary {
+    border-color: rgba(210, 171, 99, 0.4);
+    box-shadow: 0 0 0 1px rgba(210, 171, 99, 0.2);
+}
+
+.action-popover-form {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.45rem);
+    z-index: 40;
+    width: min(420px, calc(100vw - 3.5rem));
+    padding: 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    background: linear-gradient(180deg, #1f2430, #181d26);
+    box-shadow: 0 20px 36px rgba(0, 0, 0, 0.42);
+}
+
+.action-popover-form button {
+    width: auto;
+    height: auto;
+    border: 0;
+    border-radius: 0.65rem;
+    padding: 0.65rem 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--gold), #e6cb9f);
+    color: #111;
+}
+
+.class-action-icons {
+    justify-content: flex-start;
+}
+
 .teacher-create summary {
     display: inline-flex;
     align-items: center;
