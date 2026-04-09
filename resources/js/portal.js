@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
             root.classList.toggle("sidebar-collapsed");
             localStorage.setItem(
                 "portal.sidebar.collapsed",
-                String(root.classList.contains("sidebar-collapsed"))
+                String(root.classList.contains("sidebar-collapsed")),
             );
         });
 
@@ -37,15 +37,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (searchInput) {
         searchInput.addEventListener("input", (event) => {
-            const keyword = String(event.target.value || "").trim().toLowerCase();
-            const searchableBlocks = document.querySelectorAll("[data-searchable]");
+            const keyword = String(event.target.value || "")
+                .trim()
+                .toLowerCase();
+            const searchableBlocks =
+                document.querySelectorAll("[data-searchable]");
             const blocks = searchableBlocks.length
                 ? searchableBlocks
-                : document.querySelectorAll("main section.card, .portal-main section.card");
+                : document.querySelectorAll(
+                      "main section.card, .portal-main section.card",
+                  );
 
             blocks.forEach((block) => {
                 const text = String(block.textContent || "").toLowerCase();
-                block.style.display = keyword === "" || text.includes(keyword) ? "" : "none";
+                block.style.display =
+                    keyword === "" || text.includes(keyword) ? "" : "none";
             });
         });
     }
@@ -112,9 +118,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             };
 
-            buildLineChart("revenueChart", "Revenue", chartData.revenue || [], "#6366F1");
-            buildLineChart("studentGrowthChart", "Student Growth", chartData.studentGrowth || [], "#22C55E");
-            buildLineChart("attendanceRateChart", "Attendance Rate", chartData.attendanceRate || [], "#F59E0B");
+            buildLineChart(
+                "revenueChart",
+                "Revenue",
+                chartData.revenue || [],
+                "#6366F1",
+            );
+            buildLineChart(
+                "studentGrowthChart",
+                "Student Growth",
+                chartData.studentGrowth || [],
+                "#22C55E",
+            );
+            buildLineChart(
+                "attendanceRateChart",
+                "Attendance Rate",
+                chartData.attendanceRate || [],
+                "#F59E0B",
+            );
         }
     }
 });
