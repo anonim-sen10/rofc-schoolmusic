@@ -112,6 +112,99 @@
     </section>
 @endif
 
+@if ($moduleKey === 'teachers')
+    <section class="card">
+        <h3>Create Teacher Account</h3>
+        <form class="module-form" method="POST" enctype="multipart/form-data" action="{{ route('super-admin.teachers.store') }}">
+            @csrf
+            <label>Nama
+                <input type="text" name="name" value="{{ old('name') }}" required>
+            </label>
+            <label>Email
+                <input type="email" name="email" value="{{ old('email') }}" required>
+            </label>
+            <label>Password
+                <input type="password" name="password" required>
+            </label>
+            <label>Konfirmasi Password
+                <input type="password" name="password_confirmation" required>
+            </label>
+            <label>Nomor HP
+                <input type="text" name="phone" value="{{ old('phone') }}" required>
+            </label>
+            <label>Alamat
+                <textarea name="address" rows="3" required>{{ old('address') }}</textarea>
+            </label>
+            <label>Jenis Kelamin
+                <select name="gender" required>
+                    <option value="laki-laki" @selected(old('gender') === 'laki-laki')>Laki-laki</option>
+                    <option value="perempuan" @selected(old('gender') === 'perempuan')>Perempuan</option>
+                </select>
+            </label>
+            <label>Agama
+                <input type="text" name="religion" value="{{ old('religion') }}" required>
+            </label>
+            <label>Instrument
+                <input type="text" name="instrument" value="{{ old('instrument') }}" placeholder="Drum, Piano, Guitar, dll">
+            </label>
+            <label>Bio
+                <textarea name="bio" rows="3">{{ old('bio') }}</textarea>
+            </label>
+            <label>Experience
+                <input type="text" name="experience" value="{{ old('experience') }}">
+            </label>
+            <label>Class
+                <select name="class_id">
+                    <option value="">Pilih class (opsional)</option>
+                    @foreach ($classesForTeachers as $class)
+                        <option value="{{ $class->id }}" @selected((string) old('class_id') === (string) $class->id)>{{ $class->name }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <label>Upload Foto Profile
+                <input type="file" name="photo" accept="image/*">
+            </label>
+            <button type="submit">Simpan Teacher</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <h3>Daftar Guru</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th>Email</th>
+                        <th>Nomor HP</th>
+                        <th>Alamat</th>
+                        <th>Jenis Kelamin</th>
+                        <th>Agama</th>
+                        <th>Instrument</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($teachersForManagement as $teacher)
+                        <tr>
+                            <td>{{ $teacher->name }}</td>
+                            <td>{{ $teacher->user?->email ?? '-' }}</td>
+                            <td>{{ $teacher->phone ?? '-' }}</td>
+                            <td>{{ $teacher->address ?? '-' }}</td>
+                            <td>{{ $teacher->gender ?? '-' }}</td>
+                            <td>{{ $teacher->religion ?? '-' }}</td>
+                            <td>{{ $teacher->instrument }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7">Belum ada data guru.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </section>
+@endif
+
 @if (! in_array($moduleKey, ['users', 'roles'], true))
 <section class="card">
     <div class="table-wrap">

@@ -83,6 +83,61 @@ class SuperAdminController extends Controller
         return back()->with('success', 'Akun login berhasil dibuat.');
     }
 
+    public function storeTeacherAccount(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'email' => ['required', 'email', 'max:120', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'phone' => ['required', 'string', 'max:30'],
+            'address' => ['required', 'string', 'max:500'],
+            'gender' => ['required', 'in:laki-laki,perempuan'],
+            'religion' => ['required', 'string', 'max:30'],
+            'instrument' => ['nullable', 'string', 'max:80'],
+            'bio' => ['nullable', 'string'],
+            'experience' => ['nullable', 'string', 'max:80'],
+            'class_id' => ['nullable', 'integer', 'exists:classes,id'],
+            'photo' => ['nullable', 'image', 'max:2048'],
+        ]);
+
+        $role = $this->resolveCoreRole('teacher');
+
+        $user = User::query()->create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+        ]);
+
+        $user->roles()->sync([$role->id]);
+
+        $payload = [
+            'user_id' => $user->id,
+            'name' => $data['name'],
+            'phone' => $data['phone'],
+            'address' => $data['address'],
+            'gender' => $data['gender'],
+            'religion' => $data['religion'],
+            'instrument' => $data['instrument'] ?? 'General',
+            'bio' => $data['bio'] ?? null,
+            'experience' => $data['experience'] ?? null,
+            'is_active' => true,
+        ];
+
+        if ($request->hasFile('photo')) {
+            $payload['photo_path'] = $request->file('photo')->store('teachers', 'public');
+        }
+
+        $teacher = Teacher::query()->create($payload);
+
+        if (! empty($data['class_id'])) {
+            MusicClass::query()->whereKey($data['class_id'])->update([
+                'teacher_id' => $teacher->id,
+            ]);
+        }
+
+        return back()->with('success', 'Akun teacher dan data guru berhasil dibuat.');
+    }
+
     public function showUser(User $user): View
     {
         $user->load('roles');
@@ -239,6 +294,8 @@ class SuperAdminController extends Controller
             'columns' => $moduleData['columns'],
             'rows' => $moduleData['rows'],
             'usersForRoles' => User::with('roles')->latest()->take(50)->get(),
+            'classesForTeachers' => MusicClass::query()->orderBy('name')->get(['id', 'name']),
+            'teachersForManagement' => Teacher::query()->with('user')->latest()->take(50)->get(),
         ]);
     }
 

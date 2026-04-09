@@ -13,27 +13,43 @@ $homeRoute = route('admin.dashboard');
 @section('title', 'Teachers Management')
 @section('page-title', 'Teachers Management')
 @section('content')
-<div class="split-grid">
-    <section class="card">
-        <h3>Tambah Guru</h3>
-        <form class="module-form" method="POST" enctype="multipart/form-data" action="{{ route('admin.teachers.store') }}">
-            @csrf
-            <label>Nama <input type="text" name="name" required></label>
-            <label>Instrument <input type="text" name="instrument" required></label>
-            <label>Bio <textarea name="bio" rows="3"></textarea></label>
-            <label>Experience <input type="text" name="experience"></label>
-            <label>Photo <input type="file" name="photo"></label>
-            <label><input type="checkbox" name="is_active" value="1" checked> Active</label>
-            <button type="submit">Simpan</button>
-        </form>
-    </section>
-    <section class="card">
-        <h3>Daftar Guru</h3>
-        <div class="table-wrap"><table><thead><tr><th>Nama</th><th>Instrument</th><th>Status</th><th>Action</th></tr></thead><tbody>
-        @foreach($teachers as $teacher)
-            <tr><td>{{ $teacher->name }}</td><td>{{ $teacher->instrument }}</td><td>{{ $teacher->is_active ? 'active' : 'inactive' }}</td><td><form method="POST" action="{{ route('admin.teachers.destroy', $teacher) }}">@csrf @method('DELETE')<button type="submit">Delete</button></form></td></tr>
-        @endforeach
-        </tbody></table></div>
-    </section>
-</div>
+<section class="card">
+    <p>Role Admin hanya dapat melihat data guru. Pembuatan akun teacher dilakukan di portal Super Admin.</p>
+</section>
+
+<section class="card">
+    <h3>Daftar Guru</h3>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nama</th>
+                    <th>Email</th>
+                    <th>Nomor HP</th>
+                    <th>Jenis Kelamin</th>
+                    <th>Agama</th>
+                    <th>Instrument</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+            @forelse($teachers as $teacher)
+                <tr>
+                    <td>{{ $teacher->name }}</td>
+                    <td>{{ $teacher->user?->email ?? '-' }}</td>
+                    <td>{{ $teacher->phone ?? '-' }}</td>
+                    <td>{{ $teacher->gender ?? '-' }}</td>
+                    <td>{{ $teacher->religion ?? '-' }}</td>
+                    <td>{{ $teacher->instrument }}</td>
+                    <td>{{ $teacher->is_active ? 'active' : 'inactive' }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="7">Belum ada data guru.</td>
+                </tr>
+            @endforelse
+            </tbody>
+        </table>
+    </div>
+</section>
 @endsection

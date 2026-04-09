@@ -48,7 +48,7 @@ class AcademicManagementController extends Controller
     public function teachers(): View
     {
         return view('portal.admin.teachers', [
-            'teachers' => Teacher::latest()->get(),
+            'teachers' => Teacher::with('user')->latest()->get(),
         ]);
     }
 

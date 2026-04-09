@@ -73,6 +73,7 @@ Route::middleware('auth')->group(function () {
 Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'role:super_admin'])->group(function () {
     Route::get('/', [SuperAdminController::class, 'dashboard'])->name('dashboard');
     Route::post('/users', [SuperAdminController::class, 'storeUser'])->name('users.store');
+    Route::post('/teachers', [SuperAdminController::class, 'storeTeacherAccount'])->name('teachers.store');
     Route::get('/users/{user}/detail', [SuperAdminController::class, 'showUser'])->name('users.show');
     Route::get('/users/{user}/edit', [SuperAdminController::class, 'editUser'])->name('users.edit');
     Route::put('/users/{user}', [SuperAdminController::class, 'updateUser'])->name('users.update');
@@ -92,9 +93,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::delete('/classes/{class}', [AcademicManagementController::class, 'destroyClass'])->name('classes.destroy');
 
     Route::get('/teachers', [AcademicManagementController::class, 'teachers'])->name('teachers.index');
-    Route::post('/teachers', [AcademicManagementController::class, 'storeTeacher'])->name('teachers.store');
-    Route::put('/teachers/{teacher}', [AcademicManagementController::class, 'updateTeacher'])->name('teachers.update');
-    Route::delete('/teachers/{teacher}', [AcademicManagementController::class, 'destroyTeacher'])->name('teachers.destroy');
 
     Route::get('/students', [AcademicManagementController::class, 'students'])->name('students.index');
     Route::post('/students', [AcademicManagementController::class, 'storeStudent'])->name('students.store');
