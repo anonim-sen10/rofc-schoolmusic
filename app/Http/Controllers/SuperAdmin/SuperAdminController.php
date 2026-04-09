@@ -22,6 +22,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class SuperAdminController extends Controller
@@ -259,6 +260,213 @@ class SuperAdminController extends Controller
         return back()->with('success', 'Class berhasil ditambahkan.');
     }
 
+    public function updateClass(Request $request, MusicClass $class): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'description' => ['nullable', 'string'],
+            'price' => ['nullable', 'numeric', 'min:0'],
+            'schedule' => ['nullable', 'string', 'max:120'],
+            'teacher_id' => ['nullable', 'integer', 'exists:teachers,id'],
+            'status' => ['required', 'in:active,inactive'],
+        ]);
+
+        $class->update([
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+            'price' => $data['price'] ?? 0,
+            'schedule' => $data['schedule'] ?? null,
+            'teacher_id' => $data['teacher_id'] ?? null,
+            'status' => $data['status'],
+        ]);
+
+        return back()->with('success', 'Class berhasil diperbarui.');
+    }
+
+    public function destroyClass(MusicClass $class): RedirectResponse
+    {
+        $class->students()->detach();
+        $class->delete();
+
+        return back()->with('success', 'Class berhasil dihapus.');
+    }
+
+    public function storeStudent(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'age' => ['nullable', 'integer', 'min:4', 'max:80'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'email' => ['nullable', 'email', 'max:120', 'unique:students,email'],
+            'address' => ['nullable', 'string', 'max:500'],
+            'is_active' => ['required', 'in:1,0'],
+            'class_ids' => ['nullable', 'array'],
+            'class_ids.*' => ['integer', 'exists:classes,id'],
+        ]);
+
+        $student = Student::query()->create([
+            'name' => $data['name'],
+            'age' => $data['age'] ?? null,
+            'phone' => $data['phone'] ?? null,
+            'email' => $data['email'] ?? null,
+            'address' => $data['address'] ?? null,
+            'is_active' => (bool) ($data['is_active'] ?? '1'),
+        ]);
+
+        $student->classes()->sync($data['class_ids'] ?? []);
+
+        return back()->with('success', 'Siswa berhasil ditambahkan.');
+    }
+
+    public function updateStudent(Request $request, Student $student): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'age' => ['nullable', 'integer', 'min:4', 'max:80'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'email' => ['nullable', 'email', 'max:120', 'unique:students,email,'.$student->id],
+            'address' => ['nullable', 'string', 'max:500'],
+            'is_active' => ['required', 'in:1,0'],
+            'class_ids' => ['nullable', 'array'],
+            'class_ids.*' => ['integer', 'exists:classes,id'],
+        ]);
+
+        $student->update([
+            'name' => $data['name'],
+            'age' => $data['age'] ?? null,
+            'phone' => $data['phone'] ?? null,
+            'email' => $data['email'] ?? null,
+            'address' => $data['address'] ?? null,
+            'is_active' => (bool) ($data['is_active'] ?? '1'),
+        ]);
+
+        $student->classes()->sync($data['class_ids'] ?? []);
+
+        return back()->with('success', 'Data siswa berhasil diperbarui.');
+    }
+
+    public function destroyStudent(Student $student): RedirectResponse
+    {
+        $student->classes()->detach();
+        $student->delete();
+
+        return back()->with('success', 'Siswa berhasil dihapus.');
+    }
+
+    public function storeRegistration(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'full_name' => ['required', 'string', 'max:120'],
+            'age' => ['required', 'integer', 'min:4', 'max:80'],
+            'phone' => ['required', 'string', 'max:30'],
+            'email' => ['required', 'email', 'max:120'],
+            'class_id' => ['nullable', 'integer', 'exists:classes,id'],
+            'preferred_schedule' => ['required', 'string', 'max:120'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+            'status' => ['required', 'in:pending,accepted,rejected'],
+        ]);
+
+        $registration = Registration::query()->create($data);
+
+        if ($registration->status === 'accepted') {
+            $student = Student::query()->updateOrCreate(
+                ['email' => $registration->email],
+                [
+                    'name' => $registration->full_name,
+                    'age' => $registration->age,
+                    'phone' => $registration->phone,
+                    'email' => $registration->email,
+                    'is_active' => true,
+                ]
+            );
+
+            if ($registration->class_id) {
+                $student->classes()->syncWithoutDetaching([$registration->class_id]);
+            }
+        }
+
+        return back()->with('success', 'Registrasi berhasil ditambahkan.');
+    }
+
+    public function updateRegistration(Request $request, Registration $registration): RedirectResponse
+    {
+        $data = $request->validate([
+            'full_name' => ['required', 'string', 'max:120'],
+            'age' => ['required', 'integer', 'min:4', 'max:80'],
+            'phone' => ['required', 'string', 'max:30'],
+            'email' => ['required', 'email', 'max:120'],
+            'class_id' => ['nullable', 'integer', 'exists:classes,id'],
+            'preferred_schedule' => ['required', 'string', 'max:120'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+            'status' => ['required', 'in:pending,accepted,rejected'],
+        ]);
+
+        $registration->update($data);
+
+        if ($registration->status === 'accepted') {
+            $student = Student::query()->updateOrCreate(
+                ['email' => $registration->email],
+                [
+                    'name' => $registration->full_name,
+                    'age' => $registration->age,
+                    'phone' => $registration->phone,
+                    'email' => $registration->email,
+                    'is_active' => true,
+                ]
+            );
+
+            if ($registration->class_id) {
+                $student->classes()->syncWithoutDetaching([$registration->class_id]);
+            }
+        }
+
+        return back()->with('success', 'Registrasi berhasil diperbarui.');
+    }
+
+    public function destroyRegistration(Registration $registration): RedirectResponse
+    {
+        $registration->delete();
+
+        return back()->with('success', 'Registrasi berhasil dihapus.');
+    }
+
+    public function storeContent(Request $request, string $module): RedirectResponse
+    {
+        $data = $this->validateContentPayload($request, $module);
+
+        DB::table($this->contentTable($module))->insert(array_merge($data, [
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]));
+
+        return back()->with('success', 'Data '.$module.' berhasil ditambahkan.');
+    }
+
+    public function updateContent(Request $request, string $module, int $id): RedirectResponse
+    {
+        $data = $this->validateContentPayload($request, $module, $id);
+
+        DB::table($this->contentTable($module))
+            ->where('id', $id)
+            ->update(array_merge($data, ['updated_at' => now()]));
+
+        return back()->with('success', 'Data '.$module.' berhasil diperbarui.');
+    }
+
+    public function destroyContent(string $module, int $id): RedirectResponse
+    {
+        DB::table($this->contentTable($module))->where('id', $id)->delete();
+
+        return back()->with('success', 'Data '.$module.' berhasil dihapus.');
+    }
+
+    public function destroyLog(int $id): RedirectResponse
+    {
+        DB::table('activities')->where('id', $id)->delete();
+
+        return back()->with('success', 'Log aktivitas berhasil dihapus.');
+    }
+
     public function assignScheduleTeacher(Request $request): RedirectResponse
     {
         $data = $request->validate([
@@ -289,6 +497,26 @@ class SuperAdminController extends Controller
         $class->students()->syncWithoutDetaching($data['student_ids']);
 
         return back()->with('success', 'Siswa berhasil ditambahkan ke class.');
+    }
+
+    public function unassignScheduleTeacher(MusicClass $class): RedirectResponse
+    {
+        $class->update([
+            'teacher_id' => null,
+            'assignment_status' => 'pending',
+            'assignment_note' => null,
+            'assigned_at' => null,
+            'responded_at' => null,
+        ]);
+
+        return back()->with('success', 'Pengajar berhasil dilepas dari class.');
+    }
+
+    public function removeScheduleStudent(MusicClass $class, Student $student): RedirectResponse
+    {
+        $class->students()->detach([$student->id]);
+
+        return back()->with('success', 'Siswa berhasil dihapus dari class.');
     }
 
     public function showUser(User $user): View
@@ -450,9 +678,69 @@ class SuperAdminController extends Controller
             'classTypeOptions' => self::TEACHER_CLASS_OPTIONS,
             'teachersForManagement' => Teacher::query()->with(['user', 'classes'])->latest()->take(50)->get(),
             'teachersForClassOptions' => Teacher::query()->orderBy('name')->get(['id', 'name']),
+            'classesForManagement' => MusicClass::query()->with(['teacher'])->orderBy('name')->get(),
             'classesForSchedule' => MusicClass::query()->with(['teacher', 'students'])->orderBy('name')->get(),
+            'studentsForManagement' => Student::query()->with('classes')->orderBy('name')->get(),
+            'registrationsForManagement' => Registration::query()->with('class')->latest()->get(),
             'studentsForSchedule' => Student::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'email']),
+            'postsForManagement' => DB::table('posts')->latest()->get(),
+            'galleriesForManagement' => DB::table('galleries')->latest()->get(),
+            'eventsForManagement' => DB::table('events')->latest()->get(),
+            'testimonialsForManagement' => DB::table('testimonials')->latest()->get(),
+            'settingsForManagement' => DB::table('settings')->orderBy('key')->get(),
+            'logsForManagement' => DB::table('activities')->latest()->take(100)->get(),
         ]);
+    }
+
+    private function contentTable(string $module): string
+    {
+        return match ($module) {
+            'blog' => 'posts',
+            'gallery' => 'galleries',
+            'events' => 'events',
+            'testimonials' => 'testimonials',
+            'settings' => 'settings',
+            default => abort(404),
+        };
+    }
+
+    private function validateContentPayload(Request $request, string $module, ?int $id = null): array
+    {
+        return match ($module) {
+            'blog' => $request->validate([
+                'title' => ['required', 'string', 'max:255'],
+                'slug' => ['required', 'string', 'max:255', Rule::unique('posts', 'slug')->ignore($id)],
+                'excerpt' => ['nullable', 'string'],
+                'content' => ['nullable', 'string'],
+                'cover_image' => ['nullable', 'string', 'max:255'],
+                'status' => ['required', 'in:draft,published'],
+                'published_at' => ['nullable', 'date'],
+            ]),
+            'gallery' => $request->validate([
+                'title' => ['required', 'string', 'max:255'],
+                'category' => ['nullable', 'string', 'max:255'],
+                'type' => ['required', 'in:photo,video'],
+                'file_path' => ['required', 'string', 'max:255'],
+            ]),
+            'events' => $request->validate([
+                'title' => ['required', 'string', 'max:255'],
+                'description' => ['nullable', 'string'],
+                'event_date' => ['nullable', 'date'],
+                'location' => ['nullable', 'string', 'max:255'],
+                'status' => ['required', 'in:draft,upcoming,completed,cancelled'],
+            ]),
+            'testimonials' => $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'role' => ['nullable', 'string', 'max:255'],
+                'message' => ['required', 'string'],
+                'is_published' => ['required', 'in:1,0'],
+            ]),
+            'settings' => $request->validate([
+                'key' => ['required', 'string', 'max:255', Rule::unique('settings', 'key')->ignore($id)],
+                'value' => ['nullable', 'string'],
+            ]),
+            default => abort(404),
+        };
     }
 
     private function portalConfig(): array
