@@ -15,13 +15,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Validasi Secrets Wajib
+        run: |
+          test -n "${{ secrets.SERVER_HOST }}" || (echo "::error::Secret SERVER_HOST belum diisi" && exit 1)
+          test -n "${{ secrets.SERVER_USER }}" || (echo "::error::Secret SERVER_USER belum diisi" && exit 1)
+          test -n "${{ secrets.SSH_PRIVATE_KEY }}" || (echo "::error::Secret SSH_PRIVATE_KEY belum diisi" && exit 1)
+
       - name: Deploy ke Server
-        uses: appleboy/ssh-action@v1.0.0
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
           script_stop: true
           envs: DEPLOY_BRANCH,SERVER_APP_DIR
           script: |
