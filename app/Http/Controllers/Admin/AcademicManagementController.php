@@ -12,6 +12,7 @@ use App\Models\Registration;
 use App\Models\Student;
 use App\Models\Teacher;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AcademicManagementController extends Controller
@@ -19,7 +20,7 @@ class AcademicManagementController extends Controller
     public function classes(): View
     {
         return view('portal.admin.classes', [
-            'classes' => MusicClass::with('teacher')->latest()->get(),
+            'classList' => MusicClass::with('teacher')->latest()->get(),
             'teachers' => Teacher::orderBy('name')->get(),
         ]);
     }
@@ -91,7 +92,7 @@ class AcademicManagementController extends Controller
     {
         return view('portal.admin.students', [
             'students' => Student::with('classes')->latest()->get(),
-            'classes' => MusicClass::orderBy('name')->get(),
+            'classList' => MusicClass::orderBy('name')->get(),
         ]);
     }
 
@@ -131,6 +132,43 @@ class AcademicManagementController extends Controller
         return view('portal.admin.registrations', [
             'registrations' => Registration::with('class')->latest()->get(),
         ]);
+    }
+
+    public function schedule(): View
+    {
+        return view('portal.admin.schedule', [
+            'classList' => MusicClass::with(['teacher', 'students'])->orderBy('name')->get(),
+            'teachers' => Teacher::orderBy('name')->get(['id', 'name']),
+            'students' => Student::where('is_active', true)->orderBy('name')->get(['id', 'name', 'email']),
+        ]);
+    }
+
+    public function assignScheduleTeacher(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'class_id' => ['required', 'integer', 'exists:classes,id'],
+            'teacher_id' => ['required', 'integer', 'exists:teachers,id'],
+        ]);
+
+        MusicClass::query()->whereKey($data['class_id'])->update([
+            'teacher_id' => $data['teacher_id'],
+        ]);
+
+        return back()->with('success', 'Pengajar berhasil ditentukan untuk class.');
+    }
+
+    public function assignScheduleStudents(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'class_id' => ['required', 'integer', 'exists:classes,id'],
+            'student_ids' => ['required', 'array', 'min:1'],
+            'student_ids.*' => ['integer', 'exists:students,id'],
+        ]);
+
+        $class = MusicClass::query()->findOrFail($data['class_id']);
+        $class->students()->syncWithoutDetaching($data['student_ids']);
+
+        return back()->with('success', 'Siswa berhasil ditambahkan ke class.');
     }
 
     public function updateRegistrationStatus(UpdateRegistrationStatusRequest $request, Registration $registration): RedirectResponse

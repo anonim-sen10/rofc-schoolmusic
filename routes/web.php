@@ -79,13 +79,15 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'role:su
     Route::get('/teachers/{teacher}/edit', [SuperAdminController::class, 'editTeacher'])->name('teachers.edit');
     Route::put('/teachers/{teacher}', [SuperAdminController::class, 'updateTeacher'])->name('teachers.update');
     Route::delete('/teachers/{teacher}', [SuperAdminController::class, 'destroyTeacher'])->name('teachers.destroy');
+    Route::post('/schedule/teacher', [SuperAdminController::class, 'assignScheduleTeacher'])->name('schedule.teacher');
+    Route::post('/schedule/students', [SuperAdminController::class, 'assignScheduleStudents'])->name('schedule.students');
     Route::get('/users/{user}/detail', [SuperAdminController::class, 'showUser'])->name('users.show');
     Route::get('/users/{user}/edit', [SuperAdminController::class, 'editUser'])->name('users.edit');
     Route::put('/users/{user}', [SuperAdminController::class, 'updateUser'])->name('users.update');
     Route::delete('/users/{user}', [SuperAdminController::class, 'destroyUser'])->name('users.destroy');
     Route::post('/roles', [SuperAdminController::class, 'storeRole'])->name('roles.store');
     Route::get('/{module}', [SuperAdminController::class, 'module'])
-        ->whereIn('module', ['users', 'roles', 'classes', 'teachers', 'students', 'registrations', 'finance', 'reports', 'blog', 'gallery', 'events', 'testimonials', 'settings', 'logs'])
+        ->whereIn('module', ['users', 'roles', 'classes', 'teachers', 'schedule', 'students', 'registrations', 'finance', 'reports', 'blog', 'gallery', 'events', 'testimonials', 'settings', 'logs'])
         ->name('module');
 });
 
@@ -106,6 +108,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
 
     Route::get('/registrations', [AcademicManagementController::class, 'registrations'])->name('registrations.index');
     Route::patch('/registrations/{registration}/status', [AcademicManagementController::class, 'updateRegistrationStatus'])->name('registrations.status');
+    Route::get('/schedule', [AcademicManagementController::class, 'schedule'])->name('schedule.index');
+    Route::post('/schedule/teacher', [AcademicManagementController::class, 'assignScheduleTeacher'])->name('schedule.teacher');
+    Route::post('/schedule/students', [AcademicManagementController::class, 'assignScheduleStudents'])->name('schedule.students');
 
     Route::get('/{module}', fn (string $module) => app(PortalController::class)->module('admin', $module))
         ->whereIn('module', ['gallery', 'blog', 'events', 'testimonials'])

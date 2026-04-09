@@ -259,6 +259,34 @@ class SuperAdminController extends Controller
         return back()->with('success', 'Class berhasil ditambahkan.');
     }
 
+    public function assignScheduleTeacher(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'class_id' => ['required', 'integer', 'exists:classes,id'],
+            'teacher_id' => ['required', 'integer', 'exists:teachers,id'],
+        ]);
+
+        MusicClass::query()->whereKey($data['class_id'])->update([
+            'teacher_id' => $data['teacher_id'],
+        ]);
+
+        return back()->with('success', 'Pengajar berhasil ditentukan untuk class.');
+    }
+
+    public function assignScheduleStudents(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'class_id' => ['required', 'integer', 'exists:classes,id'],
+            'student_ids' => ['required', 'array', 'min:1'],
+            'student_ids.*' => ['integer', 'exists:students,id'],
+        ]);
+
+        $class = MusicClass::query()->findOrFail($data['class_id']);
+        $class->students()->syncWithoutDetaching($data['student_ids']);
+
+        return back()->with('success', 'Siswa berhasil ditambahkan ke class.');
+    }
+
     public function showUser(User $user): View
     {
         $user->load('roles');
@@ -418,6 +446,8 @@ class SuperAdminController extends Controller
             'classTypeOptions' => self::TEACHER_CLASS_OPTIONS,
             'teachersForManagement' => Teacher::query()->with(['user', 'classes'])->latest()->take(50)->get(),
             'teachersForClassOptions' => Teacher::query()->orderBy('name')->get(['id', 'name']),
+            'classesForSchedule' => MusicClass::query()->with(['teacher', 'students'])->orderBy('name')->get(),
+            'studentsForSchedule' => Student::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'email']),
         ]);
     }
 
@@ -432,6 +462,7 @@ class SuperAdminController extends Controller
                 ['key' => 'roles', 'label' => 'Manajemen User'],
                 ['key' => 'classes', 'label' => 'Classes'],
                 ['key' => 'teachers', 'label' => 'Teachers'],
+                ['key' => 'schedule', 'label' => 'Schedule'],
                 ['key' => 'students', 'label' => 'Students'],
                 ['key' => 'registrations', 'label' => 'Registrations'],
                 ['key' => 'finance', 'label' => 'Finance'],
@@ -490,6 +521,16 @@ class SuperAdminController extends Controller
                     $teacher->instrument,
                     $teacher->is_active ? 'Ya' : 'Tidak',
                     (string) $teacher->classes_count,
+                ])->all(),
+            ],
+            'schedule' => [
+                'title' => 'Schedule',
+                'description' => 'Penentuan class untuk pengajar dan siswa.',
+                'columns' => ['Class', 'Pengajar', 'Jumlah Siswa'],
+                'rows' => MusicClass::with(['teacher', 'students'])->orderBy('name')->get()->map(fn (MusicClass $class) => [
+                    $class->name,
+                    $class->teacher?->name ?? '-',
+                    (string) $class->students->count(),
                 ])->all(),
             ],
             'students' => [

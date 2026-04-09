@@ -5,6 +5,7 @@ $menuItems = [
     ['label' => 'Teachers', 'url' => route('admin.teachers.index')],
     ['label' => 'Students', 'url' => route('admin.students.index')],
     ['label' => 'Registrations', 'url' => route('admin.registrations.index')],
+    ['label' => 'Schedule', 'url' => route('admin.schedule.index')],
 ];
 $panelTitle = 'Admin Dashboard';
 $homeRoute = route('admin.dashboard');

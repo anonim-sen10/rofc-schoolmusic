@@ -5,6 +5,7 @@ $menuItems = [
     ['label' => 'Teachers', 'url' => route('admin.teachers.index')],
     ['label' => 'Students', 'url' => route('admin.students.index')],
     ['label' => 'Registrations', 'url' => route('admin.registrations.index')],
+    ['label' => 'Schedule', 'url' => route('admin.schedule.index')],
 ];
 $panelTitle = 'Admin Dashboard';
 $homeRoute = route('admin.dashboard');
@@ -24,7 +25,7 @@ $homeRoute = route('admin.dashboard');
             <label>Email <input type="email" name="email"></label>
             <label>Address <textarea name="address" rows="2"></textarea></label>
             <label>Kelas
-                <select multiple name="class_ids[]">@foreach($classes as $class)<option value="{{ $class->id }}">{{ $class->name }}</option>@endforeach</select>
+                <select multiple name="class_ids[]">@foreach($classList as $classItem)<option value="{{ $classItem->id }}">{{ $classItem->name }}</option>@endforeach</select>
             </label>
             <label><input type="checkbox" name="is_active" value="1" checked> Active</label>
             <button type="submit">Simpan</button>

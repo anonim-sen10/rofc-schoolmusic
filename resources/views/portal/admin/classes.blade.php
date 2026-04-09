@@ -5,6 +5,7 @@ $menuItems = [
     ['label' => 'Teachers', 'url' => route('admin.teachers.index')],
     ['label' => 'Students', 'url' => route('admin.students.index')],
     ['label' => 'Registrations', 'url' => route('admin.registrations.index')],
+    ['label' => 'Schedule', 'url' => route('admin.schedule.index')],
 ];
 $panelTitle = 'Admin Dashboard';
 $homeRoute = route('admin.dashboard');
@@ -37,14 +38,14 @@ $homeRoute = route('admin.dashboard');
             <table>
                 <thead><tr><th>Nama</th><th>Teacher</th><th>Harga</th><th>Status</th><th>Action</th></tr></thead>
                 <tbody>
-                @foreach($classes as $class)
+                @foreach($classList as $classItem)
                     <tr>
-                        <td>{{ $class->name }}</td>
-                        <td>{{ $class->teacher?->name ?? '-' }}</td>
-                        <td>{{ number_format($class->price,0,',','.') }}</td>
-                        <td>{{ $class->status }}</td>
+                        <td>{{ $classItem->name }}</td>
+                        <td>{{ $classItem->teacher?->name ?? '-' }}</td>
+                        <td>{{ number_format($classItem->price,0,',','.') }}</td>
+                        <td>{{ $classItem->status }}</td>
                         <td>
-                            <form method="POST" action="{{ route('admin.classes.destroy', $class) }}">@csrf @method('DELETE')<button type="submit">Delete</button></form>
+                            <form method="POST" action="{{ route('admin.classes.destroy', $classItem) }}">@csrf @method('DELETE')<button type="submit">Delete</button></form>
                         </td>
                     </tr>
                 @endforeach

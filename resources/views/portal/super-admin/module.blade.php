@@ -248,7 +248,86 @@
     </section>
 @endif
 
-@if (! in_array($moduleKey, ['users', 'roles', 'teachers'], true))
+@if ($moduleKey === 'schedule')
+    <section class="card">
+        <h3>Tentukan Pengajar per Class</h3>
+        <form class="module-form" method="POST" action="{{ route('super-admin.schedule.teacher') }}">
+            @csrf
+            <label>Class
+                <select name="class_id" required>
+                    <option value="">Pilih class</option>
+                    @foreach($classesForSchedule as $class)
+                        <option value="{{ $class->id }}">{{ $class->name }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <label>Pengajar
+                <select name="teacher_id" required>
+                    <option value="">Pilih pengajar</option>
+                    @foreach($teachersForClassOptions as $teacherOption)
+                        <option value="{{ $teacherOption->id }}">{{ $teacherOption->name }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <button type="submit">Simpan Pengajar</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <h3>Tentukan Siswa per Class</h3>
+        <form class="module-form" method="POST" action="{{ route('super-admin.schedule.students') }}">
+            @csrf
+            <label>Class
+                <select name="class_id" required>
+                    <option value="">Pilih class</option>
+                    @foreach($classesForSchedule as $class)
+                        <option value="{{ $class->id }}">{{ $class->name }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <label>Siswa (boleh lebih dari satu)
+                <select name="student_ids[]" multiple required size="8">
+                    @foreach($studentsForSchedule as $studentOption)
+                        <option value="{{ $studentOption->id }}">{{ $studentOption->name }} ({{ $studentOption->email ?? '-' }})</option>
+                    @endforeach
+                </select>
+            </label>
+            <button type="submit">Tambah Siswa ke Class</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <h3>Ringkasan Schedule</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>Pengajar</th>
+                        <th>Jumlah Siswa</th>
+                        <th>Daftar Siswa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($classesForSchedule as $class)
+                        <tr>
+                            <td>{{ $class->name }}</td>
+                            <td>{{ $class->teacher?->name ?? '-' }}</td>
+                            <td>{{ $class->students->count() }}</td>
+                            <td>{{ $class->students->pluck('name')->implode(', ') ?: '-' }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4">Belum ada class.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </section>
+@endif
+
+@if (! in_array($moduleKey, ['users', 'roles', 'teachers', 'schedule'], true))
 <section class="card">
     <div class="table-wrap">
         <table>
