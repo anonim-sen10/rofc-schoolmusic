@@ -6,14 +6,17 @@
     <title>@yield('title', 'ROFC Portal')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/portal.css', 'resources/js/portal.js'])
 </head>
 <body class="portal-body">
+    @php
+        $notifCount = $summary['registrations_pending'] ?? 0;
+    @endphp
     <div class="portal-shell">
         <aside class="portal-sidebar" data-portal-sidebar>
             <a href="{{ route($portal['prefix'].'.dashboard') }}" class="portal-brand">
-                <span class="logo">ROFC</span>
+                <span class="logo">RF</span>
                 <span>
                     <strong>{{ $portal['title'] }}</strong>
                     <small>Role Based Access</small>
@@ -31,21 +34,57 @@
                             ? request()->routeIs($portal['prefix'].'.dashboard')
                             : request()->routeIs($portal['prefix'].'.module') && request()->route('module') === $item['key'];
                     @endphp
-                    <a href="{{ $url }}" class="{{ $active ? 'active' : '' }}">{{ $item['label'] }}</a>
+                    <a href="{{ $url }}" class="{{ $active ? 'active' : '' }}" data-tooltip="{{ $item['label'] }}">
+                        <i data-lucide="{{ $item['icon'] ?? 'circle' }}"></i>
+                        <span>{{ $item['label'] }}</span>
+                    </a>
                 @endforeach
             </nav>
         </aside>
 
         <div class="portal-main">
             <header class="portal-topbar">
-                <button type="button" class="toggle" data-portal-toggle>Menu</button>
-                <div>
-                    <p class="muted">ROFC School Music Management Information System</p>
-                    <h1>@yield('page-title')</h1>
+                <div class="topbar-left">
+                    <button type="button" class="toggle" data-portal-toggle aria-label="Toggle sidebar">
+                        <i data-lucide="panel-left"></i>
+                    </button>
+                    <div>
+                        <p class="muted">ROFC School Music Management Information System</p>
+                        <h1>@yield('page-title')</h1>
+                    </div>
                 </div>
-                <div class="user-box">
-                    <strong>{{ auth()->user()->name }}</strong>
-                    <small>{{ strtoupper(str_replace('_', ' ', $roleKey)) }}</small>
+
+                <div class="topbar-tools">
+                    <label class="global-search" title="Search modules and tables">
+                        <i data-lucide="search"></i>
+                        <input type="search" placeholder="Search in dashboard..." data-global-search>
+                    </label>
+
+                    @if ($roleKey === 'super_admin')
+                        <a href="{{ route('super-admin.module', ['module' => 'students']) }}" class="quick-btn" title="Add Student">
+                            <i data-lucide="user-plus"></i>
+                            <span>Add Student</span>
+                        </a>
+                        <a href="{{ route('super-admin.module', ['module' => 'classes']) }}" class="quick-btn" title="Add Class">
+                            <i data-lucide="plus-circle"></i>
+                            <span>Add Class</span>
+                        </a>
+                    @endif
+
+                    <button type="button" class="icon-btn" title="Notifications" aria-label="Notifications">
+                        <i data-lucide="bell"></i>
+                        @if ($notifCount > 0)
+                            <span class="notif-dot">{{ $notifCount > 9 ? '9+' : $notifCount }}</span>
+                        @endif
+                    </button>
+
+                    <div class="user-box">
+                        <span class="avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                        <span>
+                            <strong>{{ auth()->user()->name }}</strong>
+                            <small>{{ strtoupper(str_replace('_', ' ', $roleKey)) }}</small>
+                        </span>
+                    </div>
                 </div>
             </header>
 
@@ -62,5 +101,11 @@
             </footer>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.511.0/dist/umd/lucide.min.js"></script>
+    <script>
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    </script>
 </body>
 </html>

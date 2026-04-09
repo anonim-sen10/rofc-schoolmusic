@@ -4,19 +4,27 @@
 @section('page-title', $moduleTitle)
 
 @section('content')
-<section class="card module-head">
-    <h2>{{ $moduleTitle }}</h2>
-    <p>{{ $moduleDescription }}</p>
+<section class="dashboard-hero module-head" data-searchable>
+    <div>
+        <p class="eyebrow">Module Workspace</p>
+        <h2>{{ $moduleTitle }}</h2>
+        <p>{{ $moduleDescription }}</p>
+    </div>
+    <div class="hero-actions">
+        <a class="ghost-btn" href="{{ route('super-admin.dashboard') }}">Back to Dashboard</a>
+    </div>
 </section>
 
 @if (session('success'))
-    <section class="card">
-        <p>{{ session('success') }}</p>
+    <section class="card" data-searchable>
+        <x-ui.badge type="success">SUCCESS</x-ui.badge>
+        <p style="margin-top: 0.5rem;">{{ session('success') }}</p>
     </section>
 @endif
 
 @if ($errors->any())
-    <section class="card">
+    <section class="card" data-searchable>
+        <x-ui.badge type="danger">ERROR</x-ui.badge>
         <ul class="list">
             @foreach ($errors->all() as $error)
                 <li><span>{{ $error }}</span></li>
@@ -26,9 +34,9 @@
 @endif
 
 @if ($moduleKey === 'users')
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>Buat Akun Login Baru</h3>
-        <form class="module-form" method="POST" action="{{ route('super-admin.users.store') }}">
+        <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.users.store') }}">
             @csrf
             <label>Nama
                 <input type="text" name="name" value="{{ old('name') }}" required>
@@ -57,13 +65,16 @@
             <label>Konfirmasi Password
                 <input type="password" name="password_confirmation" required>
             </label>
-            <button type="submit">Buat Akun</button>
+            <div class="form-actions">
+                <button type="submit">Buat Akun</button>
+                <button type="reset" class="btn-secondary">Cancel</button>
+            </div>
         </form>
     </section>
 @endif
 
 @if ($moduleKey === 'roles')
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>Data User</h3>
         <div class="table-wrap">
             <table>
@@ -85,19 +96,19 @@
                             <td>{{ optional($userRow->created_at)->format('Y-m-d H:i') }}</td>
                             <td>
                                 <div class="action-icons">
-                                    <a href="{{ route('super-admin.users.show', $userRow) }}" title="Detail" aria-label="Detail">&#128065;</a>
-                                    <a href="{{ route('super-admin.users.edit', $userRow) }}" title="Edit" aria-label="Edit">&#9998;</a>
+                                    <a href="{{ route('super-admin.users.show', $userRow) }}" class="btn-icon" title="Detail" aria-label="Detail"><i data-lucide="eye"></i></a>
+                                    <a href="{{ route('super-admin.users.edit', $userRow) }}" class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></a>
                                     <form method="POST" action="{{ route('super-admin.users.destroy', $userRow) }}" onsubmit="return confirm('Hapus user ini?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" title="Hapus" aria-label="Hapus">&#128465;</button>
+                                        <button type="submit" class="btn-icon btn-icon-danger" title="Hapus" aria-label="Hapus"><i data-lucide="trash-2"></i></button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5">Belum ada data user.</td>
+                            <td colspan="5">No user records yet. Create your first account to get started.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -107,16 +118,16 @@
 @endif
 
 @if ($moduleKey === 'users')
-    <section class="card">
+    <section class="card" data-searchable>
         <p>Data user telah dipindahkan ke menu Roles agar pengelolaan role dan akun berada dalam satu halaman.</p>
     </section>
 @endif
 
 @if ($moduleKey === 'teachers')
-    <section class="card">
+    <section class="card" data-searchable>
         <details class="teacher-create" @if($errors->any()) open @endif>
             <summary>Create Teacher</summary>
-            <form class="module-form teacher-create-form" method="POST" enctype="multipart/form-data" action="{{ route('super-admin.teachers.store') }}">
+            <form class="module-form module-form-grid teacher-create-form" method="POST" enctype="multipart/form-data" action="{{ route('super-admin.teachers.store') }}">
                 @csrf
                 <label>Nama
                     <input type="text" name="name" value="{{ old('name') }}" required>
@@ -156,12 +167,15 @@
                 <label>Upload Foto Profile
                     <input type="file" name="photo" accept="image/*">
                 </label>
-                <button type="submit">Simpan Teacher</button>
+                <div class="form-actions">
+                    <button type="submit">Simpan Teacher</button>
+                    <button type="reset" class="btn-secondary">Cancel</button>
+                </div>
             </form>
         </details>
     </section>
 
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>Daftar Guru</h3>
         <div class="table-wrap">
             <table>
@@ -189,19 +203,19 @@
                             <td>{{ $teacher->classes->pluck('name')->implode(', ') ?: '-' }}</td>
                             <td>
                                 <div class="action-icons">
-                                    <a href="{{ route('super-admin.teachers.show', $teacher) }}" title="Detail" aria-label="Detail">&#128065;</a>
-                                    <a href="{{ route('super-admin.teachers.edit', $teacher) }}" title="Edit" aria-label="Edit">&#9998;</a>
+                                    <a href="{{ route('super-admin.teachers.show', $teacher) }}" class="btn-icon" title="Detail" aria-label="Detail"><i data-lucide="eye"></i></a>
+                                    <a href="{{ route('super-admin.teachers.edit', $teacher) }}" class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></a>
                                     <form method="POST" action="{{ route('super-admin.teachers.destroy', $teacher) }}" onsubmit="return confirm('Hapus teacher ini?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" title="Hapus" aria-label="Hapus">&#128465;</button>
+                                        <button type="submit" class="btn-icon btn-icon-danger" title="Hapus" aria-label="Hapus"><i data-lucide="trash-2"></i></button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8">Belum ada data guru.</td>
+                            <td colspan="8">No teacher profiles yet. Add a teacher to start assigning classes.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -211,10 +225,10 @@
 @endif
 
 @if ($moduleKey === 'classes')
-    <section class="card">
+    <section class="card" data-searchable>
         <details class="teacher-create" @if($errors->any()) open @endif>
             <summary>Create Class</summary>
-            <form class="module-form teacher-create-form" method="POST" action="{{ route('super-admin.classes.store') }}">
+            <form class="module-form module-form-grid teacher-create-form" method="POST" action="{{ route('super-admin.classes.store') }}">
                 @csrf
                 <label>Nama Kelas
                     <input type="text" name="name" value="{{ old('name') }}" required>
@@ -242,12 +256,15 @@
                         <option value="inactive" @selected(old('status') === 'inactive')>Inactive</option>
                     </select>
                 </label>
-                <button type="submit">Simpan Class</button>
+                <div class="form-actions">
+                    <button type="submit">Simpan Class</button>
+                    <button type="reset" class="btn-secondary">Cancel</button>
+                </div>
             </form>
         </details>
     </section>
 
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>Daftar Class</h3>
         <div class="table-wrap">
             <table>
@@ -268,11 +285,15 @@
                             <td>{{ $classItem->teacher?->name ?? '-' }}</td>
                             <td>Rp{{ number_format((int) ($classItem->price ?? 0), 0, ',', '.') }}</td>
                             <td>{{ $classItem->schedule ?? '-' }}</td>
-                            <td>{{ $classItem->status }}</td>
+                            <td>
+                                <x-ui.badge :type="$classItem->status === 'active' ? 'success' : 'warning'">
+                                    {{ strtoupper($classItem->status) }}
+                                </x-ui.badge>
+                            </td>
                             <td>
                                 <div class="action-icons class-action-icons">
                                     <details class="action-popover">
-                                        <summary title="Edit" aria-label="Edit">&#9998;</summary>
+                                        <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
                                         <form class="module-form action-popover-form" method="POST" action="{{ route('super-admin.classes.update', $classItem) }}">
                                         @csrf
                                         @method('PUT')
@@ -308,14 +329,14 @@
                                     <form method="POST" action="{{ route('super-admin.classes.destroy', $classItem) }}" onsubmit="return confirm('Hapus class ini?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" title="Hapus" aria-label="Hapus">&#128465;</button>
+                                        <button type="submit" class="btn-icon btn-icon-danger" title="Hapus" aria-label="Hapus"><i data-lucide="trash-2"></i></button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6">Belum ada class.</td>
+                            <td colspan="6">No classes yet. Create a class and assign a teacher to begin operations.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -325,9 +346,9 @@
 @endif
 
 @if ($moduleKey === 'students')
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>Create Student</h3>
-        <form class="module-form" method="POST" action="{{ route('super-admin.students.store') }}">
+        <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.students.store') }}">
             @csrf
             <label>Nama
                 <input type="text" name="name" value="{{ old('name') }}" required>
@@ -357,11 +378,14 @@
                     <option value="0" @selected(old('is_active') === '0')>Inactive</option>
                 </select>
             </label>
-            <button type="submit">Simpan Student</button>
+            <div class="form-actions">
+                <button type="submit">Simpan Student</button>
+                <button type="reset" class="btn-secondary">Cancel</button>
+            </div>
         </form>
     </section>
 
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>Daftar Student</h3>
         <div class="table-wrap">
             <table>
@@ -422,7 +446,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5">Belum ada data siswa.</td>
+                            <td colspan="5">No students yet. Approve registrations or create a student manually.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -432,9 +456,9 @@
 @endif
 
 @if ($moduleKey === 'registrations')
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>Create Registration</h3>
-        <form class="module-form" method="POST" action="{{ route('super-admin.registrations.store') }}">
+        <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.registrations.store') }}">
             @csrf
             <label>Nama
                 <input type="text" name="full_name" value="{{ old('full_name') }}" required>
@@ -469,11 +493,14 @@
             <label>Catatan
                 <textarea name="notes" rows="2">{{ old('notes') }}</textarea>
             </label>
-            <button type="submit">Simpan Registration</button>
+            <div class="form-actions">
+                <button type="submit">Simpan Registration</button>
+                <button type="reset" class="btn-secondary">Cancel</button>
+            </div>
         </form>
     </section>
 
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>Daftar Registration</h3>
         <div class="table-wrap">
             <table>
@@ -539,7 +566,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5">Belum ada registration.</td>
+                            <td colspan="5">No registrations yet. Website leads will appear here automatically.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -549,9 +576,9 @@
 @endif
 
 @if ($moduleKey === 'blog')
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>Create Post</h3>
-        <form class="module-form" method="POST" action="{{ route('super-admin.content.store', 'blog') }}">
+        <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.content.store', 'blog') }}">
             @csrf
             <label>Title<input type="text" name="title" required></label>
             <label>Slug<input type="text" name="slug" required></label>
@@ -562,10 +589,13 @@
                 <select name="status"><option value="draft">draft</option><option value="published">published</option></select>
             </label>
             <label>Published At<input type="datetime-local" name="published_at"></label>
-            <button type="submit">Simpan Post</button>
+            <div class="form-actions">
+                <button type="submit">Simpan Post</button>
+                <button type="reset" class="btn-secondary">Cancel</button>
+            </div>
         </form>
     </section>
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>Daftar Post</h3>
         @foreach($postsForManagement as $post)
             <form class="module-form" method="POST" action="{{ route('super-admin.content.update', ['module' => 'blog', 'id' => $post->id]) }}">
@@ -592,18 +622,21 @@
 @endif
 
 @if ($moduleKey === 'gallery')
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>Create Gallery</h3>
-        <form class="module-form" method="POST" action="{{ route('super-admin.content.store', 'gallery') }}">
+        <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.content.store', 'gallery') }}">
             @csrf
             <label>Title<input type="text" name="title" required></label>
             <label>Category<input type="text" name="category"></label>
             <label>Type<select name="type"><option value="photo">photo</option><option value="video">video</option></select></label>
             <label>File Path<input type="text" name="file_path" required></label>
-            <button type="submit">Simpan Gallery</button>
+            <div class="form-actions">
+                <button type="submit">Simpan Gallery</button>
+                <button type="reset" class="btn-secondary">Cancel</button>
+            </div>
         </form>
     </section>
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>Daftar Gallery</h3>
         @foreach($galleriesForManagement as $gallery)
             <form class="module-form" method="POST" action="{{ route('super-admin.content.update', ['module' => 'gallery', 'id' => $gallery->id]) }}">
@@ -625,19 +658,22 @@
 @endif
 
 @if ($moduleKey === 'events')
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>Create Event</h3>
-        <form class="module-form" method="POST" action="{{ route('super-admin.content.store', 'events') }}">
+        <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.content.store', 'events') }}">
             @csrf
             <label>Title<input type="text" name="title" required></label>
             <label>Description<textarea name="description" rows="3"></textarea></label>
             <label>Date<input type="date" name="event_date"></label>
             <label>Location<input type="text" name="location"></label>
             <label>Status<select name="status"><option value="draft">draft</option><option value="upcoming">upcoming</option><option value="completed">completed</option><option value="cancelled">cancelled</option></select></label>
-            <button type="submit">Simpan Event</button>
+            <div class="form-actions">
+                <button type="submit">Simpan Event</button>
+                <button type="reset" class="btn-secondary">Cancel</button>
+            </div>
         </form>
     </section>
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>Daftar Event</h3>
         @foreach($eventsForManagement as $event)
             <form class="module-form" method="POST" action="{{ route('super-admin.content.update', ['module' => 'events', 'id' => $event->id]) }}">
@@ -660,18 +696,21 @@
 @endif
 
 @if ($moduleKey === 'testimonials')
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>Create Testimonial</h3>
-        <form class="module-form" method="POST" action="{{ route('super-admin.content.store', 'testimonials') }}">
+        <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.content.store', 'testimonials') }}">
             @csrf
             <label>Name<input type="text" name="name" required></label>
             <label>Role<input type="text" name="role"></label>
             <label>Message<textarea name="message" rows="3" required></textarea></label>
             <label>Publish<select name="is_published"><option value="1">Ya</option><option value="0">Tidak</option></select></label>
-            <button type="submit">Simpan Testimonial</button>
+            <div class="form-actions">
+                <button type="submit">Simpan Testimonial</button>
+                <button type="reset" class="btn-secondary">Cancel</button>
+            </div>
         </form>
     </section>
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>Daftar Testimonial</h3>
         @foreach($testimonialsForManagement as $testimonial)
             <form class="module-form" method="POST" action="{{ route('super-admin.content.update', ['module' => 'testimonials', 'id' => $testimonial->id]) }}">
@@ -693,16 +732,19 @@
 @endif
 
 @if ($moduleKey === 'settings')
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>Create Setting</h3>
-        <form class="module-form" method="POST" action="{{ route('super-admin.content.store', 'settings') }}">
+        <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.content.store', 'settings') }}">
             @csrf
             <label>Key<input type="text" name="key" required></label>
             <label>Value<textarea name="value" rows="2"></textarea></label>
-            <button type="submit">Simpan Setting</button>
+            <div class="form-actions">
+                <button type="submit">Simpan Setting</button>
+                <button type="reset" class="btn-secondary">Cancel</button>
+            </div>
         </form>
     </section>
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>Daftar Setting</h3>
         @foreach($settingsForManagement as $setting)
             <form class="module-form" method="POST" action="{{ route('super-admin.content.update', ['module' => 'settings', 'id' => $setting->id]) }}">
@@ -722,7 +764,7 @@
 @endif
 
 @if ($moduleKey === 'logs')
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>System Logs</h3>
         <div class="table-wrap">
             <table>
@@ -752,7 +794,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5">Belum ada data log.</td>
+                            <td colspan="5">No activity logs yet. System events will be listed once users start actions.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -762,9 +804,9 @@
 @endif
 
 @if ($moduleKey === 'schedule')
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>Tentukan Pengajar per Class</h3>
-        <form class="module-form" method="POST" action="{{ route('super-admin.schedule.teacher') }}">
+        <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.schedule.teacher') }}">
             @csrf
             <label>Class
                 <select name="class_id" required>
@@ -782,13 +824,16 @@
                     @endforeach
                 </select>
             </label>
-            <button type="submit">Simpan Pengajar</button>
+            <div class="form-actions">
+                <button type="submit">Simpan Pengajar</button>
+                <button type="reset" class="btn-secondary">Cancel</button>
+            </div>
         </form>
     </section>
 
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>Tentukan Siswa per Class</h3>
-        <form class="module-form" method="POST" action="{{ route('super-admin.schedule.students') }}">
+        <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.schedule.students') }}">
             @csrf
             <label>Class
                 <select name="class_id" required>
@@ -805,11 +850,14 @@
                     @endforeach
                 </select>
             </label>
-            <button type="submit">Tambah Siswa ke Class</button>
+            <div class="form-actions">
+                <button type="submit">Tambah Siswa ke Class</button>
+                <button type="reset" class="btn-secondary">Cancel</button>
+            </div>
         </form>
     </section>
 
-    <section class="card">
+    <section class="card" data-searchable>
         <h3>Ringkasan Schedule</h3>
         <div class="table-wrap">
             <table>
@@ -829,7 +877,13 @@
                         <tr>
                             <td>{{ $class->name }}</td>
                             <td>{{ $class->teacher?->name ?? '-' }}</td>
-                            <td>{{ $class->assignment_status ?? 'pending' }}</td>
+                            <td>
+                                @php
+                                    $assignmentStatus = strtolower($class->assignment_status ?? 'pending');
+                                    $assignmentBadge = $assignmentStatus === 'accepted' ? 'success' : ($assignmentStatus === 'rejected' ? 'danger' : 'warning');
+                                @endphp
+                                <x-ui.badge :type="$assignmentBadge">{{ strtoupper($assignmentStatus) }}</x-ui.badge>
+                            </td>
                             <td>{{ $class->students->count() }}</td>
                             <td>{{ $class->students->pluck('name')->implode(', ') ?: '-' }}</td>
                             <td>{{ $class->assignment_note ?? '-' }}</td>
@@ -854,7 +908,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7">Belum ada class.</td>
+                            <td colspan="7">No schedule data yet. Assign class-teacher pairs to activate scheduling.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -864,7 +918,7 @@
 @endif
 
 @if (! in_array($moduleKey, ['users', 'roles', 'teachers', 'schedule', 'classes', 'students', 'registrations', 'blog', 'gallery', 'events', 'testimonials', 'settings', 'logs'], true))
-<section class="card">
+<section class="card" data-searchable>
     <div class="table-wrap">
         <table>
             <thead>
@@ -883,7 +937,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ count($columns) }}">Belum ada data.</td>
+                        <td colspan="{{ count($columns) }}">No records available for this module yet.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -892,3 +946,5 @@
 </section>
 @endif
 @endsection
+
+

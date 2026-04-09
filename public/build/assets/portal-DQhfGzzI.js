@@ -1,1 +1,0 @@
-document.addEventListener("DOMContentLoaded",()=>{const e=document.querySelector("[data-portal-sidebar]"),t=document.querySelector("[data-portal-toggle]");e&&t&&t.addEventListener("click",()=>{e.classList.toggle("open")})});

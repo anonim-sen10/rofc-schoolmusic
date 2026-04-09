@@ -17,8 +17,10 @@ use App\Models\Teacher;
 use App\Models\TeacherAttendance;
 use App\Models\TeacherSalary;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -637,14 +639,116 @@ class SuperAdminController extends Controller
         $expense = Expense::query()->sum('amount');
         $salary = TeacherSalary::query()->sum('total_paid');
 
+        $months = $this->monthBuckets(6);
+        $rangeStart = $months->first()->copy()->startOfMonth();
+        $rangeEnd = $months->last()->copy()->endOfMonth();
+
+        $monthKeys = $months->map(fn (Carbon $month) => $month->format('Y-m'));
+        $chartLabels = $months->map(fn (Carbon $month) => $month->format('M Y'));
+
+        $monthlyRevenueRows = Payment::query()
+            ->selectRaw('YEAR(paid_at) as year, MONTH(paid_at) as month, SUM(amount) as total')
+            ->where('status', 'paid')
+            ->whereNotNull('paid_at')
+            ->whereBetween('paid_at', [$rangeStart, $rangeEnd])
+            ->groupBy('year', 'month')
+            ->get()
+            ->keyBy(fn ($row) => sprintf('%04d-%02d', (int) $row->year, (int) $row->month));
+
+        $studentGrowthRows = Student::query()
+            ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(*) as total')
+            ->whereBetween('created_at', [$rangeStart, $rangeEnd])
+            ->groupBy('year', 'month')
+            ->get()
+            ->keyBy(fn ($row) => sprintf('%04d-%02d', (int) $row->year, (int) $row->month));
+
+        $attendanceRows = Attendance::query()
+            ->selectRaw('YEAR(attendance_date) as year, MONTH(attendance_date) as month, COUNT(*) as total, SUM(CASE WHEN status IN ("present", "late") THEN 1 ELSE 0 END) as present_total')
+            ->whereBetween('attendance_date', [$rangeStart, $rangeEnd])
+            ->groupBy('year', 'month')
+            ->get()
+            ->keyBy(fn ($row) => sprintf('%04d-%02d', (int) $row->year, (int) $row->month));
+
+        $monthlyRevenue = $monthKeys->map(fn (string $key) => (float) ($monthlyRevenueRows->get($key)->total ?? 0));
+        $monthlyStudents = $monthKeys->map(fn (string $key) => (int) ($studentGrowthRows->get($key)->total ?? 0));
+        $monthlyAttendanceRate = $monthKeys->map(function (string $key) use ($attendanceRows) {
+            $total = (int) ($attendanceRows->get($key)->total ?? 0);
+            $present = (int) ($attendanceRows->get($key)->present_total ?? 0);
+
+            return $total > 0 ? round(($present / $total) * 100, 1) : 0;
+        });
+
+        $currentMonthStart = now()->copy()->startOfMonth();
+        $previousMonthStart = now()->copy()->subMonth()->startOfMonth();
+        $previousMonthEnd = now()->copy()->subMonth()->endOfMonth();
+
+        $studentsCurrent = Student::query()->where('is_active', true)->count();
+        $studentsPrev = Student::query()->where('is_active', true)->where('created_at', '<', $currentMonthStart)->count();
+        $teachersCurrent = Teacher::query()->where('is_active', true)->count();
+        $teachersPrev = Teacher::query()->where('is_active', true)->where('created_at', '<', $currentMonthStart)->count();
+        $revenueCurrent = (float) Payment::query()->where('status', 'paid')->whereBetween('paid_at', [$currentMonthStart, now()->copy()->endOfMonth()])->sum('amount');
+        $revenuePrev = (float) Payment::query()->where('status', 'paid')->whereBetween('paid_at', [$previousMonthStart, $previousMonthEnd])->sum('amount');
+        $classesCurrent = MusicClass::query()->where('status', 'active')->count();
+        $classesPrev = MusicClass::query()->where('status', 'active')->where('created_at', '<', $currentMonthStart)->count();
+
+        $trend = function (float|int $current, float|int $previous): array {
+            if ((float) $previous === 0.0) {
+                return [
+                    'direction' => $current > 0 ? 'up' : 'flat',
+                    'label' => $current > 0 ? '+100%' : '0%',
+                ];
+            }
+
+            $delta = (($current - $previous) / abs($previous)) * 100;
+
+            return [
+                'direction' => $delta > 0 ? 'up' : ($delta < 0 ? 'down' : 'flat'),
+                'label' => ($delta > 0 ? '+' : '').number_format($delta, 1).'%',
+            ];
+        };
+
+        $kpis = [
+            [
+                'label' => 'Total Students',
+                'value' => number_format($studentsCurrent),
+                'icon' => 'graduation-cap',
+                'trend' => $trend($studentsCurrent, $studentsPrev),
+            ],
+            [
+                'label' => 'Total Teachers',
+                'value' => number_format($teachersCurrent),
+                'icon' => 'users',
+                'trend' => $trend($teachersCurrent, $teachersPrev),
+            ],
+            [
+                'label' => 'Monthly Revenue',
+                'value' => 'Rp'.number_format($revenueCurrent, 0, ',', '.'),
+                'icon' => 'wallet',
+                'trend' => $trend($revenueCurrent, $revenuePrev),
+            ],
+            [
+                'label' => 'Active Classes',
+                'value' => number_format($classesCurrent),
+                'icon' => 'book-open',
+                'trend' => $trend($classesCurrent, $classesPrev),
+            ],
+        ];
+
         return view('portal.super-admin.dashboard', [
             'roleKey' => 'super_admin',
             'portal' => $this->portalConfig(),
+            'kpis' => $kpis,
             'stats' => [
                 ['label' => 'Total Users', 'value' => User::count()],
                 ['label' => 'Active Students', 'value' => Student::where('is_active', true)->count()],
                 ['label' => 'Active Teachers', 'value' => Teacher::where('is_active', true)->count()],
                 ['label' => 'Net Cashflow', 'value' => 'Rp'.number_format($income - $expense - $salary, 0, ',', '.')],
+            ],
+            'chartData' => [
+                'labels' => $chartLabels,
+                'revenue' => $monthlyRevenue,
+                'studentGrowth' => $monthlyStudents,
+                'attendanceRate' => $monthlyAttendanceRate,
             ],
             'summary' => [
                 'registrations_pending' => Registration::where('status', 'pending')->count(),
@@ -660,6 +764,13 @@ class SuperAdminController extends Controller
             'recentStudentAttendances' => Attendance::with(['student', 'class'])->latest('attendance_date')->take(8)->get(),
             'recentProgress' => StudentProgress::latest()->take(8)->get(),
         ]);
+    }
+
+    private function monthBuckets(int $months): Collection
+    {
+        return collect(range($months - 1, 0))->map(
+            fn (int $offset) => now()->copy()->startOfMonth()->subMonths($offset)
+        );
     }
 
     public function module(string $module): View
@@ -749,22 +860,22 @@ class SuperAdminController extends Controller
             'title' => 'Super Admin Dashboard',
             'prefix' => 'super-admin',
             'menu' => [
-                ['key' => 'dashboard', 'label' => 'Dashboard'],
-                ['key' => 'users', 'label' => 'Users'],
-                ['key' => 'roles', 'label' => 'Manajemen User'],
-                ['key' => 'classes', 'label' => 'Classes'],
-                ['key' => 'teachers', 'label' => 'Teachers'],
-                ['key' => 'schedule', 'label' => 'Schedule'],
-                ['key' => 'students', 'label' => 'Students'],
-                ['key' => 'registrations', 'label' => 'Registrations'],
-                ['key' => 'finance', 'label' => 'Finance'],
-                ['key' => 'reports', 'label' => 'Reports'],
-                ['key' => 'blog', 'label' => 'Blog'],
-                ['key' => 'gallery', 'label' => 'Gallery'],
-                ['key' => 'events', 'label' => 'Events'],
-                ['key' => 'testimonials', 'label' => 'Testimonials'],
-                ['key' => 'settings', 'label' => 'Settings'],
-                ['key' => 'logs', 'label' => 'Logs'],
+                ['key' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'layout-dashboard'],
+                ['key' => 'users', 'label' => 'Users', 'icon' => 'user-round'],
+                ['key' => 'roles', 'label' => 'Manajemen User', 'icon' => 'shield-check'],
+                ['key' => 'classes', 'label' => 'Classes', 'icon' => 'book-open'],
+                ['key' => 'teachers', 'label' => 'Teachers', 'icon' => 'music-2'],
+                ['key' => 'schedule', 'label' => 'Schedule', 'icon' => 'calendar-days'],
+                ['key' => 'students', 'label' => 'Students', 'icon' => 'graduation-cap'],
+                ['key' => 'registrations', 'label' => 'Registrations', 'icon' => 'clipboard-list'],
+                ['key' => 'finance', 'label' => 'Finance', 'icon' => 'wallet'],
+                ['key' => 'reports', 'label' => 'Reports', 'icon' => 'bar-chart-3'],
+                ['key' => 'blog', 'label' => 'Blog', 'icon' => 'newspaper'],
+                ['key' => 'gallery', 'label' => 'Gallery', 'icon' => 'image'],
+                ['key' => 'events', 'label' => 'Events', 'icon' => 'calendar'],
+                ['key' => 'testimonials', 'label' => 'Testimonials', 'icon' => 'message-square-quote'],
+                ['key' => 'settings', 'label' => 'Settings', 'icon' => 'settings'],
+                ['key' => 'logs', 'label' => 'Logs', 'icon' => 'scroll-text'],
             ],
         ];
     }

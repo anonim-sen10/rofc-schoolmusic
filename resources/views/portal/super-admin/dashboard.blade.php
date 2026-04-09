@@ -4,149 +4,129 @@
 @section('page-title', 'Super Admin Data Center')
 
 @section('content')
-<section class="stats-grid">
-    @foreach ($stats as $stat)
-        <article class="card stat">
-            <p>{{ $stat['label'] }}</p>
-            <h2>{{ $stat['value'] }}</h2>
-        </article>
+<section class="dashboard-hero" data-searchable>
+    <div>
+        <p class="eyebrow">Operations Intelligence</p>
+        <h2>High-level performance in one screen.</h2>
+        <p>Track growth, attendance quality, and cash movement in real time with clean visual storytelling.</p>
+    </div>
+    <div class="hero-actions">
+        <a href="{{ route('super-admin.module', ['module' => 'registrations']) }}" class="ghost-btn" title="Review pending registration">Review Registrations</a>
+        <a href="{{ route('super-admin.module', ['module' => 'reports']) }}" class="ghost-btn" title="Open reports">Open Reports</a>
+    </div>
+</section>
+
+<section class="kpi-grid" data-searchable>
+    @foreach ($kpis as $kpi)
+        <x-ui.card class="kpi-card card-loading" :title="$kpi['label']">
+            <div class="kpi-row">
+                <div class="kpi-value">{{ $kpi['value'] }}</div>
+                <span class="kpi-icon"><i data-lucide="{{ $kpi['icon'] }}"></i></span>
+            </div>
+            <div class="kpi-trend {{ $kpi['trend']['direction'] }}">
+                <i data-lucide="{{ $kpi['trend']['direction'] === 'up' ? 'trending-up' : ($kpi['trend']['direction'] === 'down' ? 'trending-down' : 'minus') }}"></i>
+                <span>{{ $kpi['trend']['label'] }} vs previous month</span>
+            </div>
+        </x-ui.card>
     @endforeach
 </section>
 
-<section class="split-grid">
-    <article class="card">
-        <h3>Cross-Role Snapshot</h3>
-        <ul class="list">
-            <li><span>Registrations Pending</span><small>{{ $summary['registrations_pending'] }}</small></li>
-            <li><span>Invoices Unpaid</span><small>{{ $summary['invoices_unpaid'] }}</small></li>
-            <li><span>Teacher Attendance Today</span><small>{{ $summary['teacher_attendance_today'] }}</small></li>
-            <li><span>Student Attendance Today</span><small>{{ $summary['student_attendance_today'] }}</small></li>
-            <li><span>Progress Updates Today</span><small>{{ $summary['progress_updates_today'] }}</small></li>
-            <li><span>Materials Uploaded</span><small>{{ $summary['materials_uploaded'] }}</small></li>
+<section class="chart-grid" data-searchable>
+    <x-ui.card class="card-loading" title="Revenue Trend" subtitle="Paid revenue in the last 6 months">
+        <canvas id="revenueChart" height="180"></canvas>
+    </x-ui.card>
+    <x-ui.card class="card-loading" title="Student Growth" subtitle="New students per month">
+        <canvas id="studentGrowthChart" height="180"></canvas>
+    </x-ui.card>
+    <x-ui.card class="card-loading" title="Attendance Rate" subtitle="Present + Late over total attendance">
+        <canvas id="attendanceRateChart" height="180"></canvas>
+    </x-ui.card>
+</section>
+
+<section class="split-grid-sa" data-searchable>
+    <x-ui.card class="card-loading" title="Latest Registrations" subtitle="Incoming leads from website">
+        @if ($recentRegistrations->isNotEmpty())
+            <x-ui.table :headers="['Name', 'Email', 'Status']">
+                @foreach ($recentRegistrations as $row)
+                    @php
+                        $status = strtolower($row->status ?? 'pending');
+                        $badgeType = $status === 'accepted' ? 'success' : ($status === 'rejected' ? 'danger' : 'warning');
+                    @endphp
+                    <tr>
+                        <td>{{ $row->full_name }}</td>
+                        <td>{{ $row->email }}</td>
+                        <td><x-ui.badge :type="$badgeType">{{ strtoupper($status) }}</x-ui.badge></td>
+                    </tr>
+                @endforeach
+            </x-ui.table>
+        @else
+            <x-ui.empty-state title="No registrations yet" description="New registrations will appear here when visitors submit the enrollment form." icon="user-plus" />
+        @endif
+    </x-ui.card>
+
+    <x-ui.card class="card-loading" title="Latest Payments" subtitle="Most recent finance transactions">
+        @if ($recentPayments->isNotEmpty())
+            <x-ui.table :headers="['Date', 'Student', 'Amount', 'Status']">
+                @foreach ($recentPayments as $row)
+                    @php
+                        $status = strtolower($row->status ?? 'pending');
+                        $badgeType = $status === 'paid' ? 'success' : ($status === 'failed' ? 'danger' : 'warning');
+                    @endphp
+                    <tr>
+                        <td>{{ optional($row->paid_at)->format('Y-m-d') ?? '-' }}</td>
+                        <td>{{ $row->student?->name ?? '-' }}</td>
+                        <td>Rp{{ number_format($row->amount, 0, ',', '.') }}</td>
+                        <td><x-ui.badge :type="$badgeType">{{ strtoupper($status) }}</x-ui.badge></td>
+                    </tr>
+                @endforeach
+            </x-ui.table>
+        @else
+            <x-ui.empty-state title="No payments yet" description="Recent payments will appear after finance confirms transactions." icon="wallet" />
+        @endif
+    </x-ui.card>
+</section>
+
+<section class="split-grid-sa" data-searchable>
+    <x-ui.card class="card-loading" title="Attendance Pulse" subtitle="Teacher and student attendance overview">
+        <ul class="insight-list">
+            <li>
+                <span><i data-lucide="user-check"></i> Teacher Attendance Today</span>
+                <strong>{{ $summary['teacher_attendance_today'] }}</strong>
+            </li>
+            <li>
+                <span><i data-lucide="users"></i> Student Attendance Today</span>
+                <strong>{{ $summary['student_attendance_today'] }}</strong>
+            </li>
+            <li>
+                <span><i data-lucide="clock-3"></i> Pending Registrations</span>
+                <strong>{{ $summary['registrations_pending'] }}</strong>
+            </li>
+            <li>
+                <span><i data-lucide="receipt"></i> Unpaid Invoices</span>
+                <strong>{{ $summary['invoices_unpaid'] }}</strong>
+            </li>
         </ul>
-    </article>
-    <article class="card">
-        <h3>Quick Access</h3>
-        <div class="quick-actions">
-            <a href="{{ route('super-admin.module', ['module' => 'users']) }}">User Management</a>
-            <a href="{{ route('super-admin.module', ['module' => 'registrations']) }}">Registrations</a>
-            <a href="{{ route('super-admin.module', ['module' => 'finance']) }}">Finance Summary</a>
-            <a href="{{ route('super-admin.module', ['module' => 'reports']) }}">Cross Reports</a>
-        </div>
-    </article>
-</section>
+    </x-ui.card>
 
-<section class="split-grid">
-    <article class="card">
-        <h3>Latest Registrations (Admin)</h3>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr><th>Name</th><th>Email</th><th>Status</th></tr>
-                </thead>
-                <tbody>
-                    @forelse ($recentRegistrations as $row)
-                        <tr>
-                            <td>{{ $row->full_name }}</td>
-                            <td>{{ $row->email }}</td>
-                            <td>{{ strtoupper($row->status) }}</td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="3">Belum ada data.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </article>
-    <article class="card">
-        <h3>Latest Payments (Finance)</h3>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr><th>Date</th><th>Student</th><th>Amount</th></tr>
-                </thead>
-                <tbody>
-                    @forelse ($recentPayments as $row)
-                        <tr>
-                            <td>{{ optional($row->paid_at)->format('Y-m-d') ?? '-' }}</td>
-                            <td>{{ $row->student?->name ?? '-' }}</td>
-                            <td>Rp{{ number_format($row->amount, 0, ',', '.') }}</td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="3">Belum ada data.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </article>
-</section>
-
-<section class="split-grid">
-    <article class="card">
-        <h3>Teacher Attendance (Teacher)</h3>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr><th>Date</th><th>Teacher</th><th>Status</th></tr>
-                </thead>
-                <tbody>
-                    @forelse ($recentTeacherAttendances as $row)
-                        <tr>
-                            <td>{{ optional($row->attendance_date)->format('Y-m-d') }}</td>
-                            <td>{{ $row->teacher?->name ?? '-' }}</td>
-                            <td>{{ strtoupper($row->status) }}</td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="3">Belum ada data.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </article>
-    <article class="card">
-        <h3>Student Attendance (Teacher)</h3>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr><th>Date</th><th>Class</th><th>Student</th></tr>
-                </thead>
-                <tbody>
-                    @forelse ($recentStudentAttendances as $row)
-                        <tr>
-                            <td>{{ optional($row->attendance_date)->format('Y-m-d') }}</td>
-                            <td>{{ $row->class?->name ?? '-' }}</td>
-                            <td>{{ $row->student?->name ?? '-' }}</td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="3">Belum ada data.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </article>
-</section>
-
-<section class="card">
-    <h3>Latest Progress (Teacher -> Student)</h3>
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr><th>Recorded</th><th>Student ID</th><th>Class ID</th><th>Topic</th><th>Score</th></tr>
-            </thead>
-            <tbody>
-                @forelse ($recentProgress as $row)
+    <x-ui.card class="card-loading" title="Latest Progress" subtitle="Newest coaching notes from teachers">
+        @if ($recentProgress->isNotEmpty())
+            <x-ui.table :headers="['Recorded', 'Student', 'Class', 'Topic', 'Score']">
+                @foreach ($recentProgress as $row)
                     <tr>
                         <td>{{ optional($row->recorded_at)->format('Y-m-d') ?? optional($row->created_at)->format('Y-m-d') }}</td>
-                        <td>{{ $row->student_id }}</td>
-                        <td>{{ $row->class_id }}</td>
+                        <td>#{{ $row->student_id }}</td>
+                        <td>#{{ $row->class_id }}</td>
                         <td>{{ $row->topic ?? '-' }}</td>
-                        <td>{{ $row->score ?? '-' }}</td>
+                        <td><x-ui.badge type="info">{{ $row->score ?? '-' }}</x-ui.badge></td>
                     </tr>
-                @empty
-                    <tr><td colspan="5">Belum ada data.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+                @endforeach
+            </x-ui.table>
+        @else
+            <x-ui.empty-state title="No progress records yet" description="Teacher progress logs will appear once sessions are recorded." icon="chart-line" />
+        @endif
+    </x-ui.card>
 </section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script id="dashboard-chart-data" type="application/json">@json($chartData)</script>
 @endsection
