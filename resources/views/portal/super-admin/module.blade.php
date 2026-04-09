@@ -177,6 +177,7 @@
                         <th>Jenis Kelamin</th>
                         <th>Agama</th>
                         <th>Instrument</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -189,15 +190,64 @@
                             <td>{{ $teacher->gender ?? '-' }}</td>
                             <td>{{ $teacher->religion ?? '-' }}</td>
                             <td>{{ $teacher->instrument }}</td>
+                            <td>
+                                <div class="action-icons">
+                                    <a href="{{ route('super-admin.teachers.show', $teacher) }}" title="Detail" aria-label="Detail">&#128065;</a>
+                                    <a href="{{ route('super-admin.teachers.edit', $teacher) }}" title="Edit" aria-label="Edit">&#9998;</a>
+                                    <form method="POST" action="{{ route('super-admin.teachers.destroy', $teacher) }}" onsubmit="return confirm('Hapus teacher ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" title="Hapus" aria-label="Hapus">&#128465;</button>
+                                    </form>
+                                </div>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7">Belum ada data guru.</td>
+                            <td colspan="8">Belum ada data guru.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+    </section>
+@endif
+
+@if ($moduleKey === 'classes')
+    <section class="card">
+        <details class="teacher-create" @if($errors->any()) open @endif>
+            <summary>Create Class</summary>
+            <form class="module-form teacher-create-form" method="POST" action="{{ route('super-admin.classes.store') }}">
+                @csrf
+                <label>Nama Kelas
+                    <input type="text" name="name" value="{{ old('name') }}" required>
+                </label>
+                <label>Deskripsi
+                    <textarea name="description" rows="3">{{ old('description') }}</textarea>
+                </label>
+                <label>Harga
+                    <input type="number" name="price" min="0" step="1000" value="{{ old('price', 0) }}">
+                </label>
+                <label>Jadwal
+                    <input type="text" name="schedule" value="{{ old('schedule') }}" placeholder="Contoh: Mon & Wed 16:00">
+                </label>
+                <label>Guru
+                    <select name="teacher_id">
+                        <option value="">Pilih guru (opsional)</option>
+                        @foreach ($teachersForClassOptions as $teacherOption)
+                            <option value="{{ $teacherOption->id }}" @selected((string) old('teacher_id') === (string) $teacherOption->id)>{{ $teacherOption->name }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label>Status
+                    <select name="status" required>
+                        <option value="active" @selected(old('status', 'active') === 'active')>Active</option>
+                        <option value="inactive" @selected(old('status') === 'inactive')>Inactive</option>
+                    </select>
+                </label>
+                <button type="submit">Simpan Class</button>
+            </form>
+        </details>
     </section>
 @endif
 

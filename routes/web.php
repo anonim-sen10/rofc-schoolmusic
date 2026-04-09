@@ -73,7 +73,12 @@ Route::middleware('auth')->group(function () {
 Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'role:super_admin'])->group(function () {
     Route::get('/', [SuperAdminController::class, 'dashboard'])->name('dashboard');
     Route::post('/users', [SuperAdminController::class, 'storeUser'])->name('users.store');
+    Route::post('/classes', [SuperAdminController::class, 'storeClass'])->name('classes.store');
     Route::post('/teachers', [SuperAdminController::class, 'storeTeacherAccount'])->name('teachers.store');
+    Route::get('/teachers/{teacher}/detail', [SuperAdminController::class, 'showTeacher'])->name('teachers.show');
+    Route::get('/teachers/{teacher}/edit', [SuperAdminController::class, 'editTeacher'])->name('teachers.edit');
+    Route::put('/teachers/{teacher}', [SuperAdminController::class, 'updateTeacher'])->name('teachers.update');
+    Route::delete('/teachers/{teacher}', [SuperAdminController::class, 'destroyTeacher'])->name('teachers.destroy');
     Route::get('/users/{user}/detail', [SuperAdminController::class, 'showUser'])->name('users.show');
     Route::get('/users/{user}/edit', [SuperAdminController::class, 'editUser'])->name('users.edit');
     Route::put('/users/{user}', [SuperAdminController::class, 'updateUser'])->name('users.update');

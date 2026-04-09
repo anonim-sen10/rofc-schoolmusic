@@ -134,6 +134,116 @@ class SuperAdminController extends Controller
         return back()->with('success', 'Akun teacher dan data guru berhasil dibuat.');
     }
 
+    public function showTeacher(Teacher $teacher): View
+    {
+        $teacher->load('user', 'classes');
+
+        return view('portal.super-admin.teacher-detail', [
+            'roleKey' => 'super_admin',
+            'portal' => $this->portalConfig(),
+            'teacher' => $teacher,
+        ]);
+    }
+
+    public function editTeacher(Teacher $teacher): View
+    {
+        $teacher->load('user', 'classes');
+
+        return view('portal.super-admin.teacher-edit', [
+            'roleKey' => 'super_admin',
+            'portal' => $this->portalConfig(),
+            'teacher' => $teacher,
+            'classesForTeachers' => MusicClass::query()->orderBy('name')->get(['id', 'name']),
+        ]);
+    }
+
+    public function updateTeacher(Request $request, Teacher $teacher): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'email' => ['required', 'email', 'max:120', 'unique:users,email,'.($teacher->user_id ?? 'NULL')],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'phone' => ['required', 'string', 'max:30'],
+            'address' => ['required', 'string', 'max:500'],
+            'gender' => ['required', 'in:laki-laki,perempuan'],
+            'religion' => ['required', 'string', 'max:30'],
+            'instrument' => ['nullable', 'string', 'max:80'],
+            'class_id' => ['nullable', 'integer', 'exists:classes,id'],
+            'photo' => ['nullable', 'image', 'max:2048'],
+        ]);
+
+        if ($teacher->user) {
+            $teacher->user->name = $data['name'];
+            $teacher->user->email = $data['email'];
+
+            if (! empty($data['password'])) {
+                $teacher->user->password = Hash::make($data['password']);
+            }
+
+            $teacher->user->save();
+        }
+
+        $payload = [
+            'name' => $data['name'],
+            'phone' => $data['phone'],
+            'address' => $data['address'],
+            'gender' => $data['gender'],
+            'religion' => $data['religion'],
+            'instrument' => $data['instrument'] ?? 'General',
+            'is_active' => true,
+        ];
+
+        if ($request->hasFile('photo')) {
+            $payload['photo_path'] = $request->file('photo')->store('teachers', 'public');
+        }
+
+        $teacher->update($payload);
+
+        if (! empty($data['class_id'])) {
+            MusicClass::query()->whereKey($data['class_id'])->update([
+                'teacher_id' => $teacher->id,
+            ]);
+        }
+
+        return redirect()->route('super-admin.module', ['module' => 'teachers'])->with('success', 'Data teacher berhasil diperbarui.');
+    }
+
+    public function destroyTeacher(Request $request, Teacher $teacher): RedirectResponse
+    {
+        $linkedUser = $teacher->user;
+
+        $teacher->delete();
+
+        if ($linkedUser) {
+            $linkedUser->delete();
+        }
+
+        return back()->with('success', 'Teacher berhasil dihapus.');
+    }
+
+    public function storeClass(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'description' => ['nullable', 'string'],
+            'price' => ['nullable', 'numeric', 'min:0'],
+            'schedule' => ['nullable', 'string', 'max:120'],
+            'teacher_id' => ['nullable', 'integer', 'exists:teachers,id'],
+            'status' => ['required', 'in:active,inactive'],
+        ]);
+
+        MusicClass::query()->create([
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+            'price' => $data['price'] ?? 0,
+            'schedule' => $data['schedule'] ?? null,
+            'teacher_id' => $data['teacher_id'] ?? null,
+            'status' => $data['status'],
+        ]);
+
+        return back()->with('success', 'Class berhasil ditambahkan.');
+    }
+
     public function showUser(User $user): View
     {
         $user->load('roles');
@@ -292,6 +402,7 @@ class SuperAdminController extends Controller
             'usersForRoles' => User::with('roles')->latest()->take(50)->get(),
             'classesForTeachers' => MusicClass::query()->orderBy('name')->get(['id', 'name']),
             'teachersForManagement' => Teacher::query()->with('user')->latest()->take(50)->get(),
+            'teachersForClassOptions' => Teacher::query()->orderBy('name')->get(['id', 'name']),
         ]);
     }
 
