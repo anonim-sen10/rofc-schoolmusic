@@ -137,6 +137,23 @@ class AcademicManagementController extends Controller
     {
         $registration->update($request->validated());
 
+        if ($registration->status === 'accepted') {
+            $student = Student::query()->updateOrCreate(
+                ['email' => $registration->email],
+                [
+                    'name' => $registration->full_name,
+                    'age' => $registration->age,
+                    'phone' => $registration->phone,
+                    'email' => $registration->email,
+                    'is_active' => true,
+                ]
+            );
+
+            if ($registration->class_id) {
+                $student->classes()->syncWithoutDetaching([$registration->class_id]);
+            }
+        }
+
         return back()->with('success', 'Status pendaftaran berhasil diperbarui.');
     }
 }
