@@ -349,6 +349,27 @@ th {
     margin: 0;
 }
 
+.teacher-create summary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.65rem;
+    padding: 0.6rem 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--gold), #e6cb9f);
+    color: #111;
+    list-style: none;
+}
+
+.teacher-create summary::-webkit-details-marker {
+    display: none;
+}
+
+.teacher-create-form {
+    margin-top: 0.9rem;
+}
+
 .portal-footer {
     padding: 1rem 1.2rem;
     display: flex;

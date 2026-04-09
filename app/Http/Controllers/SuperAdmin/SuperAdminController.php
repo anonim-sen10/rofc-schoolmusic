@@ -94,8 +94,6 @@ class SuperAdminController extends Controller
             'gender' => ['required', 'in:laki-laki,perempuan'],
             'religion' => ['required', 'string', 'max:30'],
             'instrument' => ['nullable', 'string', 'max:80'],
-            'bio' => ['nullable', 'string'],
-            'experience' => ['nullable', 'string', 'max:80'],
             'class_id' => ['nullable', 'integer', 'exists:classes,id'],
             'photo' => ['nullable', 'image', 'max:2048'],
         ]);
@@ -118,8 +116,6 @@ class SuperAdminController extends Controller
             'gender' => $data['gender'],
             'religion' => $data['religion'],
             'instrument' => $data['instrument'] ?? 'General',
-            'bio' => $data['bio'] ?? null,
-            'experience' => $data['experience'] ?? null,
             'is_active' => true,
         ];
 
