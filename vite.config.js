@@ -5,6 +5,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
     plugins: [
         laravel({
+            hotFile: "storage/framework/vite.hot",
             input: [
                 "resources/css/app.css",
                 "resources/css/portal.css",

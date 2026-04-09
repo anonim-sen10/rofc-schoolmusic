@@ -30,6 +30,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           port: ${{ secrets.SERVER_PORT }}
+          timeout: 120s
+          command_timeout: 30m
           script_stop: true
           envs: DEPLOY_BRANCH,SERVER_APP_DIR
           script: |
@@ -45,6 +47,7 @@ jobs:
 
             # Force production to use built assets, never Vite dev server.
             rm -f public/hot
+            rm -f storage/framework/vite.hot
 
             composer install --no-dev --optimize-autoloader --no-interaction
 
