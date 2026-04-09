@@ -377,11 +377,9 @@ th {
 }
 
 .action-popover-form {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 0.45rem);
-    z-index: 40;
-    width: min(420px, calc(100vw - 3.5rem));
+    position: static;
+    margin-top: 0.5rem;
+    width: min(420px, calc(100vw - 4rem));
     padding: 0.85rem;
     border: 1px solid var(--line);
     border-radius: 0.75rem;
@@ -403,6 +401,8 @@ th {
 
 .class-action-icons {
     justify-content: flex-start;
+    align-items: flex-start;
+    flex-wrap: wrap;
 }
 
 .teacher-create summary {
