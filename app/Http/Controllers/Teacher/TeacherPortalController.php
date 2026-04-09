@@ -12,10 +12,27 @@ use App\Models\Teacher;
 use App\Models\TeacherAttendance;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class TeacherPortalController extends Controller
 {
+    private function hasAssignmentStatusColumn(): bool
+    {
+        return Schema::hasColumn('classes', 'assignment_status');
+    }
+
+    private function teacherAcceptedClassesQuery(int $teacherId)
+    {
+        $query = MusicClass::query()->where('teacher_id', $teacherId);
+
+        if ($this->hasAssignmentStatusColumn()) {
+            $query->where('assignment_status', 'accepted');
+        }
+
+        return $query;
+    }
+
     private function teacherFromUser(int $userId): Teacher
     {
         return Teacher::firstOrCreate(
@@ -27,7 +44,7 @@ class TeacherPortalController extends Controller
     public function dashboard(Request $request): View
     {
         $teacher = $this->teacherFromUser($request->user()->id);
-        $classIds = $teacher->classes()->where('assignment_status', 'accepted')->pluck('id');
+        $classIds = $this->teacherAcceptedClassesQuery($teacher->id)->pluck('id');
 
         return view('portal.teacher.dashboard', [
             'teacher' => $teacher,
@@ -41,7 +58,7 @@ class TeacherPortalController extends Controller
     public function attendance(Request $request): View
     {
         $teacher = $this->teacherFromUser($request->user()->id);
-        $classes = MusicClass::where('teacher_id', $teacher->id)->where('assignment_status', 'accepted')->get();
+        $classes = $this->teacherAcceptedClassesQuery($teacher->id)->get();
         $today = now()->toDateString();
         $hasTeacherAttendanceToday = TeacherAttendance::query()
             ->where('teacher_id', $teacher->id)
@@ -63,8 +80,7 @@ class TeacherPortalController extends Controller
     public function storeAttendance(Request $request): RedirectResponse
     {
         $teacher = $this->teacherFromUser($request->user()->id);
-        $teacherClassIds = MusicClass::query()->where('teacher_id', $teacher->id)->pluck('id');
-        $teacherClassIds = MusicClass::query()->where('teacher_id', $teacher->id)->where('assignment_status', 'accepted')->pluck('id');
+        $teacherClassIds = $this->teacherAcceptedClassesQuery($teacher->id)->pluck('id');
 
         if ($teacherClassIds->isEmpty()) {
             return back()->withErrors([
@@ -83,8 +99,15 @@ class TeacherPortalController extends Controller
         $class = MusicClass::query()
             ->where('id', $data['class_id'])
             ->where('teacher_id', $teacher->id)
-            ->where('assignment_status', 'accepted')
             ->first();
+
+        if ($this->hasAssignmentStatusColumn()) {
+            $class = MusicClass::query()
+                ->where('id', $data['class_id'])
+                ->where('teacher_id', $teacher->id)
+                ->where('assignment_status', 'accepted')
+                ->first();
+        }
 
         if (! $class) {
             return back()->withErrors([
@@ -151,7 +174,7 @@ class TeacherPortalController extends Controller
     public function progress(Request $request): View
     {
         $teacher = $this->teacherFromUser($request->user()->id);
-        $classes = MusicClass::where('teacher_id', $teacher->id)->where('assignment_status', 'accepted')->get();
+        $classes = $this->teacherAcceptedClassesQuery($teacher->id)->get();
 
         return view('portal.teacher.progress', [
             'teacher' => $teacher,
@@ -186,7 +209,7 @@ class TeacherPortalController extends Controller
 
         return view('portal.teacher.materials', [
             'teacher' => $teacher,
-            'classes' => MusicClass::where('teacher_id', $teacher->id)->where('assignment_status', 'accepted')->get(),
+            'classes' => $this->teacherAcceptedClassesQuery($teacher->id)->get(),
             'materials' => Material::where('teacher_id', $teacher->id)->latest()->get(),
         ]);
     }
@@ -204,6 +227,12 @@ class TeacherPortalController extends Controller
     public function respondSchedule(Request $request, MusicClass $class): RedirectResponse
     {
         $teacher = $this->teacherFromUser($request->user()->id);
+
+        if (! $this->hasAssignmentStatusColumn()) {
+            return back()->withErrors([
+                'schedule' => 'Fitur respon jadwal belum aktif karena database belum di-migrate. Jalankan php artisan migrate terlebih dahulu.',
+            ]);
+        }
 
         if ((int) $class->teacher_id !== (int) $teacher->id) {
             abort(403, 'Jadwal ini bukan untuk teacher yang sedang login.');
