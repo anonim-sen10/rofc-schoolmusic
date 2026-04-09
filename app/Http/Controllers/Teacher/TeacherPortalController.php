@@ -44,7 +44,8 @@ class TeacherPortalController extends Controller
     public function dashboard(Request $request): View
     {
         $teacher = $this->teacherFromUser($request->user()->id);
-        $classIds = $this->teacherAcceptedClassesQuery($teacher->id)->pluck('id');
+        $acceptedClasses = $this->teacherAcceptedClassesQuery($teacher->id)->orderBy('name')->get(['id', 'name', 'schedule']);
+        $classIds = $acceptedClasses->pluck('id');
 
         return view('portal.teacher.dashboard', [
             'teacher' => $teacher,
@@ -52,6 +53,9 @@ class TeacherPortalController extends Controller
             'studentCount' => Student::whereHas('classes', fn ($q) => $q->whereIn('classes.id', $classIds))->count(),
             'attendanceCount' => Attendance::where('teacher_id', $teacher->id)->whereDate('attendance_date', now()->toDateString())->count() + TeacherAttendance::where('teacher_id', $teacher->id)->whereDate('attendance_date', now()->toDateString())->count(),
             'progressCount' => StudentProgress::where('teacher_id', $teacher->id)->count(),
+            'assignedClasses' => $acceptedClasses,
+            'latestProgress' => StudentProgress::with('student:id,name')->where('teacher_id', $teacher->id)->latest()->take(5)->get(),
+            'hasTeacherAttendanceToday' => TeacherAttendance::query()->where('teacher_id', $teacher->id)->whereDate('attendance_date', now()->toDateString())->exists(),
         ]);
     }
 

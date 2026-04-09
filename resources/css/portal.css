@@ -1,3 +1,6 @@
+@import "tailwindcss/theme";
+@import "tailwindcss/utilities";
+
 :root {
     --bg: #0f172a;
     --bg-2: #0b1220;
@@ -10,6 +13,7 @@
     --warning: #f59e0b;
     --danger: #ef4444;
     --gold: #d2ab63;
+    --portal-header-height: 68px;
 }
 
 * {
@@ -254,40 +258,41 @@ html.sidebar-collapsed .portal-menu a[data-tooltip]:hover::after {
 
 .portal-main {
     display: grid;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: 1fr auto;
+    min-height: 100vh;
 }
 
 .portal-topbar {
-    position: sticky;
+    position: fixed;
     top: 0;
-    z-index: 20;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    padding: 0.85rem 1.2rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(7px);
-    background: rgba(15, 23, 42, 0.82);
+    left: 270px;
+    right: 0;
+    z-index: 40;
+    transition: transform 0.28s ease;
+    will-change: transform;
+}
+
+html.sidebar-collapsed .portal-topbar {
+    left: 88px;
+}
+
+.portal-topbar.portal-topbar--hidden {
+    transform: translateY(calc(-1 * var(--portal-header-height) - 8px));
 }
 
 .topbar-left {
     display: flex;
     align-items: center;
-    min-height: 0;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-    padding-right: 0.2rem;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(99, 102, 241, 0.45) transparent;
+    min-width: 0;
+    gap: 0.75rem;
 }
 
 .topbar-tools {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+    flex-wrap: wrap;
     gap: 0.55rem;
 }
 
@@ -431,7 +436,7 @@ html.sidebar-collapsed .portal-menu a[data-tooltip]:hover::after {
 }
 
 .portal-content {
-    padding: 1.2rem;
+    padding: calc(var(--portal-header-height) + 0.85rem) 1.2rem 1.2rem;
 }
 
 .dashboard-hero {
@@ -1069,6 +1074,12 @@ th {
         z-index: 30;
     }
 
+    .portal-topbar {
+        left: 0;
+        right: 0;
+        width: 100%;
+    }
+
     .portal-sidebar.open {
         transform: translateX(0);
     }
@@ -1105,9 +1116,8 @@ th {
         flex-direction: column;
     }
 
-    .portal-topbar {
-        align-items: start;
-        flex-direction: column;
+    .portal-content {
+        padding: calc(var(--portal-header-height) + 0.75rem) 1rem 1rem;
     }
 
     .user-box {

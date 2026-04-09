@@ -2,6 +2,78 @@
 @extends('portal.layouts.app')
 @section('title','Teacher Dashboard')
 @section('page-title','Teacher Dashboard')
+@section('page-subtitle', 'ROFC School Music Management Information System - Teacher Workspace')
 @section('content')
-<section class="stats-grid"><article class="card stat"><p>My Classes</p><h2>{{ $classCount }}</h2></article><article class="card stat"><p>My Students</p><h2>{{ $studentCount }}</h2></article><article class="card stat"><p>Attendance Today</p><h2>{{ $attendanceCount }}</h2></article><article class="card stat"><p>Progress Notes</p><h2>{{ $progressCount }}</h2></article></section>
+<section class="dashboard-hero" data-searchable>
+	<div>
+		<p class="eyebrow">Teaching Snapshot</p>
+		<h2>Teacher Dashboard</h2>
+		<p>Selamat datang, {{ $teacher->name }}. Pantau kelas aktif, absensi harian, dan progres siswa secara cepat.</p>
+	</div>
+	<div class="hero-actions">
+		<a href="{{ route('teacher.attendance.index') }}" class="ghost-btn">Input Attendance</a>
+		<a href="{{ route('teacher.student-progress.index') }}" class="ghost-btn">Update Progress</a>
+	</div>
+</section>
+
+<section class="kpi-grid" data-searchable>
+	<x-ui.card title="My Classes">
+		<div class="kpi-row">
+			<div class="kpi-value">{{ $classCount }}</div>
+			<span class="kpi-icon"><i data-lucide="book-open"></i></span>
+		</div>
+	</x-ui.card>
+	<x-ui.card title="My Students">
+		<div class="kpi-row">
+			<div class="kpi-value">{{ $studentCount }}</div>
+			<span class="kpi-icon"><i data-lucide="graduation-cap"></i></span>
+		</div>
+	</x-ui.card>
+	<x-ui.card title="Attendance Today">
+		<div class="kpi-row">
+			<div class="kpi-value">{{ $attendanceCount }}</div>
+			<span class="kpi-icon"><i data-lucide="user-check"></i></span>
+		</div>
+	</x-ui.card>
+	<x-ui.card title="Progress Notes">
+		<div class="kpi-row">
+			<div class="kpi-value">{{ $progressCount }}</div>
+			<span class="kpi-icon"><i data-lucide="notebook-pen"></i></span>
+		</div>
+	</x-ui.card>
+</section>
+
+<section class="split-grid-sa" data-searchable>
+	<x-ui.card title="Assigned Classes" subtitle="Kelas yang sudah di-assign dan accepted">
+		@if ($assignedClasses->isNotEmpty())
+			<ul class="insight-list">
+				@foreach ($assignedClasses as $class)
+					<li>
+						<span><i data-lucide="music-2"></i>{{ $class->name }}</span>
+						<strong>{{ $class->schedule ?: '-' }}</strong>
+					</li>
+				@endforeach
+			</ul>
+		@else
+			<x-ui.empty-state title="No class assignment" description="Belum ada kelas yang di-assign ke akun teacher ini." icon="calendar-x" />
+		@endif
+	</x-ui.card>
+
+	<x-ui.card title="Teaching Status" subtitle="Ringkasan aktivitas pengajaran">
+		<ul class="insight-list">
+			<li>
+				<span><i data-lucide="badge-check"></i>Teacher Attendance</span>
+				<x-ui.badge :type="$hasTeacherAttendanceToday ? 'success' : 'warning'">{{ $hasTeacherAttendanceToday ? 'DONE' : 'PENDING' }}</x-ui.badge>
+			</li>
+			<li>
+				<span><i data-lucide="clipboard-list"></i>Latest Progress Records</span>
+				<strong>{{ $latestProgress->count() }}</strong>
+			</li>
+			<li>
+				<span><i data-lucide="folder-open"></i>Learning Materials</span>
+				<a href="{{ route('teacher.materials.index') }}" class="ghost-btn">Open</a>
+			</li>
+		</ul>
+	</x-ui.card>
+</section>
 @endsection

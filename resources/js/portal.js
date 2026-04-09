@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const sidebar = document.querySelector("[data-portal-sidebar]");
     const toggle = document.querySelector("[data-portal-toggle]");
+    const header = document.querySelector("[data-portal-header]");
     const root = document.documentElement;
     const searchInput = document.querySelector("[data-global-search]");
 
@@ -53,6 +54,51 @@ document.addEventListener("DOMContentLoaded", () => {
                 block.style.display =
                     keyword === "" || text.includes(keyword) ? "" : "none";
             });
+        });
+    }
+
+    if (header) {
+        let lastScrollY = window.scrollY;
+        let ticking = false;
+
+        const setHeaderHeight = () => {
+            root.style.setProperty(
+                "--portal-header-height",
+                `${header.offsetHeight}px`,
+            );
+        };
+
+        const syncHeaderVisibility = () => {
+            const currentY = window.scrollY;
+            const threshold = 10;
+            const minDelta = 8;
+
+            if (currentY <= threshold) {
+                header.classList.remove("portal-topbar--hidden");
+                lastScrollY = currentY;
+                ticking = false;
+                return;
+            }
+
+            if (currentY > lastScrollY + minDelta) {
+                header.classList.add("portal-topbar--hidden");
+            } else if (currentY < lastScrollY - minDelta) {
+                header.classList.remove("portal-topbar--hidden");
+            }
+
+            lastScrollY = currentY;
+            ticking = false;
+        };
+
+        setHeaderHeight();
+
+        window.addEventListener("resize", setHeaderHeight);
+
+        window.addEventListener("scroll", () => {
+            if (!ticking) {
+                window.requestAnimationFrame(syncHeaderVisibility);
+                ticking = true;
+            }
         });
     }
 

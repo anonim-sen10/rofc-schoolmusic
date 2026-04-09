@@ -14,11 +14,78 @@ $homeRoute = route('finance.dashboard');
 @extends('portal.layouts.app')
 @section('title', 'Finance Dashboard')
 @section('page-title', 'Finance Overview')
+@section('page-subtitle', 'ROFC School Music Management Information System - Finance Operations')
 @section('content')
-<section class="stats-grid">
-    <article class="card stat"><p>Total Invoices</p><h2>{{ $invoiceCount }}</h2></article>
-    <article class="card stat"><p>Total Paid</p><h2>Rp{{ number_format($paymentTotal,0,',','.') }}</h2></article>
-    <article class="card stat"><p>Total Expense</p><h2>Rp{{ number_format($expenseTotal,0,',','.') }}</h2></article>
-    <article class="card stat"><p>Total Salary</p><h2>Rp{{ number_format($salaryTotal,0,',','.') }}</h2></article>
+<section class="dashboard-hero" data-searchable>
+    <div>
+        <p class="eyebrow">Financial Snapshot</p>
+        <h2>Finance Dashboard</h2>
+        <p>Pantau pemasukan, biaya operasional, dan posisi kas bersih dalam satu tampilan konsisten.</p>
+    </div>
+    <div class="hero-actions">
+        <a href="{{ route('finance.invoices.index') }}" class="ghost-btn">Manage Invoices</a>
+        <a href="{{ route('finance.reports.index') }}" class="ghost-btn">Open Reports</a>
+    </div>
+</section>
+
+<section class="kpi-grid" data-searchable>
+    <x-ui.card title="Total Invoices">
+        <div class="kpi-row">
+            <div class="kpi-value">{{ $invoiceCount }}</div>
+            <span class="kpi-icon"><i data-lucide="receipt"></i></span>
+        </div>
+    </x-ui.card>
+    <x-ui.card title="Total Paid">
+        <div class="kpi-row">
+            <div class="kpi-value">Rp{{ number_format($paymentTotal, 0, ',', '.') }}</div>
+            <span class="kpi-icon"><i data-lucide="wallet"></i></span>
+        </div>
+    </x-ui.card>
+    <x-ui.card title="Total Expense">
+        <div class="kpi-row">
+            <div class="kpi-value">Rp{{ number_format($expenseTotal, 0, ',', '.') }}</div>
+            <span class="kpi-icon"><i data-lucide="hand-coins"></i></span>
+        </div>
+    </x-ui.card>
+    <x-ui.card title="Net Balance">
+        <div class="kpi-row">
+            <div class="kpi-value">Rp{{ number_format($netBalance, 0, ',', '.') }}</div>
+            <span class="kpi-icon"><i data-lucide="scale"></i></span>
+        </div>
+    </x-ui.card>
+</section>
+
+<section class="split-grid-sa" data-searchable>
+    <x-ui.card title="Invoice Health" subtitle="Status invoice saat ini">
+        <ul class="insight-list">
+            <li>
+                <span><i data-lucide="clock-3"></i>Pending / Unpaid</span>
+                <x-ui.badge type="warning">{{ $pendingInvoiceCount }}</x-ui.badge>
+            </li>
+            <li>
+                <span><i data-lucide="badge-check"></i>Paid Invoices</span>
+                <x-ui.badge type="success">{{ $paidInvoiceCount }}</x-ui.badge>
+            </li>
+            <li>
+                <span><i data-lucide="banknote"></i>Teacher Salary</span>
+                <strong>Rp{{ number_format($salaryTotal, 0, ',', '.') }}</strong>
+            </li>
+        </ul>
+    </x-ui.card>
+
+    <x-ui.card title="Recent Payments" subtitle="Transaksi pembayaran terbaru">
+        @if ($recentPayments->isNotEmpty())
+            <ul class="insight-list">
+                @foreach ($recentPayments as $payment)
+                    <li>
+                        <span><i data-lucide="arrow-down-circle"></i>{{ $payment->student?->name ?? 'General Payment' }}</span>
+                        <strong>Rp{{ number_format($payment->amount, 0, ',', '.') }}</strong>
+                    </li>
+                @endforeach
+            </ul>
+        @else
+            <x-ui.empty-state title="No payments yet" description="Transaksi pembayaran akan tampil di sini setelah data dibuat." icon="wallet" />
+        @endif
+    </x-ui.card>
 </section>
 @endsection

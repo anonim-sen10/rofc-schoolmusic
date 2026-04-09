@@ -2,6 +2,7 @@
     $resolvedRoleKey = $roleKey ?? (auth()->user()->primaryRole() ?? 'custom_role');
     $resolvedPanelTitle = $panelTitle ?? ($portal['title'] ?? 'ROFC Portal');
     $resolvedHomeRoute = $homeRoute ?? (($portal['prefix'] ?? null) ? route($portal['prefix'].'.dashboard') : route('portal.redirect'));
+    $userName = auth()->user()?->name ?? 'User';
     $legacyMenuItems = $menuItems ?? [];
     $roleLabel = strtoupper(str_replace('_', ' ', $resolvedRoleKey));
     $notifCount = $summary['registrations_pending'] ?? 0;
@@ -36,6 +37,7 @@
             'icon' => $item['icon'] ?? ($iconMap[$key] ?? 'circle'),
         ];
     });
+
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -70,54 +72,14 @@
         </aside>
 
         <div class="portal-main">
-            <header class="portal-topbar">
-                <div class="topbar-left">
-                    <button type="button" class="toggle" data-portal-toggle aria-label="Toggle sidebar">
-                        <i data-lucide="panel-left"></i>
-                    </button>
-                    <div>
-                        <p class="muted">ROFC School Music Management Information System</p>
-                        <h1>@yield('page-title')</h1>
-                    </div>
-                </div>
-
-                <div class="topbar-tools">
-                    <label class="global-search" title="Search in current page">
-                        <i data-lucide="search"></i>
-                        <input type="search" placeholder="Search in dashboard..." data-global-search>
-                    </label>
-
-                    @if (in_array($resolvedRoleKey, ['admin', 'super_admin'], true))
-                        @if (Route::has('admin.students.index'))
-                            <a href="{{ route('admin.students.index') }}" class="quick-btn" title="Open students">
-                                <i data-lucide="user-plus"></i>
-                                <span>Students</span>
-                            </a>
-                        @endif
-                        @if (Route::has('admin.classes.index'))
-                            <a href="{{ route('admin.classes.index') }}" class="quick-btn" title="Open classes">
-                                <i data-lucide="plus-circle"></i>
-                                <span>Classes</span>
-                            </a>
-                        @endif
-                    @endif
-
-                    <button type="button" class="icon-btn" title="Notifications" aria-label="Notifications">
-                        <i data-lucide="bell"></i>
-                        @if ($notifCount > 0)
-                            <span class="notif-dot">{{ $notifCount > 9 ? '9+' : $notifCount }}</span>
-                        @endif
-                    </button>
-
-                    <div class="user-box">
-                        <span class="avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
-                        <span>
-                            <strong>{{ auth()->user()->name }}</strong>
-                            <small>{{ $roleLabel }}</small>
-                        </span>
-                    </div>
-                </div>
-            </header>
+            <x-portal.dashboard-header
+                :title="trim($__env->yieldContent('page-title')) ?: 'Dashboard'"
+                :subtitle="trim($__env->yieldContent('page-subtitle')) ?: 'ROFC School Music Management Information System'"
+                search-placeholder="Search in dashboard..."
+                :user-name="$userName"
+                :role-label="$roleLabel"
+                :notification-count="$notifCount"
+            />
 
             <main class="portal-content">
                 @if (session('success'))

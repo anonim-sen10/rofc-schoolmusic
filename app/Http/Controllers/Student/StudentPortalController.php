@@ -25,10 +25,12 @@ class StudentPortalController extends Controller
     public function dashboard(Request $request): View
     {
         $student = $this->studentFromUser($request->user()->id, $request->user()->name, $request->user()->email);
+        $classes = $student->classes()->with('teacher:id,name')->get();
 
         return view('portal.student.dashboard', [
             'student' => $student,
-            'classCount' => $student->classes()->count(),
+            'classCount' => $classes->count(),
+            'classes' => $classes,
             'payments' => Payment::where('student_id', $student->id)->latest()->take(5)->get(),
             'progress' => StudentProgress::where('student_id', $student->id)->latest()->take(5)->get(),
         ]);

@@ -2,6 +2,7 @@
 
 @section('title', 'Super Admin Dashboard | ROFC')
 @section('page-title', 'Super Admin Data Center')
+@section('page-subtitle', 'ROFC School Music Management Information System - Super Admin Control')
 
 @section('content')
 <section class="dashboard-hero" data-searchable>
