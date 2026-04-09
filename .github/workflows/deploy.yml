@@ -40,7 +40,15 @@ jobs:
             git fetch origin "$BRANCH"
             git reset --hard "origin/$BRANCH"
 
+            # Force production to use built assets, never Vite dev server.
+            rm -f public/hot
+
             composer install --no-dev --optimize-autoloader --no-interaction
+
+            if command -v npm >/dev/null 2>&1; then
+              npm ci
+              npm run build
+            fi
 
             php artisan optimize:clear
 
