@@ -26,6 +26,14 @@ use Illuminate\View\View;
 
 class SuperAdminController extends Controller
 {
+    private const TEACHER_CLASS_OPTIONS = [
+        'drum' => 'Drum',
+        'gitar' => 'Gitar',
+        'vocal' => 'Vocal',
+        'violin' => 'Violin',
+        'piano' => 'Piano',
+    ];
+
     private const CORE_ROLES = [
         'super_admin' => ['name' => 'Super Admin', 'description' => 'Akses penuh ke seluruh sistem.'],
         'admin' => ['name' => 'Admin', 'description' => 'Operasional akademik dan konten website.'],
@@ -93,8 +101,7 @@ class SuperAdminController extends Controller
             'address' => ['required', 'string', 'max:500'],
             'gender' => ['required', 'in:laki-laki,perempuan'],
             'religion' => ['required', 'string', 'max:30'],
-            'instrument' => ['nullable', 'string', 'max:80'],
-            'class_id' => ['nullable', 'integer', 'exists:classes,id'],
+            'class_name' => ['required', 'in:drum,gitar,vocal,violin,piano'],
             'photo' => ['nullable', 'image', 'max:2048'],
         ]);
 
@@ -108,6 +115,8 @@ class SuperAdminController extends Controller
 
         $user->roles()->sync([$role->id]);
 
+        $selectedClassName = self::TEACHER_CLASS_OPTIONS[$data['class_name']];
+
         $payload = [
             'user_id' => $user->id,
             'name' => $data['name'],
@@ -115,7 +124,7 @@ class SuperAdminController extends Controller
             'address' => $data['address'],
             'gender' => $data['gender'],
             'religion' => $data['religion'],
-            'instrument' => $data['instrument'] ?? 'General',
+            'instrument' => $selectedClassName,
             'is_active' => true,
         ];
 
@@ -125,11 +134,17 @@ class SuperAdminController extends Controller
 
         $teacher = Teacher::query()->create($payload);
 
-        if (! empty($data['class_id'])) {
-            MusicClass::query()->whereKey($data['class_id'])->update([
-                'teacher_id' => $teacher->id,
-            ]);
-        }
+        $class = MusicClass::query()->firstOrCreate(
+            ['name' => $selectedClassName],
+            [
+                'description' => 'Kelas '.$selectedClassName,
+                'price' => 0,
+                'schedule' => null,
+                'status' => 'active',
+            ]
+        );
+
+        $class->update(['teacher_id' => $teacher->id]);
 
         return back()->with('success', 'Akun teacher dan data guru berhasil dibuat.');
     }
@@ -400,8 +415,8 @@ class SuperAdminController extends Controller
             'columns' => $moduleData['columns'],
             'rows' => $moduleData['rows'],
             'usersForRoles' => User::with('roles')->latest()->take(50)->get(),
-            'classesForTeachers' => MusicClass::query()->orderBy('name')->get(['id', 'name']),
-            'teachersForManagement' => Teacher::query()->with('user')->latest()->take(50)->get(),
+            'classTypeOptions' => self::TEACHER_CLASS_OPTIONS,
+            'teachersForManagement' => Teacher::query()->with(['user', 'classes'])->latest()->take(50)->get(),
             'teachersForClassOptions' => Teacher::query()->orderBy('name')->get(['id', 'name']),
         ]);
     }

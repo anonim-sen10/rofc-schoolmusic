@@ -139,14 +139,11 @@
                 <label>Agama
                     <input type="text" name="religion" value="{{ old('religion') }}" required>
                 </label>
-                <label>Instrument
-                    <input type="text" name="instrument" value="{{ old('instrument') }}" placeholder="Drum, Piano, Guitar, dll">
-                </label>
                 <label>Class
-                    <select name="class_id">
-                        <option value="">Pilih class (opsional)</option>
-                        @foreach ($classesForTeachers as $class)
-                            <option value="{{ $class->id }}" @selected((string) old('class_id') === (string) $class->id)>{{ $class->name }}</option>
+                    <select name="class_name" required>
+                        <option value="">Pilih class</option>
+                        @foreach ($classTypeOptions as $classKey => $classLabel)
+                            <option value="{{ $classKey }}" @selected(old('class_name') === $classKey)>{{ $classLabel }}</option>
                         @endforeach
                     </select>
                 </label>
@@ -176,7 +173,7 @@
                         <th>Alamat</th>
                         <th>Jenis Kelamin</th>
                         <th>Agama</th>
-                        <th>Instrument</th>
+                        <th>Class</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -189,7 +186,7 @@
                             <td>{{ $teacher->address ?? '-' }}</td>
                             <td>{{ $teacher->gender ?? '-' }}</td>
                             <td>{{ $teacher->religion ?? '-' }}</td>
-                            <td>{{ $teacher->instrument }}</td>
+                            <td>{{ $teacher->classes->pluck('name')->implode(', ') ?: '-' }}</td>
                             <td>
                                 <div class="action-icons">
                                     <a href="{{ route('super-admin.teachers.show', $teacher) }}" title="Detail" aria-label="Detail">&#128065;</a>
