@@ -438,47 +438,62 @@
 
 @if ($moduleKey === 'registrations')
     <section class="card" data-searchable>
-        <h3>Create Registration</h3>
-        <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.registrations.store') }}">
-            @csrf
-            <label>Nama
-                <input type="text" name="full_name" value="{{ old('full_name') }}" required>
-            </label>
-            <label>Umur
-                <input type="number" name="age" min="4" max="80" value="{{ old('age') }}" required>
-            </label>
-            <label>Email
-                <input type="email" name="email" value="{{ old('email') }}" required>
-            </label>
-            <label>Telepon
-                <input type="text" name="phone" value="{{ old('phone') }}" required>
-            </label>
-            <label>Kelas
-                <select name="class_id">
-                    <option value="">Pilih kelas</option>
-                    @foreach($classesForManagement as $classItem)
-                        <option value="{{ $classItem->id }}" @selected((string) old('class_id') === (string) $classItem->id)>{{ $classItem->name }}</option>
-                    @endforeach
-                </select>
-            </label>
-            <label>Preferensi Jadwal
-                <input type="text" name="preferred_schedule" value="{{ old('preferred_schedule') }}" required>
-            </label>
-            <label>Status
-                <select name="status" required>
-                    <option value="pending" @selected(old('status', 'pending') === 'pending')>pending</option>
-                    <option value="accepted" @selected(old('status') === 'accepted')>accepted</option>
-                    <option value="rejected" @selected(old('status') === 'rejected')>rejected</option>
-                </select>
-            </label>
-            <label>Catatan
-                <textarea name="notes" rows="2">{{ old('notes') }}</textarea>
-            </label>
-            <div class="form-actions">
-                <button type="submit">Simpan Registration</button>
-                <button type="reset" class="btn-secondary">Cancel</button>
-            </div>
-        </form>
+        @php
+            $openRegistrationCreate = $errors->hasAny([
+                'full_name',
+                'age',
+                'email',
+                'phone',
+                'class_id',
+                'preferred_schedule',
+                'status',
+                'notes',
+            ]);
+        @endphp
+
+        <details class="teacher-create" @if($openRegistrationCreate) open @endif>
+            <summary>Create Registration</summary>
+            <form class="module-form module-form-grid teacher-create-form" method="POST" action="{{ route('super-admin.registrations.store') }}">
+                @csrf
+                <label>Nama
+                    <input type="text" name="full_name" value="{{ old('full_name') }}" required>
+                </label>
+                <label>Umur
+                    <input type="number" name="age" min="4" max="80" value="{{ old('age') }}" required>
+                </label>
+                <label>Email
+                    <input type="email" name="email" value="{{ old('email') }}" required>
+                </label>
+                <label>Telepon
+                    <input type="text" name="phone" value="{{ old('phone') }}" required>
+                </label>
+                <label>Kelas
+                    <select name="class_id">
+                        <option value="">Pilih kelas</option>
+                        @foreach($classesForManagement as $classItem)
+                            <option value="{{ $classItem->id }}" @selected((string) old('class_id') === (string) $classItem->id)>{{ $classItem->name }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label>Preferensi Jadwal
+                    <input type="text" name="preferred_schedule" value="{{ old('preferred_schedule') }}" required>
+                </label>
+                <label>Status
+                    <select name="status" required>
+                        <option value="pending" @selected(old('status', 'pending') === 'pending')>pending</option>
+                        <option value="accepted" @selected(old('status') === 'accepted')>accepted</option>
+                        <option value="rejected" @selected(old('status') === 'rejected')>rejected</option>
+                    </select>
+                </label>
+                <label>Catatan
+                    <textarea name="notes" rows="2">{{ old('notes') }}</textarea>
+                </label>
+                <div class="form-actions">
+                    <button type="submit">Simpan Registration</button>
+                    <button type="reset" class="btn-secondary">Cancel</button>
+                </div>
+            </form>
+        </details>
     </section>
 
     <section class="card" data-searchable>
@@ -490,64 +505,79 @@
                         <th>Nama</th>
                         <th>Email</th>
                         <th>Telepon</th>
+                        <th>Kelas</th>
+                        <th>Preferensi Jadwal</th>
                         <th>Status</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($registrationsForManagement as $registrationItem)
+                        @php
+                            $registrationStatus = strtolower((string) $registrationItem->status);
+                            $registrationBadge = $registrationStatus === 'accepted' ? 'success' : ($registrationStatus === 'rejected' ? 'danger' : 'warning');
+                        @endphp
                         <tr>
-                            <td colspan="5">
-                                <form class="module-form" method="POST" action="{{ route('super-admin.registrations.update', $registrationItem) }}">
-                                    @csrf
-                                    @method('PUT')
-                                    <label>Nama
-                                        <input type="text" name="full_name" value="{{ $registrationItem->full_name }}" required>
-                                    </label>
-                                    <label>Umur
-                                        <input type="number" name="age" min="4" max="80" value="{{ $registrationItem->age }}" required>
-                                    </label>
-                                    <label>Email
-                                        <input type="email" name="email" value="{{ $registrationItem->email }}" required>
-                                    </label>
-                                    <label>Telepon
-                                        <input type="text" name="phone" value="{{ $registrationItem->phone }}" required>
-                                    </label>
-                                    <label>Kelas
-                                        <select name="class_id">
-                                            <option value="">Pilih kelas</option>
-                                            @foreach($classesForManagement as $classItem)
-                                                <option value="{{ $classItem->id }}" @selected((int) $registrationItem->class_id === (int) $classItem->id)>{{ $classItem->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </label>
-                                    <label>Preferensi Jadwal
-                                        <input type="text" name="preferred_schedule" value="{{ $registrationItem->preferred_schedule }}" required>
-                                    </label>
-                                    <label>Status
-                                        <select name="status" required>
-                                            <option value="pending" @selected($registrationItem->status === 'pending')>pending</option>
-                                            <option value="accepted" @selected($registrationItem->status === 'accepted')>accepted</option>
-                                            <option value="rejected" @selected($registrationItem->status === 'rejected')>rejected</option>
-                                        </select>
-                                    </label>
-                                    <label>Catatan
-                                        <textarea name="notes" rows="2">{{ $registrationItem->notes }}</textarea>
-                                    </label>
-                                    <div class="action-icons">
-                                        <button type="submit">Update</button>
-                                    </div>
-                                </form>
-                                <form method="POST" action="{{ route('super-admin.registrations.destroy', $registrationItem) }}" onsubmit="return confirm('Hapus registration ini?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit">Hapus</button>
-                                </form>
+                            <td>{{ $registrationItem->full_name }}</td>
+                            <td>{{ $registrationItem->email }}</td>
+                            <td>{{ $registrationItem->phone }}</td>
+                            <td>{{ $registrationItem->class?->name ?? '-' }}</td>
+                            <td>{{ $registrationItem->preferred_schedule }}</td>
+                            <td><x-ui.badge :type="$registrationBadge">{{ strtoupper($registrationStatus) }}</x-ui.badge></td>
+                            <td>
+                                <div class="action-icons class-action-icons">
+                                    <details class="action-popover">
+                                        <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
+                                        <form class="module-form action-popover-form" method="POST" action="{{ route('super-admin.registrations.update', $registrationItem) }}">
+                                            @csrf
+                                            @method('PUT')
+                                            <label>Nama
+                                                <input type="text" name="full_name" value="{{ $registrationItem->full_name }}" required>
+                                            </label>
+                                            <label>Umur
+                                                <input type="number" name="age" min="4" max="80" value="{{ $registrationItem->age }}" required>
+                                            </label>
+                                            <label>Email
+                                                <input type="email" name="email" value="{{ $registrationItem->email }}" required>
+                                            </label>
+                                            <label>Telepon
+                                                <input type="text" name="phone" value="{{ $registrationItem->phone }}" required>
+                                            </label>
+                                            <label>Kelas
+                                                <select name="class_id">
+                                                    <option value="">Pilih kelas</option>
+                                                    @foreach($classesForManagement as $classItem)
+                                                        <option value="{{ $classItem->id }}" @selected((int) $registrationItem->class_id === (int) $classItem->id)>{{ $classItem->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </label>
+                                            <label>Preferensi Jadwal
+                                                <input type="text" name="preferred_schedule" value="{{ $registrationItem->preferred_schedule }}" required>
+                                            </label>
+                                            <label>Status
+                                                <select name="status" required>
+                                                    <option value="pending" @selected($registrationItem->status === 'pending')>pending</option>
+                                                    <option value="accepted" @selected($registrationItem->status === 'accepted')>accepted</option>
+                                                    <option value="rejected" @selected($registrationItem->status === 'rejected')>rejected</option>
+                                                </select>
+                                            </label>
+                                            <label>Catatan
+                                                <textarea name="notes" rows="2">{{ $registrationItem->notes }}</textarea>
+                                            </label>
+                                            <button type="submit">Update</button>
+                                        </form>
+                                    </details>
+                                    <form method="POST" action="{{ route('super-admin.registrations.destroy', $registrationItem) }}" onsubmit="return confirm('Hapus registration ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn-icon btn-icon-danger" title="Hapus" aria-label="Hapus"><i data-lucide="trash-2"></i></button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5">No registrations yet. Website leads will appear here automatically.</td>
+                            <td colspan="7">No registrations yet. Website leads will appear here automatically.</td>
                         </tr>
                     @endforelse
                 </tbody>
