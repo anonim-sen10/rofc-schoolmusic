@@ -80,6 +80,25 @@ jobs:
               rsync -a --delete "$APP_DIR/public/" "$WEB_DIR/"
             fi
 
+      - name: Siapkan Folder Build di Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          port: ${{ env.RESOLVED_PORT }}
+          timeout: 120s
+          command_timeout: 30m
+          script_stop: true
+          envs: SERVER_APP_DIR
+          script: |
+            set -e
+
+            APP_DIR="${SERVER_APP_DIR:-/home/rofcmusi/rofc-laravel}"
+            rm -rf "$APP_DIR/public/build"
+            mkdir -p "$APP_DIR/public/build"
+
       - name: Upload Built Assets ke Laravel Public
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -89,11 +108,11 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           port: ${{ env.RESOLVED_PORT }}
           source: public/build/**
-          target: ${{ env.RESOLVED_APP_DIR }}/public/build
-          strip_components: 2
+          target: ${{ env.RESOLVED_APP_DIR }}/public
+          strip_components: 1
           overwrite: true
 
-      - name: Sync Built Assets ke Web Root
+      - name: Sync Public Folder ke Web Root
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -112,8 +131,8 @@ jobs:
             WEB_DIR="${SERVER_WEB_DIR:-$APP_DIR/public}"
 
             if [ "$WEB_DIR" != "$APP_DIR/public" ]; then
-              mkdir -p "$WEB_DIR/build"
-              rsync -a --delete "$APP_DIR/public/build/" "$WEB_DIR/build/"
+              mkdir -p "$WEB_DIR"
+              rsync -a --delete "$APP_DIR/public/" "$WEB_DIR/"
             fi
 
       - name: Refresh Laravel Cache
