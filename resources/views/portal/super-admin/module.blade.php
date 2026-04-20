@@ -347,106 +347,87 @@
 
 @if ($moduleKey === 'students')
     <section class="card" data-searchable>
-        <h3>Create Student</h3>
-        <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.students.store') }}">
-            @csrf
-            <label>Nama
-                <input type="text" name="name" value="{{ old('name') }}" required>
-            </label>
-            <label>Umur
-                <input type="number" name="age" min="4" max="80" value="{{ old('age') }}">
-            </label>
-            <label>Email
-                <input type="email" name="email" value="{{ old('email') }}">
-            </label>
-            <label>Telepon
-                <input type="text" name="phone" value="{{ old('phone') }}">
-            </label>
-            <label>Alamat
-                <textarea name="address" rows="2">{{ old('address') }}</textarea>
-            </label>
-            <label>Kelas
-                <select name="class_ids[]" multiple size="6">
-                    @foreach($classesForManagement as $classItem)
-                        <option value="{{ $classItem->id }}">{{ $classItem->name }}</option>
-                    @endforeach
-                </select>
-            </label>
-            <label>Status
-                <select name="is_active" required>
-                    <option value="1" @selected(old('is_active', '1') === '1')>Active</option>
-                    <option value="0" @selected(old('is_active') === '0')>Inactive</option>
-                </select>
-            </label>
-            <div class="form-actions">
-                <button type="submit">Simpan Student</button>
-                <button type="reset" class="btn-secondary">Cancel</button>
-            </div>
-        </form>
+        @php
+            $openStudentCreate = $errors->hasAny([
+                'name',
+                'age',
+                'email',
+                'phone',
+                'address',
+                'is_active',
+                'class_ids',
+                'class_ids.*',
+            ]);
+            $oldClassIds = collect(old('class_ids', []))->map(fn ($id) => (string) $id);
+        @endphp
+
+        <details class="teacher-create" @if($openStudentCreate) open @endif>
+            <summary>Create Student</summary>
+            <form class="module-form module-form-grid teacher-create-form" method="POST" action="{{ route('super-admin.students.store') }}">
+                @csrf
+                <label>Nama
+                    <input type="text" name="name" value="{{ old('name') }}" required>
+                </label>
+                <label>Umur
+                    <input type="number" name="age" min="4" max="80" value="{{ old('age') }}">
+                </label>
+                <label>Email
+                    <input type="email" name="email" value="{{ old('email') }}">
+                </label>
+                <label>Telepon
+                    <input type="text" name="phone" value="{{ old('phone') }}">
+                </label>
+                <label>Alamat
+                    <textarea name="address" rows="2">{{ old('address') }}</textarea>
+                </label>
+                <label>Kelas
+                    <select name="class_ids[]" multiple size="6">
+                        @foreach($classesForManagement as $classItem)
+                            <option value="{{ $classItem->id }}" @selected($oldClassIds->contains((string) $classItem->id))>{{ $classItem->name }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label>Status
+                    <select name="is_active" required>
+                        <option value="1" @selected(old('is_active', '1') === '1')>Active</option>
+                        <option value="0" @selected(old('is_active') === '0')>Inactive</option>
+                    </select>
+                </label>
+                <div class="form-actions">
+                    <button type="submit">Simpan Student</button>
+                    <button type="reset" class="btn-secondary">Cancel</button>
+                </div>
+            </form>
+        </details>
     </section>
 
     <section class="card" data-searchable>
-        <h3>Daftar Student</h3>
+        <h3>Daftar Student Approved</h3>
         <div class="table-wrap">
             <table>
                 <thead>
                     <tr>
                         <th>Nama</th>
                         <th>Email</th>
+                        <th>Telepon</th>
                         <th>Kelas</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
+                        <th>Status Approval</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($studentsForManagement as $studentItem)
+                    @forelse($approvedRegistrationsForStudents as $registrationItem)
                         <tr>
-                            <td colspan="5">
-                                <form class="module-form" method="POST" action="{{ route('super-admin.students.update', $studentItem) }}">
-                                    @csrf
-                                    @method('PUT')
-                                    <label>Nama
-                                        <input type="text" name="name" value="{{ $studentItem->name }}" required>
-                                    </label>
-                                    <label>Umur
-                                        <input type="number" name="age" min="4" max="80" value="{{ $studentItem->age }}">
-                                    </label>
-                                    <label>Email
-                                        <input type="email" name="email" value="{{ $studentItem->email }}">
-                                    </label>
-                                    <label>Telepon
-                                        <input type="text" name="phone" value="{{ $studentItem->phone }}">
-                                    </label>
-                                    <label>Alamat
-                                        <textarea name="address" rows="2">{{ $studentItem->address }}</textarea>
-                                    </label>
-                                    <label>Kelas
-                                        <select name="class_ids[]" multiple size="6">
-                                            @foreach($classesForManagement as $classItem)
-                                                <option value="{{ $classItem->id }}" @selected($studentItem->classes->contains('id', $classItem->id))>{{ $classItem->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </label>
-                                    <label>Status
-                                        <select name="is_active" required>
-                                            <option value="1" @selected($studentItem->is_active)>Active</option>
-                                            <option value="0" @selected(! $studentItem->is_active)>Inactive</option>
-                                        </select>
-                                    </label>
-                                    <div class="action-icons">
-                                        <button type="submit">Update</button>
-                                    </div>
-                                </form>
-                                <form method="POST" action="{{ route('super-admin.students.destroy', $studentItem) }}" onsubmit="return confirm('Hapus student ini?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit">Hapus</button>
-                                </form>
+                            <td>{{ $registrationItem->full_name }}</td>
+                            <td>{{ $registrationItem->email }}</td>
+                            <td>{{ $registrationItem->phone }}</td>
+                            <td>{{ $registrationItem->class?->name ?? '-' }}</td>
+                            <td>
+                                <x-ui.badge type="success">APPROVED</x-ui.badge>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5">No students yet. Approve registrations or create a student manually.</td>
+                            <td colspan="5">Belum ada student approved. Approve data di menu Registrations untuk menampilkannya di sini.</td>
                         </tr>
                     @endforelse
                 </tbody>

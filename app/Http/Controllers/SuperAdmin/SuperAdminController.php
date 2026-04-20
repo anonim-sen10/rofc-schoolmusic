@@ -791,7 +791,11 @@ class SuperAdminController extends Controller
             'teachersForClassOptions' => Teacher::query()->orderBy('name')->get(['id', 'name']),
             'classesForManagement' => MusicClass::query()->with(['teacher'])->orderBy('name')->get(),
             'classesForSchedule' => MusicClass::query()->with(['teacher', 'students'])->orderBy('name')->get(),
-            'studentsForManagement' => Student::query()->with('classes')->orderBy('name')->get(),
+            'approvedRegistrationsForStudents' => Registration::query()
+                ->with('class')
+                ->where('status', 'accepted')
+                ->latest('updated_at')
+                ->get(),
             'registrationsForManagement' => Registration::query()->with('class')->latest()->get(),
             'studentsForSchedule' => Student::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'email']),
             'postsForManagement' => DB::table('posts')->latest()->get(),
@@ -938,14 +942,19 @@ class SuperAdminController extends Controller
             ],
             'students' => [
                 'title' => 'Students',
-                'description' => 'Data siswa dari pendaftaran dan operasional kelas.',
-                'columns' => ['Nama', 'Email', 'Telepon', 'Aktif'],
-                'rows' => Student::latest()->take(30)->get()->map(fn (Student $student) => [
-                    $student->name,
-                    $student->email ?? '-',
-                    $student->phone ?? '-',
-                    $student->is_active ? 'Ya' : 'Tidak',
-                ])->all(),
+                'description' => 'Daftar siswa dari pendaftaran yang sudah disetujui.',
+                'columns' => ['Nama', 'Email', 'Telepon', 'Status'],
+                'rows' => Registration::query()
+                    ->where('status', 'accepted')
+                    ->latest()
+                    ->take(30)
+                    ->get()
+                    ->map(fn (Registration $registration) => [
+                        $registration->full_name,
+                        $registration->email,
+                        $registration->phone,
+                        'APPROVED',
+                    ])->all(),
             ],
             'registrations' => [
                 'title' => 'Registrations',
