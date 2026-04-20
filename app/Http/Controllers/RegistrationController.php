@@ -6,6 +6,7 @@ use App\Models\Registration;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class RegistrationController extends Controller
 {
@@ -40,7 +41,7 @@ class RegistrationController extends Controller
 
         $tanggalLahir = Carbon::parse($validated['tanggal_lahir']);
 
-        Registration::create([
+        $payload = [
             'nama_lengkap' => $validated['nama_lengkap'],
             'nama_panggilan' => $validated['nama_panggilan'],
             'jenis_kelamin' => $validated['jenis_kelamin'],
@@ -70,7 +71,39 @@ class RegistrationController extends Controller
             'preferred_schedule' => implode(', ', $validated['hari_pilihan']),
             'notes' => $validated['deskripsi_pengalaman'] ?? null,
             'status' => 'pending',
-        ]);
+        ];
+
+        $existingColumns = Schema::getColumnListing('registrations');
+        $filteredPayload = array_intersect_key($payload, array_flip($existingColumns));
+
+        // If new columns are not migrated yet, preserve extra details in legacy notes.
+        if (! in_array('nama_lengkap', $existingColumns, true)) {
+            $extraNotes = [
+                'Nama Panggilan: '.$validated['nama_panggilan'],
+                'Jenis Kelamin: '.$validated['jenis_kelamin'],
+                'Tempat/Tanggal Lahir: '.$validated['tempat_lahir'].', '.$validated['tanggal_lahir'],
+                'Kewarganegaraan: '.$validated['kewarganegaraan'],
+                'Alamat: '.$validated['alamat'],
+                'Nama Ortu: '.$validated['nama_ortu'],
+                'Pekerjaan Ortu: '.($validated['pekerjaan_ortu'] ?? '-'),
+                'No HP Ortu: '.$validated['no_hp_ortu'],
+                'Email Ortu: '.($validated['email_ortu'] ?? '-'),
+                'Instrumen: '.$validated['instrumen'],
+                'Program Tambahan: '.implode(', ', $validated['program_tambahan'] ?? []),
+                'Hari Pilihan: '.implode(', ', $validated['hari_pilihan']),
+                'Pengalaman: '.((bool) $validated['pengalaman'] ? 'Ya' : 'Tidak'),
+            ];
+
+            if (! empty($validated['deskripsi_pengalaman'])) {
+                $extraNotes[] = 'Deskripsi Pengalaman: '.$validated['deskripsi_pengalaman'];
+            }
+
+            $legacyNotes = trim(implode("\n", $extraNotes));
+            $baseNotes = (string) ($filteredPayload['notes'] ?? '');
+            $filteredPayload['notes'] = trim($baseNotes.($baseNotes !== '' ? "\n\n" : '').$legacyNotes);
+        }
+
+        Registration::create($filteredPayload);
 
         return back()->with('success', 'Pendaftaran Anda berhasil dikirim. Kami akan menghubungi Anda untuk proses berikutnya.');
     }
