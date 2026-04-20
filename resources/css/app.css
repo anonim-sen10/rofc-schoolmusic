@@ -449,11 +449,35 @@ a {
     gap: 0.9rem;
 }
 
+.rofc-form h3 {
+    margin: 0.9rem 0 0.2rem;
+    font-size: 1.05rem;
+    color: #2f2a22;
+}
+
 .rofc-form label {
     display: grid;
     gap: 0.4rem;
     color: #2f2a22;
     font-weight: 500;
+}
+
+.rofc-form .checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1rem;
+    margin-bottom: 0.2rem;
+}
+
+.rofc-form .checkbox-group label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-weight: 500;
+}
+
+.rofc-form .checkbox-group input {
+    width: auto;
 }
 
 .rofc-form input,

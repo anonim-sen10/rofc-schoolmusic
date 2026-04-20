@@ -20,37 +20,105 @@
 
             <form action="{{ route('register.submit') }}" method="POST" class="rofc-form">
                 @csrf
+                <h3>Data Siswa</h3>
                 <label>Nama Lengkap
-                    <input type="text" name="full_name" value="{{ old('full_name') }}" required>
+                    <input type="text" name="nama_lengkap" value="{{ old('nama_lengkap') }}" required>
                 </label>
-                <label>Umur
-                    <input type="number" name="age" min="4" max="80" value="{{ old('age') }}" required>
+                <label>Nama Panggilan
+                    <input type="text" name="nama_panggilan" value="{{ old('nama_panggilan') }}" required>
                 </label>
-                <label>Nomor WhatsApp
-                    <input type="text" name="phone" value="{{ old('phone') }}" required>
+                <label>Jenis Kelamin</label>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="radio" name="jenis_kelamin" value="laki-laki" {{ old('jenis_kelamin') === 'laki-laki' ? 'checked' : '' }} required>
+                        Laki-laki
+                    </label>
+                    <label>
+                        <input type="radio" name="jenis_kelamin" value="perempuan" {{ old('jenis_kelamin') === 'perempuan' ? 'checked' : '' }} required>
+                        Perempuan
+                    </label>
+                </div>
+                <label>Tempat Lahir
+                    <input type="text" name="tempat_lahir" value="{{ old('tempat_lahir') }}" required>
+                </label>
+                <label>Tanggal Lahir
+                    <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir') }}" required>
+                </label>
+                <label>Kewarganegaraan
+                    <input type="text" name="kewarganegaraan" value="{{ old('kewarganegaraan', 'Indonesia') }}" required>
+                </label>
+                <label>Alamat
+                    <textarea name="alamat" rows="3" required>{{ old('alamat') }}</textarea>
+                </label>
+                <label>No HP Siswa
+                    <input type="text" name="no_hp_siswa" value="{{ old('no_hp_siswa') }}" required>
                 </label>
                 <label>Email
                     <input type="email" name="email" value="{{ old('email') }}" required>
                 </label>
-                <label>Pilih Kelas
-                    <select name="program" required>
-                        <option value="">Pilih Kelas</option>
-                        @foreach (['Drum', 'Piano', 'Guitar', 'Vocal', 'Violin', 'Music Theory'] as $program)
-                            <option value="{{ $program }}" {{ old('program') === $program ? 'selected' : '' }}>{{ $program }}</option>
+
+                <h3>Data Orang Tua</h3>
+                <label>Nama Orang Tua
+                    <input type="text" name="nama_ortu" value="{{ old('nama_ortu') }}" required>
+                </label>
+                <label>Pekerjaan Orang Tua
+                    <input type="text" name="pekerjaan_ortu" value="{{ old('pekerjaan_ortu') }}">
+                </label>
+                <label>No HP Orang Tua
+                    <input type="text" name="no_hp_ortu" value="{{ old('no_hp_ortu') }}" required>
+                </label>
+                <label>Email Orang Tua
+                    <input type="email" name="email_ortu" value="{{ old('email_ortu') }}">
+                </label>
+
+                <h3>Program</h3>
+                <label>Instrumen
+                    <select name="instrumen" required>
+                        <option value="">Pilih Instrumen</option>
+                        @foreach (['Drum', 'Piano', 'Guitar', 'Vocal', 'Violin', 'Bass', 'Keyboard', 'Music Theory'] as $instrumen)
+                            <option value="{{ $instrumen }}" {{ old('instrumen') === $instrumen ? 'selected' : '' }}>{{ $instrumen }}</option>
                         @endforeach
                     </select>
                 </label>
-                <label>Jadwal yang Diminati
-                    <select name="preferred_schedule" required>
-                        <option value="">Pilih Jadwal</option>
-                        @foreach (['Weekday Pagi', 'Weekday Sore', 'Weekday Malam', 'Weekend Pagi', 'Weekend Sore'] as $schedule)
-                            <option value="{{ $schedule }}" {{ old('preferred_schedule') === $schedule ? 'selected' : '' }}>{{ $schedule }}</option>
-                        @endforeach
-                    </select>
+                <label>Program Tambahan (opsional)</label>
+                <div class="checkbox-group">
+                    @php($oldProgramTambahan = old('program_tambahan', []))
+                    @foreach (['Teori Musik', 'Ensemble / Band', 'Skill Teknik (ajang kompetisi)', 'Ujian Sertifikat bertaraf international'] as $programTambahan)
+                        <label>
+                            <input type="checkbox" name="program_tambahan[]" value="{{ $programTambahan }}" {{ in_array($programTambahan, $oldProgramTambahan, true) ? 'checked' : '' }}>
+                            {{ $programTambahan }}
+                        </label>
+                    @endforeach
+                </div>
+
+                <h3>Jadwal</h3>
+                <label>Hari Pilihan</label>
+                <div class="checkbox-group">
+                    @php($oldHariPilihan = old('hari_pilihan', []))
+                    @foreach (['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'] as $hari)
+                        <label>
+                            <input type="checkbox" name="hari_pilihan[]" value="{{ $hari }}" {{ in_array($hari, $oldHariPilihan, true) ? 'checked' : '' }}>
+                            {{ $hari }}
+                        </label>
+                    @endforeach
+                </div>
+
+                <h3>Pengalaman</h3>
+                <label>Pernah belajar musik sebelumnya?</label>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="radio" name="pengalaman" value="1" {{ old('pengalaman') === '1' ? 'checked' : '' }} required>
+                        Ya
+                    </label>
+                    <label>
+                        <input type="radio" name="pengalaman" value="0" {{ old('pengalaman') === '0' ? 'checked' : '' }} required>
+                        Tidak
+                    </label>
+                </div>
+                <label>Deskripsi Pengalaman
+                    <textarea name="deskripsi_pengalaman" rows="4">{{ old('deskripsi_pengalaman') }}</textarea>
                 </label>
-                <label>Pesan Tambahan
-                    <textarea name="notes" rows="4">{{ old('notes') }}</textarea>
-                </label>
+
                 <button type="submit" class="btn btn-gold">Kirim Pendaftaran</button>
             </form>
 

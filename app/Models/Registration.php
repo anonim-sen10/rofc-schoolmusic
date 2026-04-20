@@ -19,6 +19,30 @@ class Registration extends Model
         'preferred_schedule',
         'notes',
         'status',
+        'nama_lengkap',
+        'nama_panggilan',
+        'jenis_kelamin',
+        'tempat_lahir',
+        'tanggal_lahir',
+        'kewarganegaraan',
+        'alamat',
+        'no_hp_siswa',
+        'nama_ortu',
+        'pekerjaan_ortu',
+        'no_hp_ortu',
+        'email_ortu',
+        'instrumen',
+        'program_tambahan',
+        'hari_pilihan',
+        'pengalaman',
+        'deskripsi_pengalaman',
+    ];
+
+    protected $casts = [
+        'tanggal_lahir' => 'date',
+        'program_tambahan' => 'array',
+        'hari_pilihan' => 'array',
+        'pengalaman' => 'bool',
     ];
 
     public function class(): BelongsTo

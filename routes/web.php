@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AcademicManagementController;
 use App\Http\Controllers\Finance\PaymentController;
 use App\Http\Controllers\Finance\FinanceManagementController;
 use App\Http\Controllers\Portal\PortalController;
+use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\Student\StudentPortalController;
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 use App\Http\Controllers\Teacher\TeacherPortalController;
@@ -38,29 +39,7 @@ Route::post('/contact', function (Request $request) {
     return back()->with('success', 'Terima kasih, pesan Anda sudah kami terima. Tim ROFC akan segera menghubungi Anda.');
 })->name('contact.submit');
 
-Route::post('/register', function (Request $request) {
-    $validated = $request->validate([
-        'full_name' => ['required', 'string', 'max:120'],
-        'age' => ['required', 'integer', 'min:4', 'max:80'],
-        'phone' => ['required', 'string', 'max:30'],
-        'email' => ['required', 'email', 'max:120'],
-        'program' => ['required', 'string', 'max:80'],
-        'preferred_schedule' => ['required', 'string', 'max:80'],
-        'notes' => ['nullable', 'string', 'max:1000'],
-    ]);
-
-    Registration::create([
-        'full_name' => $validated['full_name'],
-        'age' => $validated['age'],
-        'phone' => $validated['phone'],
-        'email' => $validated['email'],
-        'preferred_schedule' => $validated['preferred_schedule'],
-        'notes' => $validated['notes'] ?? null,
-        'status' => 'pending',
-    ]);
-
-    return back()->with('success', 'Pendaftaran Anda berhasil dikirim. Kami akan menghubungi Anda untuk proses berikutnya.');
-})->name('register.submit');
+Route::post('/register', [RegistrationController::class, 'store'])->name('register.submit');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
