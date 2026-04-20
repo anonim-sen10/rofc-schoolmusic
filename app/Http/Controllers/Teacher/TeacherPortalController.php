@@ -184,14 +184,59 @@ class TeacherPortalController extends Controller
     public function progress(Request $request): View
     {
         $teacher = $this->teacherFromUser($request->user()->id);
-        $classes = $this->teacherAcceptedClassesQuery($teacher->id)->get();
+        $classes = $this->teacherAcceptedClassesQuery($teacher->id)
+            ->with(['students:id,name'])
+            ->orderBy('name')
+            ->get();
+
+        $students = $classes
+            ->flatMap(fn (MusicClass $class) => $class->students)
+            ->unique('id')
+            ->sortBy('name')
+            ->values();
+
+        $selectedStudentId = $request->integer('student_id');
+        if ($selectedStudentId && ! $students->contains(fn (Student $student) => (int) $student->id === $selectedStudentId)) {
+            abort(403, 'Siswa bukan milik teacher yang sedang login.');
+        }
+
+        $selectedClassId = null;
+        if ($selectedStudentId) {
+            $selectedClass = $classes->first(function (MusicClass $class) use ($selectedStudentId) {
+                return $class->students->contains(fn (Student $student) => (int) $student->id === $selectedStudentId);
+            });
+
+            $selectedClassId = $selectedClass?->id;
+        }
+
+        $classStudents = $classes->mapWithKeys(function (MusicClass $class) {
+            return [
+                $class->id => $class->students
+                    ->sortBy('name')
+                    ->map(fn (Student $student) => [
+                        'id' => $student->id,
+                        'name' => $student->name,
+                    ])
+                    ->values(),
+            ];
+        });
 
         return view('portal.teacher.progress', [
             'teacher' => $teacher,
             'classes' => $classes,
-            'students' => Student::whereHas('classes', fn ($q) => $q->whereIn('classes.id', $classes->pluck('id')))->get(),
+            'students' => $students,
             'records' => StudentProgress::where('teacher_id', $teacher->id)->latest()->take(20)->get(),
+            'classStudents' => $classStudents,
+            'selectedStudentId' => $selectedStudentId,
+            'selectedClassId' => $selectedClassId,
         ]);
+    }
+
+    public function progressForStudent(Request $request, int $student_id): View
+    {
+        $request->merge(['student_id' => $student_id]);
+
+        return $this->progress($request);
     }
 
     public function storeProgress(Request $request): RedirectResponse
@@ -206,6 +251,26 @@ class TeacherPortalController extends Controller
             'score' => ['nullable', 'string', 'max:20'],
             'recorded_at' => ['nullable', 'date'],
         ]);
+
+        $class = $this->teacherAcceptedClassesQuery($teacher->id)
+            ->where('id', $data['class_id'])
+            ->first();
+
+        if (! $class) {
+            return back()->withErrors([
+                'class_id' => 'Kelas tidak terdaftar untuk teacher yang sedang login.',
+            ])->withInput();
+        }
+
+        $studentInClass = $class->students()
+            ->where('students.id', $data['student_id'])
+            ->exists();
+
+        if (! $studentInClass) {
+            return back()->withErrors([
+                'student_id' => 'Siswa tidak terdaftar pada kelas teacher ini.',
+            ])->withInput();
+        }
 
         $data['teacher_id'] = $teacher->id;
         StudentProgress::create($data);
