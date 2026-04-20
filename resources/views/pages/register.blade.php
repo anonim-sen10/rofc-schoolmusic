@@ -3,6 +3,37 @@
 @section('title', 'ROFC School Music | Registration')
 
 @section('content')
+<style>
+    .form-card .rofc-form .choice-group {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0.45rem 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .form-card .rofc-form .choice-group label {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 0.45rem !important;
+        margin: 0 !important;
+    }
+
+    .form-card .rofc-form .choice-group input[type="checkbox"],
+    .form-card .rofc-form .choice-group input[type="radio"] {
+        width: 1rem !important;
+        height: 1rem !important;
+        margin: 0 !important;
+        flex: 0 0 auto;
+    }
+
+    @media (max-width: 640px) {
+        .form-card .rofc-form .choice-group {
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        }
+    }
+</style>
+
 <section class="page-banner">
     <div class="container">
         <span class="eyebrow">Registration</span>
@@ -28,7 +59,7 @@
                     <input type="text" name="nama_panggilan" value="{{ old('nama_panggilan') }}" required>
                 </label>
                 <label>Jenis Kelamin</label>
-                <div class="checkbox-group">
+                <div class="checkbox-group choice-group">
                     <label>
                         <input type="radio" name="jenis_kelamin" value="laki-laki" {{ old('jenis_kelamin') === 'laki-laki' ? 'checked' : '' }} required>
                         Laki-laki
@@ -81,7 +112,7 @@
                     </select>
                 </label>
                 <label>Program Tambahan (opsional)</label>
-                <div class="checkbox-group">
+                <div class="checkbox-group choice-group">
                     @php($oldProgramTambahan = old('program_tambahan', []))
                     @foreach (['Teori Musik', 'Ensemble / Band', 'Skill Teknik (ajang kompetisi)', 'Ujian Sertifikat bertaraf international'] as $programTambahan)
                         <label>
@@ -93,7 +124,7 @@
 
                 <h3>Jadwal</h3>
                 <label>Hari Pilihan</label>
-                <div class="checkbox-group">
+                <div class="checkbox-group choice-group">
                     @php($oldHariPilihan = old('hari_pilihan', []))
                     @foreach (['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'] as $hari)
                         <label>
@@ -105,7 +136,7 @@
 
                 <h3>Pengalaman</h3>
                 <label>Pernah belajar musik sebelumnya?</label>
-                <div class="checkbox-group">
+                <div class="checkbox-group choice-group">
                     <label>
                         <input type="radio" name="pengalaman" value="1" {{ old('pengalaman') === '1' ? 'checked' : '' }} required>
                         Ya
