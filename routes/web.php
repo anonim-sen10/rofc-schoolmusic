@@ -8,6 +8,7 @@ use App\Http\Controllers\Portal\PortalController;
 use App\Http\Controllers\Student\StudentPortalController;
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 use App\Http\Controllers\Teacher\TeacherPortalController;
+use App\Http\Controllers\Teacher\TeacherProgressController;
 use App\Http\Controllers\Teacher\TeacherStudentController;
 use App\Models\Registration;
 use Illuminate\Http\Request;
@@ -157,8 +158,8 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'role:teacher'])
     Route::post('/attendance', [TeacherPortalController::class, 'storeAttendance'])->name('attendance.store');
     Route::post('/attendance/teacher', [TeacherPortalController::class, 'storeTeacherAttendance'])->name('attendance.teacher.store');
     Route::get('/student-progress', [TeacherPortalController::class, 'progress'])->name('student-progress.index');
-    Route::get('/student-progress/{student_id}', [TeacherPortalController::class, 'progressForStudent'])->name('student-progress.input');
-    Route::post('/student-progress', [TeacherPortalController::class, 'storeProgress'])->name('student-progress.store');
+    Route::get('/student-progress/{student_id}', [TeacherProgressController::class, 'show'])->name('student-progress.input');
+    Route::post('/student-progress', [TeacherProgressController::class, 'store'])->name('student-progress.store');
     Route::get('/materials', [TeacherPortalController::class, 'materials'])->name('materials.index');
     Route::post('/materials', [TeacherPortalController::class, 'storeMaterial'])->name('materials.store');
     Route::get('/my-classes', [TeacherPortalController::class, 'attendance'])->name('my-classes.index');

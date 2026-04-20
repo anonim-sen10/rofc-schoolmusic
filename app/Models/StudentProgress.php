@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StudentProgress extends Model
 {
@@ -22,6 +23,17 @@ class StudentProgress extends Model
     ];
 
     protected $casts = [
+        'score' => 'integer',
         'recorded_at' => 'date',
     ];
+
+    public function student(): BelongsTo
+    {
+        return $this->belongsTo(Student::class);
+    }
+
+    public function musicClass(): BelongsTo
+    {
+        return $this->belongsTo(MusicClass::class, 'class_id');
+    }
 }
