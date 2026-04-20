@@ -104,7 +104,6 @@ class SuperAdminController extends Controller
             'address' => ['required', 'string', 'max:500'],
             'gender' => ['required', 'in:laki-laki,perempuan'],
             'religion' => ['required', 'string', 'max:30'],
-            'class_name' => ['required', 'in:drum,gitar,vocal,violin,piano'],
             'photo' => ['nullable', 'image', 'max:2048'],
         ]);
 
@@ -118,8 +117,6 @@ class SuperAdminController extends Controller
 
         $user->roles()->sync([$role->id]);
 
-        $selectedClassName = self::TEACHER_CLASS_OPTIONS[$data['class_name']];
-
         $payload = [
             'user_id' => $user->id,
             'name' => $data['name'],
@@ -127,7 +124,7 @@ class SuperAdminController extends Controller
             'address' => $data['address'],
             'gender' => $data['gender'],
             'religion' => $data['religion'],
-            'instrument' => $selectedClassName,
+            'instrument' => 'General',
             'is_active' => true,
         ];
 
@@ -135,19 +132,7 @@ class SuperAdminController extends Controller
             $payload['photo_path'] = $request->file('photo')->store('teachers', 'public');
         }
 
-        $teacher = Teacher::query()->create($payload);
-
-        $class = MusicClass::query()->firstOrCreate(
-            ['name' => $selectedClassName],
-            [
-                'description' => 'Kelas '.$selectedClassName,
-                'price' => 0,
-                'schedule' => null,
-                'status' => 'active',
-            ]
-        );
-
-        $class->update(['teacher_id' => $teacher->id]);
+        Teacher::query()->create($payload);
 
         return back()->with('success', 'Akun teacher dan data guru berhasil dibuat.');
     }

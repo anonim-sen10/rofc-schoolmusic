@@ -150,14 +150,6 @@
                 <label>Agama
                     <input type="text" name="religion" value="{{ old('religion') }}" required>
                 </label>
-                <label>Class
-                    <select name="class_name" required>
-                        <option value="">Pilih class</option>
-                        @foreach ($classTypeOptions as $classKey => $classLabel)
-                            <option value="{{ $classKey }}" @selected(old('class_name') === $classKey)>{{ $classLabel }}</option>
-                        @endforeach
-                    </select>
-                </label>
                 <label>Password
                     <input type="password" name="password" required>
                 </label>
