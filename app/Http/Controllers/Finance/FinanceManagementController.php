@@ -25,12 +25,12 @@ class FinanceManagementController extends Controller
         $salaryTotal = TeacherSalary::sum('total_paid');
 
         return view('portal.finance.dashboard', [
-            'invoiceCount' => Invoice::count(),
+            'invoiceCount' => Payment::count(),
             'paymentTotal' => $paymentTotal,
             'expenseTotal' => $expenseTotal,
             'salaryTotal' => $salaryTotal,
-            'pendingInvoiceCount' => Invoice::whereIn('status', ['draft', 'issued', 'overdue'])->count(),
-            'paidInvoiceCount' => Invoice::where('status', 'paid')->count(),
+            'pendingInvoiceCount' => Payment::where('status', 'pending')->count(),
+            'paidInvoiceCount' => Payment::where('status', 'paid')->count(),
             'netBalance' => $paymentTotal - $expenseTotal - $salaryTotal,
             'recentPayments' => Payment::with('student:id,name')->latest()->take(5)->get(),
         ]);

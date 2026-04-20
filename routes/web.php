@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Admin\AcademicManagementController;
+use App\Http\Controllers\Finance\PaymentController;
 use App\Http\Controllers\Finance\FinanceManagementController;
 use App\Http\Controllers\Portal\PortalController;
 use App\Http\Controllers\Student\StudentPortalController;
@@ -95,6 +96,7 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'role:su
     Route::delete('/schedule/teacher/{class}', [SuperAdminController::class, 'unassignScheduleTeacher'])->name('schedule.teacher.destroy');
     Route::post('/schedule/students', [SuperAdminController::class, 'assignScheduleStudents'])->name('schedule.students');
     Route::delete('/schedule/classes/{class}/students/{student}', [SuperAdminController::class, 'removeScheduleStudent'])->name('schedule.students.destroy');
+    Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
     Route::get('/users/{user}/detail', [SuperAdminController::class, 'showUser'])->name('users.show');
     Route::get('/users/{user}/edit', [SuperAdminController::class, 'editUser'])->name('users.edit');
     Route::put('/users/{user}', [SuperAdminController::class, 'updateUser'])->name('users.update');
@@ -135,8 +137,9 @@ Route::prefix('finance')->name('finance.')->middleware(['auth', 'role:finance'])
     Route::get('/', [FinanceManagementController::class, 'dashboard'])->name('dashboard');
     Route::get('/invoices', [FinanceManagementController::class, 'invoices'])->name('invoices.index');
     Route::post('/invoices', [FinanceManagementController::class, 'storeInvoice'])->name('invoices.store');
-    Route::get('/payments', [FinanceManagementController::class, 'payments'])->name('payments.index');
-    Route::post('/payments', [FinanceManagementController::class, 'storePayment'])->name('payments.store');
+    Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
+    Route::get('/payments/create', [PaymentController::class, 'create'])->name('payments.create');
+    Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
     Route::get('/expenses', [FinanceManagementController::class, 'expenses'])->name('expenses.index');
     Route::post('/expenses', [FinanceManagementController::class, 'storeExpense'])->name('expenses.store');
     Route::get('/teacher-salary', [FinanceManagementController::class, 'teacherSalaries'])->name('teacher-salary.index');
@@ -144,7 +147,7 @@ Route::prefix('finance')->name('finance.')->middleware(['auth', 'role:finance'])
     Route::get('/reports', [FinanceManagementController::class, 'reports'])->name('reports.index');
     Route::get('/reports/export/csv', [FinanceManagementController::class, 'exportCsv'])->name('reports.export.csv');
     Route::get('/reports/export/pdf', [FinanceManagementController::class, 'exportPdfView'])->name('reports.export.pdf');
-    Route::get('/transactions', [FinanceManagementController::class, 'payments'])->name('transactions.index');
+    Route::get('/transactions', [PaymentController::class, 'index'])->name('transactions.index');
 });
 
 Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'role:teacher'])->group(function () {

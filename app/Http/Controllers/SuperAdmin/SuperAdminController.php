@@ -783,6 +783,13 @@ class SuperAdminController extends Controller
                 ->get(),
             'registrationsForManagement' => Registration::query()->with('class')->latest()->get(),
             'studentsForSchedule' => Student::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'email']),
+            'studentsForFinance' => Student::query()->orderBy('name')->get(['id', 'name']),
+            'classesForFinance' => MusicClass::query()->orderBy('name')->get(['id', 'name']),
+            'paymentsForFinance' => Payment::query()->with(['student', 'musicClass'])->latest()->take(100)->get(),
+            'financeSummary' => [
+                'total_invoice' => Payment::query()->count(),
+                'successful_payments' => (float) Payment::query()->where('status', 'paid')->sum('amount'),
+            ],
             'postsForManagement' => DB::table('posts')->latest()->get(),
             'galleriesForManagement' => DB::table('galleries')->latest()->get(),
             'eventsForManagement' => DB::table('events')->latest()->get(),
@@ -957,7 +964,7 @@ class SuperAdminController extends Controller
                 'description' => 'Ringkasan pemasukan dan pengeluaran.',
                 'columns' => ['Metrik', 'Nilai'],
                 'rows' => [
-                    ['Total Invoice', (string) Invoice::count()],
+                    ['Total Invoice', (string) Payment::count()],
                     ['Pembayaran Berhasil', 'Rp'.number_format(Payment::where('status', 'paid')->sum('amount'), 0, ',', '.')],
                     ['Total Pengeluaran', 'Rp'.number_format(Expense::sum('amount'), 0, ',', '.')],
                     ['Total Gaji Guru', 'Rp'.number_format(TeacherSalary::sum('total_paid'), 0, ',', '.')],
