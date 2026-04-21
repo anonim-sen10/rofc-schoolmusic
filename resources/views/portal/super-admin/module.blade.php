@@ -435,6 +435,336 @@
         $hariOptions = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
     @endphp
 
+    <style>
+        .registration-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 80;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity .2s ease, visibility .2s ease;
+        }
+
+        [data-registration-edit-modal] {
+            z-index: 90;
+        }
+
+        .registration-modal.is-open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .registration-modal-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(2, 6, 23, .58);
+            backdrop-filter: blur(4px);
+        }
+
+        .registration-modal-panel {
+            position: relative;
+            width: min(700px, 100%);
+            max-height: calc(100vh - 2rem);
+            border-radius: 1rem;
+            border: 1px solid #d5deeb;
+            background: #fff;
+            box-shadow: 0 28px 56px rgba(2, 6, 23, .35);
+            overflow: hidden;
+            transform: scale(.96);
+            opacity: 0;
+            transition: transform .2s ease, opacity .2s ease;
+        }
+
+        .registration-modal.is-open .registration-modal-panel {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .registration-modal-header {
+            display: flex;
+            justify-content: space-between;
+            gap: .75rem;
+            align-items: flex-start;
+            padding: 1.1rem 1.25rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .registration-modal-header-left {
+            display: flex;
+            align-items: center;
+            gap: .7rem;
+        }
+
+        .registration-modal-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: .75rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #1d4ed8;
+            background: #eff6ff;
+        }
+
+        .registration-modal-header h3 {
+            margin: 0;
+            color: #0f172a;
+            font-size: 1.02rem;
+        }
+
+        .registration-modal-header p {
+            margin: .18rem 0 0;
+            color: #64748b;
+            font-size: .84rem;
+        }
+
+        .registration-modal-close-btn {
+            width: 2.1rem;
+            height: 2.1rem;
+            border-radius: .6rem;
+            border: 1px solid #dbe3ef;
+            background: #fff;
+            color: #64748b;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .registration-modal-close-btn:hover {
+            background: #f8fafc;
+            color: #334155;
+        }
+
+        .registration-modal-body {
+            max-height: 68vh;
+            overflow-y: auto;
+            padding: 1.1rem 1.25rem;
+        }
+
+        .registration-modal-summary {
+            margin-bottom: .9rem;
+            border-radius: .9rem;
+            border: 1px solid #dbe3ef;
+            background: #f8fafc;
+            padding: .8rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .8rem;
+        }
+
+        .registration-modal-summary-left {
+            display: flex;
+            align-items: center;
+            gap: .7rem;
+        }
+
+        .registration-modal-avatar {
+            width: 2.7rem;
+            height: 2.7rem;
+            border-radius: 999px;
+            background: #dbeafe;
+            color: #1e40af;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .registration-modal-summary p {
+            margin: 0;
+            color: #64748b;
+            font-size: .8rem;
+        }
+
+        .registration-modal-summary-name {
+            margin-top: .2rem !important;
+            color: #0f172a !important;
+            font-size: .95rem !important;
+            font-weight: 700;
+        }
+
+        .registration-modal-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .65rem;
+        }
+
+        .registration-modal-grid > article {
+            border: 1px solid #dbe3ef;
+            border-radius: .75rem;
+            padding: .7rem;
+            background: #fff;
+        }
+
+        .registration-modal-grid > article > p:first-child {
+            margin: 0;
+            font-size: .76rem;
+            color: #64748b;
+        }
+
+        .registration-modal-grid > article > p:last-child {
+            margin: .24rem 0 0;
+            color: #0f172a;
+            font-weight: 600;
+            line-height: 1.45;
+        }
+
+        .registration-modal-item-full {
+            grid-column: 1 / -1;
+        }
+
+        .registration-status-badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: .28rem .7rem;
+            font-size: .72rem;
+            font-weight: 700;
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .registration-status-badge.is-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .registration-status-badge.is-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .registration-status-badge.is-danger {
+            background: #ffe4e6;
+            color: #be123c;
+        }
+
+        .registration-status-badge.is-neutral {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .registration-modal-footer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: .55rem;
+            padding: .9rem 1.25rem 1.1rem;
+            border-top: 1px solid #e2e8f0;
+            background: #fff;
+        }
+
+        .registration-modal-btn {
+            border-radius: .65rem;
+            border: 1px solid transparent;
+            padding: .52rem .9rem;
+            font-size: .82rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .registration-modal-btn-secondary {
+            border-color: #cbd5e1;
+            background: #fff;
+            color: #334155;
+        }
+
+        .registration-modal-btn-secondary:hover {
+            background: #f8fafc;
+        }
+
+        .registration-modal-btn-primary {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .registration-modal-btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .registration-modal-btn-danger {
+            background: #e11d48;
+            color: #fff;
+        }
+
+        .registration-modal-btn-danger:hover {
+            background: #be123c;
+        }
+
+        .registration-edit-form .registration-edit-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .65rem;
+        }
+
+        .registration-edit-form .registration-edit-grid > label {
+            display: grid;
+            gap: .35rem;
+            color: #334155;
+            font-size: .82rem;
+        }
+
+        .registration-edit-form .registration-edit-field-full {
+            grid-column: 1 / -1;
+        }
+
+        .registration-edit-form input,
+        .registration-edit-form select,
+        .registration-edit-form textarea {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: .75rem;
+            padding: .52rem .7rem;
+            font-size: .84rem;
+            color: #0f172a;
+            background: #fff;
+        }
+
+        .registration-edit-form select[multiple] {
+            min-height: 5.9rem;
+        }
+
+        .registration-edit-form input:focus,
+        .registration-edit-form select:focus,
+        .registration-edit-form textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, .15);
+        }
+
+        .registration-edit-footer {
+            margin-top: 1rem;
+            padding: .9rem 0 0;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        @media (max-width: 900px) {
+            .registration-modal {
+                padding: .75rem;
+            }
+
+            .registration-modal-header,
+            .registration-modal-body,
+            .registration-modal-footer {
+                padding-left: .9rem;
+                padding-right: .9rem;
+            }
+
+            .registration-modal-grid,
+            .registration-edit-form .registration-edit-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
     <section class="card" data-searchable>
         @php
             $openRegistrationCreate = $errors->hasAny([
@@ -1042,7 +1372,16 @@
             };
 
             const setModalState = (modal, panel, isOpen) => {
-                modal.classList.toggle("is-open", isOpen);
+                if (isOpen) {
+                    modal.style.display = "flex";
+                    requestAnimationFrame(() => {
+                        modal.classList.add("is-open");
+                    });
+                } else {
+                    modal.classList.remove("is-open");
+                    modal.style.display = "none";
+                }
+
                 modal.setAttribute("aria-hidden", String(!isOpen));
                 syncBodyScroll();
             };
