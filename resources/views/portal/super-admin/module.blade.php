@@ -769,168 +769,168 @@
     </section>
 
     <div
-        class="fixed inset-0 z-[80] flex items-center justify-center p-3 sm:p-6 opacity-0 pointer-events-none transition-opacity duration-200"
+        class="registration-modal"
         data-registration-modal
         aria-hidden="true"
     >
-        <div class="absolute inset-0 bg-slate-950/55 backdrop-blur-sm" data-registration-modal-overlay></div>
+        <div class="registration-modal-overlay" data-registration-modal-overlay></div>
 
         <div
-            class="relative w-full max-w-[700px] overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-2xl transition-all duration-200 scale-95 opacity-0"
+            class="registration-modal-panel"
             data-registration-modal-panel
             role="dialog"
             aria-modal="true"
             aria-labelledby="registration-modal-title"
         >
-            <header class="flex items-start justify-between gap-3 border-b border-slate-200 px-6 py-5">
-                <div class="flex items-center gap-3">
-                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                        <i data-lucide="clipboard-list" class="h-5 w-5"></i>
+            <header class="registration-modal-header">
+                <div class="registration-modal-header-left">
+                    <span class="registration-modal-icon">
+                        <i data-lucide="clipboard-list"></i>
                     </span>
                     <div>
-                        <h3 id="registration-modal-title" class="text-lg font-semibold text-slate-900">Detail Pendaftaran</h3>
-                        <p class="text-sm text-slate-500">Informasi lengkap data siswa</p>
+                        <h3 id="registration-modal-title">Detail Pendaftaran</h3>
+                        <p>Informasi lengkap data siswa</p>
                     </div>
                 </div>
 
                 <button
                     type="button"
-                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+                    class="registration-modal-close-btn"
                     data-registration-modal-close
                     aria-label="Close"
                 >
-                    <i data-lucide="x" class="h-4 w-4"></i>
+                    <i data-lucide="x"></i>
                 </button>
             </header>
 
-            <div class="max-h-[68vh] overflow-y-auto px-6 py-5">
-                <section class="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <div class="flex items-center gap-3">
-                        <span class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700" id="registration-modal-avatar">-</span>
+            <div class="registration-modal-body">
+                <section class="registration-modal-summary">
+                    <div class="registration-modal-summary-left">
+                        <span class="registration-modal-avatar" id="registration-modal-avatar">-</span>
                         <div>
-                            <p class="text-sm text-slate-500">Nama Siswa</p>
-                            <p class="text-base font-semibold text-slate-900" data-registration-field="fullName">-</p>
+                            <p>Nama Siswa</p>
+                            <p class="registration-modal-summary-name" data-registration-field="fullName">-</p>
                         </div>
                     </div>
-                    <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold" data-registration-status-badge>-</span>
+                    <span class="registration-status-badge" data-registration-status-badge>-</span>
                 </section>
 
-                <section class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Nama Panggilan</p><p class="mt-1 font-medium text-slate-900" data-registration-field="nickName">-</p></article>
-                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Jenis Kelamin</p><p class="mt-1 font-medium text-slate-900" data-registration-field="gender">-</p></article>
-                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Tempat Lahir</p><p class="mt-1 font-medium text-slate-900" data-registration-field="birthPlace">-</p></article>
-                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Tanggal Lahir</p><p class="mt-1 font-medium text-slate-900" data-registration-field="birthDate">-</p></article>
-                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Kewarganegaraan</p><p class="mt-1 font-medium text-slate-900" data-registration-field="citizenship">-</p></article>
-                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">No HP Siswa</p><p class="mt-1 font-medium text-slate-900" data-registration-field="studentPhone">-</p></article>
-                    <article class="rounded-xl border border-slate-200 p-3 sm:col-span-2"><p class="text-xs text-slate-500">Email Siswa</p><p class="mt-1 font-medium text-slate-900" data-registration-field="studentEmail">-</p></article>
-                    <article class="rounded-xl border border-slate-200 p-3 sm:col-span-2"><p class="text-xs text-slate-500">Alamat</p><p class="mt-1 font-medium text-slate-900" data-registration-field="address">-</p></article>
+                <section class="registration-modal-grid">
+                    <article><p>Nama Panggilan</p><p data-registration-field="nickName">-</p></article>
+                    <article><p>Jenis Kelamin</p><p data-registration-field="gender">-</p></article>
+                    <article><p>Tempat Lahir</p><p data-registration-field="birthPlace">-</p></article>
+                    <article><p>Tanggal Lahir</p><p data-registration-field="birthDate">-</p></article>
+                    <article><p>Kewarganegaraan</p><p data-registration-field="citizenship">-</p></article>
+                    <article><p>No HP Siswa</p><p data-registration-field="studentPhone">-</p></article>
+                    <article class="registration-modal-item-full"><p>Email Siswa</p><p data-registration-field="studentEmail">-</p></article>
+                    <article class="registration-modal-item-full"><p>Alamat</p><p data-registration-field="address">-</p></article>
 
-                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Nama Orang Tua</p><p class="mt-1 font-medium text-slate-900" data-registration-field="parentName">-</p></article>
-                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Pekerjaan Orang Tua</p><p class="mt-1 font-medium text-slate-900" data-registration-field="parentJob">-</p></article>
-                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">No HP Orang Tua</p><p class="mt-1 font-medium text-slate-900" data-registration-field="parentPhone">-</p></article>
-                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Email Orang Tua</p><p class="mt-1 font-medium text-slate-900" data-registration-field="parentEmail">-</p></article>
+                    <article><p>Nama Orang Tua</p><p data-registration-field="parentName">-</p></article>
+                    <article><p>Pekerjaan Orang Tua</p><p data-registration-field="parentJob">-</p></article>
+                    <article><p>No HP Orang Tua</p><p data-registration-field="parentPhone">-</p></article>
+                    <article><p>Email Orang Tua</p><p data-registration-field="parentEmail">-</p></article>
 
-                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Instrumen</p><p class="mt-1 font-medium text-slate-900" data-registration-field="instrument">-</p></article>
-                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Program Tambahan</p><p class="mt-1 font-medium text-slate-900" data-registration-field="additionalProgram">-</p></article>
-                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Hari Pilihan</p><p class="mt-1 font-medium text-slate-900" data-registration-field="preferredDays">-</p></article>
-                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Pengalaman Belajar</p><p class="mt-1 font-medium text-slate-900" data-registration-field="experience">-</p></article>
-                    <article class="rounded-xl border border-slate-200 p-3 sm:col-span-2"><p class="text-xs text-slate-500">Deskripsi Pengalaman</p><p class="mt-1 font-medium text-slate-900" data-registration-field="experienceDescription">-</p></article>
-                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Status</p><p class="mt-1 font-medium text-slate-900" data-registration-field="status">-</p></article>
-                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Kelas Terpilih</p><p class="mt-1 font-medium text-slate-900" data-registration-field="selectedClass">-</p></article>
+                    <article><p>Instrumen</p><p data-registration-field="instrument">-</p></article>
+                    <article><p>Program Tambahan</p><p data-registration-field="additionalProgram">-</p></article>
+                    <article><p>Hari Pilihan</p><p data-registration-field="preferredDays">-</p></article>
+                    <article><p>Pengalaman Belajar</p><p data-registration-field="experience">-</p></article>
+                    <article class="registration-modal-item-full"><p>Deskripsi Pengalaman</p><p data-registration-field="experienceDescription">-</p></article>
+                    <article><p>Status</p><p data-registration-field="status">-</p></article>
+                    <article><p>Kelas Terpilih</p><p data-registration-field="selectedClass">-</p></article>
                 </section>
             </div>
 
-            <footer class="flex flex-wrap items-center justify-end gap-2 border-t border-slate-200 px-6 py-4">
-                <button type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100" data-registration-modal-close>Tutup</button>
-                <button type="button" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700" data-registration-modal-edit>Edit Data</button>
-                <button type="button" class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-rose-700" data-registration-modal-delete>Hapus</button>
+            <footer class="registration-modal-footer">
+                <button type="button" class="registration-modal-btn registration-modal-btn-secondary" data-registration-modal-close>Tutup</button>
+                <button type="button" class="registration-modal-btn registration-modal-btn-primary" data-registration-modal-edit>Edit Data</button>
+                <button type="button" class="registration-modal-btn registration-modal-btn-danger" data-registration-modal-delete>Hapus</button>
             </footer>
         </div>
     </div>
 
     <div
-        class="fixed inset-0 z-[90] flex items-center justify-center p-3 sm:p-6 opacity-0 pointer-events-none transition-opacity duration-200"
+        class="registration-modal"
         data-registration-edit-modal
         aria-hidden="true"
     >
-        <div class="absolute inset-0 bg-slate-950/55 backdrop-blur-sm" data-registration-edit-modal-overlay></div>
+        <div class="registration-modal-overlay" data-registration-edit-modal-overlay></div>
 
         <div
-            class="relative w-full max-w-[700px] overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-2xl transition-all duration-200 scale-95 opacity-0"
+            class="registration-modal-panel"
             data-registration-edit-modal-panel
             role="dialog"
             aria-modal="true"
             aria-labelledby="registration-edit-modal-title"
         >
-            <header class="flex items-start justify-between gap-3 border-b border-slate-200 px-6 py-5">
-                <div class="flex items-center gap-3">
-                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                        <i data-lucide="pencil-line" class="h-5 w-5"></i>
+            <header class="registration-modal-header">
+                <div class="registration-modal-header-left">
+                    <span class="registration-modal-icon">
+                        <i data-lucide="pencil-line"></i>
                     </span>
                     <div>
-                        <h3 id="registration-edit-modal-title" class="text-lg font-semibold text-slate-900">Edit Data Pendaftaran</h3>
-                        <p class="text-sm text-slate-500">Perbarui informasi pendaftaran siswa</p>
+                        <h3 id="registration-edit-modal-title">Edit Data Pendaftaran</h3>
+                        <p>Perbarui informasi pendaftaran siswa</p>
                     </div>
                 </div>
 
                 <button
                     type="button"
-                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+                    class="registration-modal-close-btn"
                     data-registration-edit-modal-close
                     aria-label="Close"
                 >
-                    <i data-lucide="x" class="h-4 w-4"></i>
+                    <i data-lucide="x"></i>
                 </button>
             </header>
 
-            <form method="POST" class="max-h-[68vh] overflow-y-auto px-6 py-5" data-registration-edit-form>
+            <form method="POST" class="registration-modal-body registration-edit-form" data-registration-edit-form>
                 @csrf
                 @method('PUT')
 
-                <section class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <label class="grid gap-1.5 text-sm text-slate-700">Nama Lengkap
+                <section class="registration-edit-grid">
+                    <label>Nama Lengkap
                         <input type="text" name="nama_lengkap" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
                     </label>
-                    <label class="grid gap-1.5 text-sm text-slate-700">Nama Panggilan
+                    <label>Nama Panggilan
                         <input type="text" name="nama_panggilan" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
                     </label>
-                    <label class="grid gap-1.5 text-sm text-slate-700">Jenis Kelamin
+                    <label>Jenis Kelamin
                         <select name="jenis_kelamin" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
                             <option value="laki-laki">laki-laki</option>
                             <option value="perempuan">perempuan</option>
                         </select>
                     </label>
-                    <label class="grid gap-1.5 text-sm text-slate-700">Tempat Lahir
+                    <label>Tempat Lahir
                         <input type="text" name="tempat_lahir" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
                     </label>
-                    <label class="grid gap-1.5 text-sm text-slate-700">Tanggal Lahir
+                    <label>Tanggal Lahir
                         <input type="date" name="tanggal_lahir" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
                     </label>
-                    <label class="grid gap-1.5 text-sm text-slate-700">Kewarganegaraan
+                    <label>Kewarganegaraan
                         <input type="text" name="kewarganegaraan" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
                     </label>
-                    <label class="grid gap-1.5 text-sm text-slate-700 sm:col-span-2">Alamat
+                    <label class="registration-edit-field-full">Alamat
                         <textarea name="alamat" rows="2" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required></textarea>
                     </label>
-                    <label class="grid gap-1.5 text-sm text-slate-700">No HP Siswa
+                    <label>No HP Siswa
                         <input type="text" name="no_hp_siswa" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
                     </label>
-                    <label class="grid gap-1.5 text-sm text-slate-700">Email Siswa
+                    <label>Email Siswa
                         <input type="email" name="email" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
                     </label>
-                    <label class="grid gap-1.5 text-sm text-slate-700">Nama Orang Tua
+                    <label>Nama Orang Tua
                         <input type="text" name="nama_ortu" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
                     </label>
-                    <label class="grid gap-1.5 text-sm text-slate-700">Pekerjaan Orang Tua
+                    <label>Pekerjaan Orang Tua
                         <input type="text" name="pekerjaan_ortu" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none">
                     </label>
-                    <label class="grid gap-1.5 text-sm text-slate-700">No HP Orang Tua
+                    <label>No HP Orang Tua
                         <input type="text" name="no_hp_ortu" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
                     </label>
-                    <label class="grid gap-1.5 text-sm text-slate-700">Email Orang Tua
+                    <label>Email Orang Tua
                         <input type="email" name="email_ortu" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none">
                     </label>
-                    <label class="grid gap-1.5 text-sm text-slate-700">Instrumen
+                    <label>Instrumen
                         <select name="instrumen" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
                             <option value="">Pilih instrumen</option>
                             @foreach($instrumenOptions as $instrumenItem)
@@ -938,30 +938,30 @@
                             @endforeach
                         </select>
                     </label>
-                    <label class="grid gap-1.5 text-sm text-slate-700">Program Tambahan
+                    <label>Program Tambahan
                         <select name="program_tambahan[]" multiple class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none">
                             @foreach($programTambahanOptions as $programItem)
                                 <option value="{{ $programItem }}">{{ $programItem }}</option>
                             @endforeach
                         </select>
                     </label>
-                    <label class="grid gap-1.5 text-sm text-slate-700">Hari Pilihan
+                    <label>Hari Pilihan
                         <select name="hari_pilihan[]" multiple class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
                             @foreach($hariOptions as $hariItem)
                                 <option value="{{ $hariItem }}">{{ $hariItem }}</option>
                             @endforeach
                         </select>
                     </label>
-                    <label class="grid gap-1.5 text-sm text-slate-700">Pernah Belajar Musik
+                    <label>Pernah Belajar Musik
                         <select name="pengalaman" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
                             <option value="1">Ya</option>
                             <option value="0">Tidak</option>
                         </select>
                     </label>
-                    <label class="grid gap-1.5 text-sm text-slate-700 sm:col-span-2">Deskripsi Pengalaman
+                    <label class="registration-edit-field-full">Deskripsi Pengalaman
                         <textarea name="deskripsi_pengalaman" rows="2" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"></textarea>
                     </label>
-                    <label class="grid gap-1.5 text-sm text-slate-700">Kelas
+                    <label>Kelas
                         <select name="class_id" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none">
                             <option value="">Pilih kelas</option>
                             @foreach($classesForManagement as $classItem)
@@ -969,7 +969,7 @@
                             @endforeach
                         </select>
                     </label>
-                    <label class="grid gap-1.5 text-sm text-slate-700">Status
+                    <label>Status
                         <select name="status" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
                             <option value="pending">pending</option>
                             <option value="accepted">accepted</option>
@@ -978,15 +978,15 @@
                     </label>
                 </section>
 
-                <footer class="mt-5 flex flex-wrap items-center justify-end gap-2 border-t border-slate-200 pt-4">
-                    <button type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100" data-registration-edit-modal-close>Batal</button>
-                    <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700">Simpan Perubahan</button>
+                <footer class="registration-modal-footer registration-edit-footer">
+                    <button type="button" class="registration-modal-btn registration-modal-btn-secondary" data-registration-edit-modal-close>Batal</button>
+                    <button type="submit" class="registration-modal-btn registration-modal-btn-primary">Simpan Perubahan</button>
                 </footer>
             </form>
         </div>
     </div>
 
-    <form method="POST" class="hidden" data-registration-modal-delete-form>
+    <form method="POST" data-registration-modal-delete-form style="display:none;">
         @csrf
         @method('DELETE')
     </form>
@@ -1042,11 +1042,8 @@
             };
 
             const setModalState = (modal, panel, isOpen) => {
-                modal.classList.toggle("pointer-events-none", !isOpen);
-                modal.classList.toggle("opacity-0", !isOpen);
+                modal.classList.toggle("is-open", isOpen);
                 modal.setAttribute("aria-hidden", String(!isOpen));
-                panel.classList.toggle("opacity-0", !isOpen);
-                panel.classList.toggle("scale-95", !isOpen);
                 syncBodyScroll();
             };
 
@@ -1063,24 +1060,24 @@
             const applyStatusBadge = (statusValue) => {
                 const safeStatus = String(statusValue || "-").toUpperCase();
                 statusBadge.textContent = safeStatus;
-                statusBadge.className = "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold";
+                statusBadge.className = "registration-status-badge";
 
                 if (safeStatus === "ACCEPTED" || safeStatus === "DITERIMA") {
-                    statusBadge.classList.add("bg-emerald-100", "text-emerald-700");
+                    statusBadge.classList.add("is-success");
                     return;
                 }
 
                 if (safeStatus === "PENDING") {
-                    statusBadge.classList.add("bg-amber-100", "text-amber-700");
+                    statusBadge.classList.add("is-warning");
                     return;
                 }
 
                 if (safeStatus === "REJECTED" || safeStatus === "DITOLAK") {
-                    statusBadge.classList.add("bg-rose-100", "text-rose-700");
+                    statusBadge.classList.add("is-danger");
                     return;
                 }
 
-                statusBadge.classList.add("bg-slate-200", "text-slate-700");
+                statusBadge.classList.add("is-neutral");
             };
 
             const normalizeArray = (value) => {
