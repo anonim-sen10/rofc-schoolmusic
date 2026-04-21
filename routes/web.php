@@ -26,7 +26,7 @@ Route::view('/gallery', 'pages.gallery')->name('gallery');
 Route::view('/events', 'pages.events')->name('events');
 Route::view('/blog', 'pages.blog')->name('blog');
 Route::view('/contact', 'pages.contact')->name('contact');
-Route::view('/register', 'pages.register')->name('register');
+Route::get('/register', [RegistrationController::class, 'create'])->name('register');
 
 Route::post('/contact', function (Request $request) {
     $validated = $request->validate([
@@ -62,6 +62,7 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'role:su
     Route::put('/students/{student}', [SuperAdminController::class, 'updateStudent'])->name('students.update');
     Route::delete('/students/{student}', [SuperAdminController::class, 'destroyStudent'])->name('students.destroy');
     Route::post('/registrations', [SuperAdminController::class, 'storeRegistration'])->name('registrations.store');
+    Route::post('/registrations/{id}/approve', [RegistrationController::class, 'approve'])->name('registrations.approve');
     Route::put('/registrations/{registration}', [SuperAdminController::class, 'updateRegistration'])->name('registrations.update');
     Route::delete('/registrations/{registration}', [SuperAdminController::class, 'destroyRegistration'])->name('registrations.destroy');
     Route::post('/content/{module}', [SuperAdminController::class, 'storeContent'])->whereIn('module', ['blog', 'gallery', 'events', 'testimonials', 'settings'])->name('content.store');
@@ -104,6 +105,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::delete('/students/{student}', [AcademicManagementController::class, 'destroyStudent'])->name('students.destroy');
 
     Route::get('/registrations', [AcademicManagementController::class, 'registrations'])->name('registrations.index');
+    Route::post('/registrations/{id}/approve', [RegistrationController::class, 'approve'])->name('registrations.approve');
     Route::patch('/registrations/{registration}/status', [AcademicManagementController::class, 'updateRegistrationStatus'])->name('registrations.status');
     Route::get('/schedule', [AcademicManagementController::class, 'schedule'])->name('schedule.index');
     Route::post('/schedule/teacher', [AcademicManagementController::class, 'assignScheduleTeacher'])->name('schedule.teacher');

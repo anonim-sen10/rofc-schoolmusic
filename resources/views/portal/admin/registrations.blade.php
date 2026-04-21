@@ -43,6 +43,13 @@ $homeRoute = route('admin.dashboard');
                     <td>{{ $registration->preferred_schedule }}</td>
                     <td><x-ui.badge :type="$badgeType">{{ strtoupper($status) }}</x-ui.badge></td>
                     <td>
+                        @if ($status !== 'accepted')
+                            <form class="module-form" method="POST" action="{{ route('admin.registrations.approve', $registration->id) }}" onsubmit="return confirm('Approve registrasi ini? Akun user dan student akan dibuat otomatis.');" style="margin-bottom: 0.5rem;">
+                                @csrf
+                                <button type="submit">Approve</button>
+                            </form>
+                        @endif
+
                         <form class="module-form" method="POST" action="{{ route('admin.registrations.status', $registration) }}">
                             @csrf
                             @method('PATCH')

@@ -104,10 +104,10 @@
 
                 <h3>Program</h3>
                 <label>Instrumen
-                    <select name="instrumen" required>
+                    <select name="class_id" required>
                         <option value="">Pilih Instrumen</option>
-                        @foreach (['Drum', 'Piano', 'Guitar', 'Vocal', 'Violin', 'Bass', 'Keyboard', 'Music Theory'] as $instrumen)
-                            <option value="{{ $instrumen }}" {{ old('instrumen') === $instrumen ? 'selected' : '' }}>{{ $instrumen }}</option>
+                        @foreach ($classes as $class)
+                            <option value="{{ $class->id }}" {{ (string) old('class_id') === (string) $class->id ? 'selected' : '' }}>{{ $class->name }}</option>
                         @endforeach
                     </select>
                 </label>

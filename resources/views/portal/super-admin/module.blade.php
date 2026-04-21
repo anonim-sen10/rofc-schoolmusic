@@ -22,6 +22,13 @@
     </section>
 @endif
 
+@if (session('error'))
+    <section class="card" data-searchable>
+        <x-ui.badge type="danger">ERROR</x-ui.badge>
+        <p style="margin-top: 0.5rem;">{{ session('error') }}</p>
+    </section>
+@endif
+
 @if ($errors->any())
     <section class="card" data-searchable>
         <x-ui.badge type="danger">ERROR</x-ui.badge>
@@ -1062,6 +1069,13 @@
                             <td><x-ui.badge :type="$registrationBadge">{{ strtoupper($registrationStatus) }}</x-ui.badge></td>
                             <td>
                                 <div class="action-icons class-action-icons">
+                                    @if ($registrationStatus !== 'accepted')
+                                        <form method="POST" action="{{ route('super-admin.registrations.approve', $registrationItem->id) }}" onsubmit="return confirm('Approve registration ini dan buat akun siswa?');">
+                                            @csrf
+                                            <button type="submit" class="btn-icon" title="Approve" aria-label="Approve"><i data-lucide="badge-check"></i></button>
+                                        </form>
+                                    @endif
+
                                     <button
                                         type="button"
                                         class="btn-icon"

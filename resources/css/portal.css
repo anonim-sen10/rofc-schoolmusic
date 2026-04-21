@@ -1087,7 +1087,9 @@ th {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.2s ease, visibility 0.2s ease;
+    transition:
+        opacity 0.2s ease,
+        visibility 0.2s ease;
 }
 
 [data-registration-edit-modal] {
@@ -1118,7 +1120,9 @@ th {
     overflow: hidden;
     transform: scale(0.96);
     opacity: 0;
-    transition: transform 0.2s ease, opacity 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
 }
 
 .registration-modal.is-open .registration-modal-panel {

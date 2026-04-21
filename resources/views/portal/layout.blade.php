@@ -55,6 +55,13 @@
             />
 
             <main class="portal-content">
+                @if (session('error'))
+                    <section class="card" data-searchable>
+                        <x-ui.badge type="danger">ERROR</x-ui.badge>
+                        <p style="margin-top: 0.5rem;">{{ session('error') }}</p>
+                    </section>
+                @endif
+
                 @yield('content')
             </main>
 
