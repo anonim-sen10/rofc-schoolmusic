@@ -23,6 +23,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -342,70 +343,24 @@ class SuperAdminController extends Controller
 
     public function storeRegistration(Request $request): RedirectResponse
     {
-        $data = $request->validate([
-            'full_name' => ['required', 'string', 'max:120'],
-            'age' => ['required', 'integer', 'min:4', 'max:80'],
-            'phone' => ['required', 'string', 'max:30'],
-            'email' => ['required', 'email', 'max:120'],
-            'class_id' => ['nullable', 'integer', 'exists:classes,id'],
-            'preferred_schedule' => ['required', 'string', 'max:120'],
-            'notes' => ['nullable', 'string', 'max:1000'],
-            'status' => ['required', 'in:pending,accepted,rejected'],
-        ]);
+        $data = $request->validate($this->registrationRules());
 
-        $registration = Registration::query()->create($data);
+        $registration = Registration::query()->create(
+            $this->buildRegistrationPayload($data)
+        );
 
-        if ($registration->status === 'accepted') {
-            $student = Student::query()->updateOrCreate(
-                ['email' => $registration->email],
-                [
-                    'name' => $registration->full_name,
-                    'age' => $registration->age,
-                    'phone' => $registration->phone,
-                    'email' => $registration->email,
-                    'is_active' => true,
-                ]
-            );
-
-            if ($registration->class_id) {
-                $student->classes()->syncWithoutDetaching([$registration->class_id]);
-            }
-        }
+        $this->syncStudentFromRegistration($registration);
 
         return back()->with('success', 'Registrasi berhasil ditambahkan.');
     }
 
     public function updateRegistration(Request $request, Registration $registration): RedirectResponse
     {
-        $data = $request->validate([
-            'full_name' => ['required', 'string', 'max:120'],
-            'age' => ['required', 'integer', 'min:4', 'max:80'],
-            'phone' => ['required', 'string', 'max:30'],
-            'email' => ['required', 'email', 'max:120'],
-            'class_id' => ['nullable', 'integer', 'exists:classes,id'],
-            'preferred_schedule' => ['required', 'string', 'max:120'],
-            'notes' => ['nullable', 'string', 'max:1000'],
-            'status' => ['required', 'in:pending,accepted,rejected'],
-        ]);
+        $data = $request->validate($this->registrationRules());
 
-        $registration->update($data);
+        $registration->update($this->buildRegistrationPayload($data));
 
-        if ($registration->status === 'accepted') {
-            $student = Student::query()->updateOrCreate(
-                ['email' => $registration->email],
-                [
-                    'name' => $registration->full_name,
-                    'age' => $registration->age,
-                    'phone' => $registration->phone,
-                    'email' => $registration->email,
-                    'is_active' => true,
-                ]
-            );
-
-            if ($registration->class_id) {
-                $student->classes()->syncWithoutDetaching([$registration->class_id]);
-            }
-        }
+        $this->syncStudentFromRegistration($registration);
 
         return back()->with('success', 'Registrasi berhasil diperbarui.');
     }
@@ -415,6 +370,102 @@ class SuperAdminController extends Controller
         $registration->delete();
 
         return back()->with('success', 'Registrasi berhasil dihapus.');
+    }
+
+    private function registrationRules(): array
+    {
+        return [
+            'nama_lengkap' => ['required', 'string', 'max:120'],
+            'nama_panggilan' => ['required', 'string', 'max:80'],
+            'jenis_kelamin' => ['required', 'in:laki-laki,perempuan'],
+            'tempat_lahir' => ['required', 'string', 'max:120'],
+            'tanggal_lahir' => ['required', 'date', 'before_or_equal:today'],
+            'kewarganegaraan' => ['required', 'string', 'max:120'],
+            'alamat' => ['required', 'string', 'max:2000'],
+            'no_hp_siswa' => ['required', 'string', 'max:30'],
+            'email' => ['required', 'email', 'max:120'],
+            'nama_ortu' => ['required', 'string', 'max:120'],
+            'pekerjaan_ortu' => ['nullable', 'string', 'max:120'],
+            'no_hp_ortu' => ['required', 'string', 'max:30'],
+            'email_ortu' => ['nullable', 'email', 'max:120'],
+            'instrumen' => ['required', 'string', 'max:120'],
+            'program_tambahan' => ['nullable', 'array'],
+            'program_tambahan.*' => ['string', 'max:120'],
+            'hari_pilihan' => ['required', 'array', 'min:1'],
+            'hari_pilihan.*' => ['string', 'max:40'],
+            'pengalaman' => ['required', 'boolean'],
+            'deskripsi_pengalaman' => ['nullable', 'string', 'max:2000'],
+            'class_id' => ['nullable', 'integer', 'exists:classes,id'],
+            'status' => ['required', 'in:pending,accepted,rejected'],
+        ];
+    }
+
+    private function buildRegistrationPayload(array $data): array
+    {
+        $tanggalLahir = Carbon::parse($data['tanggal_lahir']);
+        $hariPilihan = array_values(array_unique($data['hari_pilihan']));
+        $programTambahan = array_values(array_unique($data['program_tambahan'] ?? []));
+
+        $payload = [
+            'nama_lengkap' => $data['nama_lengkap'],
+            'nama_panggilan' => $data['nama_panggilan'],
+            'jenis_kelamin' => $data['jenis_kelamin'],
+            'tempat_lahir' => $data['tempat_lahir'],
+            'tanggal_lahir' => $data['tanggal_lahir'],
+            'kewarganegaraan' => $data['kewarganegaraan'],
+            'alamat' => $data['alamat'],
+            'no_hp_siswa' => $data['no_hp_siswa'],
+            'email' => $data['email'],
+            'nama_ortu' => $data['nama_ortu'],
+            'pekerjaan_ortu' => $data['pekerjaan_ortu'] ?? null,
+            'no_hp_ortu' => $data['no_hp_ortu'],
+            'email_ortu' => $data['email_ortu'] ?? null,
+            'instrumen' => $data['instrumen'],
+            'program_tambahan' => $programTambahan,
+            'hari_pilihan' => $hariPilihan,
+            'pengalaman' => (bool) $data['pengalaman'],
+            'deskripsi_pengalaman' => $data['deskripsi_pengalaman'] ?? null,
+            'class_id' => $data['class_id'] ?? null,
+            'status' => $data['status'],
+            // Keep legacy columns populated for existing modules and reports.
+            'full_name' => $data['nama_lengkap'],
+            'age' => $tanggalLahir->age,
+            'phone' => $data['no_hp_siswa'],
+            'preferred_schedule' => implode(', ', $hariPilihan),
+            'notes' => $data['deskripsi_pengalaman'] ?? null,
+        ];
+
+        $existingColumns = Schema::getColumnListing('registrations');
+
+        return array_intersect_key($payload, array_flip($existingColumns));
+    }
+
+    private function syncStudentFromRegistration(Registration $registration): void
+    {
+        if ($registration->status !== 'accepted') {
+            return;
+        }
+
+        $studentAge = $registration->age;
+
+        if ((! is_numeric($studentAge) || (int) $studentAge <= 0) && $registration->tanggal_lahir) {
+            $studentAge = Carbon::parse($registration->tanggal_lahir)->age;
+        }
+
+        $student = Student::query()->updateOrCreate(
+            ['email' => $registration->email],
+            [
+                'name' => $registration->nama_lengkap ?: $registration->full_name,
+                'age' => $studentAge,
+                'phone' => $registration->no_hp_siswa ?: $registration->phone,
+                'email' => $registration->email,
+                'is_active' => true,
+            ]
+        );
+
+        if ($registration->class_id) {
+            $student->classes()->syncWithoutDetaching([$registration->class_id]);
+        }
     }
 
     public function storeContent(Request $request, string $module): RedirectResponse

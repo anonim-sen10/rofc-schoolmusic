@@ -1024,6 +1024,58 @@ th {
     color: #111;
 }
 
+.action-popover-panel {
+    position: static;
+    margin-top: 0.5rem;
+    width: min(560px, calc(100vw - 4rem));
+    padding: 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    background: linear-gradient(180deg, #1f2430, #181d26);
+    box-shadow: 0 20px 36px rgba(0, 0, 0, 0.42);
+}
+
+.registration-detail-panel h4 {
+    margin: 0 0 0.6rem;
+    font-size: 0.95rem;
+}
+
+.registration-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+}
+
+.registration-detail-item {
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 0.6rem;
+    background: rgba(15, 23, 42, 0.65);
+    padding: 0.55rem 0.65rem;
+}
+
+.registration-detail-item--full {
+    grid-column: 1 / -1;
+}
+
+.registration-detail-item span {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-bottom: 0.2rem;
+}
+
+.registration-detail-item strong {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: #e5e7eb;
+}
+
+.registration-detail-item p {
+    margin: 0;
+    color: #d6dbe6;
+    line-height: 1.45;
+}
+
 .class-action-icons {
     justify-content: flex-start;
     align-items: flex-start;
@@ -1138,6 +1190,10 @@ th {
     }
 
     .module-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .registration-detail-grid {
         grid-template-columns: 1fr;
     }
 

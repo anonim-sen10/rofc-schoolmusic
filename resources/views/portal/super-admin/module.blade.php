@@ -429,35 +429,114 @@
 @endif
 
 @if ($moduleKey === 'registrations')
+    @php
+        $instrumenOptions = ['Drum', 'Piano', 'Guitar', 'Vocal', 'Violin', 'Bass', 'Keyboard', 'Music Theory'];
+        $programTambahanOptions = ['Teori Musik', 'Ensemble / Band', 'Skill Teknik (ajang kompetisi)', 'Ujian Sertifikat bertaraf international'];
+        $hariOptions = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+    @endphp
+
     <section class="card" data-searchable>
         @php
             $openRegistrationCreate = $errors->hasAny([
-                'full_name',
-                'age',
+                'nama_lengkap',
+                'nama_panggilan',
+                'jenis_kelamin',
+                'tempat_lahir',
+                'tanggal_lahir',
+                'kewarganegaraan',
+                'alamat',
                 'email',
-                'phone',
+                'no_hp_siswa',
+                'nama_ortu',
+                'no_hp_ortu',
+                'instrumen',
+                'hari_pilihan',
                 'class_id',
-                'preferred_schedule',
+                'pengalaman',
+                'deskripsi_pengalaman',
                 'status',
-                'notes',
             ]);
+            $oldProgramTambahan = old('program_tambahan', []);
+            $oldHariPilihan = old('hari_pilihan', []);
         @endphp
 
         <details class="teacher-create" @if($openRegistrationCreate) open @endif>
             <summary>Create Registration</summary>
             <form class="module-form module-form-grid teacher-create-form" method="POST" action="{{ route('super-admin.registrations.store') }}">
                 @csrf
-                <label>Nama
-                    <input type="text" name="full_name" value="{{ old('full_name') }}" required>
+                <label>Nama Lengkap
+                    <input type="text" name="nama_lengkap" value="{{ old('nama_lengkap') }}" required>
                 </label>
-                <label>Umur
-                    <input type="number" name="age" min="4" max="80" value="{{ old('age') }}" required>
+                <label>Nama Panggilan
+                    <input type="text" name="nama_panggilan" value="{{ old('nama_panggilan') }}" required>
+                </label>
+                <label>Jenis Kelamin
+                    <select name="jenis_kelamin" required>
+                        <option value="">Pilih jenis kelamin</option>
+                        <option value="laki-laki" @selected(old('jenis_kelamin') === 'laki-laki')>laki-laki</option>
+                        <option value="perempuan" @selected(old('jenis_kelamin') === 'perempuan')>perempuan</option>
+                    </select>
+                </label>
+                <label>Tempat Lahir
+                    <input type="text" name="tempat_lahir" value="{{ old('tempat_lahir') }}" required>
+                </label>
+                <label>Tanggal Lahir
+                    <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir') }}" required>
+                </label>
+                <label>Kewarganegaraan
+                    <input type="text" name="kewarganegaraan" value="{{ old('kewarganegaraan', 'Indonesia') }}" required>
+                </label>
+                <label>Alamat
+                    <textarea name="alamat" rows="2" required>{{ old('alamat') }}</textarea>
+                </label>
+                <label>No HP Siswa
+                    <input type="text" name="no_hp_siswa" value="{{ old('no_hp_siswa') }}" required>
                 </label>
                 <label>Email
                     <input type="email" name="email" value="{{ old('email') }}" required>
                 </label>
-                <label>Telepon
-                    <input type="text" name="phone" value="{{ old('phone') }}" required>
+                <label>Nama Orang Tua
+                    <input type="text" name="nama_ortu" value="{{ old('nama_ortu') }}" required>
+                </label>
+                <label>Pekerjaan Orang Tua
+                    <input type="text" name="pekerjaan_ortu" value="{{ old('pekerjaan_ortu') }}">
+                </label>
+                <label>No HP Orang Tua
+                    <input type="text" name="no_hp_ortu" value="{{ old('no_hp_ortu') }}" required>
+                </label>
+                <label>Email Orang Tua
+                    <input type="email" name="email_ortu" value="{{ old('email_ortu') }}">
+                </label>
+                <label>Instrumen
+                    <select name="instrumen" required>
+                        <option value="">Pilih instrumen</option>
+                        @foreach($instrumenOptions as $instrumenItem)
+                            <option value="{{ $instrumenItem }}" @selected(old('instrumen') === $instrumenItem)>{{ $instrumenItem }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label>Program Tambahan
+                    <select name="program_tambahan[]" multiple>
+                        @foreach($programTambahanOptions as $programItem)
+                            <option value="{{ $programItem }}" @selected(in_array($programItem, $oldProgramTambahan, true))>{{ $programItem }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label>Hari Pilihan
+                    <select name="hari_pilihan[]" multiple required>
+                        @foreach($hariOptions as $hariItem)
+                            <option value="{{ $hariItem }}" @selected(in_array($hariItem, $oldHariPilihan, true))>{{ $hariItem }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label>Pernah Belajar Musik
+                    <select name="pengalaman" required>
+                        <option value="1" @selected(old('pengalaman') === '1')>Ya</option>
+                        <option value="0" @selected(old('pengalaman') === '0')>Tidak</option>
+                    </select>
+                </label>
+                <label>Deskripsi Pengalaman
+                    <textarea name="deskripsi_pengalaman" rows="2">{{ old('deskripsi_pengalaman') }}</textarea>
                 </label>
                 <label>Kelas
                     <select name="class_id">
@@ -467,18 +546,12 @@
                         @endforeach
                     </select>
                 </label>
-                <label>Preferensi Jadwal
-                    <input type="text" name="preferred_schedule" value="{{ old('preferred_schedule') }}" required>
-                </label>
                 <label>Status
                     <select name="status" required>
                         <option value="pending" @selected(old('status', 'pending') === 'pending')>pending</option>
                         <option value="accepted" @selected(old('status') === 'accepted')>accepted</option>
                         <option value="rejected" @selected(old('status') === 'rejected')>rejected</option>
                     </select>
-                </label>
-                <label>Catatan
-                    <textarea name="notes" rows="2">{{ old('notes') }}</textarea>
                 </label>
                 <div class="form-actions">
                     <button type="submit">Simpan Registration</button>
@@ -494,11 +567,12 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Nama</th>
+                        <th>Nama Lengkap</th>
+                        <th>Nama Panggilan</th>
                         <th>Email</th>
-                        <th>Telepon</th>
-                        <th>Kelas</th>
-                        <th>Preferensi Jadwal</th>
+                        <th>Telepon Siswa</th>
+                        <th>Instrumen</th>
+                        <th>Hari Pilihan</th>
                         <th>Status</th>
                         <th>Aksi</th>
                     </tr>
@@ -508,57 +582,174 @@
                         @php
                             $registrationStatus = strtolower((string) $registrationItem->status);
                             $registrationBadge = $registrationStatus === 'accepted' ? 'success' : ($registrationStatus === 'rejected' ? 'danger' : 'warning');
+                            $legacyNotesMap = [];
+                            foreach (preg_split('/\r\n|\r|\n/', (string) ($registrationItem->notes ?? '')) as $line) {
+                                $line = trim((string) $line);
+                                if ($line === '' || ! str_contains($line, ':')) {
+                                    continue;
+                                }
+
+                                [$key, $value] = array_pad(explode(':', $line, 2), 2, '');
+                                $key = trim($key);
+                                if ($key === '') {
+                                    continue;
+                                }
+
+                                $legacyNotesMap[$key] = trim($value);
+                            }
+
+                            $namaLengkap = $registrationItem->nama_lengkap ?: $registrationItem->full_name;
+                            $namaPanggilan = $registrationItem->nama_panggilan ?: ($legacyNotesMap['Nama Panggilan'] ?? '-');
+                            $jenisKelamin = $registrationItem->jenis_kelamin ?: ($legacyNotesMap['Jenis Kelamin'] ?? '-');
+
+                            $legacyTempatLahir = '-';
+                            $legacyTanggalLahir = '-';
+                            $legacyTempatTanggal = trim((string) ($legacyNotesMap['Tempat/Tanggal Lahir'] ?? ''));
+                            if ($legacyTempatTanggal !== '') {
+                                $legacyTempatTanggalParts = array_values(array_filter(array_map('trim', explode(',', $legacyTempatTanggal)), fn (string $item) => $item !== ''));
+                                if (count($legacyTempatTanggalParts) >= 2) {
+                                    $legacyTanggalLahir = array_pop($legacyTempatTanggalParts) ?: '-';
+                                    $legacyTempatLahir = implode(', ', $legacyTempatTanggalParts) ?: '-';
+                                } else {
+                                    $legacyTempatLahir = $legacyTempatTanggal;
+                                }
+                            }
+
+                            $tempatLahir = $registrationItem->tempat_lahir ?: $legacyTempatLahir;
+
+                            $tanggalLahirText = $registrationItem->tanggal_lahir
+                                ? optional($registrationItem->tanggal_lahir)->format('d M Y')
+                                : $legacyTanggalLahir;
+
+                            $tanggalLahirInput = $registrationItem->tanggal_lahir
+                                ? optional($registrationItem->tanggal_lahir)->format('Y-m-d')
+                                : null;
+                            if (! $tanggalLahirInput && $legacyTanggalLahir !== '-') {
+                                try {
+                                    $tanggalLahirInput = \Carbon\Carbon::parse($legacyTanggalLahir)->format('Y-m-d');
+                                } catch (\Throwable $e) {
+                                    $tanggalLahirInput = '';
+                                }
+                            }
+
+                            $kewarganegaraan = $registrationItem->kewarganegaraan ?: ($legacyNotesMap['Kewarganegaraan'] ?? '-');
+                            $alamat = $registrationItem->alamat ?: ($legacyNotesMap['Alamat'] ?? '-');
+                            $teleponSiswa = $registrationItem->no_hp_siswa ?: $registrationItem->phone;
+                            $namaOrtu = $registrationItem->nama_ortu ?: ($legacyNotesMap['Nama Ortu'] ?? '-');
+                            $pekerjaanOrtu = $registrationItem->pekerjaan_ortu ?: ($legacyNotesMap['Pekerjaan Ortu'] ?? '-');
+                            $noHpOrtu = $registrationItem->no_hp_ortu ?: ($legacyNotesMap['No HP Ortu'] ?? '-');
+                            $emailOrtu = $registrationItem->email_ortu ?: ($legacyNotesMap['Email Ortu'] ?? '-');
+
+                            $instrumenValue = $registrationItem->instrumen ?: ($legacyNotesMap['Instrumen'] ?? '');
+                            $instrumenText = $instrumenValue !== '' ? $instrumenValue : ($registrationItem->class?->name ?? '-');
+
+                            $hariPilihanText = $registrationItem->preferred_schedule ?? '-';
+                            $hariPilihanArray = is_array($registrationItem->hari_pilihan)
+                                ? $registrationItem->hari_pilihan
+                                : collect(explode(',', (string) ($registrationItem->preferred_schedule ?? '')))
+                                    ->map(fn (string $item) => trim($item))
+                                    ->filter()
+                                    ->values()
+                                    ->all();
+                            if (empty($hariPilihanArray) && ! empty($legacyNotesMap['Hari Pilihan'])) {
+                                $hariPilihanArray = collect(explode(',', (string) $legacyNotesMap['Hari Pilihan']))
+                                    ->map(fn (string $item) => trim($item))
+                                    ->filter()
+                                    ->values()
+                                    ->all();
+                            }
+                            if (! empty($hariPilihanArray)) {
+                                $hariPilihanText = implode(', ', $hariPilihanArray);
+                            }
+
+                            $programTambahanArray = is_array($registrationItem->program_tambahan)
+                                ? $registrationItem->program_tambahan
+                                : [];
+                            if (empty($programTambahanArray) && ! empty($legacyNotesMap['Program Tambahan']) && $legacyNotesMap['Program Tambahan'] !== '-') {
+                                $programTambahanArray = collect(explode(',', (string) $legacyNotesMap['Program Tambahan']))
+                                    ->map(fn (string $item) => trim($item))
+                                    ->filter()
+                                    ->values()
+                                    ->all();
+                            }
+                            $programTambahanText = ! empty($programTambahanArray) ? implode(', ', $programTambahanArray) : '-';
+
+                            $pengalamanValue = null;
+                            if (! is_null($registrationItem->pengalaman)) {
+                                $pengalamanValue = (bool) $registrationItem->pengalaman;
+                            } elseif (! empty($legacyNotesMap['Pengalaman']) && $legacyNotesMap['Pengalaman'] !== '-') {
+                                $pengalamanValue = in_array(strtolower((string) $legacyNotesMap['Pengalaman']), ['ya', 'yes', '1', 'true'], true);
+                            }
+                            $pengalamanText = is_null($pengalamanValue) ? '-' : ($pengalamanValue ? 'Ya' : 'Tidak');
+
+                            $deskripsiPengalaman = $registrationItem->deskripsi_pengalaman ?: ($legacyNotesMap['Deskripsi Pengalaman'] ?? null);
+                            if (blank($deskripsiPengalaman) && ! empty($registrationItem->notes) && empty($legacyNotesMap)) {
+                                $deskripsiPengalaman = $registrationItem->notes;
+                            }
+                            $deskripsiPengalaman = $deskripsiPengalaman ?: '-';
+
+                            $editTriggerId = 'registration-edit-trigger-'.$registrationItem->id;
+                            $detailPayload = [
+                                'fullName' => $namaLengkap,
+                                'nickName' => $namaPanggilan,
+                                'gender' => $jenisKelamin,
+                                'birthPlace' => $tempatLahir,
+                                'birthDate' => $tanggalLahirText,
+                                'birthDateInput' => $tanggalLahirInput,
+                                'citizenship' => $kewarganegaraan,
+                                'studentPhone' => $teleponSiswa,
+                                'studentEmail' => $registrationItem->email,
+                                'address' => $alamat,
+                                'parentName' => $namaOrtu,
+                                'parentJob' => $pekerjaanOrtu,
+                                'parentPhone' => $noHpOrtu,
+                                'parentEmail' => $emailOrtu,
+                                'instrument' => $instrumenText,
+                                'additionalProgram' => $programTambahanText,
+                                'preferredDays' => $hariPilihanText,
+                                'preferredDaysRaw' => $hariPilihanArray,
+                                'experience' => $pengalamanText,
+                                'experienceValue' => $pengalamanValue === true ? '1' : '0',
+                                'experienceDescription' => $deskripsiPengalaman,
+                                'status' => strtoupper($registrationStatus),
+                                'statusValue' => $registrationStatus,
+                                'selectedClass' => $registrationItem->class?->name ?? '-',
+                                'classId' => (string) ($registrationItem->class_id ?? ''),
+                                'instrumentValue' => $instrumenValue,
+                                'additionalProgramRaw' => $programTambahanArray,
+                                'updateAction' => route('super-admin.registrations.update', $registrationItem),
+                                'editTriggerId' => $editTriggerId,
+                                'deleteAction' => route('super-admin.registrations.destroy', $registrationItem),
+                            ];
                         @endphp
                         <tr>
-                            <td>{{ $registrationItem->full_name }}</td>
+                            <td>{{ $namaLengkap }}</td>
+                            <td>{{ $namaPanggilan }}</td>
                             <td>{{ $registrationItem->email }}</td>
-                            <td>{{ $registrationItem->phone }}</td>
-                            <td>{{ $registrationItem->class?->name ?? '-' }}</td>
-                            <td>{{ $registrationItem->preferred_schedule }}</td>
+                            <td>{{ $teleponSiswa }}</td>
+                            <td>{{ $instrumenText }}</td>
+                            <td>{{ $hariPilihanText }}</td>
                             <td><x-ui.badge :type="$registrationBadge">{{ strtoupper($registrationStatus) }}</x-ui.badge></td>
                             <td>
                                 <div class="action-icons class-action-icons">
-                                    <details class="action-popover">
-                                        <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
-                                        <form class="module-form action-popover-form" method="POST" action="{{ route('super-admin.registrations.update', $registrationItem) }}">
-                                            @csrf
-                                            @method('PUT')
-                                            <label>Nama
-                                                <input type="text" name="full_name" value="{{ $registrationItem->full_name }}" required>
-                                            </label>
-                                            <label>Umur
-                                                <input type="number" name="age" min="4" max="80" value="{{ $registrationItem->age }}" required>
-                                            </label>
-                                            <label>Email
-                                                <input type="email" name="email" value="{{ $registrationItem->email }}" required>
-                                            </label>
-                                            <label>Telepon
-                                                <input type="text" name="phone" value="{{ $registrationItem->phone }}" required>
-                                            </label>
-                                            <label>Kelas
-                                                <select name="class_id">
-                                                    <option value="">Pilih kelas</option>
-                                                    @foreach($classesForManagement as $classItem)
-                                                        <option value="{{ $classItem->id }}" @selected((int) $registrationItem->class_id === (int) $classItem->id)>{{ $classItem->name }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </label>
-                                            <label>Preferensi Jadwal
-                                                <input type="text" name="preferred_schedule" value="{{ $registrationItem->preferred_schedule }}" required>
-                                            </label>
-                                            <label>Status
-                                                <select name="status" required>
-                                                    <option value="pending" @selected($registrationItem->status === 'pending')>pending</option>
-                                                    <option value="accepted" @selected($registrationItem->status === 'accepted')>accepted</option>
-                                                    <option value="rejected" @selected($registrationItem->status === 'rejected')>rejected</option>
-                                                </select>
-                                            </label>
-                                            <label>Catatan
-                                                <textarea name="notes" rows="2">{{ $registrationItem->notes }}</textarea>
-                                            </label>
-                                            <button type="submit">Update</button>
-                                        </form>
-                                    </details>
+                                    <button
+                                        type="button"
+                                        class="btn-icon"
+                                        title="Detail"
+                                        aria-label="Detail"
+                                        data-registration-detail-trigger
+                                        data-registration='@json($detailPayload, JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_TAG | JSON_HEX_QUOT)'
+                                    ><i data-lucide="eye"></i></button>
+
+                                    <button
+                                        type="button"
+                                        class="btn-icon"
+                                        id="{{ $editTriggerId }}"
+                                        title="Edit"
+                                        aria-label="Edit"
+                                        data-registration-edit-trigger
+                                        data-registration='@json($detailPayload, JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_TAG | JSON_HEX_QUOT)'
+                                    ><i data-lucide="pencil-line"></i></button>
                                     <form method="POST" action="{{ route('super-admin.registrations.destroy', $registrationItem) }}" onsubmit="return confirm('Hapus registration ini?');">
                                         @csrf
                                         @method('DELETE')
@@ -569,13 +760,513 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7">No registrations yet. Website leads will appear here automatically.</td>
+                            <td colspan="8">No registrations yet. Website leads will appear here automatically.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </section>
+
+    <div
+        class="fixed inset-0 z-[80] flex items-center justify-center p-3 sm:p-6 opacity-0 pointer-events-none transition-opacity duration-200"
+        data-registration-modal
+        aria-hidden="true"
+    >
+        <div class="absolute inset-0 bg-slate-950/55 backdrop-blur-sm" data-registration-modal-overlay></div>
+
+        <div
+            class="relative w-full max-w-[700px] overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-2xl transition-all duration-200 scale-95 opacity-0"
+            data-registration-modal-panel
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="registration-modal-title"
+        >
+            <header class="flex items-start justify-between gap-3 border-b border-slate-200 px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                        <i data-lucide="clipboard-list" class="h-5 w-5"></i>
+                    </span>
+                    <div>
+                        <h3 id="registration-modal-title" class="text-lg font-semibold text-slate-900">Detail Pendaftaran</h3>
+                        <p class="text-sm text-slate-500">Informasi lengkap data siswa</p>
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+                    data-registration-modal-close
+                    aria-label="Close"
+                >
+                    <i data-lucide="x" class="h-4 w-4"></i>
+                </button>
+            </header>
+
+            <div class="max-h-[68vh] overflow-y-auto px-6 py-5">
+                <section class="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div class="flex items-center gap-3">
+                        <span class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700" id="registration-modal-avatar">-</span>
+                        <div>
+                            <p class="text-sm text-slate-500">Nama Siswa</p>
+                            <p class="text-base font-semibold text-slate-900" data-registration-field="fullName">-</p>
+                        </div>
+                    </div>
+                    <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold" data-registration-status-badge>-</span>
+                </section>
+
+                <section class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Nama Panggilan</p><p class="mt-1 font-medium text-slate-900" data-registration-field="nickName">-</p></article>
+                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Jenis Kelamin</p><p class="mt-1 font-medium text-slate-900" data-registration-field="gender">-</p></article>
+                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Tempat Lahir</p><p class="mt-1 font-medium text-slate-900" data-registration-field="birthPlace">-</p></article>
+                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Tanggal Lahir</p><p class="mt-1 font-medium text-slate-900" data-registration-field="birthDate">-</p></article>
+                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Kewarganegaraan</p><p class="mt-1 font-medium text-slate-900" data-registration-field="citizenship">-</p></article>
+                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">No HP Siswa</p><p class="mt-1 font-medium text-slate-900" data-registration-field="studentPhone">-</p></article>
+                    <article class="rounded-xl border border-slate-200 p-3 sm:col-span-2"><p class="text-xs text-slate-500">Email Siswa</p><p class="mt-1 font-medium text-slate-900" data-registration-field="studentEmail">-</p></article>
+                    <article class="rounded-xl border border-slate-200 p-3 sm:col-span-2"><p class="text-xs text-slate-500">Alamat</p><p class="mt-1 font-medium text-slate-900" data-registration-field="address">-</p></article>
+
+                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Nama Orang Tua</p><p class="mt-1 font-medium text-slate-900" data-registration-field="parentName">-</p></article>
+                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Pekerjaan Orang Tua</p><p class="mt-1 font-medium text-slate-900" data-registration-field="parentJob">-</p></article>
+                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">No HP Orang Tua</p><p class="mt-1 font-medium text-slate-900" data-registration-field="parentPhone">-</p></article>
+                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Email Orang Tua</p><p class="mt-1 font-medium text-slate-900" data-registration-field="parentEmail">-</p></article>
+
+                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Instrumen</p><p class="mt-1 font-medium text-slate-900" data-registration-field="instrument">-</p></article>
+                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Program Tambahan</p><p class="mt-1 font-medium text-slate-900" data-registration-field="additionalProgram">-</p></article>
+                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Hari Pilihan</p><p class="mt-1 font-medium text-slate-900" data-registration-field="preferredDays">-</p></article>
+                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Pengalaman Belajar</p><p class="mt-1 font-medium text-slate-900" data-registration-field="experience">-</p></article>
+                    <article class="rounded-xl border border-slate-200 p-3 sm:col-span-2"><p class="text-xs text-slate-500">Deskripsi Pengalaman</p><p class="mt-1 font-medium text-slate-900" data-registration-field="experienceDescription">-</p></article>
+                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Status</p><p class="mt-1 font-medium text-slate-900" data-registration-field="status">-</p></article>
+                    <article class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-slate-500">Kelas Terpilih</p><p class="mt-1 font-medium text-slate-900" data-registration-field="selectedClass">-</p></article>
+                </section>
+            </div>
+
+            <footer class="flex flex-wrap items-center justify-end gap-2 border-t border-slate-200 px-6 py-4">
+                <button type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100" data-registration-modal-close>Tutup</button>
+                <button type="button" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700" data-registration-modal-edit>Edit Data</button>
+                <button type="button" class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-rose-700" data-registration-modal-delete>Hapus</button>
+            </footer>
+        </div>
+    </div>
+
+    <div
+        class="fixed inset-0 z-[90] flex items-center justify-center p-3 sm:p-6 opacity-0 pointer-events-none transition-opacity duration-200"
+        data-registration-edit-modal
+        aria-hidden="true"
+    >
+        <div class="absolute inset-0 bg-slate-950/55 backdrop-blur-sm" data-registration-edit-modal-overlay></div>
+
+        <div
+            class="relative w-full max-w-[700px] overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-2xl transition-all duration-200 scale-95 opacity-0"
+            data-registration-edit-modal-panel
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="registration-edit-modal-title"
+        >
+            <header class="flex items-start justify-between gap-3 border-b border-slate-200 px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                        <i data-lucide="pencil-line" class="h-5 w-5"></i>
+                    </span>
+                    <div>
+                        <h3 id="registration-edit-modal-title" class="text-lg font-semibold text-slate-900">Edit Data Pendaftaran</h3>
+                        <p class="text-sm text-slate-500">Perbarui informasi pendaftaran siswa</p>
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+                    data-registration-edit-modal-close
+                    aria-label="Close"
+                >
+                    <i data-lucide="x" class="h-4 w-4"></i>
+                </button>
+            </header>
+
+            <form method="POST" class="max-h-[68vh] overflow-y-auto px-6 py-5" data-registration-edit-form>
+                @csrf
+                @method('PUT')
+
+                <section class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <label class="grid gap-1.5 text-sm text-slate-700">Nama Lengkap
+                        <input type="text" name="nama_lengkap" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
+                    </label>
+                    <label class="grid gap-1.5 text-sm text-slate-700">Nama Panggilan
+                        <input type="text" name="nama_panggilan" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
+                    </label>
+                    <label class="grid gap-1.5 text-sm text-slate-700">Jenis Kelamin
+                        <select name="jenis_kelamin" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
+                            <option value="laki-laki">laki-laki</option>
+                            <option value="perempuan">perempuan</option>
+                        </select>
+                    </label>
+                    <label class="grid gap-1.5 text-sm text-slate-700">Tempat Lahir
+                        <input type="text" name="tempat_lahir" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
+                    </label>
+                    <label class="grid gap-1.5 text-sm text-slate-700">Tanggal Lahir
+                        <input type="date" name="tanggal_lahir" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
+                    </label>
+                    <label class="grid gap-1.5 text-sm text-slate-700">Kewarganegaraan
+                        <input type="text" name="kewarganegaraan" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
+                    </label>
+                    <label class="grid gap-1.5 text-sm text-slate-700 sm:col-span-2">Alamat
+                        <textarea name="alamat" rows="2" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required></textarea>
+                    </label>
+                    <label class="grid gap-1.5 text-sm text-slate-700">No HP Siswa
+                        <input type="text" name="no_hp_siswa" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
+                    </label>
+                    <label class="grid gap-1.5 text-sm text-slate-700">Email Siswa
+                        <input type="email" name="email" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
+                    </label>
+                    <label class="grid gap-1.5 text-sm text-slate-700">Nama Orang Tua
+                        <input type="text" name="nama_ortu" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
+                    </label>
+                    <label class="grid gap-1.5 text-sm text-slate-700">Pekerjaan Orang Tua
+                        <input type="text" name="pekerjaan_ortu" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none">
+                    </label>
+                    <label class="grid gap-1.5 text-sm text-slate-700">No HP Orang Tua
+                        <input type="text" name="no_hp_ortu" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
+                    </label>
+                    <label class="grid gap-1.5 text-sm text-slate-700">Email Orang Tua
+                        <input type="email" name="email_ortu" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none">
+                    </label>
+                    <label class="grid gap-1.5 text-sm text-slate-700">Instrumen
+                        <select name="instrumen" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
+                            <option value="">Pilih instrumen</option>
+                            @foreach($instrumenOptions as $instrumenItem)
+                                <option value="{{ $instrumenItem }}">{{ $instrumenItem }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <label class="grid gap-1.5 text-sm text-slate-700">Program Tambahan
+                        <select name="program_tambahan[]" multiple class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none">
+                            @foreach($programTambahanOptions as $programItem)
+                                <option value="{{ $programItem }}">{{ $programItem }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <label class="grid gap-1.5 text-sm text-slate-700">Hari Pilihan
+                        <select name="hari_pilihan[]" multiple class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
+                            @foreach($hariOptions as $hariItem)
+                                <option value="{{ $hariItem }}">{{ $hariItem }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <label class="grid gap-1.5 text-sm text-slate-700">Pernah Belajar Musik
+                        <select name="pengalaman" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
+                            <option value="1">Ya</option>
+                            <option value="0">Tidak</option>
+                        </select>
+                    </label>
+                    <label class="grid gap-1.5 text-sm text-slate-700 sm:col-span-2">Deskripsi Pengalaman
+                        <textarea name="deskripsi_pengalaman" rows="2" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"></textarea>
+                    </label>
+                    <label class="grid gap-1.5 text-sm text-slate-700">Kelas
+                        <select name="class_id" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none">
+                            <option value="">Pilih kelas</option>
+                            @foreach($classesForManagement as $classItem)
+                                <option value="{{ $classItem->id }}">{{ $classItem->name }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <label class="grid gap-1.5 text-sm text-slate-700">Status
+                        <select name="status" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
+                            <option value="pending">pending</option>
+                            <option value="accepted">accepted</option>
+                            <option value="rejected">rejected</option>
+                        </select>
+                    </label>
+                </section>
+
+                <footer class="mt-5 flex flex-wrap items-center justify-end gap-2 border-t border-slate-200 pt-4">
+                    <button type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100" data-registration-edit-modal-close>Batal</button>
+                    <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700">Simpan Perubahan</button>
+                </footer>
+            </form>
+        </div>
+    </div>
+
+    <form method="POST" class="hidden" data-registration-modal-delete-form>
+        @csrf
+        @method('DELETE')
+    </form>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const detailModal = document.querySelector("[data-registration-modal]");
+            const editModal = document.querySelector("[data-registration-edit-modal]");
+
+            if (!detailModal || !editModal) {
+                return;
+            }
+
+            const detailPanel = detailModal.querySelector("[data-registration-modal-panel]");
+            const detailOverlay = detailModal.querySelector("[data-registration-modal-overlay]");
+            const detailCloseButtons = detailModal.querySelectorAll("[data-registration-modal-close]");
+            const detailTriggerButtons = document.querySelectorAll("[data-registration-detail-trigger]");
+            const detailEditButton = detailModal.querySelector("[data-registration-modal-edit]");
+            const detailDeleteButton = detailModal.querySelector("[data-registration-modal-delete]");
+
+            const editPanel = editModal.querySelector("[data-registration-edit-modal-panel]");
+            const editOverlay = editModal.querySelector("[data-registration-edit-modal-overlay]");
+            const editCloseButtons = editModal.querySelectorAll("[data-registration-edit-modal-close]");
+            const editTriggerButtons = document.querySelectorAll("[data-registration-edit-trigger]");
+            const editForm = editModal.querySelector("[data-registration-edit-form]");
+
+            const deleteForm = document.querySelector("[data-registration-modal-delete-form]");
+            const avatar = document.getElementById("registration-modal-avatar");
+            const statusBadge = detailModal.querySelector("[data-registration-status-badge]");
+            const fieldNodes = new Map(
+                Array.from(detailModal.querySelectorAll("[data-registration-field]"))
+                    .map((node) => [node.getAttribute("data-registration-field"), node]),
+            );
+
+            let activePayload = null;
+            let activeDeleteAction = "";
+
+            const parsePayload = (button) => {
+                let payload = {};
+                try {
+                    payload = JSON.parse(button.getAttribute("data-registration") || "{}");
+                } catch {
+                    payload = {};
+                }
+
+                return payload;
+            };
+
+            const syncBodyScroll = () => {
+                const detailOpen = detailModal.getAttribute("aria-hidden") === "false";
+                const editOpen = editModal.getAttribute("aria-hidden") === "false";
+                document.body.style.overflow = detailOpen || editOpen ? "hidden" : "";
+            };
+
+            const setModalState = (modal, panel, isOpen) => {
+                modal.classList.toggle("pointer-events-none", !isOpen);
+                modal.classList.toggle("opacity-0", !isOpen);
+                modal.setAttribute("aria-hidden", String(!isOpen));
+                panel.classList.toggle("opacity-0", !isOpen);
+                panel.classList.toggle("scale-95", !isOpen);
+                syncBodyScroll();
+            };
+
+            const setField = (key, value) => {
+                const target = fieldNodes.get(key);
+                if (!target) {
+                    return;
+                }
+
+                const safeValue = String(value ?? "").trim();
+                target.textContent = safeValue !== "" ? safeValue : "-";
+            };
+
+            const applyStatusBadge = (statusValue) => {
+                const safeStatus = String(statusValue || "-").toUpperCase();
+                statusBadge.textContent = safeStatus;
+                statusBadge.className = "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold";
+
+                if (safeStatus === "ACCEPTED" || safeStatus === "DITERIMA") {
+                    statusBadge.classList.add("bg-emerald-100", "text-emerald-700");
+                    return;
+                }
+
+                if (safeStatus === "PENDING") {
+                    statusBadge.classList.add("bg-amber-100", "text-amber-700");
+                    return;
+                }
+
+                if (safeStatus === "REJECTED" || safeStatus === "DITOLAK") {
+                    statusBadge.classList.add("bg-rose-100", "text-rose-700");
+                    return;
+                }
+
+                statusBadge.classList.add("bg-slate-200", "text-slate-700");
+            };
+
+            const normalizeArray = (value) => {
+                if (Array.isArray(value)) {
+                    return value.map((item) => String(item).trim()).filter(Boolean);
+                }
+
+                const safeValue = String(value ?? "").trim();
+                if (safeValue === "" || safeValue === "-") {
+                    return [];
+                }
+
+                return safeValue.split(",").map((item) => item.trim()).filter(Boolean);
+            };
+
+            const setInputValue = (name, value) => {
+                const element = editForm.elements.namedItem(name);
+                if (!element) {
+                    return;
+                }
+
+                const safeValue = String(value ?? "").trim();
+                element.value = safeValue === "-" ? "" : safeValue;
+            };
+
+            const setMultiSelectValues = (name, values) => {
+                const element = editForm.elements.namedItem(name);
+                if (!(element instanceof HTMLSelectElement)) {
+                    return;
+                }
+
+                const selected = new Set(values);
+                Array.from(element.options).forEach((option) => {
+                    option.selected = selected.has(option.value);
+                });
+            };
+
+            const openEditModal = (payload) => {
+                activePayload = payload || activePayload || {};
+                if (!activePayload || !editForm) {
+                    return;
+                }
+
+                if (activePayload.updateAction) {
+                    editForm.setAttribute("action", String(activePayload.updateAction));
+                }
+
+                setInputValue("nama_lengkap", activePayload.fullName);
+                setInputValue("nama_panggilan", activePayload.nickName);
+                setInputValue("jenis_kelamin", activePayload.gender);
+                setInputValue("tempat_lahir", activePayload.birthPlace);
+                setInputValue("tanggal_lahir", activePayload.birthDateInput);
+                setInputValue("kewarganegaraan", activePayload.citizenship === "-" ? "Indonesia" : activePayload.citizenship);
+                setInputValue("alamat", activePayload.address);
+                setInputValue("no_hp_siswa", activePayload.studentPhone);
+                setInputValue("email", activePayload.studentEmail);
+                setInputValue("nama_ortu", activePayload.parentName);
+                setInputValue("pekerjaan_ortu", activePayload.parentJob);
+                setInputValue("no_hp_ortu", activePayload.parentPhone);
+                setInputValue("email_ortu", activePayload.parentEmail);
+                setInputValue("instrumen", activePayload.instrumentValue || activePayload.instrument);
+                setInputValue("pengalaman", activePayload.experienceValue || "0");
+                setInputValue("deskripsi_pengalaman", activePayload.experienceDescription);
+                setInputValue("class_id", activePayload.classId || "");
+                setInputValue("status", activePayload.statusValue || "pending");
+
+                setMultiSelectValues("program_tambahan[]", normalizeArray(activePayload.additionalProgramRaw || activePayload.additionalProgram));
+                setMultiSelectValues("hari_pilihan[]", normalizeArray(activePayload.preferredDaysRaw || activePayload.preferredDays));
+
+                setModalState(editModal, editPanel, true);
+            };
+
+            const closeDetailModal = () => {
+                setModalState(detailModal, detailPanel, false);
+                activeDeleteAction = "";
+            };
+
+            const closeEditModal = () => {
+                setModalState(editModal, editPanel, false);
+            };
+
+            const openModalWithData = (payload) => {
+                const fields = [
+                    "fullName",
+                    "nickName",
+                    "gender",
+                    "birthPlace",
+                    "birthDate",
+                    "citizenship",
+                    "studentPhone",
+                    "studentEmail",
+                    "address",
+                    "parentName",
+                    "parentJob",
+                    "parentPhone",
+                    "parentEmail",
+                    "instrument",
+                    "additionalProgram",
+                    "preferredDays",
+                    "experience",
+                    "experienceDescription",
+                    "status",
+                    "selectedClass",
+                ];
+
+                fields.forEach((key) => setField(key, payload[key]));
+                applyStatusBadge(payload.status);
+
+                const fullName = String(payload.fullName || "-").trim();
+                avatar.textContent = fullName === "-"
+                    ? "-"
+                    : fullName
+                        .split(/\s+/)
+                        .filter(Boolean)
+                        .slice(0, 2)
+                        .map((chunk) => chunk.charAt(0).toUpperCase())
+                        .join("");
+
+                activePayload = payload;
+                activeDeleteAction = String(payload.deleteAction || "");
+
+                setModalState(detailModal, detailPanel, true);
+            };
+
+            detailTriggerButtons.forEach((button) => {
+                button.addEventListener("click", () => {
+                    openModalWithData(parsePayload(button));
+                });
+            });
+
+            editTriggerButtons.forEach((button) => {
+                button.addEventListener("click", () => {
+                    openEditModal(parsePayload(button));
+                });
+            });
+
+            detailCloseButtons.forEach((button) => {
+                button.addEventListener("click", closeDetailModal);
+            });
+
+            editCloseButtons.forEach((button) => {
+                button.addEventListener("click", closeEditModal);
+            });
+
+            detailOverlay.addEventListener("click", closeDetailModal);
+            editOverlay.addEventListener("click", closeEditModal);
+
+            document.addEventListener("keydown", (event) => {
+                if (event.key !== "Escape") {
+                    return;
+                }
+
+                if (editModal.getAttribute("aria-hidden") === "false") {
+                    closeEditModal();
+                    return;
+                }
+
+                if (detailModal.getAttribute("aria-hidden") === "false") {
+                    closeDetailModal();
+                }
+            });
+
+            detailEditButton.addEventListener("click", () => {
+                closeDetailModal();
+                if (!activePayload) {
+                    return;
+                }
+
+                openEditModal(activePayload);
+            });
+
+            detailDeleteButton.addEventListener("click", () => {
+                if (!activeDeleteAction || !deleteForm) {
+                    return;
+                }
+
+                const confirmed = window.confirm("Hapus registration ini?");
+                if (!confirmed) {
+                    return;
+                }
+
+                deleteForm.setAttribute("action", activeDeleteAction);
+                deleteForm.submit();
+            });
+        });
+    </script>
 @endif
 
 @if ($moduleKey === 'blog')
