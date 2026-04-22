@@ -7,6 +7,7 @@ use App\Models\MusicClass;
 use App\Models\Schedule;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -22,6 +23,10 @@ class ScheduleController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        if (! $this->hasSchedulesTable()) {
+            return back()->with('error', 'Tabel schedules belum tersedia. Jalankan migrasi terlebih dahulu.');
+        }
+
         $data = $this->validatePayload($request);
         $class = MusicClass::query()->findOrFail($data['class_id']);
 
@@ -37,6 +42,10 @@ class ScheduleController extends Controller
 
     public function update(Request $request, Schedule $schedule): RedirectResponse
     {
+        if (! $this->hasSchedulesTable()) {
+            return back()->with('error', 'Tabel schedules belum tersedia. Jalankan migrasi terlebih dahulu.');
+        }
+
         $data = $this->validatePayload($request, $schedule->id);
         $class = MusicClass::query()->findOrFail($data['class_id']);
 
@@ -52,6 +61,10 @@ class ScheduleController extends Controller
 
     public function destroy(Schedule $schedule): RedirectResponse
     {
+        if (! $this->hasSchedulesTable()) {
+            return back()->with('error', 'Tabel schedules belum tersedia. Jalankan migrasi terlebih dahulu.');
+        }
+
         $schedule->delete();
 
         return back()->with('success', 'Jadwal kelas berhasil dihapus.');
@@ -81,5 +94,10 @@ class ScheduleController extends Controller
         }
 
         return $data;
+    }
+
+    private function hasSchedulesTable(): bool
+    {
+        return Schema::hasTable('schedules');
     }
 }

@@ -815,6 +815,7 @@ class SuperAdminController extends Controller
     public function module(string $module): View
     {
         $moduleData = $this->moduleData($module);
+        $scheduleFeatureReady = $this->hasSchedulesTable();
 
         return view('portal.super-admin.module', [
             'roleKey' => 'super_admin',
@@ -830,7 +831,10 @@ class SuperAdminController extends Controller
             'teachersForClassOptions' => Teacher::query()->orderBy('name')->get(['id', 'name']),
             'classesForManagement' => MusicClass::query()->with(['teacher'])->orderBy('name')->get(),
             'classesForSchedule' => MusicClass::query()->with('teacher')->orderBy('name')->get(),
-            'schedulesForManagement' => Schedule::query()->with(['musicClass.teacher', 'teacher'])->orderBy('day')->orderBy('time')->get(),
+            'schedulesForManagement' => $scheduleFeatureReady
+                ? Schedule::query()->with(['musicClass.teacher', 'teacher'])->orderBy('day')->orderBy('time')->get()
+                : collect(),
+            'scheduleFeatureReady' => $scheduleFeatureReady,
             'dayOptions' => self::SCHEDULE_DAY_OPTIONS,
             'approvedRegistrationsForStudents' => Registration::query()
                 ->with('class')
@@ -982,12 +986,14 @@ class SuperAdminController extends Controller
                 'title' => 'Schedule',
                 'description' => 'Jadwal kelas berdasarkan hari dan jam.',
                 'columns' => ['Class', 'Hari', 'Jam', 'Pengajar'],
-                'rows' => Schedule::with(['musicClass', 'teacher'])->orderBy('day')->orderBy('time')->get()->map(fn (Schedule $schedule) => [
-                    $schedule->musicClass?->name ?? '-',
-                    $schedule->day,
-                    substr((string) $schedule->time, 0, 5),
-                    $schedule->teacher?->name ?? ($schedule->musicClass?->teacher?->name ?? '-'),
-                ])->all(),
+                'rows' => $this->hasSchedulesTable()
+                    ? Schedule::with(['musicClass', 'teacher'])->orderBy('day')->orderBy('time')->get()->map(fn (Schedule $schedule) => [
+                        $schedule->musicClass?->name ?? '-',
+                        $schedule->day,
+                        substr((string) $schedule->time, 0, 5),
+                        $schedule->teacher?->name ?? ($schedule->musicClass?->teacher?->name ?? '-'),
+                    ])->all()
+                    : [],
             ],
             'students' => [
                 'title' => 'Students',
@@ -1101,6 +1107,11 @@ class SuperAdminController extends Controller
             ],
             default => abort(404),
         };
+    }
+
+    private function hasSchedulesTable(): bool
+    {
+        return Schema::hasTable('schedules');
     }
 
     private function resolveCoreRole(string $roleSlug): Role

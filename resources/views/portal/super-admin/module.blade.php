@@ -1934,136 +1934,144 @@
 
 @if ($moduleKey === 'schedule')
     @php
+        $scheduleFeatureReady = (bool) ($scheduleFeatureReady ?? false);
         $availableDayOptions = $dayOptions ?? ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
         $openScheduleCreate = $errors->hasAny(['class_id', 'day', 'time']);
     @endphp
 
-    <section class="card" data-searchable>
-        <details class="teacher-create" @if($openScheduleCreate) open @endif>
-            <summary>Tambah Jadwal Class</summary>
-            <form class="module-form module-form-grid teacher-create-form" method="POST" action="{{ route('super-admin.schedule.store') }}">
-                @csrf
-                <label>Class
-                    <select name="class_id" data-schedule-class-select required>
-                        <option value="">Pilih class</option>
-                        @foreach($classesForSchedule as $class)
-                            <option
-                                value="{{ $class->id }}"
-                                data-teacher-name="{{ $class->teacher?->name ?? 'Belum ada pengajar' }}"
-                                @selected((string) old('class_id') === (string) $class->id)
-                            >{{ $class->name }}</option>
-                        @endforeach
-                    </select>
-                </label>
-                <label>Hari
-                    <select name="day" required>
-                        <option value="">Pilih hari</option>
-                        @foreach($availableDayOptions as $dayOption)
-                            <option value="{{ $dayOption }}" @selected(old('day') === $dayOption)>{{ $dayOption }}</option>
-                        @endforeach
-                    </select>
-                </label>
-                <label>Jam
-                    <input type="time" name="time" value="{{ old('time') }}" required>
-                </label>
-                <label>Teacher (otomatis dari class)
-                    <input type="text" value="-" data-schedule-teacher-preview readonly>
-                </label>
-                <div class="form-actions">
-                    <button type="submit">Simpan Jadwal</button>
-                    <button type="reset" class="btn-secondary">Cancel</button>
-                </div>
-            </form>
-        </details>
-    </section>
+    @if (! $scheduleFeatureReady)
+        <section class="card" data-searchable>
+            <x-ui.badge type="danger">ERROR</x-ui.badge>
+            <p style="margin-top: 0.5rem;">Fitur schedule belum aktif karena tabel <strong>schedules</strong> belum ada. Jalankan migrasi di server: <strong>php artisan migrate --force</strong>.</p>
+        </section>
+    @else
+        <section class="card" data-searchable>
+            <details class="teacher-create" @if($openScheduleCreate) open @endif>
+                <summary>Tambah Jadwal Class</summary>
+                <form class="module-form module-form-grid teacher-create-form" method="POST" action="{{ route('super-admin.schedule.store') }}">
+                    @csrf
+                    <label>Class
+                        <select name="class_id" data-schedule-class-select required>
+                            <option value="">Pilih class</option>
+                            @foreach($classesForSchedule as $class)
+                                <option
+                                    value="{{ $class->id }}"
+                                    data-teacher-name="{{ $class->teacher?->name ?? 'Belum ada pengajar' }}"
+                                    @selected((string) old('class_id') === (string) $class->id)
+                                >{{ $class->name }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <label>Hari
+                        <select name="day" required>
+                            <option value="">Pilih hari</option>
+                            @foreach($availableDayOptions as $dayOption)
+                                <option value="{{ $dayOption }}" @selected(old('day') === $dayOption)>{{ $dayOption }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <label>Jam
+                        <input type="time" name="time" value="{{ old('time') }}" required>
+                    </label>
+                    <label>Teacher (otomatis dari class)
+                        <input type="text" value="-" data-schedule-teacher-preview readonly>
+                    </label>
+                    <div class="form-actions">
+                        <button type="submit">Simpan Jadwal</button>
+                        <button type="reset" class="btn-secondary">Cancel</button>
+                    </div>
+                </form>
+            </details>
+        </section>
 
-    <section class="card" data-searchable>
-        <h3>Daftar Jadwal Class</h3>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Class</th>
-                        <th>Hari</th>
-                        <th>Jam</th>
-                        <th>Pengajar</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($schedulesForManagement as $scheduleItem)
-                        @php
-                            $teacherName = $scheduleItem->teacher?->name ?? ($scheduleItem->musicClass?->teacher?->name ?? '-');
-                            $timeValue = substr((string) $scheduleItem->time, 0, 5);
-                        @endphp
+        <section class="card" data-searchable>
+            <h3>Daftar Jadwal Class</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
                         <tr>
-                            <td>{{ $scheduleItem->musicClass?->name ?? '-' }}</td>
-                            <td>{{ $scheduleItem->day }}</td>
-                            <td>{{ $timeValue !== '' ? $timeValue : '-' }}</td>
-                            <td>{{ $teacherName }}</td>
-                            <td>
-                                <details class="action-popover" style="margin-bottom: 0.35rem;">
-                                    <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
-                                    <form class="module-form action-popover-form" method="POST" action="{{ route('super-admin.schedule.update', $scheduleItem) }}">
+                            <th>Class</th>
+                            <th>Hari</th>
+                            <th>Jam</th>
+                            <th>Pengajar</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($schedulesForManagement as $scheduleItem)
+                            @php
+                                $teacherName = $scheduleItem->teacher?->name ?? ($scheduleItem->musicClass?->teacher?->name ?? '-');
+                                $timeValue = substr((string) $scheduleItem->time, 0, 5);
+                            @endphp
+                            <tr>
+                                <td>{{ $scheduleItem->musicClass?->name ?? '-' }}</td>
+                                <td>{{ $scheduleItem->day }}</td>
+                                <td>{{ $timeValue !== '' ? $timeValue : '-' }}</td>
+                                <td>{{ $teacherName }}</td>
+                                <td>
+                                    <details class="action-popover" style="margin-bottom: 0.35rem;">
+                                        <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
+                                        <form class="module-form action-popover-form" method="POST" action="{{ route('super-admin.schedule.update', $scheduleItem) }}">
+                                            @csrf
+                                            @method('PUT')
+                                            <label>Class
+                                                <select name="class_id" required>
+                                                    @foreach($classesForSchedule as $class)
+                                                        <option value="{{ $class->id }}" @selected((int) $scheduleItem->class_id === (int) $class->id)>{{ $class->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </label>
+                                            <label>Hari
+                                                <select name="day" required>
+                                                    @foreach($availableDayOptions as $dayOption)
+                                                        <option value="{{ $dayOption }}" @selected($scheduleItem->day === $dayOption)>{{ $dayOption }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </label>
+                                            <label>Jam
+                                                <input type="time" name="time" value="{{ $timeValue }}" required>
+                                            </label>
+                                            <button type="submit">Update Jadwal</button>
+                                        </form>
+                                    </details>
+
+                                    <form method="POST" action="{{ route('super-admin.schedule.destroy', $scheduleItem) }}" onsubmit="return confirm('Hapus jadwal class ini?');">
                                         @csrf
-                                        @method('PUT')
-                                        <label>Class
-                                            <select name="class_id" required>
-                                                @foreach($classesForSchedule as $class)
-                                                    <option value="{{ $class->id }}" @selected((int) $scheduleItem->class_id === (int) $class->id)>{{ $class->name }}</option>
-                                                @endforeach
-                                            </select>
-                                        </label>
-                                        <label>Hari
-                                            <select name="day" required>
-                                                @foreach($availableDayOptions as $dayOption)
-                                                    <option value="{{ $dayOption }}" @selected($scheduleItem->day === $dayOption)>{{ $dayOption }}</option>
-                                                @endforeach
-                                            </select>
-                                        </label>
-                                        <label>Jam
-                                            <input type="time" name="time" value="{{ $timeValue }}" required>
-                                        </label>
-                                        <button type="submit">Update Jadwal</button>
+                                        @method('DELETE')
+                                        <button type="submit" class="btn-icon btn-icon-danger" title="Hapus" aria-label="Hapus"><i data-lucide="trash-2"></i></button>
                                     </form>
-                                </details>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5">Belum ada jadwal class. Tambahkan jadwal berdasarkan hari dan jam.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
-                                <form method="POST" action="{{ route('super-admin.schedule.destroy', $scheduleItem) }}" onsubmit="return confirm('Hapus jadwal class ini?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn-icon btn-icon-danger" title="Hapus" aria-label="Hapus"><i data-lucide="trash-2"></i></button>
-                                </form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5">Belum ada jadwal class. Tambahkan jadwal berdasarkan hari dan jam.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </section>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const classSelect = document.querySelector("[data-schedule-class-select]");
+                const teacherPreview = document.querySelector("[data-schedule-teacher-preview]");
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const classSelect = document.querySelector("[data-schedule-class-select]");
-            const teacherPreview = document.querySelector("[data-schedule-teacher-preview]");
+                if (!classSelect || !teacherPreview) {
+                    return;
+                }
 
-            if (!classSelect || !teacherPreview) {
-                return;
-            }
+                const syncTeacherPreview = () => {
+                    const selectedOption = classSelect.options[classSelect.selectedIndex];
+                    const teacherName = selectedOption ? selectedOption.getAttribute("data-teacher-name") : "";
+                    teacherPreview.value = teacherName && teacherName.trim() !== "" ? teacherName : "Belum ada pengajar";
+                };
 
-            const syncTeacherPreview = () => {
-                const selectedOption = classSelect.options[classSelect.selectedIndex];
-                const teacherName = selectedOption ? selectedOption.getAttribute("data-teacher-name") : "";
-                teacherPreview.value = teacherName && teacherName.trim() !== "" ? teacherName : "Belum ada pengajar";
-            };
-
-            classSelect.addEventListener("change", syncTeacherPreview);
-            syncTeacherPreview();
-        });
-    </script>
+                classSelect.addEventListener("change", syncTeacherPreview);
+                syncTeacherPreview();
+            });
+        </script>
+    @endif
 @endif
 
 @if (! in_array($moduleKey, ['users', 'roles', 'teachers', 'schedule', 'classes', 'students', 'registrations', 'finance', 'blog', 'gallery', 'events', 'testimonials', 'settings', 'logs'], true))
