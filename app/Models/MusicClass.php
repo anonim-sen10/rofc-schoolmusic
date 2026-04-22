@@ -47,4 +47,9 @@ class MusicClass extends Model
     {
         return $this->hasMany(Payment::class, 'class_id');
     }
+
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(Schedule::class, 'class_id');
+    }
 }

@@ -1933,117 +1933,137 @@
 @endif
 
 @if ($moduleKey === 'schedule')
+    @php
+        $availableDayOptions = $dayOptions ?? ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+        $openScheduleCreate = $errors->hasAny(['class_id', 'day', 'time']);
+    @endphp
+
     <section class="card" data-searchable>
-        <h3>Tentukan Pengajar per Class</h3>
-        <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.schedule.teacher') }}">
-            @csrf
-            <label>Class
-                <select name="class_id" required>
-                    <option value="">Pilih class</option>
-                    @foreach($classesForSchedule as $class)
-                        <option value="{{ $class->id }}">{{ $class->name }}</option>
-                    @endforeach
-                </select>
-            </label>
-            <label>Pengajar
-                <select name="teacher_id" required>
-                    <option value="">Pilih pengajar</option>
-                    @foreach($teachersForClassOptions as $teacherOption)
-                        <option value="{{ $teacherOption->id }}">{{ $teacherOption->name }}</option>
-                    @endforeach
-                </select>
-            </label>
-            <div class="form-actions">
-                <button type="submit">Simpan Pengajar</button>
-                <button type="reset" class="btn-secondary">Cancel</button>
-            </div>
-        </form>
+        <details class="teacher-create" @if($openScheduleCreate) open @endif>
+            <summary>Tambah Jadwal Class</summary>
+            <form class="module-form module-form-grid teacher-create-form" method="POST" action="{{ route('super-admin.schedule.store') }}">
+                @csrf
+                <label>Class
+                    <select name="class_id" data-schedule-class-select required>
+                        <option value="">Pilih class</option>
+                        @foreach($classesForSchedule as $class)
+                            <option
+                                value="{{ $class->id }}"
+                                data-teacher-name="{{ $class->teacher?->name ?? 'Belum ada pengajar' }}"
+                                @selected((string) old('class_id') === (string) $class->id)
+                            >{{ $class->name }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label>Hari
+                    <select name="day" required>
+                        <option value="">Pilih hari</option>
+                        @foreach($availableDayOptions as $dayOption)
+                            <option value="{{ $dayOption }}" @selected(old('day') === $dayOption)>{{ $dayOption }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label>Jam
+                    <input type="time" name="time" value="{{ old('time') }}" required>
+                </label>
+                <label>Teacher (otomatis dari class)
+                    <input type="text" value="-" data-schedule-teacher-preview readonly>
+                </label>
+                <div class="form-actions">
+                    <button type="submit">Simpan Jadwal</button>
+                    <button type="reset" class="btn-secondary">Cancel</button>
+                </div>
+            </form>
+        </details>
     </section>
 
     <section class="card" data-searchable>
-        <h3>Tentukan Siswa per Class</h3>
-        <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.schedule.students') }}">
-            @csrf
-            <label>Class
-                <select name="class_id" required>
-                    <option value="">Pilih class</option>
-                    @foreach($classesForSchedule as $class)
-                        <option value="{{ $class->id }}">{{ $class->name }}</option>
-                    @endforeach
-                </select>
-            </label>
-            <label>Siswa (boleh lebih dari satu)
-                <select name="student_ids[]" multiple required size="8">
-                    @foreach($studentsForSchedule as $studentOption)
-                        <option value="{{ $studentOption->id }}">{{ $studentOption->name }} ({{ $studentOption->email ?? '-' }})</option>
-                    @endforeach
-                </select>
-            </label>
-            <div class="form-actions">
-                <button type="submit">Tambah Siswa ke Class</button>
-                <button type="reset" class="btn-secondary">Cancel</button>
-            </div>
-        </form>
-    </section>
-
-    <section class="card" data-searchable>
-        <h3>Ringkasan Schedule</h3>
+        <h3>Daftar Jadwal Class</h3>
         <div class="table-wrap">
             <table>
                 <thead>
                     <tr>
                         <th>Class</th>
+                        <th>Hari</th>
+                        <th>Jam</th>
                         <th>Pengajar</th>
-                        <th>Status Jadwal</th>
-                        <th>Jumlah Siswa</th>
-                        <th>Daftar Siswa</th>
-                        <th>Catatan Respon</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($classesForSchedule as $class)
+                    @forelse ($schedulesForManagement as $scheduleItem)
+                        @php
+                            $teacherName = $scheduleItem->teacher?->name ?? ($scheduleItem->musicClass?->teacher?->name ?? '-');
+                            $timeValue = substr((string) $scheduleItem->time, 0, 5);
+                        @endphp
                         <tr>
-                            <td>{{ $class->name }}</td>
-                            <td>{{ $class->teacher?->name ?? '-' }}</td>
+                            <td>{{ $scheduleItem->musicClass?->name ?? '-' }}</td>
+                            <td>{{ $scheduleItem->day }}</td>
+                            <td>{{ $timeValue !== '' ? $timeValue : '-' }}</td>
+                            <td>{{ $teacherName }}</td>
                             <td>
-                                @php
-                                    $assignmentStatus = strtolower($class->assignment_status ?? 'pending');
-                                    $assignmentBadge = $assignmentStatus === 'accepted' ? 'success' : ($assignmentStatus === 'rejected' ? 'danger' : 'warning');
-                                @endphp
-                                <x-ui.badge :type="$assignmentBadge">{{ strtoupper($assignmentStatus) }}</x-ui.badge>
-                            </td>
-                            <td>{{ $class->students->count() }}</td>
-                            <td>{{ $class->students->pluck('name')->implode(', ') ?: '-' }}</td>
-                            <td>{{ $class->assignment_note ?? '-' }}</td>
-                            <td>
-                                @if($class->teacher_id)
-                                    <form method="POST" action="{{ route('super-admin.schedule.teacher.destroy', $class) }}" style="margin-bottom: 0.35rem;" onsubmit="return confirm('Lepas pengajar dari class ini?');">
+                                <details class="action-popover" style="margin-bottom: 0.35rem;">
+                                    <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
+                                    <form class="module-form action-popover-form" method="POST" action="{{ route('super-admin.schedule.update', $scheduleItem) }}">
                                         @csrf
-                                        @method('DELETE')
-                                        <button type="submit">Lepas Guru</button>
+                                        @method('PUT')
+                                        <label>Class
+                                            <select name="class_id" required>
+                                                @foreach($classesForSchedule as $class)
+                                                    <option value="{{ $class->id }}" @selected((int) $scheduleItem->class_id === (int) $class->id)>{{ $class->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </label>
+                                        <label>Hari
+                                            <select name="day" required>
+                                                @foreach($availableDayOptions as $dayOption)
+                                                    <option value="{{ $dayOption }}" @selected($scheduleItem->day === $dayOption)>{{ $dayOption }}</option>
+                                                @endforeach
+                                            </select>
+                                        </label>
+                                        <label>Jam
+                                            <input type="time" name="time" value="{{ $timeValue }}" required>
+                                        </label>
+                                        <button type="submit">Update Jadwal</button>
                                     </form>
-                                @endif
-                                @forelse($class->students as $studentInClass)
-                                    <form method="POST" action="{{ route('super-admin.schedule.students.destroy', [$class, $studentInClass]) }}" style="margin-bottom: 0.35rem;" onsubmit="return confirm('Hapus siswa {{ $studentInClass->name }} dari class ini?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit">Hapus {{ $studentInClass->name }}</button>
-                                    </form>
-                                @empty
-                                    -
-                                @endforelse
+                                </details>
+
+                                <form method="POST" action="{{ route('super-admin.schedule.destroy', $scheduleItem) }}" onsubmit="return confirm('Hapus jadwal class ini?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn-icon btn-icon-danger" title="Hapus" aria-label="Hapus"><i data-lucide="trash-2"></i></button>
+                                </form>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7">No schedule data yet. Assign class-teacher pairs to activate scheduling.</td>
+                            <td colspan="5">Belum ada jadwal class. Tambahkan jadwal berdasarkan hari dan jam.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </section>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const classSelect = document.querySelector("[data-schedule-class-select]");
+            const teacherPreview = document.querySelector("[data-schedule-teacher-preview]");
+
+            if (!classSelect || !teacherPreview) {
+                return;
+            }
+
+            const syncTeacherPreview = () => {
+                const selectedOption = classSelect.options[classSelect.selectedIndex];
+                const teacherName = selectedOption ? selectedOption.getAttribute("data-teacher-name") : "";
+                teacherPreview.value = teacherName && teacherName.trim() !== "" ? teacherName : "Belum ada pengajar";
+            };
+
+            classSelect.addEventListener("change", syncTeacherPreview);
+            syncTeacherPreview();
+        });
+    </script>
 @endif
 
 @if (! in_array($moduleKey, ['users', 'roles', 'teachers', 'schedule', 'classes', 'students', 'registrations', 'finance', 'blog', 'gallery', 'events', 'testimonials', 'settings', 'logs'], true))

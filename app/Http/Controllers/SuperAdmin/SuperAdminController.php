@@ -11,6 +11,7 @@ use App\Models\MusicClass;
 use App\Models\Payment;
 use App\Models\Registration;
 use App\Models\Role;
+use App\Models\Schedule;
 use App\Models\Student;
 use App\Models\StudentProgress;
 use App\Models\Teacher;
@@ -45,6 +46,8 @@ class SuperAdminController extends Controller
         'teacher' => ['name' => 'Teacher', 'description' => 'Portal pengajar dan akademik.'],
         'student' => ['name' => 'Student', 'description' => 'Portal siswa.'],
     ];
+
+    private const SCHEDULE_DAY_OPTIONS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
     public function storeUser(Request $request): RedirectResponse
     {
@@ -826,7 +829,9 @@ class SuperAdminController extends Controller
             'teachersForManagement' => Teacher::query()->with(['user', 'classes'])->latest()->take(50)->get(),
             'teachersForClassOptions' => Teacher::query()->orderBy('name')->get(['id', 'name']),
             'classesForManagement' => MusicClass::query()->with(['teacher'])->orderBy('name')->get(),
-            'classesForSchedule' => MusicClass::query()->with(['teacher', 'students'])->orderBy('name')->get(),
+            'classesForSchedule' => MusicClass::query()->with('teacher')->orderBy('name')->get(),
+            'schedulesForManagement' => Schedule::query()->with(['musicClass.teacher', 'teacher'])->orderBy('day')->orderBy('time')->get(),
+            'dayOptions' => self::SCHEDULE_DAY_OPTIONS,
             'approvedRegistrationsForStudents' => Registration::query()
                 ->with('class')
                 ->where('status', 'accepted')
@@ -975,12 +980,13 @@ class SuperAdminController extends Controller
             ],
             'schedule' => [
                 'title' => 'Schedule',
-                'description' => 'Penentuan class untuk pengajar dan siswa.',
-                'columns' => ['Class', 'Pengajar', 'Jumlah Siswa'],
-                'rows' => MusicClass::with(['teacher', 'students'])->orderBy('name')->get()->map(fn (MusicClass $class) => [
-                    $class->name,
-                    ($class->teacher?->name ?? '-').' ('.strtoupper($class->assignment_status ?? 'pending').')',
-                    (string) $class->students->count(),
+                'description' => 'Jadwal kelas berdasarkan hari dan jam.',
+                'columns' => ['Class', 'Hari', 'Jam', 'Pengajar'],
+                'rows' => Schedule::with(['musicClass', 'teacher'])->orderBy('day')->orderBy('time')->get()->map(fn (Schedule $schedule) => [
+                    $schedule->musicClass?->name ?? '-',
+                    $schedule->day,
+                    substr((string) $schedule->time, 0, 5),
+                    $schedule->teacher?->name ?? ($schedule->musicClass?->teacher?->name ?? '-'),
                 ])->all(),
             ],
             'students' => [

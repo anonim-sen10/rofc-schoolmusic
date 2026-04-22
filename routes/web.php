@@ -7,6 +7,7 @@ use App\Http\Controllers\Finance\FinanceManagementController;
 use App\Http\Controllers\Portal\PortalController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\Student\StudentPortalController;
+use App\Http\Controllers\SuperAdmin\ScheduleController as SuperAdminScheduleController;
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 use App\Http\Controllers\Teacher\TeacherPortalController;
 use App\Http\Controllers\Teacher\TeacherProgressController;
@@ -74,17 +75,22 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'role:su
     Route::get('/teachers/{teacher}/edit', [SuperAdminController::class, 'editTeacher'])->name('teachers.edit');
     Route::put('/teachers/{teacher}', [SuperAdminController::class, 'updateTeacher'])->name('teachers.update');
     Route::delete('/teachers/{teacher}', [SuperAdminController::class, 'destroyTeacher'])->name('teachers.destroy');
-    Route::post('/schedule/teacher', [SuperAdminController::class, 'assignScheduleTeacher'])->name('schedule.teacher');
-    Route::delete('/schedule/teacher/{class}', [SuperAdminController::class, 'unassignScheduleTeacher'])->name('schedule.teacher.destroy');
-    Route::post('/schedule/students', [SuperAdminController::class, 'assignScheduleStudents'])->name('schedule.students');
-    Route::delete('/schedule/classes/{class}/students/{student}', [SuperAdminController::class, 'removeScheduleStudent'])->name('schedule.students.destroy');
+    Route::post('/schedule', [SuperAdminScheduleController::class, 'store'])->name('schedule.store');
+    Route::put('/schedule/{schedule}', [SuperAdminScheduleController::class, 'update'])->name('schedule.update');
+    Route::delete('/schedule/{schedule}', [SuperAdminScheduleController::class, 'destroy'])->name('schedule.destroy');
     Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
     Route::get('/users/{user}/detail', [SuperAdminController::class, 'showUser'])->name('users.show');
     Route::get('/users/{user}/edit', [SuperAdminController::class, 'editUser'])->name('users.edit');
     Route::put('/users/{user}', [SuperAdminController::class, 'updateUser'])->name('users.update');
     Route::delete('/users/{user}', [SuperAdminController::class, 'destroyUser'])->name('users.destroy');
     Route::post('/roles', [SuperAdminController::class, 'storeRole'])->name('roles.store');
-    Route::get('/{module}', [SuperAdminController::class, 'module'])
+    Route::get('/{module}', function (string $module) {
+        if ($module === 'schedule') {
+            return app(SuperAdminScheduleController::class)->index();
+        }
+
+        return app(SuperAdminController::class)->module($module);
+    })
         ->whereIn('module', ['users', 'roles', 'classes', 'teachers', 'schedule', 'students', 'registrations', 'finance', 'reports', 'blog', 'gallery', 'events', 'testimonials', 'settings', 'logs'])
         ->name('module');
 });

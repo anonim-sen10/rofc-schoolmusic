@@ -38,4 +38,9 @@ class Teacher extends Model
     {
         return $this->hasMany(MusicClass::class, 'teacher_id');
     }
+
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(Schedule::class);
+    }
 }
