@@ -44,9 +44,25 @@
                         {{ $item['label'] }}
                     </a>
                 @endforeach
+
+                @auth
+                    <a href="{{ route('portal.redirect') }}" class="mobile-only-link">Login</a>
+                    <a href="{{ route('register') }}" class="mobile-only-link">Daftar Sekarang</a>
+                @else
+                    <a href="{{ route('login') }}" class="mobile-only-link">Login</a>
+                    <a href="{{ route('register') }}" class="mobile-only-link">Daftar Sekarang</a>
+                @endauth
             </nav>
 
-            <a href="{{ route('register') }}" class="btn btn-gold desktop-cta">Daftar Sekarang</a>
+            <div class="nav-actions">
+                @auth
+                    <a href="{{ route('portal.redirect') }}" class="btn btn-header-outline desktop-cta">Login</a>
+                    <a href="{{ route('register') }}" class="btn btn-gold desktop-cta">Daftar Sekarang</a>
+                @else
+                    <a href="{{ route('login') }}" class="btn btn-header-outline desktop-cta">Login</a>
+                    <a href="{{ route('register') }}" class="btn btn-gold desktop-cta">Daftar Sekarang</a>
+                @endauth
+            </div>
         </div>
     </header>
 
