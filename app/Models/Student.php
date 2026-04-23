@@ -19,6 +19,8 @@ class Student extends Model
         'phone',
         'email',
         'address',
+        'class_id',
+        'schedule_id',
         'is_active',
     ];
 
@@ -29,6 +31,11 @@ class Student extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function schedule(): BelongsTo
+    {
+        return $this->belongsTo(Schedule::class, 'schedule_id');
     }
 
     public function classes(): BelongsToMany

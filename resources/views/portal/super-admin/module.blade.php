@@ -238,9 +238,6 @@
                 <label>Harga
                     <input type="number" name="price" min="0" step="1000" value="{{ old('price', 0) }}">
                 </label>
-                <label>Jadwal
-                    <input type="text" name="schedule" value="{{ old('schedule') }}" placeholder="Contoh: Mon & Wed 16:00">
-                </label>
                 <label>Guru
                     <select name="teacher_id">
                         <option value="">Pilih guru (opsional)</option>
@@ -304,9 +301,6 @@
                                         </label>
                                         <label>Harga
                                             <input type="number" name="price" min="0" step="1000" value="{{ (int) ($classItem->price ?? 0) }}">
-                                        </label>
-                                        <label>Jadwal
-                                            <input type="text" name="schedule" value="{{ $classItem->schedule }}">
                                         </label>
                                         <label>Guru
                                             <select name="teacher_id">

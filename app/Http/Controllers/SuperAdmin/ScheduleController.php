@@ -30,12 +30,18 @@ class ScheduleController extends Controller
         $data = $this->validatePayload($request);
         $class = MusicClass::query()->findOrFail($data['class_id']);
 
-        Schedule::query()->create([
+        $payload = [
             'class_id' => $class->id,
             'day' => $data['day'],
             'time' => $data['time'],
             'teacher_id' => $class->teacher_id,
-        ]);
+        ];
+
+        if (Schema::hasColumn('schedules', 'status')) {
+            $payload['status'] = 'available';
+        }
+
+        Schedule::query()->create($payload);
 
         return back()->with('success', 'Jadwal kelas berhasil ditambahkan.');
     }

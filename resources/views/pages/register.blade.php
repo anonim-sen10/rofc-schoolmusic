@@ -123,16 +123,19 @@
                 </div>
 
                 <h3>Jadwal</h3>
-                <label>Hari Pilihan</label>
-                <div class="checkbox-group choice-group">
-                    @php($oldHariPilihan = old('hari_pilihan', []))
-                    @foreach (['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'] as $hari)
-                        <label>
-                            <input type="checkbox" name="hari_pilihan[]" value="{{ $hari }}" {{ in_array($hari, $oldHariPilihan, true) ? 'checked' : '' }}>
-                            {{ $hari }}
-                        </label>
-                    @endforeach
-                </div>
+                <label>Hari
+                    <select name="day" id="day-select" required>
+                        <option value="">Pilih Hari</option>
+                        @foreach ($dayOptions as $hari)
+                            <option value="{{ $hari }}" {{ old('day') === $hari ? 'selected' : '' }}>{{ $hari }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label>Jam (Slot Tersedia)
+                    <select name="schedule_id" id="schedule-select" required data-old-value="{{ old('schedule_id') }}">
+                        <option value="">Pilih class dan hari terlebih dahulu</option>
+                    </select>
+                </label>
 
                 <h3>Pengalaman</h3>
                 <label>Pernah belajar musik sebelumnya?</label>
@@ -163,4 +166,91 @@
         </div>
     </div>
 </section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const classSelect = document.querySelector('select[name="class_id"]');
+        const daySelect = document.getElementById('day-select');
+        const scheduleSelect = document.getElementById('schedule-select');
+        const oldScheduleId = scheduleSelect?.dataset.oldValue || '';
+
+        if (!classSelect || !daySelect || !scheduleSelect) {
+            return;
+        }
+
+        const resetScheduleOptions = (message) => {
+            scheduleSelect.innerHTML = '';
+
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = message;
+
+            scheduleSelect.appendChild(option);
+            scheduleSelect.value = '';
+        };
+
+        const loadSchedules = async () => {
+            const classId = classSelect.value;
+            const day = daySelect.value;
+
+            if (!classId || !day) {
+                resetScheduleOptions('Pilih class dan hari terlebih dahulu');
+                return;
+            }
+
+            resetScheduleOptions('Memuat jadwal...');
+
+            try {
+                const endpoint = `/get-available-schedules/${encodeURIComponent(classId)}/${encodeURIComponent(day)}`;
+                const response = await fetch(endpoint, {
+                    headers: {
+                        'Accept': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Gagal mengambil data jadwal');
+                }
+
+                const data = await response.json();
+                const schedules = Array.isArray(data.schedules) ? data.schedules : [];
+
+                scheduleSelect.innerHTML = '';
+
+                if (schedules.length === 0) {
+                    resetScheduleOptions('Tidak ada slot tersedia untuk pilihan ini');
+                    return;
+                }
+
+                const placeholderOption = document.createElement('option');
+                placeholderOption.value = '';
+                placeholderOption.textContent = 'Pilih Jam';
+                scheduleSelect.appendChild(placeholderOption);
+
+                schedules.forEach((schedule) => {
+                    const option = document.createElement('option');
+                    option.value = String(schedule.id);
+                    option.textContent = schedule.label ?? `${schedule.day} - ${schedule.time}`;
+                    scheduleSelect.appendChild(option);
+                });
+
+                if (oldScheduleId !== '') {
+                    const exists = schedules.some((schedule) => String(schedule.id) === String(oldScheduleId));
+                    if (exists) {
+                        scheduleSelect.value = String(oldScheduleId);
+                    }
+                }
+            } catch (error) {
+                resetScheduleOptions('Terjadi kesalahan saat memuat jadwal');
+            }
+        };
+
+        classSelect.addEventListener('change', loadSchedules);
+        daySelect.addEventListener('change', loadSchedules);
+
+        if (classSelect.value && daySelect.value) {
+            loadSchedules();
+        }
+    });
+</script>
 @endsection

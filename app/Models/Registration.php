@@ -16,6 +16,7 @@ class Registration extends Model
         'phone',
         'email',
         'class_id',
+        'schedule_id',
         'preferred_schedule',
         'notes',
         'status',
@@ -48,5 +49,10 @@ class Registration extends Model
     public function class(): BelongsTo
     {
         return $this->belongsTo(MusicClass::class, 'class_id');
+    }
+
+    public function schedule(): BelongsTo
+    {
+        return $this->belongsTo(Schedule::class, 'schedule_id');
     }
 }

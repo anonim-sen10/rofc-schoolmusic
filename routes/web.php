@@ -28,6 +28,7 @@ Route::view('/events', 'pages.events')->name('events');
 Route::view('/blog', 'pages.blog')->name('blog');
 Route::view('/contact', 'pages.contact')->name('contact');
 Route::get('/register', [RegistrationController::class, 'create'])->name('register');
+Route::get('/get-available-schedules/{class_id}/{day}', [RegistrationController::class, 'getAvailableSchedules'])->name('register.schedules.available');
 
 Route::post('/contact', function (Request $request) {
     $validated = $request->validate([
@@ -47,7 +48,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(  'auth')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('/portal', [PortalController::class, 'redirectByRole'])->name('portal.redirect');
     Route::get('/portal/custom', [PortalController::class, 'customDashboard'])->name('portal.custom.dashboard');

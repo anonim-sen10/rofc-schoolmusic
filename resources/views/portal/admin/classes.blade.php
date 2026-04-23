@@ -37,7 +37,6 @@ $homeRoute = route('admin.dashboard');
             <label>Nama Kelas <input type="text" name="name" required></label>
             <label>Deskripsi <textarea name="description" rows="3"></textarea></label>
             <label>Harga <input type="number" step="0.01" name="price" required></label>
-            <label>Jadwal <input type="text" name="schedule"></label>
             <label>Teacher
                 <select name="teacher_id"><option value="">-</option>@foreach($teachers as $teacher)<option value="{{ $teacher->id }}">{{ $teacher->name }}</option>@endforeach</select>
             </label>
