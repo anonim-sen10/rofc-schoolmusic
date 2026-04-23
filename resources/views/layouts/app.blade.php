@@ -9,6 +9,28 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        .main-nav .mobile-only-link {
+            display: none !important;
+        }
+
+        .btn-header-outline {
+            background: rgba(255, 255, 255, 0.06);
+            color: #f4f1e7;
+            border: 1px solid rgba(255, 255, 255, 0.32);
+        }
+
+        .btn-header-outline:hover {
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        @media (max-width: 980px) {
+            .main-nav.open .mobile-only-link {
+                display: block !important;
+            }
+        }
+    </style>
 </head>
 <body class="rofc-body">
     @php
