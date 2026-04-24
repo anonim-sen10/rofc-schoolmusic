@@ -55,7 +55,7 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           port: ${{ env.SERVER_PORT }}
           timeout: 120s
-          command_timeout: 30m
+          command_timeout: 4m
           script_stop: true
           script: |
             set -e
@@ -72,10 +72,6 @@ jobs:
             # Force production to use built assets, never Vite dev server.
             rm -f public/hot
             rm -f storage/framework/vite.hot
-
-            composer install --no-dev --optimize-autoloader --no-interaction
-
-            php artisan migrate --force
 
             # If web root is outside Laravel public dir (typical shared hosting),
             # sync the public entry files so requests hit latest index + assets.
