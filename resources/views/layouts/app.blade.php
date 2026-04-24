@@ -21,7 +21,7 @@
         }
     </style>
 </head>
-<body class="rofc-body {{ request()->routeIs('home') ? 'is-home' : '' }}">
+<body class="rofc-body {{ request()->routeIs('home') ? 'is-home' : '' }}" style="background: #f3f6fb;">
     @php
         $navigation = [
             ['label' => 'Beranda', 'route' => 'home'],
