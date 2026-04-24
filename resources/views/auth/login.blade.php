@@ -12,7 +12,7 @@
 <body class="portal-auth-body">
     <main class="login-shell">
         <section class="login-panel">
-            <p class="badge">ROFC School Music</p>
+            <p class="badge">ROFC Private Music</p>
             <h1>Music School Management System</h1>
             <p>Login untuk mengakses dashboard sesuai role: Super Admin, Admin, Finance, Teacher, Student.</p>
 

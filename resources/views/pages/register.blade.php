@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'ROFC School Music | Registration')
+@section('title', 'ROFC Private Music | Registration')
 
 @section('content')
 <style>
@@ -38,7 +38,7 @@
     <div class="container">
         <span class="eyebrow">Registration</span>
         <h1>Form Pendaftaran Siswa Baru</h1>
-        <p>Isi data berikut untuk bergabung dengan ROFC School Music.</p>
+        <p>Isi data berikut untuk bergabung dengan ROFC Private Music.</p>
     </div>
 </section>
 

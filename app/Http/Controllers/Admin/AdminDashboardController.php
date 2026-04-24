@@ -133,8 +133,8 @@ class AdminDashboardController extends Controller
     {
         return view('admin.users', [
             'users' => [
-                ['name' => 'Super Admin', 'email' => 'admin@rofcschoolmusic.com', 'role' => 'admin'],
-                ['name' => 'Content Staff', 'email' => 'staff@rofcschoolmusic.com', 'role' => 'staff'],
+                ['name' => 'Super Admin', 'email' => 'admin@rofcprivatemusic.com', 'role' => 'admin'],
+                ['name' => 'Content Staff', 'email' => 'staff@rofcprivatemusic.com', 'role' => 'staff'],
             ],
         ]);
     }
@@ -143,11 +143,11 @@ class AdminDashboardController extends Controller
     {
         return view('admin.settings', [
             'settings' => [
-                'school_name' => 'ROFC School Music',
-                'email' => 'hello@rofcschoolmusic.com',
+                'school_name' => 'ROFC Private Music',
+                'email' => 'hello@rofcprivatemusic.com',
                 'whatsapp' => '+62 812-3456-7890',
                 'address' => 'Jl. Harmoni Musik No. 25, Jakarta Selatan',
-                'footer_text' => 'ROFC School Music - Creative and Professional Music Education',
+                'footer_text' => 'ROFC Private Music - Creative and Professional Music Education',
             ],
         ]);
     }

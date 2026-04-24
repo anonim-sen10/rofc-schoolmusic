@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'ROFC School Music')</title>
-    <meta name="description" content="ROFC School Music - sekolah musik modern untuk anak, remaja, dan dewasa.">
+    <title>@yield('title', 'ROFC Private Music')</title>
+    <meta name="description" content="ROFC Private Music - sekolah musik modern untuk anak, remaja, dan dewasa.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
@@ -14,17 +14,6 @@
             display: none !important;
         }
 
-        .btn-header-outline {
-            background: rgba(255, 255, 255, 0.06);
-            color: #f4f1e7;
-            border: 1px solid rgba(255, 255, 255, 0.32);
-        }
-
-        .btn-header-outline:hover {
-            background: rgba(255, 255, 255, 0.12);
-            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
-        }
-
         @media (max-width: 980px) {
             .main-nav.open .mobile-only-link {
                 display: block !important;
@@ -32,27 +21,26 @@
         }
     </style>
 </head>
-<body class="rofc-body">
+<body class="rofc-body {{ request()->routeIs('home') ? 'is-home' : '' }}">
     @php
         $navigation = [
-            ['label' => 'Home', 'route' => 'home'],
-            ['label' => 'About', 'route' => 'about'],
-            ['label' => 'Programs', 'route' => 'programs'],
-            ['label' => 'Teachers', 'route' => 'teachers'],
-            ['label' => 'Gallery', 'route' => 'gallery'],
-            ['label' => 'Events', 'route' => 'events'],
-            ['label' => 'Blog', 'route' => 'blog'],
-            ['label' => 'Contact', 'route' => 'contact'],
+            ['label' => 'Beranda', 'route' => 'home'],
+            ['label' => 'Tentang Kami', 'route' => 'about'],
+            ['label' => 'Layanan', 'route' => 'programs'],
+            ['label' => 'Produk', 'route' => 'teachers'],
+            ['label' => 'Galeri', 'route' => 'gallery'],
+            ['label' => 'Artikel', 'route' => 'blog'],
+            ['label' => 'Kontak', 'route' => 'contact'],
         ];
     @endphp
 
     <header class="site-header">
         <div class="container nav-wrap">
-            <a href="{{ route('home') }}" class="brand-mark" aria-label="ROFC School Music home">
-                <span class="brand-badge">ROFC</span>
+            <a href="{{ route('home') }}" class="brand-mark" aria-label="ROFC Private Music home">
+                <span class="brand-badge">SM</span>
                 <span>
-                    <strong>School Music</strong>
-                    <small>Creative. Professional. Inspiring.</small>
+                    <strong>ROFC Private Music</strong>
+                    <small>Music for a Better Education</small>
                 </span>
             </a>
 
@@ -68,21 +56,21 @@
                 @endforeach
 
                 @auth
-                    <a href="{{ route('portal.redirect') }}" class="mobile-only-link">Login</a>
+                    <a href="{{ route('portal.redirect') }}" class="mobile-only-link">Masuk</a>
                     <a href="{{ route('register') }}" class="mobile-only-link">Daftar Sekarang</a>
                 @else
-                    <a href="{{ route('login') }}" class="mobile-only-link">Login</a>
+                    <a href="{{ route('login') }}" class="mobile-only-link">Masuk</a>
                     <a href="{{ route('register') }}" class="mobile-only-link">Daftar Sekarang</a>
                 @endauth
             </nav>
 
             <div class="nav-actions">
                 @auth
-                    <a href="{{ route('portal.redirect') }}" class="btn btn-header-outline desktop-cta">Login</a>
-                    <a href="{{ route('register') }}" class="btn btn-gold desktop-cta">Daftar Sekarang</a>
+                    <a href="{{ route('portal.redirect') }}" class="btn btn-header-outline desktop-cta">Masuk</a>
+                    <a href="{{ route('register') }}" class="btn btn-primary desktop-cta">Daftar Sekarang</a>
                 @else
-                    <a href="{{ route('login') }}" class="btn btn-header-outline desktop-cta">Login</a>
-                    <a href="{{ route('register') }}" class="btn btn-gold desktop-cta">Daftar Sekarang</a>
+                    <a href="{{ route('login') }}" class="btn btn-header-outline desktop-cta">Masuk</a>
+                    <a href="{{ route('register') }}" class="btn btn-primary desktop-cta">Daftar Sekarang</a>
                 @endauth
             </div>
         </div>
@@ -95,13 +83,13 @@
     <footer class="site-footer">
         <div class="container footer-grid">
             <div>
-                <h3>ROFC School Music</h3>
+                <h3>ROFC Private Music</h3>
                 <p>Wadah belajar musik yang kreatif, nyaman, dan profesional untuk semua usia.</p>
             </div>
             <div>
                 <h4>Kontak Cepat</h4>
                 <p>WhatsApp: +62 812-3456-7890</p>
-                <p>Email: hello@rofcschoolmusic.com</p>
+                <p>Email: hello@rofcprivatemusic.com</p>
             </div>
             <div>
                 <h4>Alamat</h4>
@@ -110,7 +98,7 @@
             </div>
         </div>
         <div class="container footer-bottom">
-            <p>&copy; {{ date('Y') }} ROFC School Music. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} ROFC Private Music. All rights reserved.</p>
         </div>
     </footer>
 </body>

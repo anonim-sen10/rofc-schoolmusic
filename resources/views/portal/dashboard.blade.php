@@ -2,7 +2,7 @@
 
 @section('title', $portal['title'].' | ROFC')
 @section('page-title', 'Dashboard Overview')
-@section('page-subtitle', 'ROFC School Music Management Information System - '.($portal['title'] ?? 'Portal'))
+@section('page-subtitle', 'ROFC Private Music Management Information System - '.($portal['title'] ?? 'Portal'))
 
 @section('content')
 <section class="dashboard-hero" data-searchable>

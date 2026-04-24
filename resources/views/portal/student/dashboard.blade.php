@@ -2,7 +2,7 @@
 @extends('portal.layouts.app')
 @section('title','Student Dashboard')
 @section('page-title','Student Dashboard')
-@section('page-subtitle', 'ROFC School Music Management Information System - Student Workspace')
+@section('page-subtitle', 'ROFC Private Music Management Information System - Student Workspace')
 @section('content')
 @php
 	$classCollection = collect($classes);

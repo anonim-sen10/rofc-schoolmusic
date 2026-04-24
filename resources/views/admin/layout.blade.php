@@ -32,7 +32,7 @@
             <a href="{{ route('admin.dashboard') }}" class="admin-logo">
                 <span class="logo-badge">ROFC</span>
                 <span>
-                    <strong>School Music</strong>
+                    <strong>Private Music</strong>
                     <small>Admin Panel</small>
                 </span>
             </a>
@@ -56,7 +56,7 @@
                 <button type="button" class="sidebar-toggle" data-sidebar-toggle aria-label="Toggle sidebar">Menu</button>
                 <div class="topbar-meta">
                     <div>
-                        <p class="muted">ROFC School Music Management System</p>
+                        <p class="muted">ROFC Private Music Management System</p>
                         <h1>@yield('page-title', 'Dashboard')</h1>
                     </div>
                     <div class="topbar-user">
@@ -71,7 +71,7 @@
             </main>
 
             <footer class="admin-footer">
-                <p>&copy; {{ date('Y') }} ROFC School Music. Internal Dashboard.</p>
+                <p>&copy; {{ date('Y') }} ROFC Private Music. Internal Dashboard.</p>
             </footer>
         </div>
     </div>

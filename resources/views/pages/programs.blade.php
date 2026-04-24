@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'ROFC School Music | Programs')
+@section('title', 'ROFC Private Music | Programs')
 
 @section('content')
 <section class="page-banner">

@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'ROFC School Music | Teachers')
+@section('title', 'ROFC Private Music | Teachers')
 
 @section('content')
 <section class="page-banner">
     <div class="container">
         <span class="eyebrow">Teachers</span>
-        <h1>Pengajar ROFC School Music</h1>
+        <h1>Pengajar ROFC Private Music</h1>
         <p>Tim mentor yang ramah, berpengalaman, dan fokus pada perkembangan setiap siswa.</p>
     </div>
 </section>

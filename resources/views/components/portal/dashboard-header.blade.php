@@ -1,6 +1,6 @@
 @props([
     'title' => 'Dashboard',
-    'subtitle' => 'ROFC School Music Management Information System',
+    'subtitle' => 'ROFC Private Music Management Information System',
     'searchPlaceholder' => 'Search in dashboard...',
     'userName' => 'User',
     'roleLabel' => 'USER',

@@ -14,7 +14,7 @@ $homeRoute = route('finance.dashboard');
 @extends('portal.layouts.app')
 @section('title', 'Finance Dashboard')
 @section('page-title', 'Finance Overview')
-@section('page-subtitle', 'ROFC School Music Management Information System - Finance Operations')
+@section('page-subtitle', 'ROFC Private Music Management Information System - Finance Operations')
 @section('content')
 <section class="dashboard-hero" data-searchable>
     <div>

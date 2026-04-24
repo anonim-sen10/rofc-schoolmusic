@@ -1,120 +1,118 @@
 @extends('layouts.app')
 
-@section('title', 'ROFC School Music | Home')
+@section('title', 'ROFC Private Music | Home')
 
 @section('content')
-<section class="hero-section">
-    <div class="hero-overlay"></div>
-    <div class="container hero-content">
-        <span class="eyebrow">ROFC School Music</span>
-        <h1>Bangun Bakat Musikmu Bersama ROFC School Music</h1>
-        <p>Tempat belajar musik yang nyaman, modern, dan inspiratif untuk anak-anak, remaja, hingga dewasa dengan pendekatan kreatif dan profesional.</p>
-        <div class="cta-row">
-            <a href="{{ route('register') }}" class="btn btn-gold">Daftar Sekarang</a>
-            <a href="{{ route('programs') }}" class="btn btn-outline">Lihat Program</a>
-        </div>
-    </div>
-</section>
-
-<section class="section">
-    <div class="container two-col">
-        <div>
-            <span class="eyebrow">Tentang Kami</span>
-            <h2>Wadah Belajar Musik yang Kreatif dan Profesional</h2>
-            <p>ROFC School Music hadir untuk mendampingi setiap siswa menemukan karakter musikalnya. Kami menggabungkan teknik, kreativitas, dan suasana belajar yang menyenangkan.</p>
-        </div>
-        <div class="stats-grid">
-            <article><strong>12+</strong><span>Tahun Pengalaman</span></article>
-            <article><strong>600+</strong><span>Siswa Aktif & Alumni</span></article>
-            <article><strong>25+</strong><span>Program & Kelas</span></article>
-            <article><strong>40+</strong><span>Event & Recital Tahunan</span></article>
-        </div>
-    </div>
-</section>
-
-<section class="section section-soft">
-    <div class="container">
-        <div class="section-head">
-            <span class="eyebrow">Keunggulan</span>
-            <h2>Mengapa Memilih ROFC</h2>
-        </div>
-        <div class="card-grid three">
-            <article class="feature-card"><h3>Mentor Berpengalaman</h3><p>Pengajar profesional dengan pendekatan ramah, terstruktur, dan adaptif.</p></article>
-            <article class="feature-card"><h3>Kurikulum Bertahap</h3><p>Silabus disusun dari pemula hingga lanjutan sesuai target perkembangan siswa.</p></article>
-            <article class="feature-card"><h3>Studio Nyaman</h3><p>Fasilitas belajar modern untuk meningkatkan fokus, motivasi, dan kreativitas.</p></article>
-        </div>
-    </div>
-</section>
-
-<section class="section">
-    <div class="container">
-        <div class="section-head">
-            <span class="eyebrow">Program Unggulan</span>
-            <h2>Kelas Musik Favorit</h2>
-        </div>
-        <div class="card-grid three">
-            <article class="program-card"><h3>Drum Class</h3><p>Teknik ritme, groove, dan performa panggung.</p></article>
-            <article class="program-card"><h3>Piano Class</h3><p>Dari basic chord hingga ekspresi musikal tingkat lanjut.</p></article>
-            <article class="program-card"><h3>Vocal Class</h3><p>Latihan pernapasan, pitch control, dan karakter vokal.</p></article>
-        </div>
-    </div>
-</section>
-
-<section class="section section-soft">
-    <div class="container">
-        <div class="section-head split">
-            <div>
-                <span class="eyebrow">Teachers Preview</span>
-                <h2>Belajar dengan Pengajar Berkualitas</h2>
+<section class="cp-hero">
+    <div class="container cp-hero-grid">
+        <div class="cp-hero-copy">
+            <span class="cp-kicker">ROFC Private Music</span>
+            <h1>Music for<br>a Better <span>Education</span></h1>
+            <p>ROFC Private Music hadir untuk mendukung sekolah dalam membangun program musik yang berkualitas, inspiratif, dan berkelanjutan.</p>
+            <div class="cp-hero-actions">
+                <a href="{{ route('about') }}" class="btn btn-primary">Tentang Kami</a>
+                <a href="{{ route('programs') }}" class="btn btn-outline cp-video-btn">Lihat Video</a>
             </div>
-            <a href="{{ route('teachers') }}" class="btn btn-outline">Lihat Semua Guru</a>
-        </div>
-        <div class="card-grid three">
-            <article class="teacher-card"><h3>Andra Prakoso</h3><p>Drum Specialist - 10 tahun pengalaman live & studio.</p></article>
-            <article class="teacher-card"><h3>Nadia Putri</h3><p>Vocal Coach - fokus teknik vokal modern & stage confidence.</p></article>
-            <article class="teacher-card"><h3>Kevin Hartono</h3><p>Piano Mentor - klasik, pop, dan improvisasi kreatif.</p></article>
-        </div>
-    </div>
-</section>
-
-<section class="section">
-    <div class="container">
-        <div class="section-head split">
-            <div>
-                <span class="eyebrow">Gallery Preview</span>
-                <h2>Momen Belajar & Performance</h2>
+            <div class="cp-pill-list">
+                <article>
+                    <span class="cp-pill-icon">M</span>
+                    <div>
+                        <strong>Program Musik</strong>
+                        <small>Berkualitas</small>
+                    </div>
+                </article>
+                <article>
+                    <span class="cp-pill-icon">S</span>
+                    <div>
+                        <strong>Pengembangan</strong>
+                        <small>Bakat Siswa</small>
+                    </div>
+                </article>
+                <article>
+                    <span class="cp-pill-icon">E</span>
+                    <div>
+                        <strong>Edukasi Musik</strong>
+                        <small>Berkelanjutan</small>
+                    </div>
+                </article>
             </div>
-            <a href="{{ route('gallery') }}" class="btn btn-outline">Lihat Gallery</a>
         </div>
-        <div class="gallery-grid">
-            <img src="https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?auto=format&fit=crop&w=800&q=80" alt="Sesi latihan drum">
-            <img src="https://images.unsplash.com/photo-1461783436728-0a9217714694?auto=format&fit=crop&w=800&q=80" alt="Siswa belajar gitar">
-            <img src="https://images.unsplash.com/photo-1514119412350-e174d90d280e?auto=format&fit=crop&w=800&q=80" alt="Performance siswa">
+        <div class="cp-hero-media">
+            <img src="https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=1400&q=80" alt="Siswa sekolah sedang belajar musik bersama">
         </div>
     </div>
 </section>
 
-<section class="section section-soft">
+<section class="cp-about">
+    <div class="container cp-about-grid">
+        <div class="cp-about-left">
+            <span class="cp-kicker">TENTANG KAMI</span>
+            <h2>Mitra Sekolah dalam<br>Mewujudkan Pendidikan Musik</h2>
+            <p>ROFC Private Music adalah penyedia solusi pendidikan musik untuk sekolah. Kami percaya bahwa musik dapat membentuk karakter, meningkatkan kreativitas, dan membangun kepercayaan diri siswa.</p>
+            <a href="{{ route('about') }}" class="btn btn-primary">Selengkapnya</a>
+        </div>
+        <div class="cp-about-right">
+            <div class="cp-vision-list">
+                <article>
+                    <span>V</span>
+                    <div>
+                        <h3>Visi</h3>
+                        <p>Menjadi mitra terpercaya sekolah dalam mewujudkan pendidikan musik berkualitas.</p>
+                    </div>
+                </article>
+                <article>
+                    <span>M</span>
+                    <div>
+                        <h3>Misi</h3>
+                        <p>Memberikan layanan, produk, dan program musik terbaik yang mendukung perkembangan siswa.</p>
+                    </div>
+                </article>
+                <article>
+                    <span>N</span>
+                    <div>
+                        <h3>Nilai</h3>
+                        <p>Kualitas, Integritas, Kolaborasi, dan Inspirasi.</p>
+                    </div>
+                </article>
+            </div>
+            <img src="https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=80" alt="Gedung sekolah untuk program musik">
+        </div>
+    </div>
+</section>
+
+<section class="cp-stats">
+    <div class="container cp-stats-wrap">
+        <article><strong>150+</strong><span>Sekolah Bermitra</span></article>
+        <article><strong>20.000+</strong><span>Siswa Terlibat</span></article>
+        <article><strong>100+</strong><span>Program Musik</span></article>
+        <article><strong>50+</strong><span>Prestasi Siswa</span></article>
+    </div>
+</section>
+
+<section class="cp-services">
     <div class="container">
-        <div class="section-head">
-            <span class="eyebrow">Testimonial</span>
-            <h2>Apa Kata Siswa & Orang Tua</h2>
+        <div class="cp-head">
+            <h2>Layanan Kami</h2>
+            <p>Solusi lengkap untuk mendukung program musik di sekolah Anda</p>
         </div>
-        <div class="card-grid three">
-            <article class="testimonial-card"><p>"Anak saya jadi lebih percaya diri tampil di depan umum setelah ikut kelas vocal di ROFC."</p><strong>- Ibu Rina</strong></article>
-            <article class="testimonial-card"><p>"Belajarnya terarah, studio nyaman, dan gurunya sangat suportif."</p><strong>- Arman, Siswa Drum</strong></article>
-            <article class="testimonial-card"><p>"Program pianonya cocok untuk pemula dewasa seperti saya."</p><strong>- Devina</strong></article>
+        <div class="cp-service-grid">
+            <article>
+                <h3>Program Musik Sekolah</h3>
+                <p>Kurikulum dan program musik yang dirancang sesuai kebutuhan sekolah.</p>
+            </article>
+            <article>
+                <h3>Pengadaan Alat Musik</h3>
+                <p>Penyediaan alat musik berkualitas dari berbagai merek terpercaya.</p>
+            </article>
+            <article>
+                <h3>Pelatihan & Workshop</h3>
+                <p>Pelatihan guru dan workshop siswa oleh instruktur berpengalaman.</p>
+            </article>
+            <article>
+                <h3>Event & Kompetisi</h3>
+                <p>Mendukung sekolah dalam kegiatan musik dan kompetisi siswa.</p>
+            </article>
         </div>
-    </div>
-</section>
-
-<section class="section callout">
-    <div class="container callout-inner">
-        <div>
-            <h2>Siap Mulai Perjalanan Musikmu?</h2>
-            <p>Bergabunglah bersama ROFC School Music dan kembangkan bakat terbaikmu dari sekarang.</p>
-        </div>
-        <a href="{{ route('register') }}" class="btn btn-gold">Join Us</a>
     </div>
 </section>
 @endsection

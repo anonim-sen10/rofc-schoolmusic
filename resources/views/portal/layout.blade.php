@@ -47,7 +47,7 @@
         <div class="portal-main">
             <x-portal.dashboard-header
                 :title="trim($__env->yieldContent('page-title')) ?: 'Dashboard'"
-                :subtitle="trim($__env->yieldContent('page-subtitle')) ?: 'ROFC School Music Management Information System'"
+                :subtitle="trim($__env->yieldContent('page-subtitle')) ?: 'ROFC Private Music Management Information System'"
                 search-placeholder="Search in dashboard..."
                 :user-name="$userName"
                 :role-label="$roleLabel"
@@ -66,7 +66,7 @@
             </main>
 
             <footer class="portal-footer">
-                <p>&copy; {{ date('Y') }} ROFC School Music</p>
+                <p>&copy; {{ date('Y') }} ROFC Private Music</p>
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
                     <button type="submit" class="logout-btn">Logout</button>

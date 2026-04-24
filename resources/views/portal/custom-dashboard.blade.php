@@ -12,7 +12,7 @@
 <body class="portal-auth-body">
     <main class="login-shell">
         <section class="login-panel">
-            <p class="badge">ROFC School Music</p>
+            <p class="badge">ROFC Private Music</p>
             <h1>Portal Untuk Role Custom</h1>
             <p>Akun Anda berhasil login dengan role <strong>{{ strtoupper(str_replace('_', ' ', $roleKey)) }}</strong>.</p>
             <p>Role ini belum dipetakan ke dashboard khusus. Silakan hubungi Super Admin untuk konfigurasi menu dan izin akses.</p>

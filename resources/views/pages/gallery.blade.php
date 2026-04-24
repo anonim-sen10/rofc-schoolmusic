@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'ROFC School Music | Gallery')
+@section('title', 'ROFC Private Music | Gallery')
 
 @section('content')
 <section class="page-banner">
     <div class="container">
         <span class="eyebrow">Gallery</span>
         <h1>Gallery Kegiatan</h1>
-        <p>Dokumentasi belajar, latihan, performance, dan event ROFC School Music.</p>
+        <p>Dokumentasi belajar, latihan, performance, dan event ROFC Private Music.</p>
     </div>
 </section>
 

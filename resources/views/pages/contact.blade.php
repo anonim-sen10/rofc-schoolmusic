@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'ROFC School Music | Contact')
+@section('title', 'ROFC Private Music | Contact')
 
 @section('content')
 <section class="page-banner">
@@ -18,7 +18,7 @@
             <ul class="check-list">
                 <li>Alamat: Jl. Harmoni Musik No. 25, Jakarta Selatan</li>
                 <li>WhatsApp: +62 812-3456-7890</li>
-                <li>Email: hello@rofcschoolmusic.com</li>
+                <li>Email: hello@rofcprivatemusic.com</li>
                 <li>Jam Operasional: Senin - Sabtu, 09.00 - 20.00 WIB</li>
             </ul>
             <iframe class="map-frame" title="Peta Lokasi ROFC" src="https://maps.google.com/maps?q=jakarta%20selatan&t=&z=13&ie=UTF8&iwloc=&output=embed"></iframe>

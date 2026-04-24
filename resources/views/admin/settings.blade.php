@@ -12,8 +12,8 @@
         <label>Alamat <textarea rows="3">{{ $settings['address'] }}</textarea></label>
         <label>Email <input type="email" value="{{ $settings['email'] }}"></label>
         <label>WhatsApp <input type="text" value="{{ $settings['whatsapp'] }}"></label>
-        <label>Instagram <input type="text" placeholder="https://instagram.com/rofcschoolmusic"></label>
-        <label>YouTube <input type="text" placeholder="https://youtube.com/@rofcschoolmusic"></label>
+        <label>Instagram <input type="text" placeholder="https://instagram.com/rofcprivatemusic"></label>
+        <label>YouTube <input type="text" placeholder="https://youtube.com/@rofcprivatemusic"></label>
         <label>Footer Text <input type="text" value="{{ $settings['footer_text'] }}"></label>
         <button class="btn-admin" type="button">Simpan Pengaturan</button>
     </form>

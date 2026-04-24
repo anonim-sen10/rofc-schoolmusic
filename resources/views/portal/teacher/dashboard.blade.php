@@ -2,7 +2,7 @@
 @extends('portal.layouts.app')
 @section('title','Teacher Dashboard')
 @section('page-title','Teacher Dashboard')
-@section('page-subtitle', 'ROFC School Music Management Information System - Teacher Workspace')
+@section('page-subtitle', 'ROFC Private Music Management Information System - Teacher Workspace')
 @section('content')
 <section class="dashboard-hero" data-searchable>
 	<div>

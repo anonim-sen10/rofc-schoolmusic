@@ -1,6 +1,7 @@
 import "./bootstrap";
 
 document.addEventListener("DOMContentLoaded", () => {
+    const siteHeader = document.querySelector(".site-header");
     const menuToggle = document.querySelector("[data-menu-toggle]");
     const menu = document.querySelector("[data-menu]");
 
@@ -29,4 +30,13 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     revealTargets.forEach((element) => observer.observe(element));
+
+    if (siteHeader) {
+        const updateHeaderState = () => {
+            siteHeader.classList.toggle("is-scrolled", window.scrollY > 12);
+        };
+
+        updateHeaderState();
+        window.addEventListener("scroll", updateHeaderState, { passive: true });
+    }
 });

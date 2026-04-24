@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'ROFC School Music | About Us')
+@section('title', 'ROFC Private Music | About Us')
 
 @section('content')
 <section class="page-banner">
     <div class="container">
         <span class="eyebrow">About Us</span>
-        <h1>Profil ROFC School Music</h1>
+        <h1>Profil ROFC Private Music</h1>
         <p>Sekolah musik modern dengan lingkungan belajar yang hangat, kreatif, dan profesional.</p>
     </div>
 </section>
@@ -15,7 +15,7 @@
     <div class="container two-col">
         <div>
             <h2>Cerita Kami</h2>
-            <p>ROFC School Music berdiri dari semangat menghadirkan pendidikan musik yang berkualitas dan menyenangkan. Kami percaya musik bukan hanya keterampilan, tetapi juga sarana membangun karakter, disiplin, dan kepercayaan diri.</p>
+            <p>ROFC Private Music berdiri dari semangat menghadirkan pendidikan musik yang berkualitas dan menyenangkan. Kami percaya musik bukan hanya keterampilan, tetapi juga sarana membangun karakter, disiplin, dan kepercayaan diri.</p>
             <p>Sejak awal, ROFC berkomitmen menjadi ruang tumbuh bagi setiap siswa dari berbagai usia dan latar belakang.</p>
         </div>
         <div class="info-panel">

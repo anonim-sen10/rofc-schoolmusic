@@ -1,6 +1,6 @@
 @extends('admin.layout')
 
-@section('title', 'Admin Dashboard | ROFC School Music')
+@section('title', 'Admin Dashboard | ROFC Private Music')
 @section('page-title', 'Dashboard Overview')
 
 @section('content')
