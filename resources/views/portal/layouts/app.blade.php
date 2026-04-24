@@ -1,10 +1,10 @@
 @php
     $resolvedRoleKey = $roleKey ?? (auth()->user()->primaryRole() ?? 'custom_role');
-    $resolvedPanelTitle = $panelTitle ?? ($portal['title'] ?? 'ROFC Portal');
+    $resolvedPanelTitle = $panelTitle ?? ($portal['title'] ?? 'SchoolMusic Portal');
     $resolvedHomeRoute = $homeRoute ?? (($portal['prefix'] ?? null) ? route($portal['prefix'].'.dashboard') : route('portal.redirect'));
     $userName = auth()->user()?->name ?? 'User';
     $legacyMenuItems = $menuItems ?? [];
-    $roleLabel = strtoupper(str_replace('_', ' ', $resolvedRoleKey));
+    $roleLabel = ucwords(str_replace('_', ' ', $resolvedRoleKey));
     $notifCount = $summary['registrations_pending'] ?? 0;
     $iconMap = [
         'dashboard' => 'layout-dashboard',
@@ -54,10 +54,10 @@
     <div class="portal-shell">
         <aside class="portal-sidebar" data-portal-sidebar>
             <a href="{{ $resolvedHomeRoute }}" class="portal-brand">
-                <span class="logo">RF</span>
+                <span class="logo">SM</span>
                 <span>
                     <strong>{{ $resolvedPanelTitle }}</strong>
-                    <small>Role Based Access</small>
+                    <small>Music School Platform</small>
                 </span>
             </a>
 
@@ -81,7 +81,7 @@
                 :notification-count="$notifCount"
             />
 
-            <main class="portal-content">
+            <main class="portal-content portal-content--saas">
                 @if (session('success'))
                     <section class="card" data-searchable>
                         <x-ui.badge type="success">SUCCESS</x-ui.badge>
@@ -111,7 +111,7 @@
             </main>
 
             <footer class="portal-footer">
-                <p>&copy; {{ date('Y') }} ROFC Private Music</p>
+                <p>&copy; {{ date('Y') }} SchoolMusic</p>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="logout-btn">Logout</button>

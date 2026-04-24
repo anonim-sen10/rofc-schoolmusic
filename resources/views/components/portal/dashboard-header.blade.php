@@ -40,13 +40,23 @@
                 @endif
             </button>
 
-            <div class="user-box">
-                <span class="avatar">{{ $initial }}</span>
-                <span>
-                    <strong>{{ $userName }}</strong>
-                    <small>{{ $roleLabel }}</small>
-                </span>
-            </div>
+            <details class="profile-dropdown">
+                <summary class="user-box" aria-label="Open profile menu">
+                    <span class="avatar">{{ $initial }}</span>
+                    <span>
+                        <strong>{{ $userName }}</strong>
+                        <small>{{ $roleLabel }}</small>
+                    </span>
+                    <i data-lucide="chevron-down"></i>
+                </summary>
+                <div class="profile-menu">
+                    <span class="profile-menu-role">{{ $roleLabel }}</span>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="profile-menu-logout">Logout</button>
+                    </form>
+                </div>
+            </details>
         </div>
     </div>
 
