@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+﻿<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,8 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    @vite(['resources/css/portal.css'])
-</head>
+            <link rel="stylesheet" href="https://rofcmusicschool.com/build/assets/portal.css">
+    </head>
 <body class="portal-auth-body">
     <main class="login-shell">
         <section class="login-panel">
@@ -16,14 +16,10 @@
             <h1>Music School Management System</h1>
             <p>Login untuk mengakses dashboard sesuai role: Super Admin, Admin, Finance, Teacher, Student.</p>
 
-            @if ($errors->any())
-                <div class="form-error">{{ $errors->first() }}</div>
-            @endif
-
-            <form action="{{ route('login.store') }}" method="POST" class="login-form">
-                @csrf
-                <label>Email
-                    <input type="email" name="email" value="{{ old('email') }}" required>
+            
+            <form action="https://rofcmusicschool.com/login" method="POST" class="login-form">
+                <input type="hidden" name="_token" value="vlirclur05BUu3nReWzw1Ud2yl4eIHS04cEAnjhL" autocomplete="off">                <label>Email
+                    <input type="email" name="email" value="" required>
                 </label>
                 <label>Password
                     <input type="password" name="password" id="login-password" required>
@@ -66,3 +62,4 @@
     </script>
 </body>
 </html>
+
