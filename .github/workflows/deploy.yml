@@ -75,9 +75,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           port: ${{ env.SERVER_PORT }}
-          source: public/build/**
-          target: ${{ env.SERVER_APP_DIR }}/public
-          strip_components: 1
+          source: public/build/*
+          target: ${{ env.SERVER_APP_DIR }}/public/build
+          strip_components: 2
           overwrite: true
 
       - name: Sync Public Folder ke Web Root
