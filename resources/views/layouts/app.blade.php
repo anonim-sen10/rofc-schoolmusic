@@ -101,5 +101,6 @@
             <p>&copy; {{ date('Y') }} ROFC Private Music. All rights reserved.</p>
         </div>
     </footer>
+
 </body>
 </html>

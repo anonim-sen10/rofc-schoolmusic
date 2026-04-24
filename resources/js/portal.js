@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const header = document.querySelector("[data-portal-header]");
     const root = document.documentElement;
     const searchInput = document.querySelector("[data-global-search]");
+    const confirmModal = document.querySelector("[data-confirm-modal]");
 
     if (sidebar && toggle) {
         const applyDesktopState = () => {
@@ -99,6 +100,105 @@ document.addEventListener("DOMContentLoaded", () => {
                 window.requestAnimationFrame(syncHeaderVisibility);
                 ticking = true;
             }
+        });
+    }
+
+    if (confirmModal) {
+        const modalMessage = confirmModal.querySelector("[data-confirm-message]");
+        const cancelButtons = confirmModal.querySelectorAll("[data-confirm-cancel]");
+        const okButton = confirmModal.querySelector("[data-confirm-ok]");
+        const formsWithNativeConfirm = document.querySelectorAll(
+            "form[onsubmit*='confirm(']",
+        );
+        let activeForm = null;
+        let lastFocusedElement = null;
+
+        formsWithNativeConfirm.forEach((form) => {
+            const inlineHandler = String(form.getAttribute("onsubmit") || "");
+            const match = inlineHandler.match(/confirm\((['"`])([\s\S]*?)\1\)/);
+            if (!match) {
+                return;
+            }
+
+            const decodedMessage = String(match[2])
+                .replace(/\\'/g, "'")
+                .replace(/\\"/g, '"');
+
+            form.dataset.confirmMessage =
+                decodedMessage || "Apakah Anda yakin ingin melanjutkan aksi ini?";
+            form.removeAttribute("onsubmit");
+        });
+
+        const closeConfirmModal = () => {
+            confirmModal.hidden = true;
+            confirmModal.classList.remove("is-open");
+            activeForm = null;
+
+            if (lastFocusedElement && typeof lastFocusedElement.focus === "function") {
+                lastFocusedElement.focus();
+            }
+        };
+
+        const openConfirmModal = (form, message) => {
+            activeForm = form;
+            lastFocusedElement = document.activeElement;
+
+            if (modalMessage) {
+                modalMessage.textContent =
+                    message || "Apakah Anda yakin ingin melanjutkan aksi ini?";
+            }
+
+            confirmModal.hidden = false;
+            window.requestAnimationFrame(() => {
+                confirmModal.classList.add("is-open");
+            });
+
+            if (okButton) {
+                okButton.focus();
+            }
+        };
+
+        cancelButtons.forEach((button) => {
+            button.addEventListener("click", closeConfirmModal);
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (confirmModal.hidden) {
+                return;
+            }
+
+            if (event.key === "Escape") {
+                event.preventDefault();
+                closeConfirmModal();
+            }
+        });
+
+        if (okButton) {
+            okButton.addEventListener("click", () => {
+                if (!activeForm) {
+                    closeConfirmModal();
+                    return;
+                }
+
+                const formToSubmit = activeForm;
+                closeConfirmModal();
+                formToSubmit.submit();
+            });
+        }
+
+        document.addEventListener("submit", (event) => {
+            const form = event.target;
+            if (!(form instanceof HTMLFormElement)) {
+                return;
+            }
+
+            const confirmMessage = form.dataset.confirmMessage;
+            if (!confirmMessage) {
+                return;
+            }
+
+            event.preventDefault();
+            openConfirmModal(form, confirmMessage);
         });
     }
 

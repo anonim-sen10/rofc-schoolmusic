@@ -39,4 +39,5 @@ document.addEventListener("DOMContentLoaded", () => {
         updateHeaderState();
         window.addEventListener("scroll", updateHeaderState, { passive: true });
     }
+
 });

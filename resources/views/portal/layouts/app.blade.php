@@ -121,6 +121,17 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.511.0/dist/umd/lucide.min.js"></script>
+    <div class="confirm-modal" data-confirm-modal hidden>
+        <div class="confirm-modal-overlay" data-confirm-cancel></div>
+        <div class="confirm-modal-panel" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title" aria-describedby="confirm-modal-message">
+            <h3 id="confirm-modal-title">Konfirmasi Aksi</h3>
+            <p id="confirm-modal-message" data-confirm-message>Apakah Anda yakin ingin melanjutkan?</p>
+            <div class="confirm-modal-actions">
+                <button type="button" class="confirm-modal-btn confirm-modal-btn-secondary" data-confirm-cancel>Batal</button>
+                <button type="button" class="confirm-modal-btn confirm-modal-btn-primary" data-confirm-ok>Ya, Lanjutkan</button>
+            </div>
+        </div>
+    </div>
     <script>
         if (window.lucide) {
             window.lucide.createIcons();
