@@ -59,7 +59,7 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           port: ${{ env.SERVER_PORT }}
           timeout: 120s
-          command_timeout: 30m
+          command_timeout: 2m
           script_stop: true
           script: |
             set -e
