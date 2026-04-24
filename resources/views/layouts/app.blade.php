@@ -9,8 +9,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     @production
-        <link rel="stylesheet" href="{{ asset('build/assets/app-BjzrX921.css') }}">
-        <script type="module" src="{{ asset('build/assets/app-34-dhqh6.js') }}" defer></script>
+        <link rel="stylesheet" href="{{ asset('build/assets/app.css') }}">
+        <script type="module" src="{{ asset('build/assets/app.js') }}" defer></script>
     @else
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endproduction
