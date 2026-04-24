@@ -15,10 +15,10 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      RESOLVED_APP_DIR: ${{ secrets.SERVER_APP_DIR != '' && secrets.SERVER_APP_DIR || '/home/rofcmusi/rofc-laravel' }}
-      RESOLVED_BRANCH: ${{ secrets.DEPLOY_BRANCH != '' && secrets.DEPLOY_BRANCH || 'main' }}
-      RESOLVED_PORT: ${{ secrets.SERVER_PORT != '' && secrets.SERVER_PORT || '22' }}
-      RESOLVED_WEB_DIR: ${{ secrets.SERVER_WEB_DIR != '' && secrets.SERVER_WEB_DIR || '/home/rofcmusi/public_html' }}
+      SERVER_APP_DIR: ${{ secrets.SERVER_APP_DIR != '' && secrets.SERVER_APP_DIR || '/home/rofcmusi/rofc-laravel' }}
+      DEPLOY_BRANCH: ${{ secrets.DEPLOY_BRANCH != '' && secrets.DEPLOY_BRANCH || 'main' }}
+      SERVER_PORT: ${{ secrets.SERVER_PORT != '' && secrets.SERVER_PORT || '22' }}
+      SERVER_WEB_DIR: ${{ secrets.SERVER_WEB_DIR != '' && secrets.SERVER_WEB_DIR || '/home/rofcmusi/public_html' }}
 
     steps:
       - name: Validasi Secrets Wajib
@@ -52,7 +52,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          port: ${{ env.RESOLVED_PORT }}
+          port: ${{ env.SERVER_PORT }}
           timeout: 120s
           command_timeout: 30m
           script_stop: true
@@ -91,7 +91,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          port: ${{ env.RESOLVED_PORT }}
+          port: ${{ env.SERVER_PORT }}
           timeout: 120s
           command_timeout: 30m
           script_stop: true
@@ -110,9 +110,9 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          port: ${{ env.RESOLVED_PORT }}
+          port: ${{ env.SERVER_PORT }}
           source: public/build/**
-          target: ${{ env.RESOLVED_APP_DIR }}/public
+          target: ${{ env.SERVER_APP_DIR }}/public
           strip_components: 1
           overwrite: true
 
@@ -123,7 +123,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          port: ${{ env.RESOLVED_PORT }}
+          port: ${{ env.SERVER_PORT }}
           timeout: 120s
           command_timeout: 30m
           script_stop: true
@@ -146,7 +146,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          port: ${{ env.RESOLVED_PORT }}
+          port: ${{ env.SERVER_PORT }}
           timeout: 120s
           command_timeout: 30m
           script_stop: true
@@ -171,7 +171,3 @@ jobs:
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
-        env:
-          DEPLOY_BRANCH: ${{ env.RESOLVED_BRANCH }}
-          SERVER_APP_DIR: ${{ env.RESOLVED_APP_DIR }}
-          SERVER_WEB_DIR: ${{ env.RESOLVED_WEB_DIR }}
