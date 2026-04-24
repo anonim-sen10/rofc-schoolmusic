@@ -34,7 +34,7 @@
         ];
     @endphp
 
-    <header class="site-header">
+    <header class="site-header" style="background: rgba(255, 255, 255, 0.92); border-bottom: 1px solid rgba(164, 185, 217, 0.5); backdrop-filter: blur(10px);">
         <div class="container nav-wrap">
             <a href="{{ route('home') }}" class="brand-mark" aria-label="ROFC Private Music home">
                 <span class="brand-badge">SM</span>
