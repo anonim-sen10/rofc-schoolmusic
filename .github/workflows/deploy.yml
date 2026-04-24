@@ -56,13 +56,12 @@ jobs:
           timeout: 120s
           command_timeout: 30m
           script_stop: true
-          envs: DEPLOY_BRANCH,SERVER_APP_DIR,SERVER_WEB_DIR
           script: |
             set -e
 
-            APP_DIR="${SERVER_APP_DIR:-/home/rofcmusi/rofc-laravel}"
-            BRANCH="${DEPLOY_BRANCH:-main}"
-            WEB_DIR="${SERVER_WEB_DIR:-$APP_DIR/public}"
+            APP_DIR="${{ env.SERVER_APP_DIR }}"
+            BRANCH="${{ env.DEPLOY_BRANCH }}"
+            WEB_DIR="${{ env.SERVER_WEB_DIR }}"
 
             cd "$APP_DIR"
 
@@ -95,11 +94,10 @@ jobs:
           timeout: 120s
           command_timeout: 30m
           script_stop: true
-          envs: SERVER_APP_DIR
           script: |
             set -e
 
-            APP_DIR="${SERVER_APP_DIR:-/home/rofcmusi/rofc-laravel}"
+            APP_DIR="${{ env.SERVER_APP_DIR }}"
             rm -rf "$APP_DIR/public/build"
             mkdir -p "$APP_DIR/public/build"
 
@@ -127,12 +125,11 @@ jobs:
           timeout: 120s
           command_timeout: 30m
           script_stop: true
-          envs: SERVER_APP_DIR,SERVER_WEB_DIR
           script: |
             set -e
 
-            APP_DIR="${SERVER_APP_DIR:-/home/rofcmusi/rofc-laravel}"
-            WEB_DIR="${SERVER_WEB_DIR:-$APP_DIR/public}"
+            APP_DIR="${{ env.SERVER_APP_DIR }}"
+            WEB_DIR="${{ env.SERVER_WEB_DIR }}"
 
             if [ "$WEB_DIR" != "$APP_DIR/public" ]; then
               mkdir -p "$WEB_DIR"
@@ -150,12 +147,11 @@ jobs:
           timeout: 120s
           command_timeout: 30m
           script_stop: true
-          envs: SERVER_APP_DIR,SERVER_WEB_DIR
           script: |
             set -e
 
-            APP_DIR="${SERVER_APP_DIR:-/home/rofcmusi/rofc-laravel}"
-            WEB_DIR="${SERVER_WEB_DIR:-$APP_DIR/public}"
+            APP_DIR="${{ env.SERVER_APP_DIR }}"
+            WEB_DIR="${{ env.SERVER_WEB_DIR }}"
 
             cd "$APP_DIR"
 
