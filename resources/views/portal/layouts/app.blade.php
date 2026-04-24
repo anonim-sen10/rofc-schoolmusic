@@ -48,12 +48,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
-    @production
-        <link rel="stylesheet" href="{{ asset('build/assets/portal.css') }}">
-        <script type="module" src="{{ asset('build/assets/portal.js') }}" defer></script>
-    @else
-        @vite(['resources/css/portal.css', 'resources/js/portal.js'])
-    @endproduction
+    @vite(['resources/css/portal.css', 'resources/js/portal.js'])
 </head>
 <body class="portal-body">
     <div class="portal-shell">
