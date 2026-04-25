@@ -1018,7 +1018,7 @@ th {
 }
 
 .action-popover {
-    position: relative;
+    position: static;
 }
 
 .action-popover summary {
@@ -1040,44 +1040,53 @@ th {
 }
 
 .action-popover[open] summary {
-    border-color: rgba(210, 171, 99, 0.4);
-    box-shadow: 0 0 0 1px rgba(210, 171, 99, 0.2);
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.2);
 }
 
-.action-popover-form {
-    position: static;
-    margin-top: 0.5rem;
-    width: min(420px, calc(100vw - 4rem));
-    grid-template-columns: 1fr;
-    padding: 0.85rem;
-    border: 1px solid var(--line);
-    border-radius: 0.75rem;
-    background: linear-gradient(180deg, #1f2430, #181d26);
-    box-shadow: 0 20px 36px rgba(0, 0, 0, 0.42);
+.action-popover[open] summary::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(6px);
+    z-index: 50;
+    cursor: default;
+    animation: fade-in 0.25s ease-out forwards;
 }
 
-.action-popover-form button {
-    width: auto;
-    height: auto;
-    border: 0;
-    border-radius: 0.65rem;
-    padding: 0.65rem 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    background: linear-gradient(135deg, var(--gold), #e6cb9f);
-    color: #111;
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
+@keyframes modal-pop {
+    from { opacity: 0; transform: translate(-50%, -46%) scale(0.96); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.action-popover-form,
 .action-popover-panel {
-    position: static;
-    margin-top: 0.5rem;
-    width: min(560px, calc(100vw - 4rem));
-    padding: 0.85rem;
-    border: 1px solid var(--line);
-    border-radius: 0.75rem;
-    background: linear-gradient(180deg, #1f2430, #181d26);
-    box-shadow: 0 20px 36px rgba(0, 0, 0, 0.42);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 51;
+    width: min(500px, calc(100vw - 2rem));
+    max-height: calc(100vh - 2rem);
+    grid-template-columns: 1fr;
+    padding: 0;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 1rem;
+    background: #ffffff;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    animation: modal-pop 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+
+
+
 
 .registration-detail-panel h4 {
     margin: 0 0 0.6rem;

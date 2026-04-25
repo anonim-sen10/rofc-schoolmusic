@@ -93,7 +93,49 @@
                             <td>
                                 <div class="action-icons">
                                     <a href="{{ route('super-admin.users.show', $userRow) }}" class="btn-icon" title="Detail" aria-label="Detail"><i data-lucide="eye"></i></a>
-                                    <a href="{{ route('super-admin.users.edit', $userRow) }}" class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></a>
+                                    <details class="action-popover">
+                                        <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
+                                        <form class="action-popover-form" method="POST" action="{{ route('super-admin.users.update', $userRow) }}">
+                                            @csrf
+                                            @method('PUT')
+                                            <header class="registration-modal-header">
+                                                <div class="registration-modal-header-left">
+                                                    <span class="registration-modal-icon">
+                                                        <i data-lucide="pencil-line"></i>
+                                                    </span>
+                                                    <div>
+                                                        <h3 style="margin:0; font-size:1.02rem; color:#0f172a;">Edit User</h3>
+                                                        <p style="margin:.18rem 0 0; font-size:.84rem; color:#64748b;">Perbarui informasi akun dan akses</p>
+                                                    </div>
+                                                </div>
+                                            </header>
+                                            <div class="registration-modal-body registration-edit-form">
+                                                <div class="registration-edit-grid">
+                                                    <label>Nama
+                                                        <input type="text" name="name" value="{{ $userRow->name }}" required>
+                                                    </label>
+                                                    <label>Email
+                                                        <input type="email" name="email" value="{{ $userRow->email }}" required>
+                                                    </label>
+                                                    <label>Role
+                                                        <select name="role" required>
+                                                            <option value="super_admin" @selected($userRow->hasRole('super_admin'))>Super Admin</option>
+                                                            <option value="admin" @selected($userRow->hasRole('admin'))>Admin</option>
+                                                            <option value="finance" @selected($userRow->hasRole('finance'))>Finance</option>
+                                                            <option value="teacher" @selected($userRow->hasRole('teacher'))>Teacher</option>
+                                                            <option value="student" @selected($userRow->hasRole('student'))>Siswa</option>
+                                                        </select>
+                                                    </label>
+                                                    <label>Password Baru (opsional)
+                                                        <input type="password" name="password" placeholder="Kosongkan jika tidak diganti">
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <footer class="registration-modal-footer registration-edit-footer">
+                                                <button type="submit" class="registration-modal-btn registration-modal-btn-primary">Simpan Perubahan</button>
+                                            </footer>
+                                        </form>
+                                    </details>
                                     <form method="POST" action="{{ route('super-admin.users.destroy', $userRow) }}" onsubmit="return confirm('Hapus user ini?');">
                                         @csrf
                                         @method('DELETE')
@@ -192,7 +234,52 @@
                             <td>
                                 <div class="action-icons">
                                     <a href="{{ route('super-admin.teachers.show', $teacher) }}" class="btn-icon" title="Detail" aria-label="Detail"><i data-lucide="eye"></i></a>
-                                    <a href="{{ route('super-admin.teachers.edit', $teacher) }}" class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></a>
+                                    <details class="action-popover">
+                                        <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
+                                        <form class="action-popover-form" method="POST" enctype="multipart/form-data" action="{{ route('super-admin.teachers.update', $teacher) }}">
+                                            @csrf
+                                            @method('PUT')
+                                            <header class="registration-modal-header">
+                                                <div class="registration-modal-header-left">
+                                                    <span class="registration-modal-icon">
+                                                        <i data-lucide="pencil-line"></i>
+                                                    </span>
+                                                    <div>
+                                                        <h3 style="margin:0; font-size:1.02rem; color:#0f172a;">Edit Teacher</h3>
+                                                        <p style="margin:.18rem 0 0; font-size:.84rem; color:#64748b;">Perbarui informasi data pengajar</p>
+                                                    </div>
+                                                </div>
+                                            </header>
+                                            <div class="registration-modal-body registration-edit-form">
+                                                <div class="registration-edit-grid">
+                                                    <label>Nama
+                                                        <input type="text" name="name" value="{{ $teacher->name }}" required>
+                                                    </label>
+                                                    <label>Email
+                                                        <input type="email" name="email" value="{{ $teacher->user?->email }}" required>
+                                                    </label>
+                                                    <label>Nomor HP
+                                                        <input type="text" name="phone" value="{{ $teacher->phone }}" required>
+                                                    </label>
+                                                    <label>Jenis Kelamin
+                                                        <select name="gender" required>
+                                                            <option value="laki-laki" @selected($teacher->gender === 'laki-laki')>Laki-laki</option>
+                                                            <option value="perempuan" @selected($teacher->gender === 'perempuan')>Perempuan</option>
+                                                        </select>
+                                                    </label>
+                                                    <label class="registration-edit-field-full">Alamat
+                                                        <textarea name="address" rows="2" required>{{ $teacher->address }}</textarea>
+                                                    </label>
+                                                    <label>Agama
+                                                        <input type="text" name="religion" value="{{ $teacher->religion }}" required>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <footer class="registration-modal-footer registration-edit-footer">
+                                                <button type="submit" class="registration-modal-btn registration-modal-btn-primary">Simpan Perubahan</button>
+                                            </footer>
+                                        </form>
+                                    </details>
                                     <form method="POST" action="{{ route('super-admin.teachers.destroy', $teacher) }}" onsubmit="return confirm('Hapus teacher ini?');">
                                         @csrf
                                         @method('DELETE')
@@ -279,33 +366,50 @@
                                 <div class="action-icons class-action-icons">
                                     <details class="action-popover">
                                         <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
-                                        <form class="module-form action-popover-form" method="POST" action="{{ route('super-admin.classes.update', $classItem) }}">
+                                        <form class="action-popover-form" method="POST" action="{{ route('super-admin.classes.update', $classItem) }}">
                                         @csrf
                                         @method('PUT')
-                                        <label>Nama Kelas
-                                            <input type="text" name="name" value="{{ $classItem->name }}" required>
-                                        </label>
-                                        <label>Deskripsi
-                                            <textarea name="description" rows="2">{{ $classItem->description }}</textarea>
-                                        </label>
-                                        <label>Harga
-                                            <input type="number" name="price" min="0" step="1000" value="{{ (int) ($classItem->price ?? 0) }}">
-                                        </label>
-                                        <label>Guru
-                                            <select name="teacher_id">
-                                                <option value="">Tanpa guru</option>
-                                                @foreach ($teachersForClassOptions as $teacherOption)
-                                                    <option value="{{ $teacherOption->id }}" @selected((int) $classItem->teacher_id === (int) $teacherOption->id)>{{ $teacherOption->name }}</option>
-                                                @endforeach
-                                            </select>
-                                        </label>
-                                        <label>Status
-                                            <select name="status" required>
-                                                <option value="active" @selected($classItem->status === 'active')>Active</option>
-                                                <option value="inactive" @selected($classItem->status === 'inactive')>Inactive</option>
-                                            </select>
-                                        </label>
-                                        <button type="submit">Update</button>
+                                        <header class="registration-modal-header">
+                                            <div class="registration-modal-header-left">
+                                                <span class="registration-modal-icon">
+                                                    <i data-lucide="pencil-line"></i>
+                                                </span>
+                                                <div>
+                                                    <h3 style="margin:0; font-size:1.02rem; color:#0f172a;">Edit Class</h3>
+                                                    <p style="margin:.18rem 0 0; font-size:.84rem; color:#64748b;">Perbarui informasi kelas musik</p>
+                                                </div>
+                                            </div>
+                                        </header>
+                                        <div class="registration-modal-body registration-edit-form">
+                                            <div class="registration-edit-grid">
+                                                <label>Nama Kelas
+                                                    <input type="text" name="name" value="{{ $classItem->name }}" required>
+                                                </label>
+                                                <label>Harga
+                                                    <input type="number" name="price" min="0" step="1000" value="{{ (int) ($classItem->price ?? 0) }}">
+                                                </label>
+                                                <label class="registration-edit-field-full">Deskripsi
+                                                    <textarea name="description" rows="2">{{ $classItem->description }}</textarea>
+                                                </label>
+                                                <label>Guru
+                                                    <select name="teacher_id">
+                                                        <option value="">Tanpa guru</option>
+                                                        @foreach ($teachersForClassOptions as $teacherOption)
+                                                            <option value="{{ $teacherOption->id }}" @selected((int) $classItem->teacher_id === (int) $teacherOption->id)>{{ $teacherOption->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </label>
+                                                <label>Status
+                                                    <select name="status" required>
+                                                        <option value="active" @selected($classItem->status === 'active')>Active</option>
+                                                        <option value="inactive" @selected($classItem->status === 'inactive')>Inactive</option>
+                                                    </select>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <footer class="registration-modal-footer registration-edit-footer">
+                                            <button type="submit" class="registration-modal-btn registration-modal-btn-primary">Simpan Perubahan</button>
+                                        </footer>
                                         </form>
                                     </details>
                                     <form method="POST" action="{{ route('super-admin.classes.destroy', $classItem) }}" onsubmit="return confirm('Hapus class ini?');">
@@ -1995,27 +2099,44 @@
                                     <div class="action-icons">
                                         <details class="action-popover">
                                             <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
-                                            <form class="module-form action-popover-form" method="POST" action="{{ route('super-admin.schedule.update', $scheduleItem) }}">
+                                            <form class="action-popover-form" method="POST" action="{{ route('super-admin.schedule.update', $scheduleItem) }}">
                                                 @csrf
                                                 @method('PUT')
-                                                <label>Class
-                                                    <select name="class_id" required>
-                                                        @foreach($classesForSchedule as $class)
-                                                            <option value="{{ $class->id }}" @selected((int) $scheduleItem->class_id === (int) $class->id)>{{ $class->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </label>
-                                                <label>Hari
-                                                    <select name="day" required>
-                                                        @foreach($availableDayOptions as $dayOption)
-                                                            <option value="{{ $dayOption }}" @selected($scheduleItem->day === $dayOption)>{{ $dayOption }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </label>
-                                                <label>Jam
-                                                    <input type="time" name="time" value="{{ $timeValue }}" required>
-                                                </label>
-                                                <button type="submit">Update Jadwal</button>
+                                                <header class="registration-modal-header">
+                                                    <div class="registration-modal-header-left">
+                                                        <span class="registration-modal-icon">
+                                                            <i data-lucide="pencil-line"></i>
+                                                        </span>
+                                                        <div>
+                                                            <h3 style="margin:0; font-size:1.02rem; color:#0f172a;">Edit Jadwal</h3>
+                                                            <p style="margin:.18rem 0 0; font-size:.84rem; color:#64748b;">Perbarui jadwal dan waktu kelas</p>
+                                                        </div>
+                                                    </div>
+                                                </header>
+                                                <div class="registration-modal-body registration-edit-form">
+                                                    <div class="registration-edit-grid">
+                                                        <label class="registration-edit-field-full">Class
+                                                            <select name="class_id" required>
+                                                                @foreach($classesForSchedule as $class)
+                                                                    <option value="{{ $class->id }}" @selected((int) $scheduleItem->class_id === (int) $class->id)>{{ $class->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </label>
+                                                        <label>Hari
+                                                            <select name="day" required>
+                                                                @foreach($availableDayOptions as $dayOption)
+                                                                    <option value="{{ $dayOption }}" @selected($scheduleItem->day === $dayOption)>{{ $dayOption }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </label>
+                                                        <label>Jam
+                                                            <input type="time" name="time" value="{{ $timeValue }}" required>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <footer class="registration-modal-footer registration-edit-footer">
+                                                    <button type="submit" class="registration-modal-btn registration-modal-btn-primary">Simpan Perubahan</button>
+                                                </footer>
                                             </form>
                                         </details>
 
