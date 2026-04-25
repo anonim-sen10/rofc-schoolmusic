@@ -1992,37 +1992,39 @@
                                 <td>{{ $timeValue !== '' ? $timeValue : '-' }}</td>
                                 <td>{{ $teacherName }}</td>
                                 <td>
-                                    <details class="action-popover" style="margin-bottom: 0.35rem;">
-                                        <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
-                                        <form class="module-form action-popover-form" method="POST" action="{{ route('super-admin.schedule.update', $scheduleItem) }}">
-                                            @csrf
-                                            @method('PUT')
-                                            <label>Class
-                                                <select name="class_id" required>
-                                                    @foreach($classesForSchedule as $class)
-                                                        <option value="{{ $class->id }}" @selected((int) $scheduleItem->class_id === (int) $class->id)>{{ $class->name }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </label>
-                                            <label>Hari
-                                                <select name="day" required>
-                                                    @foreach($availableDayOptions as $dayOption)
-                                                        <option value="{{ $dayOption }}" @selected($scheduleItem->day === $dayOption)>{{ $dayOption }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </label>
-                                            <label>Jam
-                                                <input type="time" name="time" value="{{ $timeValue }}" required>
-                                            </label>
-                                            <button type="submit">Update Jadwal</button>
-                                        </form>
-                                    </details>
+                                    <div class="action-icons">
+                                        <details class="action-popover">
+                                            <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
+                                            <form class="module-form action-popover-form" method="POST" action="{{ route('super-admin.schedule.update', $scheduleItem) }}">
+                                                @csrf
+                                                @method('PUT')
+                                                <label>Class
+                                                    <select name="class_id" required>
+                                                        @foreach($classesForSchedule as $class)
+                                                            <option value="{{ $class->id }}" @selected((int) $scheduleItem->class_id === (int) $class->id)>{{ $class->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </label>
+                                                <label>Hari
+                                                    <select name="day" required>
+                                                        @foreach($availableDayOptions as $dayOption)
+                                                            <option value="{{ $dayOption }}" @selected($scheduleItem->day === $dayOption)>{{ $dayOption }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </label>
+                                                <label>Jam
+                                                    <input type="time" name="time" value="{{ $timeValue }}" required>
+                                                </label>
+                                                <button type="submit">Update Jadwal</button>
+                                            </form>
+                                        </details>
 
-                                    <form method="POST" action="{{ route('super-admin.schedule.destroy', $scheduleItem) }}" onsubmit="return confirm('Hapus jadwal class ini?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn-icon btn-icon-danger" title="Hapus" aria-label="Hapus"><i data-lucide="trash-2"></i></button>
-                                    </form>
+                                        <form method="POST" action="{{ route('super-admin.schedule.destroy', $scheduleItem) }}" onsubmit="return confirm('Hapus jadwal class ini?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn-icon btn-icon-danger" title="Hapus" aria-label="Hapus"><i data-lucide="trash-2"></i></button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
