@@ -1,14 +1,24 @@
 document.addEventListener("DOMContentLoaded", () => {
     const sidebar = document.querySelector("[data-portal-sidebar]");
-    const toggle = document.querySelector("[data-portal-toggle]");
+    const sidebarToggle = document.querySelector(
+        "[data-portal-sidebar-toggle]",
+    );
+    const sidebarClose = document.querySelector("[data-portal-sidebar-close]");
     const header = document.querySelector("[data-portal-header]");
     const root = document.documentElement;
     const searchInput = document.querySelector("[data-global-search]");
     const confirmModal = document.querySelector("[data-confirm-modal]");
 
-    if (sidebar && toggle) {
+    if (sidebar && sidebarToggle) {
+        const isMobile = () => window.matchMedia("(max-width: 900px)").matches;
+        const closeSidebar = () => {
+            if (isMobile()) {
+                sidebar.classList.remove("open");
+            }
+        };
+
         const applyDesktopState = () => {
-            if (window.matchMedia("(max-width: 900px)").matches) {
+            if (isMobile()) {
                 root.classList.remove("sidebar-collapsed");
                 return;
             }
@@ -21,8 +31,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         applyDesktopState();
 
-        toggle.addEventListener("click", () => {
-            if (window.matchMedia("(max-width: 900px)").matches) {
+        sidebarToggle.addEventListener("click", () => {
+            if (isMobile()) {
                 sidebar.classList.toggle("open");
                 return;
             }
@@ -32,6 +42,39 @@ document.addEventListener("DOMContentLoaded", () => {
                 "portal.sidebar.collapsed",
                 String(root.classList.contains("sidebar-collapsed")),
             );
+        });
+
+        if (sidebarClose) {
+            sidebarClose.addEventListener("click", closeSidebar);
+        }
+
+        sidebar.querySelectorAll(".portal-menu a").forEach((link) => {
+            link.addEventListener("click", closeSidebar);
+        });
+
+        document.addEventListener("click", (event) => {
+            if (!isMobile() || !sidebar.classList.contains("open")) {
+                return;
+            }
+
+            const target = event.target;
+            if (!(target instanceof Node)) {
+                return;
+            }
+
+            if (sidebar.contains(target)) {
+                return;
+            }
+
+            if (sidebarToggle.contains(target)) {
+                return;
+            }
+
+            if (sidebarClose && sidebarClose.contains(target)) {
+                return;
+            }
+
+            closeSidebar();
         });
 
         window.addEventListener("resize", applyDesktopState);
@@ -104,8 +147,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (confirmModal) {
-        const modalMessage = confirmModal.querySelector("[data-confirm-message]");
-        const cancelButtons = confirmModal.querySelectorAll("[data-confirm-cancel]");
+        const modalMessage = confirmModal.querySelector(
+            "[data-confirm-message]",
+        );
+        const cancelButtons = confirmModal.querySelectorAll(
+            "[data-confirm-cancel]",
+        );
         const okButton = confirmModal.querySelector("[data-confirm-ok]");
         const formsWithNativeConfirm = document.querySelectorAll(
             "form[onsubmit*='confirm(']",
@@ -125,7 +172,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 .replace(/\\"/g, '"');
 
             form.dataset.confirmMessage =
-                decodedMessage || "Apakah Anda yakin ingin melanjutkan aksi ini?";
+                decodedMessage ||
+                "Apakah Anda yakin ingin melanjutkan aksi ini?";
             form.removeAttribute("onsubmit");
         });
 
@@ -134,7 +182,10 @@ document.addEventListener("DOMContentLoaded", () => {
             confirmModal.classList.remove("is-open");
             activeForm = null;
 
-            if (lastFocusedElement && typeof lastFocusedElement.focus === "function") {
+            if (
+                lastFocusedElement &&
+                typeof lastFocusedElement.focus === "function"
+            ) {
                 lastFocusedElement.focus();
             }
         };

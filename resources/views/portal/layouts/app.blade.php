@@ -84,19 +84,25 @@
 <body class="portal-body">
     <div class="portal-shell">
         <aside class="portal-sidebar" data-portal-sidebar>
-            <a href="{{ $resolvedHomeRoute }}" class="portal-brand">
-                <span class="brand-logo-icon-wrap" aria-hidden="true">
-                    @if ($brandLogoIconUrl)
-                        <img src="{{ $brandLogoIconUrl }}" alt="" class="brand-logo-icon">
-                    @else
-                        <span class="brand-logo-fallback">SM</span>
-                    @endif
-                </span>
-                <span class="brand-logo-content">
-                    <strong>{{ $resolvedPanelTitle }}</strong>
-                    <small>Music School Platform</small>
-                </span>
-            </a>
+            <div class="portal-sidebar-header">
+                <a href="{{ $resolvedHomeRoute }}" class="portal-brand">
+                    <span class="brand-logo-icon-wrap" aria-hidden="true">
+                        @if ($brandLogoIconUrl)
+                            <img src="{{ $brandLogoIconUrl }}" alt="" class="brand-logo-icon">
+                        @else
+                            <span class="brand-logo-fallback">SM</span>
+                        @endif
+                    </span>
+                    <span class="brand-logo-content">
+                        <strong>{{ $resolvedPanelTitle }}</strong>
+                        <small>Music School Platform</small>
+                    </span>
+                </a>
+
+                <button type="button" class="sidebar-close" data-portal-sidebar-close aria-label="Close sidebar">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
 
             <nav class="portal-menu">
                 @foreach ($normalizedMenu as $item)

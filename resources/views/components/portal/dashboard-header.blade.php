@@ -17,7 +17,7 @@
     <div class="portal-topbar-inner">
         <div class="topbar-left">
             @if ($showSidebarToggle)
-                <button type="button" class="toggle" data-portal-toggle aria-label="Toggle sidebar">
+                <button type="button" class="toggle" data-portal-sidebar-toggle aria-label="Toggle sidebar">
                     <i data-lucide="panel-left"></i>
                 </button>
             @endif
