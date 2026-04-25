@@ -57,3 +57,15 @@ jobs:
           local-dir: ./public/build/
           server-dir: /public_html/build/
           dangerous-clean-slate: true
+
+      - name: Deploy Build ke public_html/rofc-laravel/public/build via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ${{ secrets.FTP_PROTOCOL != '' && secrets.FTP_PROTOCOL || 'ftps' }}
+          port: ${{ secrets.FTP_PORT != '' && secrets.FTP_PORT || '21' }}
+          local-dir: ./public/build/
+          server-dir: /public_html/rofc-laravel/public/build/
+          dangerous-clean-slate: true
