@@ -1,4 +1,4 @@
-name: Auto Deploy Laravel
+name: Auto Deploy Build to cPanel
 
 on:
   push:
@@ -11,21 +11,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  deploy-build:
     runs-on: ubuntu-latest
 
-    env:
-      SERVER_APP_DIR: ${{ secrets.SERVER_APP_DIR != '' && secrets.SERVER_APP_DIR || '/home/rofcmusi/rofc-laravel' }}
-      DEPLOY_BRANCH: ${{ secrets.DEPLOY_BRANCH != '' && secrets.DEPLOY_BRANCH || 'main' }}
-      SERVER_PORT: ${{ secrets.SERVER_PORT != '' && secrets.SERVER_PORT || '22' }}
-      SERVER_WEB_DIR: ${{ secrets.SERVER_WEB_DIR != '' && secrets.SERVER_WEB_DIR || '/home/rofcmusi/public_html' }}
-
     steps:
-      - name: Validasi Secrets Wajib
+      - name: Validasi FTP Secrets
         run: |
-          test -n "${{ secrets.SERVER_HOST }}" || (echo "::error::Secret SERVER_HOST belum diisi" && exit 1)
-          test -n "${{ secrets.SERVER_USER }}" || (echo "::error::Secret SERVER_USER belum diisi" && exit 1)
-          test -n "${{ secrets.SSH_PRIVATE_KEY }}" || (echo "::error::Secret SSH_PRIVATE_KEY belum diisi" && exit 1)
+          test -n "${{ secrets.FTP_SERVER }}" || (echo "::error::Secret FTP_SERVER belum diisi" && exit 1)
+          test -n "${{ secrets.FTP_USERNAME }}" || (echo "::error::Secret FTP_USERNAME belum diisi" && exit 1)
+          test -n "${{ secrets.FTP_PASSWORD }}" || (echo "::error::Secret FTP_PASSWORD belum diisi" && exit 1)
 
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -45,141 +39,21 @@ jobs:
         run: |
           node -e "const fs=require('fs'); const path=require('path'); const manifest=JSON.parse(fs.readFileSync('public/build/manifest.json','utf8')); const map=[['resources/css/app.css','app.css'],['resources/js/app.js','app.js'],['resources/css/portal.css','portal.css'],['resources/js/portal.js','portal.js']]; for (const [key,targetName] of map){ const file=manifest[key]?.file; if(!file){ throw new Error('Manifest entry not found: '+key); } const src=path.join('public/build', file); const dst=path.join('public/build/assets', targetName); fs.copyFileSync(src,dst); console.log('copied', src, '=>', dst); }"
 
-      - name: Upload Build Artifacts
+      - name: Upload Build Artifacts (Backup)
         uses: actions/upload-artifact@v4
         with:
           name: build-assets
           path: public/build/
           retention-days: 7
 
-      - name: Deploy Code ke Server
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Deploy Build ke public_html/build via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          port: ${{ env.SERVER_PORT }}
-          timeout: 120s
-          command_timeout: 30m
-          script_stop: true
-          script: |
-            set -e
-
-            APP_DIR="${{ env.SERVER_APP_DIR }}"
-            DEPLOY_BRANCH="${{ env.DEPLOY_BRANCH }}"
-
-            echo "📦 Deploying branch: $DEPLOY_BRANCH"
-
-            # Jika folder tidak ada, clone repository
-            if [ ! -d "$APP_DIR/.git" ]; then
-              echo "📥 Cloning repository..."
-              git clone --depth 1 --branch "$DEPLOY_BRANCH" $(git config --get remote.origin.url) "$APP_DIR" || {
-                echo "❌ Git clone gagal. Pastikan SSH key sudah di-setup di server."
-                exit 1
-              }
-            else
-              cd "$APP_DIR"
-              echo "🔄 Pulling latest code..."
-              git fetch origin "$DEPLOY_BRANCH"
-              git checkout "$DEPLOY_BRANCH"
-              git pull origin "$DEPLOY_BRANCH"
-            fi
-
-            cd "$APP_DIR"
-
-            # Composer install
-            echo "📚 Installing PHP dependencies..."
-            composer install --no-dev --optimize-autoloader
-
-            # Copy .env jika belum ada (opsional, sesuaikan dengan setup Anda)
-            if [ ! -f .env ]; then
-              echo "⚠️  File .env tidak ditemukan, pastikan sudah di-create manual di server"
-            fi
-
-            echo "✅ Code deployment selesai"
-
-      - name: Siapkan Folder Build di Server
-        uses: appleboy/ssh-action@v1.0.3
-        continue-on-error: true
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          port: ${{ env.SERVER_PORT }}
-          timeout: 120s
-          command_timeout: 2m
-          script_stop: true
-          script: |
-            set -e
-
-            APP_DIR="${{ env.SERVER_APP_DIR }}"
-            mkdir -p "$APP_DIR/public/build/assets"
-
-      - name: Upload Built Assets ke Laravel Public
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          port: ${{ env.SERVER_PORT }}
-          source: public/build/*
-          target: ${{ env.SERVER_APP_DIR }}/public/build
-          strip_components: 2
-          overwrite: true
-
-      - name: Sync Public Folder ke Web Root
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          port: ${{ env.SERVER_PORT }}
-          timeout: 120s
-          command_timeout: 30m
-          script_stop: true
-          script: |
-            set -e
-
-            APP_DIR="${{ env.SERVER_APP_DIR }}"
-            WEB_DIR="${{ env.SERVER_WEB_DIR }}"
-
-            if [ "$WEB_DIR" != "$APP_DIR/public" ]; then
-              mkdir -p "$WEB_DIR"
-              rsync -a --delete "$APP_DIR/public/" "$WEB_DIR/"
-            fi
-
-      - name: Refresh Laravel Cache
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          port: ${{ env.SERVER_PORT }}
-          timeout: 120s
-          command_timeout: 30m
-          script_stop: true
-          script: |
-            set -e
-
-            APP_DIR="${{ env.SERVER_APP_DIR }}"
-            WEB_DIR="${{ env.SERVER_WEB_DIR }}"
-
-            cd "$APP_DIR"
-
-            rm -f "$WEB_DIR/hot"
-            rm -f storage/framework/vite.hot
-
-            if [ "$WEB_DIR" != "$APP_DIR/public" ]; then
-              rm -f "$APP_DIR/public/hot"
-            fi
-
-            php artisan optimize:clear
-
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ${{ secrets.FTP_PROTOCOL != '' && secrets.FTP_PROTOCOL || 'ftps' }}
+          port: ${{ secrets.FTP_PORT != '' && secrets.FTP_PORT || '21' }}
+          local-dir: ./public/build/
+          server-dir: /public_html/build/
+          dangerous-clean-slate: true
