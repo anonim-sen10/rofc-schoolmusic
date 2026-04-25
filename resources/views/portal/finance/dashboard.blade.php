@@ -16,18 +16,6 @@ $homeRoute = route('finance.dashboard');
 @section('page-title', 'Finance Overview')
 @section('page-subtitle', 'ROFC Private Music Management Information System - Finance Operations')
 @section('content')
-<section class="dashboard-hero" data-searchable>
-    <div>
-        <p class="eyebrow">Financial Snapshot</p>
-        <h2>Finance Dashboard</h2>
-        <p>Pantau pemasukan, biaya operasional, dan posisi kas bersih dalam satu tampilan konsisten.</p>
-    </div>
-    <div class="hero-actions">
-        <a href="{{ route('finance.invoices.index') }}" class="ghost-btn">Manage Invoices</a>
-        <a href="{{ route('finance.reports.index') }}" class="ghost-btn">Open Reports</a>
-    </div>
-</section>
-
 <section class="kpi-grid" data-searchable>
     <x-ui.card title="Total Invoices">
         <div class="kpi-row">

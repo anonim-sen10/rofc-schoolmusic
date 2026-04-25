@@ -18,17 +18,6 @@ $homeRoute = route('admin.dashboard');
 @section('title', 'Registrations')
 @section('page-title', 'Registrations Approval')
 @section('content')
-<section class="dashboard-hero" data-searchable>
-    <div>
-        <p class="eyebrow">Admission</p>
-        <h2>Registrations Approval</h2>
-        <p>Tinjau pendaftaran siswa baru dan update status untuk sinkronisasi ke data siswa aktif.</p>
-    </div>
-    <div class="hero-actions">
-        <a href="{{ route('admin.students.index') }}" class="ghost-btn">Open Students</a>
-    </div>
-</section>
-
 <x-ui.card title="Daftar Pendaftaran" subtitle="Semua submission dari form pendaftaran" data-searchable>
     @if ($registrations->isNotEmpty())
         <x-ui.table :headers="['Nama', 'Email', 'Jadwal', 'Status', 'Action']">

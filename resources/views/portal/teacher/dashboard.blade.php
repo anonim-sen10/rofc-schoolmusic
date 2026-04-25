@@ -4,18 +4,6 @@
 @section('page-title','Teacher Dashboard')
 @section('page-subtitle', 'ROFC Private Music Management Information System - Teacher Workspace')
 @section('content')
-<section class="dashboard-hero" data-searchable>
-	<div>
-		<p class="eyebrow">Teaching Snapshot</p>
-		<h2>Teacher Dashboard</h2>
-		<p>Selamat datang, {{ $teacher->name }}. Pantau kelas aktif, absensi harian, dan progres siswa secara cepat.</p>
-	</div>
-	<div class="hero-actions">
-		<a href="{{ route('teacher.attendance.index') }}" class="ghost-btn">Input Attendance</a>
-		<a href="{{ route('teacher.student-progress.index') }}" class="ghost-btn">Update Progress</a>
-	</div>
-</section>
-
 <section class="kpi-grid" data-searchable>
 	<x-ui.card title="My Classes">
 		<div class="kpi-row">

@@ -18,17 +18,6 @@ $homeRoute = route('admin.dashboard');
 @section('title', 'Teachers Management')
 @section('page-title', 'Teachers Management')
 @section('content')
-<section class="dashboard-hero" data-searchable>
-    <div>
-        <p class="eyebrow">Academic Operation</p>
-        <h2>Teachers Management</h2>
-        <p>Monitoring data pengajar aktif untuk kebutuhan jadwal kelas dan operasional harian.</p>
-    </div>
-    <div class="hero-actions">
-        <a href="{{ route('admin.schedule.index') }}" class="ghost-btn">Open Schedule</a>
-    </div>
-</section>
-
 <section class="card" data-searchable>
     <x-ui.badge type="info">INFO</x-ui.badge>
     <p style="margin-top: 0.5rem;">Role Admin hanya dapat melihat data guru. Pembuatan akun teacher dilakukan di portal Super Admin.</p>

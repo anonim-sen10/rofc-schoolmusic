@@ -4,17 +4,6 @@
 @section('page-title', $moduleTitle)
 
 @section('content')
-<section class="dashboard-hero module-head" data-searchable>
-    <div>
-        <p class="eyebrow">Module Workspace</p>
-        <h2>{{ $moduleTitle }}</h2>
-        <p>{{ $moduleDescription }}</p>
-    </div>
-    <div class="hero-actions">
-        <a class="ghost-btn" href="{{ route('super-admin.dashboard') }}">Back to Dashboard</a>
-    </div>
-</section>
-
 @if (session('success'))
     <section class="card" data-searchable>
         <x-ui.badge type="success">SUCCESS</x-ui.badge>

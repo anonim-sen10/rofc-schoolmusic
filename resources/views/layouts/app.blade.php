@@ -32,12 +32,35 @@
             ['label' => 'Artikel', 'route' => 'blog'],
             ['label' => 'Kontak', 'route' => 'contact'],
         ];
+
+        $publicBrandCandidates = [
+            'brand/rofc-logo-icon.png',
+            'brand/rofc-logo-icon.jpg',
+            'brand/rofc-logo-icon.jpeg',
+            'brand/rofc-logo-icon.webp',
+            'brand/rofc-logo.png',
+            'brand/rofc-logo.jpg',
+            'brand/rofc-logo.jpeg',
+            'brand/rofc-logo.webp',
+        ];
+
+        $publicBrandUrl = null;
+        foreach ($publicBrandCandidates as $logoPath) {
+            if (file_exists(public_path($logoPath))) {
+                $publicBrandUrl = asset($logoPath);
+                break;
+            }
+        }
     @endphp
 
     <header class="site-header" style="background: rgba(255, 255, 255, 0.92); border-bottom: 1px solid rgba(164, 185, 217, 0.5); backdrop-filter: blur(10px);">
         <div class="container nav-wrap">
             <a href="{{ route('home') }}" class="brand-mark" aria-label="ROFC Private Music home">
-                <span class="brand-badge">SM</span>
+                @if ($publicBrandUrl)
+                    <img src="{{ $publicBrandUrl }}" alt="ROFC Private Music" class="brand-wordmark-logo">
+                @else
+                    <span class="brand-badge">SM</span>
+                @endif
                 <span>
                     <strong>ROFC Private Music</strong>
                     <small>Music for a Better Education</small>

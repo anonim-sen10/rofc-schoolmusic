@@ -5,24 +5,6 @@
 @section('page-subtitle', 'ROFC Private Music Management Information System - '.($portal['title'] ?? 'Portal'))
 
 @section('content')
-<section class="dashboard-hero" data-searchable>
-    <div>
-        <p class="eyebrow">Operational Snapshot</p>
-        <h2>{{ $portal['title'] }}</h2>
-        <p>Semua indikator utama akademik dan operasional tersedia dalam satu layar untuk eksekusi harian yang lebih cepat.</p>
-    </div>
-    <div class="hero-actions">
-        @if ($portal['prefix'] === 'admin')
-            <a href="{{ route('admin.classes.index') }}" class="ghost-btn" title="Kelola kelas">Manage Classes</a>
-            <a href="{{ route('admin.registrations.index') }}" class="ghost-btn" title="Cek pendaftaran">Review Registrations</a>
-        @else
-            @foreach (array_slice($portal['menu'], 1, 2) as $item)
-                <a href="{{ route($portal['prefix'].'.module', ['module' => $item['key']]) }}" class="ghost-btn">{{ $item['label'] }}</a>
-            @endforeach
-        @endif
-    </div>
-</section>
-
 <section class="kpi-grid" data-searchable>
     @foreach ($stats as $stat)
         @php

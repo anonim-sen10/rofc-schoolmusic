@@ -1,11 +1,12 @@
 @props([
     'title' => 'Dashboard',
     'subtitle' => 'ROFC Private Music Management Information System',
-    'searchPlaceholder' => 'Search in dashboard...',
     'userName' => 'User',
     'roleLabel' => 'USER',
     'notificationCount' => 0,
     'showSidebarToggle' => true,
+    'showNavbarLogo' => false,
+    'brandLogoUrl' => null,
 ])
 
 @php
@@ -21,6 +22,12 @@
                 </button>
             @endif
 
+            @if ($showNavbarLogo && $brandLogoUrl)
+                <a href="{{ route('portal.redirect') }}" class="topbar-brand" aria-label="SchoolMusic Dashboard Home">
+                    <img src="{{ $brandLogoUrl }}" alt="ROFC Music School" class="topbar-brand-logo">
+                </a>
+            @endif
+
             <div>
                 <h1>{{ $title }}</h1>
                 <p class="muted">{{ $subtitle }}</p>
@@ -28,11 +35,6 @@
         </div>
 
         <div class="topbar-tools">
-            <label class="global-search desktop-search" title="Search in current page">
-                <i data-lucide="search"></i>
-                <input type="search" placeholder="{{ $searchPlaceholder }}" data-global-search>
-            </label>
-
             <button type="button" class="icon-btn" title="Notifications" aria-label="Notifications">
                 <i data-lucide="bell"></i>
                 @if ((int) $notificationCount > 0)
@@ -58,12 +60,5 @@
                 </div>
             </details>
         </div>
-    </div>
-
-    <div class="mobile-search-wrap">
-        <label class="global-search" title="Search in current page">
-            <i data-lucide="search"></i>
-            <input type="search" placeholder="{{ $searchPlaceholder }}" data-global-search>
-        </label>
     </div>
 </header>

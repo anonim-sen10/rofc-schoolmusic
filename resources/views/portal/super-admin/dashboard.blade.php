@@ -5,18 +5,6 @@
 @section('page-subtitle', 'ROFC Private Music Management Information System - Super Admin Control')
 
 @section('content')
-<section class="dashboard-hero" data-searchable>
-    <div>
-        <p class="eyebrow">Operations Intelligence</p>
-        <h2>High-level performance in one screen.</h2>
-        <p>Track growth, attendance quality, and cash movement in real time with clean visual storytelling.</p>
-    </div>
-    <div class="hero-actions">
-        <a href="{{ route('super-admin.module', ['module' => 'registrations']) }}" class="ghost-btn" title="Review pending registration">Review Registrations</a>
-        <a href="{{ route('super-admin.module', ['module' => 'reports']) }}" class="ghost-btn" title="Open reports">Open Reports</a>
-    </div>
-</section>
-
 <section class="kpi-grid" data-searchable>
     @foreach ($kpis as $kpi)
         <x-ui.card class="kpi-card card-loading" :title="$kpi['label']">

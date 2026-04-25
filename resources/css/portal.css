@@ -302,9 +302,9 @@ html.sidebar-collapsed .portal-topbar {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    width: 100%;
-    flex-wrap: wrap;
-    gap: 0.55rem;
+    width: auto;
+    flex-wrap: nowrap;
+    gap: 0.65rem;
 }
 
 .toggle {
@@ -397,11 +397,6 @@ html.sidebar-collapsed .portal-topbar {
     width: min(460px, 100%);
 }
 
-.mobile-search-wrap {
-    display: none;
-    padding: 0 1.2rem 0.8rem;
-}
-
 .quick-btn {
     display: inline-flex;
     align-items: center;
@@ -461,7 +456,7 @@ html.sidebar-collapsed .portal-topbar {
 
 .dashboard-hero {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 1rem;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 1rem;
@@ -496,6 +491,7 @@ html.sidebar-collapsed .portal-topbar {
     display: inline-flex;
     gap: 0.5rem;
     align-items: flex-start;
+    margin-left: auto;
 }
 
 .ghost-btn {
@@ -1475,25 +1471,12 @@ th {
     }
 
     .topbar-tools {
-        width: 100%;
-        flex-wrap: wrap;
+        width: auto;
+        flex-wrap: nowrap;
     }
 
     .portal-topbar-inner {
         padding: 0.75rem 1rem 0.55rem;
-    }
-
-    .desktop-search {
-        display: none;
-    }
-
-    .mobile-search-wrap {
-        display: block;
-        padding: 0 1rem 0.7rem;
-    }
-
-    .global-search {
-        min-width: 100%;
     }
 
     .split-grid,
@@ -1533,6 +1516,11 @@ th {
 
     .dashboard-hero {
         flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    .hero-actions {
+        margin-left: 0;
     }
 
     .portal-content {
@@ -1562,8 +1550,16 @@ th {
 body.portal-body {
     color: var(--text);
     background:
-        radial-gradient(circle at 95% -10%, rgba(37, 99, 235, 0.12), transparent 42%),
-        radial-gradient(circle at 8% 118%, rgba(11, 30, 60, 0.08), transparent 38%),
+        radial-gradient(
+            circle at 95% -10%,
+            rgba(37, 99, 235, 0.12),
+            transparent 42%
+        ),
+        radial-gradient(
+            circle at 8% 118%,
+            rgba(11, 30, 60, 0.08),
+            transparent 38%
+        ),
         var(--bg);
 }
 
@@ -1736,14 +1732,27 @@ body.portal-body {
     inset: 0;
     pointer-events: none;
     background:
-        radial-gradient(circle at 8% 10%, rgba(37, 99, 235, 0.08), transparent 28%),
-        radial-gradient(circle at 96% 88%, rgba(11, 30, 60, 0.05), transparent 22%);
+        radial-gradient(
+            circle at 8% 10%,
+            rgba(37, 99, 235, 0.08),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 96% 88%,
+            rgba(11, 30, 60, 0.05),
+            transparent 22%
+        );
     animation: portalBgFloat 14s ease-in-out infinite;
 }
 
 @keyframes portalBgFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
 }
 
 .portal-content > * {
@@ -1752,8 +1761,14 @@ body.portal-body {
 }
 
 @keyframes portalFadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .dashboard-hero {
@@ -1792,7 +1807,9 @@ body.portal-body {
     background: #fff;
     box-shadow: 0 12px 28px rgba(15, 23, 42, 0.07);
     color: #0f172a;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .card:hover,
@@ -1982,6 +1999,94 @@ th {
     color: #1d4ed8;
 }
 
+.portal-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.45rem 0.2rem 0.9rem;
+}
+
+.brand-logo-icon-wrap {
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.brand-logo-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.brand-logo-fallback {
+    width: 100%;
+    height: 100%;
+    border-radius: 0.55rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #ffffff;
+    background: linear-gradient(135deg, #2563eb, #0b1e3c);
+}
+
+.brand-logo-content {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.28rem;
+}
+
+.brand-logo-full {
+    display: block;
+    height: 30px;
+    width: auto;
+    max-width: 150px;
+    object-fit: contain;
+}
+
+.brand-logo-content strong {
+    font-size: 0.93rem;
+    color: #0f172a;
+    line-height: 1.1;
+}
+
+html.sidebar-collapsed .portal-brand {
+    justify-content: center;
+}
+
+html.sidebar-collapsed .brand-logo-content {
+    display: none;
+}
+
+.topbar-brand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.2rem;
+}
+
+.topbar-brand-logo {
+    display: block;
+    height: 24px;
+    width: auto;
+    object-fit: contain;
+}
+
+@media (max-width: 900px) {
+    .brand-logo-content {
+        display: flex;
+    }
+
+    .topbar-brand {
+        display: none;
+    }
+}
+
 .confirm-modal {
     position: fixed;
     inset: 0;
@@ -1993,7 +2098,9 @@ th {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.2s ease, visibility 0.2s ease;
+    transition:
+        opacity 0.2s ease,
+        visibility 0.2s ease;
 }
 
 .confirm-modal.is-open {

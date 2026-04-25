@@ -18,18 +18,6 @@ $homeRoute = route('admin.dashboard');
 @section('title', 'Students Management')
 @section('page-title', 'Students Management')
 @section('content')
-<section class="dashboard-hero" data-searchable>
-    <div>
-        <p class="eyebrow">Academic Operation</p>
-        <h2>Students Management</h2>
-        <p>Kelola data siswa aktif, assignment kelas, dan status akademik secara terpusat.</p>
-    </div>
-    <div class="hero-actions">
-        <a href="{{ route('admin.classes.index') }}" class="ghost-btn">Open Classes</a>
-        <a href="{{ route('admin.registrations.index') }}" class="ghost-btn">Registrations</a>
-    </div>
-</section>
-
 <div class="split-grid-sa" data-searchable>
     <x-ui.card title="Tambah Siswa" subtitle="Registrasi manual siswa baru">
         <form class="module-form module-form-grid" method="POST" action="{{ route('admin.students.store') }}">

@@ -7,18 +7,6 @@
 @php
 	$classCollection = collect($classes);
 @endphp
-<section class="dashboard-hero" data-searchable>
-	<div>
-		<p class="eyebrow">Learning Snapshot</p>
-		<h2>Student Dashboard</h2>
-		<p>Halo {{ $student->name }}, semua informasi kelas, pembayaran, dan progres belajar ada di sini.</p>
-	</div>
-	<div class="hero-actions">
-		<a href="{{ route('student.my-class.index') }}" class="ghost-btn">My Class</a>
-		<a href="{{ route('student.payment.index') }}" class="ghost-btn">Payment</a>
-	</div>
-</section>
-
 <section class="kpi-grid" data-searchable>
 	<x-ui.card title="My Classes">
 		<div class="kpi-row">

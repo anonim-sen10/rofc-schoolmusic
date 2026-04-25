@@ -6,6 +6,37 @@
     $legacyMenuItems = $menuItems ?? [];
     $roleLabel = ucwords(str_replace('_', ' ', $resolvedRoleKey));
     $notifCount = $summary['registrations_pending'] ?? 0;
+    $brandLogoCandidates = [
+        'brand/rofc-logo.png',
+        'brand/rofc-logo.jpg',
+        'brand/rofc-logo.jpeg',
+        'brand/rofc-logo.webp',
+        'assets/brand/rofc-logo.png',
+        'assets/brand/rofc-logo.jpg',
+        'assets/brand/rofc-logo.jpeg',
+        'assets/brand/rofc-logo.webp',
+    ];
+    $brandLogoIconCandidates = [
+        'brand/rofc-logo-icon.png',
+        'brand/rofc-logo-icon.jpg',
+        'brand/rofc-logo-icon.jpeg',
+        'brand/rofc-logo-icon.webp',
+        'assets/brand/rofc-logo-icon.png',
+        'assets/brand/rofc-logo-icon.jpg',
+        'assets/brand/rofc-logo-icon.jpeg',
+        'assets/brand/rofc-logo-icon.webp',
+    ];
+    $resolveFirstAsset = static function (array $paths): ?string {
+        foreach ($paths as $path) {
+            if (file_exists(public_path($path))) {
+                return asset($path);
+            }
+        }
+
+        return null;
+    };
+    $brandLogoUrl = $resolveFirstAsset($brandLogoCandidates);
+    $brandLogoIconUrl = $resolveFirstAsset($brandLogoIconCandidates) ?? $brandLogoUrl;
     $iconMap = [
         'dashboard' => 'layout-dashboard',
         'classes' => 'book-open',
@@ -54,8 +85,14 @@
     <div class="portal-shell">
         <aside class="portal-sidebar" data-portal-sidebar>
             <a href="{{ $resolvedHomeRoute }}" class="portal-brand">
-                <span class="logo">SM</span>
-                <span>
+                <span class="brand-logo-icon-wrap" aria-hidden="true">
+                    @if ($brandLogoIconUrl)
+                        <img src="{{ $brandLogoIconUrl }}" alt="" class="brand-logo-icon">
+                    @else
+                        <span class="brand-logo-fallback">SM</span>
+                    @endif
+                </span>
+                <span class="brand-logo-content">
                     <strong>{{ $resolvedPanelTitle }}</strong>
                     <small>Music School Platform</small>
                 </span>
@@ -75,10 +112,11 @@
             <x-portal.dashboard-header
                 :title="trim($__env->yieldContent('page-title')) ?: 'Dashboard'"
                 :subtitle="trim($__env->yieldContent('page-subtitle')) ?: 'ROFC Private Music Management Information System'"
-                search-placeholder="Search in dashboard..."
                 :user-name="$userName"
                 :role-label="$roleLabel"
                 :notification-count="$notifCount"
+                :show-navbar-logo="true"
+                :brand-logo-url="$brandLogoUrl"
             />
 
             <main class="portal-content portal-content--saas">

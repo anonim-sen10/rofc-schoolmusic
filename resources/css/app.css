@@ -135,6 +135,14 @@ a {
     font-size: 0.8rem;
 }
 
+.brand-wordmark-logo {
+    width: auto;
+    height: 2.9rem;
+    max-width: 10.5rem;
+    object-fit: contain;
+    display: block;
+}
+
 .brand-mark strong {
     display: block;
     font-size: 0.95rem;

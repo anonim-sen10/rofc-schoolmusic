@@ -18,17 +18,6 @@ $homeRoute = route('admin.dashboard');
 @section('title', 'Schedule Management')
 @section('page-title', 'Schedule Management')
 @section('content')
-<section class="dashboard-hero" data-searchable>
-    <div>
-        <p class="eyebrow">Academic Operation</p>
-        <h2>Schedule Management</h2>
-        <p>Tentukan assignment pengajar dan siswa per kelas agar jadwal belajar sinkron di semua portal.</p>
-    </div>
-    <div class="hero-actions">
-        <a href="{{ route('admin.classes.index') }}" class="ghost-btn">Open Classes</a>
-    </div>
-</section>
-
 <div class="split-grid-sa" data-searchable>
     <x-ui.card title="Tentukan Pengajar per Class" subtitle="Assignment pengajar utama tiap kelas">
         <form class="module-form module-form-grid" method="POST" action="{{ route('admin.schedule.teacher') }}">
