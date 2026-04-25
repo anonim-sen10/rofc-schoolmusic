@@ -45,15 +45,14 @@ jobs:
         run: |
           node -e "const fs=require('fs'); const path=require('path'); const manifest=JSON.parse(fs.readFileSync('public/build/manifest.json','utf8')); const map=[['resources/css/app.css','app.css'],['resources/js/app.js','app.js'],['resources/css/portal.css','portal.css'],['resources/js/portal.js','portal.js']]; for (const [key,targetName] of map){ const file=manifest[key]?.file; if(!file){ throw new Error('Manifest entry not found: '+key); } const src=path.join('public/build', file); const dst=path.join('public/build/assets', targetName); fs.copyFileSync(src,dst); console.log('copied', src, '=>', dst); }"
 
-      - name: Deploy Code ke Server
-        - name: Upload Build Artifacts
-          uses: actions/upload-artifact@v4
-          with:
-            name: build-assets
-            path: public/build/
-            retention-days: 7
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-assets
+          path: public/build/
+          retention-days: 7
 
-        - name: Deploy Code ke Server
+      - name: Deploy Code ke Server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
