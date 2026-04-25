@@ -45,9 +45,52 @@ jobs:
         run: |
           node -e "const fs=require('fs'); const path=require('path'); const manifest=JSON.parse(fs.readFileSync('public/build/manifest.json','utf8')); const map=[['resources/css/app.css','app.css'],['resources/js/app.js','app.js'],['resources/css/portal.css','portal.css'],['resources/js/portal.js','portal.js']]; for (const [key,targetName] of map){ const file=manifest[key]?.file; if(!file){ throw new Error('Manifest entry not found: '+key); } const src=path.join('public/build', file); const dst=path.join('public/build/assets', targetName); fs.copyFileSync(src,dst); console.log('copied', src, '=>', dst); }"
 
-      - name: Deploy Code ke Server (Dinonaktifkan Sementara)
-        run: |
-          echo "Skip code sync sementara untuk memastikan asset build terbaru ter-upload dulu."
+      - name: Deploy Code ke Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          port: ${{ env.SERVER_PORT }}
+          timeout: 120s
+          command_timeout: 30m
+          script_stop: true
+          script: |
+            set -e
+
+            APP_DIR="${{ env.SERVER_APP_DIR }}"
+            DEPLOY_BRANCH="${{ env.DEPLOY_BRANCH }}"
+
+            echo "📦 Deploying branch: $DEPLOY_BRANCH"
+
+            # Jika folder tidak ada, clone repository
+            if [ ! -d "$APP_DIR/.git" ]; then
+              echo "📥 Cloning repository..."
+              git clone --depth 1 --branch "$DEPLOY_BRANCH" $(git config --get remote.origin.url) "$APP_DIR" || {
+                echo "❌ Git clone gagal. Pastikan SSH key sudah di-setup di server."
+                exit 1
+              }
+            else
+              cd "$APP_DIR"
+              echo "🔄 Pulling latest code..."
+              git fetch origin "$DEPLOY_BRANCH"
+              git checkout "$DEPLOY_BRANCH"
+              git pull origin "$DEPLOY_BRANCH"
+            fi
+
+            cd "$APP_DIR"
+
+            # Composer install
+            echo "📚 Installing PHP dependencies..."
+            composer install --no-dev --optimize-autoloader
+
+            # Copy .env jika belum ada (opsional, sesuaikan dengan setup Anda)
+            if [ ! -f .env ]; then
+              echo "⚠️  File .env tidak ditemukan, pastikan sudah di-create manual di server"
+            fi
+
+            echo "✅ Code deployment selesai"
 
       - name: Siapkan Folder Build di Server
         uses: appleboy/ssh-action@v1.0.3

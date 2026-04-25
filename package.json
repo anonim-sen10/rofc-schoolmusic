@@ -3,8 +3,10 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "vite build",
-        "dev": "vite"
+        "build": "vite build && node scripts/sync-build-to-public-html.mjs",
+        "dev": "vite",
+        "deploy": "node scripts/deploy.mjs",
+        "deploy:no-build": "node scripts/deploy.mjs --no-build"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",

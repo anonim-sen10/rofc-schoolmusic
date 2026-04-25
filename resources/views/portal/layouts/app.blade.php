@@ -86,13 +86,11 @@
         <aside class="portal-sidebar" data-portal-sidebar>
             <div class="portal-sidebar-header">
                 <a href="{{ $resolvedHomeRoute }}" class="portal-brand">
-                    <span class="brand-logo-icon-wrap" aria-hidden="true">
-                        @if ($brandLogoIconUrl)
-                            <img src="{{ $brandLogoIconUrl }}" alt="" class="brand-logo-icon">
-                        @else
-                            <span class="brand-logo-fallback">SM</span>
-                        @endif
-                    </span>
+                    @if ($brandLogoUrl)
+                        <img src="{{ $brandLogoUrl }}" alt="ROFC Music School" class="brand-logo-sidebar">
+                    @else
+                        <span class="brand-logo-fallback">SM</span>
+                    @endif
                     <span class="brand-logo-content">
                         <strong>{{ $resolvedPanelTitle }}</strong>
                         <small>Music School Platform</small>
