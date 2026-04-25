@@ -1,6 +1,6 @@
 import "./bootstrap";
 
-document.addEventListener("DOMContentLoaded", () => {
+function initApp() {
     const siteHeader = document.querySelector(".site-header");
     const menuToggle = document.querySelector("[data-menu-toggle]");
     const menu = document.querySelector("[data-menu]");
@@ -39,5 +39,10 @@ document.addEventListener("DOMContentLoaded", () => {
         updateHeaderState();
         window.addEventListener("scroll", updateHeaderState, { passive: true });
     }
+}
 
-});
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}

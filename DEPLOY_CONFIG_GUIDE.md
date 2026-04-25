@@ -47,20 +47,23 @@ ssh -i ./deploy_key -p 22 rofcmusi@192.168.1.100
 ## Deployment Commands
 
 ### Deploy Lengkap (Build + Git Push + Deploy)
+
 ```bash
 npm run deploy
 ```
 
 Workflow:
+
 1. `npm run build` - Build frontend assets
 2. `git add`, `git commit`, `git push` - Push ke repository
 3. SSH ke server dan:
-   - `git pull` - Pull kode terbaru
-   - `composer install` - Install PHP dependencies
-   - `rsync` - Sync public folder ke web_root
-   - `php artisan optimize:clear` - Clear caches
+    - `git pull` - Pull kode terbaru
+    - `composer install` - Install PHP dependencies
+    - `rsync` - Sync public folder ke web_root
+    - `php artisan optimize:clear` - Clear caches
 
 ### Deploy Tanpa Build (Jika hanya code changes, bukan assets)
+
 ```bash
 npm run deploy:no-build
 ```
@@ -70,12 +73,14 @@ Akan skip `npm run build` dan langsung git push + server deploy.
 ## Troubleshooting
 
 ### SSH Key Permission Error
+
 ```bash
 # Fix permission
 chmod 600 deploy_key
 ```
 
 ### SSH Connection Denied
+
 ```bash
 # Test dengan verbose
 ssh -v -i ./deploy_key rofcmusi@192.168.1.100
@@ -87,6 +92,7 @@ ssh -v -i ./deploy_key rofcmusi@192.168.1.100
 ```
 
 ### Composer Install Fails
+
 ```bash
 # SSH ke server dan test
 ssh -i ./deploy_key rofcmusi@192.168.1.100
@@ -97,6 +103,7 @@ composer -v
 ```
 
 ### Git Clone/Pull Fails
+
 ```bash
 # SSH ke server dan test
 cd /home/rofcmusi/rofc-laravel
@@ -148,7 +155,8 @@ ssh -i deploy_key rofcmusi@192.168.1.100 'ls -lah /home/rofcmusi/public_html/bui
 
 ---
 
-**Note:** 
+**Note:**
+
 - `.env.deploy` dan `deploy_key` sudah di-add ke `.gitignore` - tidak akan ter-commit
 - Jangan share SSH private key secara public!
 - Jangan commit deploy_key ke git repository

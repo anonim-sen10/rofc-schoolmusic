@@ -5,11 +5,13 @@
 Anda perlu mengatur secrets berikut di GitHub repository:
 
 ### Required Secrets (Wajib):
+
 - `SERVER_HOST` - IP atau domain server hosting Anda
 - `SERVER_USER` - Username SSH (contoh: rofcmusi)
 - `SSH_PRIVATE_KEY` - Private SSH key untuk authentikasi
 
 ### Optional Secrets (Opsional, jika berbeda dengan default):
+
 - `SERVER_APP_DIR` - Path aplikasi Laravel (default: `/home/rofcmusi/rofc-laravel`)
 - `SERVER_WEB_DIR` - Path web root (default: `/home/rofcmusi/public_html`)
 - `DEPLOY_BRANCH` - Branch untuk deploy (default: `main`)
@@ -36,6 +38,7 @@ Kemudian copy isi file `~/.ssh/deploy_key` ke GitHub secret `SSH_PRIVATE_KEY`
 3. Tambahkan setiap secret yang diperlukan
 
 Contoh:
+
 ```
 SERVER_HOST: 192.168.1.100
 SERVER_USER: rofcmusi
@@ -80,11 +83,13 @@ Ketika Anda push ke branch `main`, workflow akan:
 ## 6. Testing & Troubleshooting
 
 ### Test SSH Connection Locally:
+
 ```bash
 ssh -i path/to/private_key -p 22 rofcmusi@SERVER_HOST
 ```
 
 ### Manual Deploy Push:
+
 ```bash
 git push origin main
 ```
@@ -92,6 +97,7 @@ git push origin main
 Workflow akan otomatis berjalan. Lihat progress di **GitHub** → **Actions** tab
 
 ### Jika ada error:
+
 - Check **Actions** tab untuk detail error
 - Verifikasi SSH key permission: `chmod 600 ~/.ssh/deploy_key`
 - Verifikasi secrets di GitHub (jangan sampai ada typo)
@@ -124,6 +130,7 @@ php artisan optimize:clear
 ## 8. Continuous Improvement
 
 Dalam pengembangan, Anda bisa:
+
 - Menambahkan unit/feature tests di workflow
 - Menambahkan database backup sebelum migration
 - Menambahkan slack notification untuk status deployment

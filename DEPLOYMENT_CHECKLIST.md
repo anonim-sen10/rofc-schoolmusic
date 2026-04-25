@@ -3,30 +3,35 @@
 ## Quick Start Checklist
 
 ### Step 1: Server SSH Setup ⚠️ HARUS DILAKUKAN DULU
+
 - [ ] SSH ke server: `ssh rofcmusi@SERVER_HOST`
 - [ ] Generate SSH key: `ssh-keygen -t ed25519 -f ~/.ssh/deploy_key -N ""`
 - [ ] Add public key: `cat ~/.ssh/deploy_key.pub >> ~/.ssh/authorized_keys`
 - [ ] Fix permissions:
-  ```bash
-  chmod 600 ~/.ssh/authorized_keys
-  chmod 700 ~/.ssh
-  ```
+    ```bash
+    chmod 600 ~/.ssh/authorized_keys
+    chmod 700 ~/.ssh
+    ```
 - [ ] Copy private key content untuk GitHub secret
 
 ### Step 2: GitHub Secrets Setup
+
 Di repository GitHub Anda → Settings → Secrets and variables → Actions
 
 **Required (Wajib):**
+
 - [ ] `SERVER_HOST` - IP atau domain server (contoh: 192.168.1.100)
 - [ ] `SERVER_USER` - SSH username (contoh: rofcmusi)
 - [ ] `SSH_PRIVATE_KEY` - Isi file `~/.ssh/deploy_key` dari server
 
 **Optional:**
+
 - [ ] `SERVER_APP_DIR` - Path Laravel (default: `/home/rofcmusi/rofc-laravel`)
 - [ ] `SERVER_WEB_DIR` - Path web root (default: `/home/rofcmusi/public_html`)
 - [ ] `SSH_PASSPHRASE` - Jika private key punya passphrase
 
 ### Step 3: Server Prerequisites Verification
+
 SSH ke server dan jalankan:
 
 ```bash
@@ -84,6 +89,7 @@ git push origin main
 ### Step 6: Monitor Deployment
 
 **Watch in UI:**
+
 1. Buka GitHub repo
 2. Klik tab **Actions**
 3. Lihat workflow run terbaru
@@ -147,6 +153,7 @@ ls -lah /home/rofcmusi/public_html/build/
 ## Troubleshooting
 
 ### SSH Connection Failed
+
 ```bash
 # Test SSH key locally
 ssh -i ~/.ssh/deploy_key -p 22 rofcmusi@SERVER_HOST
@@ -156,6 +163,7 @@ cat ~/.ssh/authorized_keys
 ```
 
 ### Composer Install Fails
+
 ```bash
 # SSH ke server dan check
 php -v
@@ -166,6 +174,7 @@ curl -sS https://getcomposer.org/installer | php -- --install-dir /usr/local/bin
 ```
 
 ### Git Clone Fails
+
 ```bash
 # Check git installed
 git --version
@@ -175,6 +184,7 @@ git clone https://github.com/your-repo.git /tmp/test-clone
 ```
 
 ### Assets Not Updated
+
 ```bash
 # Check build folder exist
 ls -la /home/rofcmusi/public_html/build/
@@ -214,6 +224,7 @@ php artisan view:cache
 ## Status: READY TO DEPLOY ✅
 
 Semua sudah siap. Tinggal:
+
 1. Setup GitHub Secrets
 2. SSH ke server dan setup SSH keysfile
 3. Test dengan `git push origin main`

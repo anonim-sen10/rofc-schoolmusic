@@ -37,12 +37,14 @@ git push origin main
 ### 2️⃣ GitHub Actions Otomatis Build
 
 Setelah push:
+
 1. Buka repository GitHub: https://github.com/anonim-sen10/rofc-schoolmusic
 2. Klik tab **Actions**
 3. Lihat workflow run terbaru (nama: "Auto Deploy Laravel")
 4. Status akan berubah dari 🟡 (running) → 🟢 (success)
 
 **Workflow akan:**
+
 - ✅ Setup Node.js 20
 - ✅ Install npm dependencies
 - ✅ Build frontend assets
@@ -77,6 +79,7 @@ build-assets/
 ### 4️⃣ Extract & Upload via cPanel
 
 #### A. Extract Locally
+
 ```
 build-assets.zip
     ↓ (extract)
@@ -93,18 +96,18 @@ build/
 3. Navigate ke: `/public_html/build/`
 4. **Delete folder/files lama** (atau backup dulu)
 5. **Upload semua files** dari folder `build/` yang sudah di-extract
-   - Atau drag-drop files ke cPanel
-   - Atau extract ZIP langsung di cPanel
+    - Atau drag-drop files ke cPanel
+    - Atau extract ZIP langsung di cPanel
 
 #### C. Verify Upload
 
 - Cek di cPanel bahwa file-file sudah ter-upload
 - File penting yang harus ada:
-  - `manifest.json` ✅
-  - `assets/app.css` ✅
-  - `assets/app.js` ✅
-  - `assets/portal.css` ✅
-  - `assets/portal.js` ✅
+    - `manifest.json` ✅
+    - `assets/app.css` ✅
+    - `assets/app.js` ✅
+    - `assets/portal.css` ✅
+    - `assets/portal.js` ✅
 
 ### 5️⃣ Test di Browser
 
@@ -119,17 +122,19 @@ build/
 ## Workflow Status Check
 
 ### Sukses ✅
+
 - Workflow status: **Green / Success**
 - Artifact tersedia untuk download
 - Semua file terlihat di cPanel
 
 ### Gagal ❌
+
 - Workflow status: **Red / Failed**
 - Lihat error log di GitHub Actions
 - Common errors:
-  - npm install error → cek dependencies
-  - Build error → cek code syntax
-  - Manifest error → cek file structure
+    - npm install error → cek dependencies
+    - Build error → cek code syntax
+    - Manifest error → cek file structure
 
 ---
 
@@ -152,28 +157,36 @@ gh run download <RUN_ID> -n build-assets
 ## Tips & Tricks
 
 ### 1. Automated Artifacts Cleanup
+
 Artifacts akan otomatis terhapus setelah **7 hari** (untuk hemat storage GitHub)
 
 ### 2. Multiple Deployments
+
 Jika deploy berkali-kali dalam sehari:
+
 - Setiap push = 1 new artifact
 - Hanya download artifact terbaru (latest)
 - Artifacts lama bisa didelete manual
 
 ### 3. Verify Manifest
+
 Jika ada doubt, cek isi `manifest.json`:
+
 ```bash
 cat public/build/manifest.json | jq '.' # pretty print
 ```
 
 Harus berisi keys:
+
 - `resources/css/app.css`
 - `resources/js/app.js`
 - `resources/css/portal.css`
 - `resources/js/portal.js`
 
 ### 4. Rollback Strategy
+
 Jika deploy error, keep backup folder:
+
 ```
 /public_html/build-backup/  ← old version
 /public_html/build/          ← new version
@@ -186,22 +199,26 @@ Untuk rollback, rename folder back
 ## Troubleshooting
 
 ### Artifact tidak ada setelah workflow selesai
+
 - ❌ Workflow gagal sebelum build step
 - ✅ Buka workflow log, cari error
 - ✅ Fix error di kode
 - ✅ Push lagi
 
 ### Files not updating di browser
+
 - ❌ Browser cache lama
 - ✅ Hard refresh: Ctrl+F5 (Windows) atau Cmd+Shift+R (Mac)
 - ✅ Atau clear DevTools cache
 
 ### Permission error di cPanel
+
 - ❌ File ownership/permission issue
 - ✅ Di cPanel → File Manager → select file → Can modify → Change
 - ✅ Atau contact hosting support
 
 ### Build artifact terlalu besar
+
 - ❌ Ada node_modules kemasuk (jangan)
 - ✅ Cek `.github/workflows/deploy.yml → path: public/build/`
 
@@ -210,11 +227,13 @@ Untuk rollback, rename folder back
 ## Maintenance
 
 ### Weekly Checks
+
 - [ ] Workflow runs successfully
 - [ ] Artifact downloads fine
 - [ ] Website loads assets correctly
 
 ### Monthly Cleanup
+
 - [ ] Delete old artifacts (>1 month) in GitHub
 - [ ] Check storage usage on cPanel
 - [ ] Review error logs if any
@@ -224,12 +243,15 @@ Untuk rollback, rename folder back
 ## Next Steps (Future Improvements)
 
 ### Option 1: FTP Automation
+
 Setup GitHub Actions to auto-upload via FTP (eliminate manual step)
 
 ### Option 2: Webhook
+
 Setup hosting webhook to trigger deployment on push
 
 ### Option 3: SSH Alternative
+
 Try different SSH port or setup reverse SSH tunnel
 
 ---
@@ -245,6 +267,7 @@ Try different SSH port or setup reverse SSH tunnel
 **That's it!** 🎉
 
 Setiap kali ada update, tinggal:
+
 1. `git push origin main`
 2. Download artifact dari GitHub Actions
 3. Upload ke cPanel via File Manager

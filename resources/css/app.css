@@ -199,6 +199,7 @@ a {
     color: #1a3a6e;
     border-radius: 999px;
     padding: 0.45rem 1rem;
+    cursor: pointer;
 }
 
 .btn {
@@ -885,11 +886,19 @@ a {
         gap: 0;
         overflow: hidden;
         max-height: 0;
-        transition: max-height 0.25s ease;
+        opacity: 0;
+        pointer-events: none;
+        transition: max-height 0.25s ease, opacity 0.25s ease;
     }
 
     .main-nav.open {
-        max-height: 420px;
+        max-height: 600px;
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .nav-actions {
+        display: none;
     }
 
     .main-nav a {
