@@ -1073,13 +1073,23 @@ details.action-popover[open]::before {
 }
 
 @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes modal-pop {
-    from { opacity: 0; transform: translate(-50%, -46%) scale(0.96); }
-    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    from {
+        opacity: 0;
+        transform: translate(-50%, -46%) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
 }
 
 .action-popover-form,
@@ -1223,7 +1233,10 @@ details.action-popover[open]::before {
     font-size: 0.925rem;
     color: #1e293b;
     background: #ffffff;
-    transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+    transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease,
+        background-color 0.18s ease;
     line-height: 1.5;
     font-family: inherit;
 }
@@ -1296,7 +1309,11 @@ details.action-popover[open]::before {
     font-size: 0.84rem;
     font-weight: 600;
     cursor: pointer;
-    transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, transform 0.12s ease;
+    transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease,
+        background-color 0.18s ease,
+        transform 0.12s ease;
     line-height: 1.5;
     border: 1px solid transparent;
     font-family: inherit;
@@ -1344,7 +1361,9 @@ details.action-popover[open]::before {
     opacity: 0.9;
 }
 @keyframes te-spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 .te-spin {
     animation: te-spin 0.7s linear infinite;
@@ -1738,7 +1757,9 @@ details.action-popover[open]::before {
     color: #0f172a;
     background: #fff;
     font-family: inherit;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .registration-edit-form select[multiple] {
@@ -2422,7 +2443,8 @@ details.registration-style-popover[open] > summary::before {
     display: none !important;
 }
 
-details.registration-style-popover[open] .action-popover-form.registration-edit-form {
+details.registration-style-popover[open]
+    .action-popover-form.registration-edit-form {
     position: fixed !important;
     top: 50% !important;
     left: 50% !important;
@@ -2440,7 +2462,9 @@ details.registration-style-popover[open] .action-popover-form.registration-edit-
     pointer-events: auto !important;
 }
 
-details.registration-style-popover[open] .action-popover-form.registration-edit-form .registration-modal-header {
+details.registration-style-popover[open]
+    .action-popover-form.registration-edit-form
+    .registration-modal-header {
     display: flex !important;
     align-items: center;
     justify-content: space-between;
@@ -2449,20 +2473,30 @@ details.registration-style-popover[open] .action-popover-form.registration-edit-
     z-index: 2;
 }
 
-details.registration-style-popover[open] .action-popover-form.registration-edit-form .registration-modal-body {
+details.registration-style-popover[open]
+    .action-popover-form.registration-edit-form
+    .registration-modal-body {
     flex: 1;
     overflow-y: auto;
 }
 
-details.registration-style-popover[open] .action-popover-form.registration-edit-form .registration-modal-footer {
+details.registration-style-popover[open]
+    .action-popover-form.registration-edit-form
+    .registration-modal-footer {
     position: sticky;
     bottom: 0;
     z-index: 2;
 }
 
-details.registration-style-popover[open] .action-popover-form.registration-edit-form input,
-details.registration-style-popover[open] .action-popover-form.registration-edit-form select,
-details.registration-style-popover[open] .action-popover-form.registration-edit-form textarea {
+details.registration-style-popover[open]
+    .action-popover-form.registration-edit-form
+    input,
+details.registration-style-popover[open]
+    .action-popover-form.registration-edit-form
+    select,
+details.registration-style-popover[open]
+    .action-popover-form.registration-edit-form
+    textarea {
     width: 100%;
     border: 1px solid #cbd5e1;
     border-radius: 0.5rem;
@@ -2471,23 +2505,39 @@ details.registration-style-popover[open] .action-popover-form.registration-edit-
     color: #0f172a;
     background: #fff;
     font-family: inherit;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
-details.registration-style-popover[open] .action-popover-form.registration-edit-form select[multiple] {
+details.registration-style-popover[open]
+    .action-popover-form.registration-edit-form
+    select[multiple] {
     min-height: 6rem;
     padding: 0.5rem;
 }
 
-details.registration-style-popover[open] .action-popover-form.registration-edit-form input:hover,
-details.registration-style-popover[open] .action-popover-form.registration-edit-form select:hover,
-details.registration-style-popover[open] .action-popover-form.registration-edit-form textarea:hover {
+details.registration-style-popover[open]
+    .action-popover-form.registration-edit-form
+    input:hover,
+details.registration-style-popover[open]
+    .action-popover-form.registration-edit-form
+    select:hover,
+details.registration-style-popover[open]
+    .action-popover-form.registration-edit-form
+    textarea:hover {
     border-color: #94a3b8;
 }
 
-details.registration-style-popover[open] .action-popover-form.registration-edit-form input:focus,
-details.registration-style-popover[open] .action-popover-form.registration-edit-form select:focus,
-details.registration-style-popover[open] .action-popover-form.registration-edit-form textarea:focus {
+details.registration-style-popover[open]
+    .action-popover-form.registration-edit-form
+    input:focus,
+details.registration-style-popover[open]
+    .action-popover-form.registration-edit-form
+    select:focus,
+details.registration-style-popover[open]
+    .action-popover-form.registration-edit-form
+    textarea:focus {
     outline: none;
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
