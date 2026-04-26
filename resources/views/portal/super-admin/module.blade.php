@@ -93,9 +93,9 @@
                             <td>
                                 <div class="action-icons">
                                     <a href="{{ route('super-admin.users.show', $userRow) }}" class="btn-icon" title="Detail" aria-label="Detail"><i data-lucide="eye"></i></a>
-                                    <details class="action-popover">
+                                    <details class="action-popover registration-style-popover">
                                         <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
-                                        <form class="action-popover-form" method="POST" action="{{ route('super-admin.users.update', $userRow) }}">
+                                        <form class="action-popover-form registration-edit-form" method="POST" action="{{ route('super-admin.users.update', $userRow) }}">
                                             @csrf
                                             @method('PUT')
                                             <header class="registration-modal-header">
@@ -104,20 +104,24 @@
                                                         <i data-lucide="pencil-line"></i>
                                                     </span>
                                                     <div>
-                                                        <h3 style="margin:0; font-size:1.02rem; color:#0f172a;">Edit User</h3>
-                                                        <p style="margin:.18rem 0 0; font-size:.84rem; color:#64748b;">Perbarui informasi akun dan akses</p>
+                                                        <h3>Edit User</h3>
+                                                        <p>Perbarui informasi akun dan akses</p>
                                                     </div>
                                                 </div>
+                                                <button type="button" class="registration-modal-close-btn action-popover-close" aria-label="Tutup"><i data-lucide="x"></i></button>
                                             </header>
-                                            <div class="registration-modal-body registration-edit-form">
-                                                <div class="registration-edit-grid">
-                                                    <label>Nama
+                                            <div class="registration-modal-body">
+                                                <section class="registration-edit-grid">
+                                                    <div class="registration-edit-field">
+                                                        <label class="registration-edit-label">Nama</label>
                                                         <input type="text" name="name" value="{{ $userRow->name }}" required>
-                                                    </label>
-                                                    <label>Email
+                                                    </div>
+                                                    <div class="registration-edit-field">
+                                                        <label class="registration-edit-label">Email</label>
                                                         <input type="email" name="email" value="{{ $userRow->email }}" required>
-                                                    </label>
-                                                    <label>Role
+                                                    </div>
+                                                    <div class="registration-edit-field">
+                                                        <label class="registration-edit-label">Role</label>
                                                         <select name="role" required>
                                                             <option value="super_admin" @selected($userRow->hasRole('super_admin'))>Super Admin</option>
                                                             <option value="admin" @selected($userRow->hasRole('admin'))>Admin</option>
@@ -125,13 +129,15 @@
                                                             <option value="teacher" @selected($userRow->hasRole('teacher'))>Teacher</option>
                                                             <option value="student" @selected($userRow->hasRole('student'))>Siswa</option>
                                                         </select>
-                                                    </label>
-                                                    <label>Password Baru (opsional)
+                                                    </div>
+                                                    <div class="registration-edit-field">
+                                                        <label class="registration-edit-label">Password Baru (opsional)</label>
                                                         <input type="password" name="password" placeholder="Kosongkan jika tidak diganti">
-                                                    </label>
-                                                </div>
+                                                    </div>
+                                                </section>
                                             </div>
-                                            <footer class="registration-modal-footer registration-edit-footer">
+                                            <footer class="registration-modal-footer">
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close">Batal</button>
                                                 <button type="submit" class="registration-modal-btn registration-modal-btn-primary">Simpan Perubahan</button>
                                             </footer>
                                         </form>
@@ -234,49 +240,87 @@
                             <td>
                                 <div class="action-icons">
                                     <a href="{{ route('super-admin.teachers.show', $teacher) }}" class="btn-icon" title="Detail" aria-label="Detail"><i data-lucide="eye"></i></a>
-                                    <details class="action-popover">
+                                    <details class="action-popover" id="teacher-edit-{{ $teacher->id }}">
                                         <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
-                                        <form class="action-popover-form" method="POST" enctype="multipart/form-data" action="{{ route('super-admin.teachers.update', $teacher) }}">
+                                        <form class="action-popover-form teacher-edit-modal" method="POST" enctype="multipart/form-data" action="{{ route('super-admin.teachers.update', $teacher) }}" id="teacher-edit-form-{{ $teacher->id }}" novalidate>
                                             @csrf
                                             @method('PUT')
-                                            <header class="registration-modal-header">
-                                                <div class="registration-modal-header-left">
-                                                    <span class="registration-modal-icon">
-                                                        <i data-lucide="pencil-line"></i>
+                                            {{-- ─── HEADER ─── --}}
+                                            <header class="te-modal-header">
+                                                <div class="te-modal-header-left">
+                                                    <span class="te-modal-icon">
+                                                        <i data-lucide="user-pen"></i>
                                                     </span>
                                                     <div>
-                                                        <h3 style="margin:0; font-size:1.02rem; color:#0f172a;">Edit Teacher</h3>
-                                                        <p style="margin:.18rem 0 0; font-size:.84rem; color:#64748b;">Perbarui informasi data pengajar</p>
+                                                        <h3 class="te-modal-title">Edit Teacher</h3>
+                                                        <p class="te-modal-subtitle">Perbarui informasi data pengajar</p>
                                                     </div>
                                                 </div>
+                                                <button type="button" class="te-modal-close action-popover-close" aria-label="Tutup">
+                                                    <i data-lucide="x"></i>
+                                                </button>
                                             </header>
-                                            <div class="registration-modal-body registration-edit-form">
-                                                <div class="registration-edit-grid">
-                                                    <label>Nama
-                                                        <input type="text" name="name" value="{{ $teacher->name }}" required>
-                                                    </label>
-                                                    <label>Email
-                                                        <input type="email" name="email" value="{{ $teacher->user?->email }}" required>
-                                                    </label>
-                                                    <label>Nomor HP
-                                                        <input type="text" name="phone" value="{{ $teacher->phone }}" required>
-                                                    </label>
-                                                    <label>Jenis Kelamin
-                                                        <select name="gender" required>
-                                                            <option value="laki-laki" @selected($teacher->gender === 'laki-laki')>Laki-laki</option>
-                                                            <option value="perempuan" @selected($teacher->gender === 'perempuan')>Perempuan</option>
-                                                        </select>
-                                                    </label>
-                                                    <label class="registration-edit-field-full">Alamat
-                                                        <textarea name="address" rows="2" required>{{ $teacher->address }}</textarea>
-                                                    </label>
-                                                    <label>Agama
-                                                        <input type="text" name="religion" value="{{ $teacher->religion }}" required>
-                                                    </label>
+
+                                            {{-- ─── BODY ─── --}}
+                                            <div class="te-modal-body">
+                                                <div class="te-modal-grid">
+                                                    {{-- Row 1 --}}
+                                                    <div class="te-field" id="field-name-{{ $teacher->id }}">
+                                                        <label class="te-label" for="te-name-{{ $teacher->id }}">Nama</label>
+                                                        <input class="te-input" type="text" id="te-name-{{ $teacher->id }}" name="name" value="{{ $teacher->name }}" placeholder="Masukkan nama lengkap" required>
+                                                        <span class="te-error-text" aria-live="polite"></span>
+                                                    </div>
+                                                    <div class="te-field" id="field-gender-{{ $teacher->id }}">
+                                                        <label class="te-label" for="te-gender-{{ $teacher->id }}">Jenis Kelamin</label>
+                                                        <div class="te-select-wrap">
+                                                            <select class="te-input te-select" id="te-gender-{{ $teacher->id }}" name="gender" required>
+                                                                <option value="" disabled>Pilih jenis kelamin</option>
+                                                                <option value="laki-laki" @selected($teacher->gender === 'laki-laki')>Laki-laki</option>
+                                                                <option value="perempuan" @selected($teacher->gender === 'perempuan')>Perempuan</option>
+                                                            </select>
+                                                            <i data-lucide="chevron-down" class="te-select-icon"></i>
+                                                        </div>
+                                                        <span class="te-error-text" aria-live="polite"></span>
+                                                    </div>
+
+                                                    {{-- Row 2 --}}
+                                                    <div class="te-field" id="field-email-{{ $teacher->id }}">
+                                                        <label class="te-label" for="te-email-{{ $teacher->id }}">Email</label>
+                                                        <input class="te-input" type="email" id="te-email-{{ $teacher->id }}" name="email" value="{{ $teacher->user?->email }}" placeholder="contoh@email.com" required>
+                                                        <span class="te-error-text" aria-live="polite"></span>
+                                                    </div>
+                                                    <div class="te-field" id="field-religion-{{ $teacher->id }}">
+                                                        <label class="te-label" for="te-religion-{{ $teacher->id }}">Agama</label>
+                                                        <input class="te-input" type="text" id="te-religion-{{ $teacher->id }}" name="religion" value="{{ $teacher->religion }}" placeholder="Masukkan agama" required>
+                                                        <span class="te-error-text" aria-live="polite"></span>
+                                                    </div>
+
+                                                    {{-- Row 3 --}}
+                                                    <div class="te-field" id="field-phone-{{ $teacher->id }}">
+                                                        <label class="te-label" for="te-phone-{{ $teacher->id }}">Nomor HP</label>
+                                                        <input class="te-input" type="text" id="te-phone-{{ $teacher->id }}" name="phone" value="{{ $teacher->phone }}" placeholder="08xxxxxxxxxx" required>
+                                                        <span class="te-error-text" aria-live="polite"></span>
+                                                    </div>
+                                                    <div class="te-field te-field--placeholder"></div>
+
+                                                    {{-- Full-width: Alamat --}}
+                                                    <div class="te-field te-field--full" id="field-address-{{ $teacher->id }}">
+                                                        <label class="te-label" for="te-address-{{ $teacher->id }}">Alamat</label>
+                                                        <textarea class="te-input te-textarea" id="te-address-{{ $teacher->id }}" name="address" rows="3" placeholder="Masukkan alamat lengkap" required>{{ $teacher->address }}</textarea>
+                                                        <span class="te-error-text" aria-live="polite"></span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <footer class="registration-modal-footer registration-edit-footer">
-                                                <button type="submit" class="registration-modal-btn registration-modal-btn-primary">Simpan Perubahan</button>
+
+                                            {{-- ─── FOOTER ─── --}}
+                                            <footer class="te-modal-footer">
+                                                <button type="button" class="te-btn te-btn--secondary action-popover-close">Cancel</button>
+                                                <button type="submit" class="te-btn te-btn--primary">
+                                                    <span class="te-btn-label">Save Changes</span>
+                                                    <span class="te-btn-spinner" aria-hidden="true">
+                                                        <svg class="te-spin" width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="31.42 31.42" stroke-dashoffset="10"/></svg>
+                                                    </span>
+                                                </button>
                                             </footer>
                                         </form>
                                     </details>
@@ -364,9 +408,9 @@
                             </td>
                             <td>
                                 <div class="action-icons class-action-icons">
-                                    <details class="action-popover">
+                                    <details class="action-popover registration-style-popover">
                                         <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
-                                        <form class="action-popover-form" method="POST" action="{{ route('super-admin.classes.update', $classItem) }}">
+                                        <form class="action-popover-form registration-edit-form" method="POST" action="{{ route('super-admin.classes.update', $classItem) }}">
                                         @csrf
                                         @method('PUT')
                                         <header class="registration-modal-header">
@@ -375,39 +419,46 @@
                                                     <i data-lucide="pencil-line"></i>
                                                 </span>
                                                 <div>
-                                                    <h3 style="margin:0; font-size:1.02rem; color:#0f172a;">Edit Class</h3>
-                                                    <p style="margin:.18rem 0 0; font-size:.84rem; color:#64748b;">Perbarui informasi kelas musik</p>
+                                                    <h3>Edit Class</h3>
+                                                    <p>Perbarui informasi kelas musik</p>
                                                 </div>
                                             </div>
+                                            <button type="button" class="registration-modal-close-btn action-popover-close" aria-label="Tutup"><i data-lucide="x"></i></button>
                                         </header>
-                                        <div class="registration-modal-body registration-edit-form">
-                                            <div class="registration-edit-grid">
-                                                <label>Nama Kelas
+                                        <div class="registration-modal-body">
+                                            <section class="registration-edit-grid">
+                                                <div class="registration-edit-field">
+                                                    <label class="registration-edit-label">Nama Kelas</label>
                                                     <input type="text" name="name" value="{{ $classItem->name }}" required>
-                                                </label>
-                                                <label>Harga
+                                                </div>
+                                                <div class="registration-edit-field">
+                                                    <label class="registration-edit-label">Harga</label>
                                                     <input type="number" name="price" min="0" step="1000" value="{{ (int) ($classItem->price ?? 0) }}">
-                                                </label>
-                                                <label class="registration-edit-field-full">Deskripsi
+                                                </div>
+                                                <div class="registration-edit-field registration-edit-field-full">
+                                                    <label class="registration-edit-label">Deskripsi</label>
                                                     <textarea name="description" rows="2">{{ $classItem->description }}</textarea>
-                                                </label>
-                                                <label>Guru
+                                                </div>
+                                                <div class="registration-edit-field">
+                                                    <label class="registration-edit-label">Guru</label>
                                                     <select name="teacher_id">
                                                         <option value="">Tanpa guru</option>
                                                         @foreach ($teachersForClassOptions as $teacherOption)
                                                             <option value="{{ $teacherOption->id }}" @selected((int) $classItem->teacher_id === (int) $teacherOption->id)>{{ $teacherOption->name }}</option>
                                                         @endforeach
                                                     </select>
-                                                </label>
-                                                <label>Status
+                                                </div>
+                                                <div class="registration-edit-field">
+                                                    <label class="registration-edit-label">Status</label>
                                                     <select name="status" required>
                                                         <option value="active" @selected($classItem->status === 'active')>Active</option>
                                                         <option value="inactive" @selected($classItem->status === 'inactive')>Inactive</option>
                                                     </select>
-                                                </label>
-                                            </div>
+                                                </div>
+                                            </section>
                                         </div>
-                                        <footer class="registration-modal-footer registration-edit-footer">
+                                        <footer class="registration-modal-footer">
+                                            <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close">Batal</button>
                                             <button type="submit" class="registration-modal-btn registration-modal-btn-primary">Simpan Perubahan</button>
                                         </footer>
                                         </form>
@@ -1319,94 +1370,127 @@
                 @method('PUT')
 
                 <section class="registration-edit-grid">
-                    <label>Nama Lengkap
-                        <input type="text" name="nama_lengkap" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
-                    </label>
-                    <label>Nama Panggilan
-                        <input type="text" name="nama_panggilan" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
-                    </label>
-                    <label>Jenis Kelamin
-                        <select name="jenis_kelamin" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
-                            <option value="laki-laki">laki-laki</option>
-                            <option value="perempuan">perempuan</option>
+                    <div class="registration-edit-field">
+                        <label class="registration-edit-label">Nama Lengkap</label>
+                        <input type="text" name="nama_lengkap" required>
+                    </div>
+                    <div class="registration-edit-field">
+                        <label class="registration-edit-label">Nama Panggilan</label>
+                        <input type="text" name="nama_panggilan" required>
+                    </div>
+
+                    <div class="registration-edit-field">
+                        <label class="registration-edit-label">Jenis Kelamin</label>
+                        <select name="jenis_kelamin" required>
+                            <option value="">Pilih jenis kelamin</option>
+                            <option value="laki-laki">Laki-laki</option>
+                            <option value="perempuan">Perempuan</option>
                         </select>
-                    </label>
-                    <label>Tempat Lahir
-                        <input type="text" name="tempat_lahir" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
-                    </label>
-                    <label>Tanggal Lahir
-                        <input type="date" name="tanggal_lahir" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
-                    </label>
-                    <label>Kewarganegaraan
-                        <input type="text" name="kewarganegaraan" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
-                    </label>
-                    <label class="registration-edit-field-full">Alamat
-                        <textarea name="alamat" rows="2" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required></textarea>
-                    </label>
-                    <label>No HP Siswa
-                        <input type="text" name="no_hp_siswa" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
-                    </label>
-                    <label>Email Siswa
-                        <input type="email" name="email" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
-                    </label>
-                    <label>Nama Orang Tua
-                        <input type="text" name="nama_ortu" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
-                    </label>
-                    <label>Pekerjaan Orang Tua
-                        <input type="text" name="pekerjaan_ortu" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none">
-                    </label>
-                    <label>No HP Orang Tua
-                        <input type="text" name="no_hp_ortu" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
-                    </label>
-                    <label>Email Orang Tua
-                        <input type="email" name="email_ortu" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none">
-                    </label>
-                    <label>Instrumen
-                        <select name="instrumen" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
+                    </div>
+                    <div class="registration-edit-field">
+                        <label class="registration-edit-label">Tempat Lahir</label>
+                        <input type="text" name="tempat_lahir" required>
+                    </div>
+
+                    <div class="registration-edit-field">
+                        <label class="registration-edit-label">Tanggal Lahir</label>
+                        <input type="date" name="tanggal_lahir" required>
+                    </div>
+                    <div class="registration-edit-field">
+                        <label class="registration-edit-label">Kewarganegaraan</label>
+                        <input type="text" name="kewarganegaraan" required>
+                    </div>
+
+                    <div class="registration-edit-field registration-edit-field-full">
+                        <label class="registration-edit-label">Alamat</label>
+                        <textarea name="alamat" rows="3" required></textarea>
+                    </div>
+
+                    <div class="registration-edit-field">
+                        <label class="registration-edit-label">No HP Siswa</label>
+                        <input type="tel" name="no_hp_siswa" required>
+                    </div>
+                    <div class="registration-edit-field">
+                        <label class="registration-edit-label">Email Siswa</label>
+                        <input type="email" name="email" required>
+                    </div>
+
+                    <div class="registration-edit-field">
+                        <label class="registration-edit-label">Nama Orang Tua</label>
+                        <input type="text" name="nama_ortu" required>
+                    </div>
+                    <div class="registration-edit-field">
+                        <label class="registration-edit-label">Pekerjaan Orang Tua</label>
+                        <input type="text" name="pekerjaan_ortu">
+                    </div>
+
+                    <div class="registration-edit-field">
+                        <label class="registration-edit-label">No HP Orang Tua</label>
+                        <input type="tel" name="no_hp_ortu" required>
+                    </div>
+                    <div class="registration-edit-field">
+                        <label class="registration-edit-label">Email Orang Tua</label>
+                        <input type="email" name="email_ortu">
+                    </div>
+
+                    <div class="registration-edit-field">
+                        <label class="registration-edit-label">Instrumen</label>
+                        <select name="instrumen" required>
                             <option value="">Pilih instrumen</option>
                             @foreach($instrumenOptions as $instrumenItem)
                                 <option value="{{ $instrumenItem }}">{{ $instrumenItem }}</option>
                             @endforeach
                         </select>
-                    </label>
-                    <label>Program Tambahan
-                        <select name="program_tambahan[]" multiple class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none">
+                    </div>
+                    <div class="registration-edit-field">
+                        <label class="registration-edit-label">Program Tambahan</label>
+                        <select name="program_tambahan[]" multiple>
                             @foreach($programTambahanOptions as $programItem)
                                 <option value="{{ $programItem }}">{{ $programItem }}</option>
                             @endforeach
                         </select>
-                    </label>
-                    <label>Hari Pilihan
-                        <select name="hari_pilihan[]" multiple class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
+                    </div>
+
+                    <div class="registration-edit-field">
+                        <label class="registration-edit-label">Hari Pilihan</label>
+                        <select name="hari_pilihan[]" multiple required>
                             @foreach($hariOptions as $hariItem)
                                 <option value="{{ $hariItem }}">{{ $hariItem }}</option>
                             @endforeach
                         </select>
-                    </label>
-                    <label>Pernah Belajar Musik
-                        <select name="pengalaman" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
+                    </div>
+                    <div class="registration-edit-field">
+                        <label class="registration-edit-label">Pernah Belajar Musik</label>
+                        <select name="pengalaman" required>
+                            <option value="">Pilih</option>
                             <option value="1">Ya</option>
                             <option value="0">Tidak</option>
                         </select>
-                    </label>
-                    <label class="registration-edit-field-full">Deskripsi Pengalaman
-                        <textarea name="deskripsi_pengalaman" rows="2" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"></textarea>
-                    </label>
-                    <label>Kelas
-                        <select name="class_id" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none">
+                    </div>
+
+                    <div class="registration-edit-field registration-edit-field-full">
+                        <label class="registration-edit-label">Deskripsi Pengalaman</label>
+                        <textarea name="deskripsi_pengalaman" rows="3"></textarea>
+                    </div>
+
+                    <div class="registration-edit-field">
+                        <label class="registration-edit-label">Kelas</label>
+                        <select name="class_id">
                             <option value="">Pilih kelas</option>
                             @foreach($classesForManagement as $classItem)
                                 <option value="{{ $classItem->id }}">{{ $classItem->name }}</option>
                             @endforeach
                         </select>
-                    </label>
-                    <label>Status
-                        <select name="status" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none" required>
-                            <option value="pending">pending</option>
-                            <option value="accepted">accepted</option>
-                            <option value="rejected">rejected</option>
+                    </div>
+                    <div class="registration-edit-field">
+                        <label class="registration-edit-label">Status</label>
+                        <select name="status" required>
+                            <option value="">Pilih status</option>
+                            <option value="pending">Pending</option>
+                            <option value="accepted">Accepted</option>
+                            <option value="rejected">Rejected</option>
                         </select>
-                    </label>
+                    </div>
                 </section>
 
                 <footer class="registration-modal-footer registration-edit-footer">
@@ -2097,9 +2181,9 @@
                                 <td>{{ $teacherName }}</td>
                                 <td>
                                     <div class="action-icons">
-                                        <details class="action-popover">
+                                        <details class="action-popover registration-style-popover schedule-edit-popover">
                                             <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
-                                            <form class="action-popover-form" method="POST" action="{{ route('super-admin.schedule.update', $scheduleItem) }}">
+                                            <form class="action-popover-form registration-edit-form" method="POST" action="{{ route('super-admin.schedule.update', $scheduleItem) }}">
                                                 @csrf
                                                 @method('PUT')
                                                 <header class="registration-modal-header">
@@ -2108,33 +2192,40 @@
                                                             <i data-lucide="pencil-line"></i>
                                                         </span>
                                                         <div>
-                                                            <h3 style="margin:0; font-size:1.02rem; color:#0f172a;">Edit Jadwal</h3>
-                                                            <p style="margin:.18rem 0 0; font-size:.84rem; color:#64748b;">Perbarui jadwal dan waktu kelas</p>
+                                                            <h3>Edit Jadwal</h3>
+                                                            <p>Perbarui jadwal dan waktu kelas</p>
                                                         </div>
                                                     </div>
+                                                    <button type="button" class="registration-modal-close-btn action-popover-close" aria-label="Tutup"><i data-lucide="x"></i></button>
                                                 </header>
-                                                <div class="registration-modal-body registration-edit-form">
-                                                    <div class="registration-edit-grid">
-                                                        <label class="registration-edit-field-full">Class
+                                                <div class="registration-modal-body">
+                                                    <section class="registration-edit-grid">
+                                                        <div class="registration-edit-field registration-edit-field-full">
+                                                            <label class="registration-edit-label">Class</label>
                                                             <select name="class_id" required>
+                                                                <option value="">Pilih kelas</option>
                                                                 @foreach($classesForSchedule as $class)
                                                                     <option value="{{ $class->id }}" @selected((int) $scheduleItem->class_id === (int) $class->id)>{{ $class->name }}</option>
                                                                 @endforeach
                                                             </select>
-                                                        </label>
-                                                        <label>Hari
+                                                        </div>
+                                                        <div class="registration-edit-field">
+                                                            <label class="registration-edit-label">Hari</label>
                                                             <select name="day" required>
+                                                                <option value="">Pilih hari</option>
                                                                 @foreach($availableDayOptions as $dayOption)
                                                                     <option value="{{ $dayOption }}" @selected($scheduleItem->day === $dayOption)>{{ $dayOption }}</option>
                                                                 @endforeach
                                                             </select>
-                                                        </label>
-                                                        <label>Jam
+                                                        </div>
+                                                        <div class="registration-edit-field">
+                                                            <label class="registration-edit-label">Jam</label>
                                                             <input type="time" name="time" value="{{ $timeValue }}" required>
-                                                        </label>
-                                                    </div>
+                                                        </div>
+                                                    </section>
                                                 </div>
-                                                <footer class="registration-modal-footer registration-edit-footer">
+                                                <footer class="registration-modal-footer">
+                                                    <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close">Batal</button>
                                                     <button type="submit" class="registration-modal-btn registration-modal-btn-primary">Simpan Perubahan</button>
                                                 </footer>
                                             </form>
@@ -2210,4 +2301,117 @@
 @endif
 @endsection
 
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const syncBodyModalState = () => {
+        const hasOpenPopover = document.querySelector('details.action-popover[open]') !== null;
+        document.body.classList.toggle('modal-open', hasOpenPopover);
+    };
 
+    // Close action-popover modal via X button
+    document.querySelectorAll('.action-popover-close').forEach(btn => {
+        btn.addEventListener('click', e => {
+            e.preventDefault();
+            const details = btn.closest('details.action-popover');
+            if (details) details.removeAttribute('open');
+            syncBodyModalState();
+        });
+    });
+
+    // Close action-popover when clicking the backdrop (the ::before pseudo-element area)
+    document.addEventListener('click', e => {
+        // If the click target is a summary inside an open action-popover, do nothing (native toggle)
+        if (e.target.closest('details.action-popover')) return;
+        // Otherwise close all open action-popovers
+        document.querySelectorAll('details.action-popover[open]').forEach(d => {
+            d.removeAttribute('open');
+        });
+        syncBodyModalState();
+    });
+
+    // Prevent clicks inside the modal form from bubbling and closing the modal
+    document.querySelectorAll('.action-popover-form').forEach(form => {
+        form.addEventListener('click', e => e.stopPropagation());
+    });
+
+    document.querySelectorAll('details.action-popover').forEach(details => {
+        details.addEventListener('toggle', syncBodyModalState);
+    });
+    syncBodyModalState();
+
+    // Teacher edit modal: inline validation + loading state on submit
+    document.querySelectorAll('.teacher-edit-modal').forEach(form => {
+        const fields = form.querySelectorAll('input, select, textarea');
+        const submitBtn = form.querySelector('.te-btn--primary');
+
+        const getMessage = (field) => {
+            if (!field.validity) return 'Input tidak valid.';
+            if (field.validity.valueMissing) return 'Field ini wajib diisi.';
+            if (field.validity.typeMismatch && field.type === 'email') return 'Masukkan format email yang valid.';
+            if (field.validity.tooShort) return 'Input terlalu pendek.';
+            if (field.validity.tooLong) return 'Input terlalu panjang.';
+            if (field.validity.patternMismatch) return 'Format input tidak sesuai.';
+            return 'Periksa kembali input ini.';
+        };
+
+        const setFieldError = (field, message) => {
+            const wrapper = field.closest('.te-field');
+            if (!wrapper) return;
+            wrapper.classList.add('has-error');
+            field.setAttribute('aria-invalid', 'true');
+            const error = wrapper.querySelector('.te-error-text');
+            if (error) error.textContent = message;
+        };
+
+        const clearFieldError = (field) => {
+            const wrapper = field.closest('.te-field');
+            if (!wrapper) return;
+            wrapper.classList.remove('has-error');
+            field.removeAttribute('aria-invalid');
+            const error = wrapper.querySelector('.te-error-text');
+            if (error) error.textContent = '';
+        };
+
+        const validateField = (field) => {
+            clearFieldError(field);
+            if (field.checkValidity()) return true;
+            setFieldError(field, getMessage(field));
+            return false;
+        };
+
+        fields.forEach(field => {
+            field.addEventListener('input', () => validateField(field));
+            field.addEventListener('change', () => validateField(field));
+            field.addEventListener('blur', () => validateField(field));
+        });
+
+        form.addEventListener('submit', (event) => {
+            let firstInvalid = null;
+            let allValid = true;
+
+            fields.forEach(field => {
+                const isValid = validateField(field);
+                if (!isValid) {
+                    allValid = false;
+                    if (!firstInvalid) firstInvalid = field;
+                }
+            });
+
+            if (!allValid) {
+                event.preventDefault();
+                if (submitBtn) submitBtn.classList.remove('is-loading');
+                if (firstInvalid) firstInvalid.focus();
+                return;
+            }
+
+            if (submitBtn) {
+                submitBtn.classList.add('is-loading');
+                submitBtn.setAttribute('aria-busy', 'true');
+                submitBtn.disabled = true;
+            }
+        });
+    });
+});
+</script>
+@endpush

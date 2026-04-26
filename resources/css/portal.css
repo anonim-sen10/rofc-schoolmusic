@@ -1048,10 +1048,27 @@ th {
     content: "";
     position: fixed;
     inset: 0;
+    background: transparent;
+    backdrop-filter: none;
+    z-index: -1;
+    cursor: default;
+    pointer-events: none;
+    display: none;
+}
+
+details.action-popover[open] {
+    position: relative;
+}
+
+details.action-popover[open]::before {
+    content: "";
+    position: fixed;
+    inset: 0;
     background: rgba(15, 23, 42, 0.45);
     backdrop-filter: blur(6px);
-    z-index: 50;
+    z-index: 40 !important;
     cursor: default;
+    pointer-events: none !important;
     animation: fade-in 0.25s ease-out forwards;
 }
 
@@ -1072,9 +1089,8 @@ th {
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 51;
-    width: min(500px, calc(100vw - 2rem));
+    width: min(600px, calc(100vw - 2rem));
     max-height: calc(100vh - 2rem);
-    grid-template-columns: 1fr;
     padding: 0;
     border: 1px solid rgba(226, 232, 240, 0.8);
     border-radius: 1rem;
@@ -1082,12 +1098,289 @@ th {
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     overflow: hidden;
     animation: modal-pop 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    display: flex;
+    flex-direction: column;
+    pointer-events: auto !important;
 }
 
+/* ═══════════════════════════════════════════════════════════
+   Teacher Edit Modal – Premium SaaS Design
+   ═══════════════════════════════════════════════════════════ */
 
-
-
-
+/* Override default popover width for teacher modal */
+.teacher-edit-modal.action-popover-form {
+    width: min(600px, calc(100vw - 2rem));
+    border-radius: 1rem;
+    border: 1px solid #e5e7eb;
+    background: #f8fafc;
+    box-shadow:
+        0 1px 2px rgba(2, 6, 23, 0.06),
+        0 12px 32px rgba(2, 6, 23, 0.1);
+    overflow: hidden;
+}
+.te-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.875rem;
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #ffffff;
+}
+.te-modal-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.te-modal-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.65rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #dbeafe;
+    background: #eff6ff;
+    color: #1d4ed8;
+    flex-shrink: 0;
+}
+.te-modal-icon i {
+    width: 1rem;
+    height: 1rem;
+}
+.te-modal-title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #0b1220;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+}
+.te-modal-subtitle {
+    margin: 0.15rem 0 0;
+    font-size: 0.8125rem;
+    color: #6b7280;
+    font-weight: 400;
+    line-height: 1.4;
+}
+.te-modal-close {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.625rem;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #6b7280;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+.te-modal-close i {
+    width: 0.875rem;
+    height: 0.875rem;
+}
+.te-modal-close:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+    color: #374151;
+}
+.te-modal-body {
+    padding: 1.5rem;
+    max-height: 65vh;
+    overflow-y: auto;
+    background: #f8fafc;
+}
+.te-modal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.125rem 1.5rem;
+}
+.te-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+.te-field--full {
+    grid-column: 1 / -1;
+}
+.te-field--placeholder {
+    visibility: hidden;
+}
+.te-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #374151;
+    letter-spacing: 0.005em;
+    line-height: 1.4;
+}
+.te-input {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 0.65rem;
+    padding: 0.625rem 0.8125rem;
+    font-size: 0.925rem;
+    color: #1e293b;
+    background: #ffffff;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+    line-height: 1.5;
+    font-family: inherit;
+}
+.te-input::placeholder {
+    color: #9aa4b2;
+    font-weight: 400;
+}
+.te-input:hover {
+    border-color: #93c5fd;
+}
+.te-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+}
+.te-textarea {
+    resize: vertical;
+    min-height: 5.5rem;
+}
+.te-select-wrap {
+    position: relative;
+}
+.te-select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding-right: 2.25rem;
+    cursor: pointer;
+}
+.te-select-icon {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0.95rem;
+    height: 0.95rem;
+    color: #94a3b8;
+    pointer-events: none;
+}
+.te-error-text {
+    font-size: 0.75rem;
+    color: #dc2626;
+    min-height: 0;
+    line-height: 1.3;
+    display: none;
+}
+.te-field.has-error .te-input {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.14);
+}
+.te-field.has-error .te-error-text {
+    display: block;
+}
+.te-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.625rem;
+    padding: 1rem 1.5rem 1.25rem;
+    border-top: 1px solid #e5e7eb;
+    background: #ffffff;
+}
+.te-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    border-radius: 0.65rem;
+    padding: 0.58rem 1.05rem;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, transform 0.12s ease;
+    line-height: 1.5;
+    border: 1px solid transparent;
+    font-family: inherit;
+}
+.te-btn--secondary {
+    background: #ffffff;
+    color: #374151;
+    border-color: #d1d5db;
+}
+.te-btn--secondary:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+.te-btn--primary {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #1d4ed8;
+    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.25);
+}
+.te-btn--primary:hover {
+    background: #1d4ed8;
+    box-shadow: 0 6px 14px rgba(37, 99, 235, 0.3);
+    transform: translateY(-1px);
+}
+.te-btn--primary:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.25);
+}
+.te-btn:focus-visible,
+.te-modal-close:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+.te-btn-spinner {
+    display: none;
+}
+.te-btn--primary.is-loading .te-btn-label {
+    opacity: 0.5;
+}
+.te-btn--primary.is-loading .te-btn-spinner {
+    display: inline-flex;
+}
+.te-btn--primary.is-loading {
+    pointer-events: none;
+    opacity: 0.9;
+}
+@keyframes te-spin {
+    to { transform: rotate(360deg); }
+}
+.te-spin {
+    animation: te-spin 0.7s linear infinite;
+}
+@media (max-width: 768px) {
+    .teacher-edit-modal.action-popover-form {
+        width: calc(100vw - 1.5rem);
+    }
+    .te-modal-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem 0;
+    }
+    .te-field--placeholder {
+        display: none;
+    }
+    .te-modal-header,
+    .te-modal-body,
+    .te-modal-footer {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    .te-modal-body {
+        padding-top: 1.25rem;
+        padding-bottom: 1.25rem;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .teacher-edit-modal.action-popover-form,
+    .action-popover[open] summary::before,
+    .te-btn,
+    .te-input,
+    .te-modal-close {
+        animation: none !important;
+        transition: none !important;
+    }
+}
 .registration-detail-panel h4 {
     margin: 0 0 0.6rem;
     font-size: 0.95rem;
@@ -1190,6 +1483,7 @@ th {
     align-items: flex-start;
     padding: 1.1rem 1.25rem;
     border-bottom: 1px solid #e2e8f0;
+    flex-shrink: 0;
 }
 
 .registration-modal-header-left {
@@ -1240,6 +1534,7 @@ th {
 }
 
 .registration-modal-body {
+    flex: 1;
     max-height: 68vh;
     overflow-y: auto;
     padding: 1.1rem 1.25rem;
@@ -1357,6 +1652,7 @@ th {
     padding: 0.9rem 1.25rem 1.1rem;
     border-top: 1px solid #e2e8f0;
     background: #fff;
+    flex-shrink: 0;
 }
 
 .registration-modal-btn {
@@ -1399,14 +1695,32 @@ th {
 .registration-edit-form .registration-edit-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.65rem;
+    gap: 1rem;
 }
 
-.registration-edit-form .registration-edit-grid > label {
-    display: grid;
-    gap: 0.35rem;
-    color: #334155;
-    font-size: 0.82rem;
+.action-popover-form.registration-edit-form .registration-edit-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 600px) {
+    .registration-edit-form .registration-edit-grid,
+    .action-popover-form.registration-edit-form .registration-edit-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.registration-edit-form .registration-edit-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.registration-edit-form .registration-edit-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #1e293b;
+    margin: 0;
 }
 
 .registration-edit-form .registration-edit-field-full {
@@ -1418,15 +1732,28 @@ th {
 .registration-edit-form textarea {
     width: 100%;
     border: 1px solid #cbd5e1;
-    border-radius: 0.75rem;
-    padding: 0.52rem 0.7rem;
-    font-size: 0.84rem;
+    border-radius: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
     color: #0f172a;
     background: #fff;
+    font-family: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .registration-edit-form select[multiple] {
-    min-height: 5.9rem;
+    min-height: 6rem;
+    padding: 0.5rem;
+}
+
+.registration-edit-form select[multiple] option {
+    padding: 0.25rem 0;
+}
+
+.registration-edit-form input:hover,
+.registration-edit-form select:hover,
+.registration-edit-form textarea:hover {
+    border-color: #94a3b8;
 }
 
 .registration-edit-form input:focus,
@@ -1434,7 +1761,8 @@ th {
 .registration-edit-form textarea:focus {
     outline: none;
     border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background: #f0f9ff;
 }
 
 .registration-edit-footer {
@@ -2082,6 +2410,134 @@ th {
 
 .toggle span {
     color: inherit;
+}
+
+/* Strong modal override: keep Edit Teacher truly floating */
+details.action-popover[open] > summary::before {
+    display: none !important;
+}
+
+details.registration-style-popover[open]::before,
+details.registration-style-popover[open] > summary::before {
+    display: none !important;
+}
+
+details.registration-style-popover[open] .action-popover-form.registration-edit-form {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 51 !important;
+    width: min(700px, calc(100vw - 2rem)) !important;
+    max-height: calc(100vh - 2rem) !important;
+    display: flex !important;
+    flex-direction: column;
+    border: 1px solid #d5deeb;
+    border-radius: 1rem;
+    background: #ffffff;
+    box-shadow: 0 28px 56px rgba(2, 6, 23, 0.35);
+    overflow: hidden;
+    pointer-events: auto !important;
+}
+
+details.registration-style-popover[open] .action-popover-form.registration-edit-form .registration-modal-header {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+details.registration-style-popover[open] .action-popover-form.registration-edit-form .registration-modal-body {
+    flex: 1;
+    overflow-y: auto;
+}
+
+details.registration-style-popover[open] .action-popover-form.registration-edit-form .registration-modal-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+}
+
+details.registration-style-popover[open] .action-popover-form.registration-edit-form input,
+details.registration-style-popover[open] .action-popover-form.registration-edit-form select,
+details.registration-style-popover[open] .action-popover-form.registration-edit-form textarea {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+    color: #0f172a;
+    background: #fff;
+    font-family: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+details.registration-style-popover[open] .action-popover-form.registration-edit-form select[multiple] {
+    min-height: 6rem;
+    padding: 0.5rem;
+}
+
+details.registration-style-popover[open] .action-popover-form.registration-edit-form input:hover,
+details.registration-style-popover[open] .action-popover-form.registration-edit-form select:hover,
+details.registration-style-popover[open] .action-popover-form.registration-edit-form textarea:hover {
+    border-color: #94a3b8;
+}
+
+details.registration-style-popover[open] .action-popover-form.registration-edit-form input:focus,
+details.registration-style-popover[open] .action-popover-form.registration-edit-form select:focus,
+details.registration-style-popover[open] .action-popover-form.registration-edit-form textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background: #f0f9ff;
+}
+
+details.action-popover[open] .teacher-edit-modal.action-popover-form {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 1001 !important;
+    width: min(640px, calc(100vw - 2rem)) !important;
+    max-height: min(90vh, 760px) !important;
+    display: flex !important;
+    flex-direction: column;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    background: #f8fafc;
+    box-shadow:
+        0 2px 6px rgba(15, 23, 42, 0.08),
+        0 20px 48px rgba(15, 23, 42, 0.22);
+    overflow: hidden;
+}
+
+details.action-popover[open] .teacher-edit-modal .te-modal-header {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #ffffff;
+}
+
+details.action-popover[open] .teacher-edit-modal .te-modal-body {
+    flex: 1 1 auto;
+    max-height: none;
+    overflow-y: auto;
+}
+
+details.action-popover[open] .teacher-edit-modal .te-modal-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    background: #ffffff;
+}
+
+body.modal-open {
+    overflow: hidden;
 }
 
 .portal-brand {
