@@ -4,31 +4,6 @@
 @section('page-title', $moduleTitle)
 
 @section('content')
-@if (session('success'))
-    <section class="card" data-searchable>
-        <x-ui.badge type="success">SUCCESS</x-ui.badge>
-        <p style="margin-top: 0.5rem;">{{ session('success') }}</p>
-    </section>
-@endif
-
-@if (session('error'))
-    <section class="card" data-searchable>
-        <x-ui.badge type="danger">ERROR</x-ui.badge>
-        <p style="margin-top: 0.5rem;">{{ session('error') }}</p>
-    </section>
-@endif
-
-@if ($errors->any())
-    <section class="card" data-searchable>
-        <x-ui.badge type="danger">ERROR</x-ui.badge>
-        <ul class="list">
-            @foreach ($errors->all() as $error)
-                <li><span>{{ $error }}</span></li>
-            @endforeach
-        </ul>
-    </section>
-@endif
-
 @if ($moduleKey === 'users')
     <section class="card" data-searchable>
         <h3>Buat Akun Login Baru</h3>
