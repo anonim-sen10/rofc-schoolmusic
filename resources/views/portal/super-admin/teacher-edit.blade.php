@@ -44,7 +44,7 @@
         <label>Agama
             <input type="text" name="religion" value="{{ old('religion', $teacher->religion) }}" required>
         </label>
-        <label>Instrument
+        <label>Bidang / Instrumen
             <input type="text" name="instrument" value="{{ old('instrument', $teacher->instrument) }}">
         </label>
         <label>Class

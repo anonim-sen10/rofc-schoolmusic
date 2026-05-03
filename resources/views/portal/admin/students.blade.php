@@ -219,14 +219,14 @@ $homeRoute = route('admin.dashboard');
                                         <header class="registration-modal-header">
                                             <div class="registration-modal-header-left">
                                                 <span class="registration-modal-icon">
-                                                    <i data-lucide="eye"></i>
+                                                    <i data-lucide="clipboard-list"></i>
                                                 </span>
                                                 <div>
                                                     <h3>Detail Siswa</h3>
-                                                    <p>Informasi lengkap profil siswa</p>
+                                                    <p>Informasi lengkap data siswa</p>
                                                 </div>
                                             </div>
-                                            <button type="button" class="registration-modal-close-btn action-popover-close" aria-label="Tutup"><i data-lucide="x"></i></button>
+                                            <button type="button" class="registration-modal-close-btn" aria-label="Tutup" onclick="this.closest('details').removeAttribute('open');"><i data-lucide="x"></i></button>
                                         </header>
                                         <div class="registration-modal-body">
                                             <div class="registration-modal-summary">
@@ -235,22 +235,30 @@ $homeRoute = route('admin.dashboard');
                                                         {{ strtoupper(substr($student->name, 0, 1)) }}
                                                     </div>
                                                     <div>
+                                                        <p>Nama Siswa</p>
                                                         <p class="registration-modal-summary-name">{{ $student->name }}</p>
-                                                        <p>{{ $student->email ?: 'No email' }}</p>
                                                     </div>
                                                 </div>
-                                                <x-ui.badge :type="$student->is_active ? 'success' : 'warning'">
+                                                <span class="registration-status-badge {{ $student->is_active ? 'is-success' : 'is-warning' }}">
                                                     {{ $student->is_active ? 'ACTIVE' : 'INACTIVE' }}
-                                                </x-ui.badge>
+                                                </span>
                                             </div>
                                             <section class="registration-modal-grid">
+                                                <article>
+                                                    <p>Email Siswa</p>
+                                                    <p>{{ $student->email ?: '-' }}</p>
+                                                </article>
+                                                <article>
+                                                    <p>Telepon</p>
+                                                    <p>{{ $student->phone ?: '-' }}</p>
+                                                </article>
                                                 <article>
                                                     <p>Umur</p>
                                                     <p>{{ $student->age ? $student->age . ' Tahun' : '-' }}</p>
                                                 </article>
                                                 <article>
-                                                    <p>Telepon</p>
-                                                    <p>{{ $student->phone ?: '-' }}</p>
+                                                    <p>Mulai Kursus</p>
+                                                    <p>{{ $student->start_date ? \Carbon\Carbon::parse($student->start_date)->format('d M Y') : '-' }}</p>
                                                 </article>
                                                 <article class="registration-modal-item-full">
                                                     <p>Alamat</p>
@@ -261,17 +269,19 @@ $homeRoute = route('admin.dashboard');
                                                     <p>{{ $student->classes->pluck('name')->join(', ') ?: '-' }}</p>
                                                 </article>
                                                 <article>
-                                                    <p>Mulai Kursus</p>
-                                                    <p>{{ $student->start_date ? \Carbon\Carbon::parse($student->start_date)->format('d M Y') : '-' }}</p>
-                                                </article>
-                                                <article>
                                                     <p>Berakhir Pada</p>
                                                     <p>{{ $student->end_date ? \Carbon\Carbon::parse($student->end_date)->format('d M Y') : '-' }}</p>
+                                                </article>
+                                                <article>
+                                                    <p>Status Akun</p>
+                                                    <p>{{ $student->is_active ? 'Aktif' : 'Non-aktif' }}</p>
                                                 </article>
                                             </section>
                                         </div>
                                         <footer class="registration-modal-footer">
                                             <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close">Tutup</button>
+                                            <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(2)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');">Edit Data</button>
+                                            <button type="button" class="registration-modal-btn registration-modal-btn-danger" onclick="if(confirm('Hapus siswa ini?')) this.closest('.action-icons').querySelector('form.delete-form').submit();">Hapus</button>
                                         </footer>
                                     </div>
                                 </details>
@@ -292,12 +302,12 @@ $homeRoute = route('admin.dashboard');
                                                     <p>Perbarui informasi profil siswa</p>
                                                 </div>
                                             </div>
-                                            <button type="button" class="registration-modal-close-btn action-popover-close" aria-label="Tutup"><i data-lucide="x"></i></button>
+                                            <button type="button" class="registration-modal-close-btn" aria-label="Tutup" onclick="this.closest('details').removeAttribute('open');"><i data-lucide="x"></i></button>
                                         </header>
                                         <div class="registration-modal-body">
                                             <section class="registration-edit-grid">
                                                 <div class="registration-edit-field">
-                                                    <label class="registration-edit-label">Nama</label>
+                                                    <label class="registration-edit-label">Nama Lengkap</label>
                                                     <input type="text" name="name" value="{{ $student->name }}" required>
                                                 </div>
                                                 <div class="registration-edit-field">
@@ -327,11 +337,11 @@ $homeRoute = route('admin.dashboard');
                                                     </select>
                                                 </div>
                                                 <div class="registration-edit-field">
-                                                    <label class="registration-edit-label">Start Date</label>
+                                                    <label class="registration-edit-label">Mulai Kursus</label>
                                                     <input type="date" name="start_date" value="{{ $student->start_date ? \Carbon\Carbon::parse($student->start_date)->format('Y-m-d') : '' }}">
                                                 </div>
                                                 <div class="registration-edit-field">
-                                                    <label class="registration-edit-label">Duration (Months)</label>
+                                                    <label class="registration-edit-label">Durasi (Bulan)</label>
                                                     <select name="duration_months">
                                                         @foreach([1, 2, 3, 4, 6, 12] as $m)
                                                             <option value="{{ $m }}" @selected((int)($student->duration_months ?? 0) === $m)>{{ $m }} Bulan</option>
@@ -339,10 +349,10 @@ $homeRoute = route('admin.dashboard');
                                                     </select>
                                                 </div>
                                                 <div class="registration-edit-field">
-                                                    <label class="registration-edit-label">Status</label>
+                                                    <label class="registration-edit-label">Status Akun</label>
                                                     <select name="is_active">
-                                                        <option value="1" @selected($student->is_active)>Active</option>
-                                                        <option value="0" @selected(!$student->is_active)>Inactive</option>
+                                                        <option value="1" @selected($student->is_active)>Aktif</option>
+                                                        <option value="0" @selected(!$student->is_active)>Non-aktif</option>
                                                     </select>
                                                 </div>
                                             </section>
@@ -355,7 +365,7 @@ $homeRoute = route('admin.dashboard');
                                 </details>
 
                                 {{-- Delete Button --}}
-                                <form method="POST" action="{{ route('admin.students.destroy', $student) }}" onsubmit="return confirm('Hapus siswa ini?');">
+                                <form class="delete-form" method="POST" action="{{ route('admin.students.destroy', $student) }}" onsubmit="return confirm('Hapus siswa ini?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn-icon btn-icon-danger" title="Hapus" aria-label="Hapus"><i data-lucide="trash-2"></i></button>

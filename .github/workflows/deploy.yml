@@ -58,6 +58,30 @@ jobs:
           server-dir: /build/
           dangerous-clean-slate: true
 
+      - name: Deploy Aplikasi ke rofc-laravel via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ${{ secrets.FTP_PROTOCOL != '' && secrets.FTP_PROTOCOL || 'ftps' }}
+          port: ${{ secrets.FTP_PORT != '' && secrets.FTP_PORT || '21' }}
+          local-dir: ./
+          server-dir: /rofc-laravel/
+          exclude: |
+            **/.git*
+            **/node_modules/**
+            **/vendor/**
+            **/storage/logs/**
+            **/storage/framework/sessions/**
+            **/storage/framework/views/**
+            **/storage/framework/cache/**
+            public/build/**
+            public/build.zip
+            .env
+            deploy_key
+            scripts/deploy.mjs
+
       - name: Deploy Build ke rofc-laravel/public/build via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -69,3 +93,4 @@ jobs:
           local-dir: ./public/build/
           server-dir: /rofc-laravel/public/build/
           dangerous-clean-slate: true
+

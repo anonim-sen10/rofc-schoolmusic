@@ -67,7 +67,67 @@
                             <td>{{ optional($userRow->created_at)->format('Y-m-d H:i') }}</td>
                             <td>
                                 <div class="action-icons">
-                                    <a href="{{ route('super-admin.users.show', $userRow) }}" class="btn-icon" title="Detail" aria-label="Detail"><i data-lucide="eye"></i></a>
+                                    {{-- Detail Button --}}
+                                    <details class="action-popover registration-style-popover">
+                                        <summary class="btn-icon" title="Detail" aria-label="Detail"><i data-lucide="eye"></i></summary>
+                                        <div class="action-popover-form registration-edit-form">
+                                            <header class="registration-modal-header">
+                                                <div class="registration-modal-header-left">
+                                                    <span class="registration-modal-icon">
+                                                        <i data-lucide="clipboard-list"></i>
+                                                    </span>
+                                                    <div>
+                                                        <h3>Detail User</h3>
+                                                        <p>Informasi lengkap akun pengguna</p>
+                                                    </div>
+                                                </div>
+                                                <button type="button" class="registration-modal-close-btn" aria-label="Tutup" onclick="this.closest('details').removeAttribute('open');"><i data-lucide="x"></i></button>
+                                            </header>
+                                            <div class="registration-modal-body">
+                                                <div class="registration-modal-summary">
+                                                    <div class="registration-modal-summary-left">
+                                                        <div class="registration-modal-avatar">
+                                                            {{ strtoupper(substr($userRow->name, 0, 1)) }}
+                                                        </div>
+                                                        <div>
+                                                            <p>Nama User</p>
+                                                            <p class="registration-modal-summary-name">{{ $userRow->name }}</p>
+                                                        </div>
+                                                    </div>
+                                                    <x-ui.badge type="neutral">
+                                                        {{ strtoupper($userRow->roles->pluck('slug')->first() ?? 'USER') }}
+                                                    </x-ui.badge>
+                                                </div>
+                                                <section class="registration-modal-grid">
+                                                    <article class="registration-modal-item-full">
+                                                        <p>Email Address</p>
+                                                        <p>{{ $userRow->email }}</p>
+                                                    </article>
+                                                    <article>
+                                                        <p>Role Akses</p>
+                                                        <p>{{ $userRow->roles->pluck('name')->join(', ') ?: '-' }}</p>
+                                                    </article>
+                                                    <article>
+                                                        <p>Terdaftar Sejak</p>
+                                                        <p>{{ optional($userRow->created_at)->format('d M Y H:i') }}</p>
+                                                    </article>
+                                                    <article>
+                                                        <p>Verifikasi Email</p>
+                                                        <p>{{ $userRow->email_verified_at ? 'Terverifikasi' : 'Belum Verifikasi' }}</p>
+                                                    </article>
+                                                    <article>
+                                                        <p>ID Akun</p>
+                                                        <p>#{{ $userRow->id }}</p>
+                                                    </article>
+                                                </section>
+                                            </div>
+                                            <footer class="registration-modal-footer">
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close">Tutup</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(2)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');">Edit Akses</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-danger" onclick="if(confirm('Hapus user ini?')) this.closest('.action-icons').querySelector('form.delete-form').submit();">Hapus</button>
+                                            </footer>
+                                        </div>
+                                    </details>
                                     <details class="action-popover registration-style-popover">
                                         <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
                                         <form class="action-popover-form registration-edit-form" method="POST" action="{{ route('super-admin.users.update', $userRow) }}">
@@ -83,7 +143,7 @@
                                                         <p>Perbarui informasi akun dan akses</p>
                                                     </div>
                                                 </div>
-                                                <button type="button" class="registration-modal-close-btn action-popover-close" aria-label="Tutup"><i data-lucide="x"></i></button>
+                                                <button type="button" class="registration-modal-close-btn" aria-label="Tutup" onclick="this.closest('details').removeAttribute('open');"><i data-lucide="x"></i></button>
                                             </header>
                                             <div class="registration-modal-body">
                                                 <section class="registration-edit-grid">
@@ -117,7 +177,7 @@
                                             </footer>
                                         </form>
                                     </details>
-                                    <form method="POST" action="{{ route('super-admin.users.destroy', $userRow) }}" onsubmit="return confirm('Hapus user ini?');">
+                                    <form class="delete-form" method="POST" action="{{ route('super-admin.users.destroy', $userRow) }}" onsubmit="return confirm('Hapus user ini?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-icon btn-icon-danger" title="Hapus" aria-label="Hapus"><i data-lucide="trash-2"></i></button>
@@ -169,6 +229,9 @@
                 <label>Agama
                     <input type="text" name="religion" value="{{ old('religion') }}" required>
                 </label>
+                <label>Bidang / Instrumen
+                    <input type="text" name="instrument" value="{{ old('instrument') }}" placeholder="Drum, Piano, Vocal, dll">
+                </label>
                 <label>Password
                     <input type="password" name="password" required>
                 </label>
@@ -214,7 +277,79 @@
                             <td>{{ $teacher->classes->pluck('name')->implode(', ') ?: '-' }}</td>
                             <td>
                                 <div class="action-icons">
-                                    <a href="{{ route('super-admin.teachers.show', $teacher) }}" class="btn-icon" title="Detail" aria-label="Detail"><i data-lucide="eye"></i></a>
+                                    {{-- Detail Button --}}
+                                    <details class="action-popover registration-style-popover">
+                                        <summary class="btn-icon" title="Detail" aria-label="Detail"><i data-lucide="eye"></i></summary>
+                                        <div class="action-popover-form registration-edit-form">
+                                            <header class="registration-modal-header">
+                                                <div class="registration-modal-header-left">
+                                                    <span class="registration-modal-icon">
+                                                        <i data-lucide="clipboard-list"></i>
+                                                    </span>
+                                                    <div>
+                                                        <h3>Detail Guru</h3>
+                                                        <p>Informasi lengkap profil pengajar</p>
+                                                    </div>
+                                                </div>
+                                                <button type="button" class="registration-modal-close-btn" aria-label="Tutup" onclick="this.closest('details').removeAttribute('open');"><i data-lucide="x"></i></button>
+                                            </header>
+                                            <div class="registration-modal-body">
+                                                <div class="registration-modal-summary">
+                                                    <div class="registration-modal-summary-left">
+                                                        @if($teacher->photo_path)
+                                                            <img src="{{ asset('storage/' . $teacher->photo_path) }}" class="registration-modal-avatar" style="object-fit: cover;">
+                                                        @else
+                                                            <div class="registration-modal-avatar">
+                                                                {{ strtoupper(substr($teacher->name, 0, 1)) }}
+                                                            </div>
+                                                        @endif
+                                                        <div>
+                                                            <p>Nama Guru</p>
+                                                            <p class="registration-modal-summary-name">{{ $teacher->name }}</p>
+                                                        </div>
+                                                    </div>
+                                                    <x-ui.badge :type="$teacher->is_active ? 'success' : 'warning'">
+                                                        {{ $teacher->is_active ? 'ACTIVE' : 'INACTIVE' }}
+                                                    </x-ui.badge>
+                                                </div>
+                                                <section class="registration-modal-grid">
+                                                    <article class="registration-modal-item-full">
+                                                        <p>Email Address</p>
+                                                        <p>{{ $teacher->user?->email ?? '-' }}</p>
+                                                    </article>
+                                                    <article>
+                                                        <p>Nomor HP</p>
+                                                        <p>{{ $teacher->phone ?? '-' }}</p>
+                                                    </article>
+                                                    <article>
+                                                        <p>Jenis Kelamin</p>
+                                                        <p>{{ ucfirst($teacher->gender ?? '-') }}</p>
+                                                    </article>
+                                                    <article>
+                                                        <p>Agama</p>
+                                                        <p>{{ $teacher->religion ?? '-' }}</p>
+                                                    </article>
+                                                    <article>
+                                                        <p>Bidang / Instrumen</p>
+                                                        <p>{{ $teacher->instrument ?? '-' }}</p>
+                                                    </article>
+                                                    <article class="registration-modal-item-full">
+                                                        <p>Alamat</p>
+                                                        <p>{{ $teacher->address ?? '-' }}</p>
+                                                    </article>
+                                                    <article class="registration-modal-item-full">
+                                                        <p>Kelas Diampu</p>
+                                                        <p>{{ $teacher->classes->pluck('name')->join(', ') ?: '-' }}</p>
+                                                    </article>
+                                                </section>
+                                            </div>
+                                            <footer class="registration-modal-footer">
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close">Tutup</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(2)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');">Edit Data</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-danger" onclick="if(confirm('Hapus teacher ini?')) this.closest('.action-icons').querySelector('form.delete-form').submit();">Hapus</button>
+                                            </footer>
+                                        </div>
+                                    </details>
                                     <details class="action-popover" id="teacher-edit-{{ $teacher->id }}">
                                         <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
                                         <form class="action-popover-form teacher-edit-modal" method="POST" enctype="multipart/form-data" action="{{ route('super-admin.teachers.update', $teacher) }}" id="teacher-edit-form-{{ $teacher->id }}" novalidate>
@@ -276,7 +411,11 @@
                                                         <input class="te-input" type="text" id="te-phone-{{ $teacher->id }}" name="phone" value="{{ $teacher->phone }}" placeholder="08xxxxxxxxxx" required>
                                                         <span class="te-error-text" aria-live="polite"></span>
                                                     </div>
-                                                    <div class="te-field te-field--placeholder"></div>
+                                                    <div class="te-field" id="field-instrument-{{ $teacher->id }}">
+                                                        <label class="te-label" for="te-instrument-{{ $teacher->id }}">Bidang / Instrumen</label>
+                                                        <input class="te-input" type="text" id="te-instrument-{{ $teacher->id }}" name="instrument" value="{{ $teacher->instrument }}" placeholder="Drum, Piano, Vocal, dll">
+                                                        <span class="te-error-text" aria-live="polite"></span>
+                                                    </div>
 
                                                     {{-- Full-width: Alamat --}}
                                                     <div class="te-field te-field--full" id="field-address-{{ $teacher->id }}">
@@ -299,7 +438,7 @@
                                             </footer>
                                         </form>
                                     </details>
-                                    <form method="POST" action="{{ route('super-admin.teachers.destroy', $teacher) }}" onsubmit="return confirm('Hapus teacher ini?');">
+                                    <form class="delete-form" method="POST" action="{{ route('super-admin.teachers.destroy', $teacher) }}" onsubmit="return confirm('Hapus teacher ini?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-icon btn-icon-danger" title="Hapus" aria-label="Hapus"><i data-lucide="trash-2"></i></button>
@@ -383,6 +522,64 @@
                             </td>
                             <td>
                                 <div class="action-icons class-action-icons">
+                                    {{-- Detail Button --}}
+                                    <details class="action-popover registration-style-popover">
+                                        <summary class="btn-icon" title="Detail" aria-label="Detail"><i data-lucide="eye"></i></summary>
+                                        <div class="action-popover-form registration-edit-form">
+                                            <header class="registration-modal-header">
+                                                <div class="registration-modal-header-left">
+                                                    <span class="registration-modal-icon">
+                                                        <i data-lucide="clipboard-list"></i>
+                                                    </span>
+                                                    <div>
+                                                        <h3>Detail Kelas</h3>
+                                                        <p>Informasi lengkap program kelas musik</p>
+                                                    </div>
+                                                </div>
+                                                <button type="button" class="registration-modal-close-btn" aria-label="Tutup" onclick="this.closest('details').removeAttribute('open');"><i data-lucide="x"></i></button>
+                                            </header>
+                                            <div class="registration-modal-body">
+                                                <div class="registration-modal-summary">
+                                                    <div class="registration-modal-summary-left">
+                                                        <div class="registration-modal-avatar">
+                                                            {{ strtoupper(substr($classItem->name, 0, 1)) }}
+                                                        </div>
+                                                        <div>
+                                                            <p>Nama Kelas</p>
+                                                            <p class="registration-modal-summary-name">{{ $classItem->name }}</p>
+                                                        </div>
+                                                    </div>
+                                                    <x-ui.badge :type="$classItem->status === 'active' ? 'success' : 'warning'">
+                                                        {{ strtoupper($classItem->status) }}
+                                                    </x-ui.badge>
+                                                </div>
+                                                <section class="registration-modal-grid">
+                                                    <article>
+                                                        <p>Harga Per Bulan</p>
+                                                        <p>Rp{{ number_format((int) ($classItem->price ?? 0), 0, ',', '.') }}</p>
+                                                    </article>
+                                                    <article>
+                                                        <p>Jadwal Standar</p>
+                                                        <p>{{ $classItem->schedule ?? '-' }}</p>
+                                                    </article>
+                                                    <article class="registration-modal-item-full">
+                                                        <p>Guru Pengampu</p>
+                                                        <p>{{ $classItem->teacher?->name ?? 'Belum ditentukan' }}</p>
+                                                    </article>
+                                                    <article class="registration-modal-item-full">
+                                                        <p>Deskripsi Kelas</p>
+                                                        <p>{{ $classItem->description ?: 'Tidak ada deskripsi' }}</p>
+                                                    </article>
+                                                </section>
+                                            </div>
+                                            <footer class="registration-modal-footer">
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close">Tutup</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(2)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');">Edit Kelas</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-danger" onclick="if(confirm('Hapus class ini?')) this.closest('.action-icons').querySelector('form.delete-form').submit();">Hapus</button>
+                                            </footer>
+                                        </div>
+                                    </details>
+
                                     <details class="action-popover registration-style-popover">
                                         <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
                                         <form class="action-popover-form registration-edit-form" method="POST" action="{{ route('super-admin.classes.update', $classItem) }}">
@@ -438,7 +635,7 @@
                                         </footer>
                                         </form>
                                     </details>
-                                    <form method="POST" action="{{ route('super-admin.classes.destroy', $classItem) }}" onsubmit="return confirm('Hapus class ini?');">
+                                    <form class="delete-form" method="POST" action="{{ route('super-admin.classes.destroy', $classItem) }}" onsubmit="return confirm('Hapus class ini?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-icon btn-icon-danger" title="Hapus" aria-label="Hapus"><i data-lucide="trash-2"></i></button>
@@ -548,14 +745,14 @@
                                             <header class="registration-modal-header">
                                                 <div class="registration-modal-header-left">
                                                     <span class="registration-modal-icon">
-                                                        <i data-lucide="eye"></i>
+                                                        <i data-lucide="clipboard-list"></i>
                                                     </span>
                                                     <div>
                                                         <h3>Detail Siswa</h3>
-                                                        <p>Informasi lengkap profil siswa</p>
+                                                        <p>Informasi lengkap data siswa</p>
                                                     </div>
                                                 </div>
-                                                <button type="button" class="registration-modal-close-btn action-popover-close" aria-label="Tutup"><i data-lucide="x"></i></button>
+                                                <button type="button" class="registration-modal-close-btn" aria-label="Tutup" onclick="this.closest('details').removeAttribute('open');"><i data-lucide="x"></i></button>
                                             </header>
                                             <div class="registration-modal-body">
                                                 <div class="registration-modal-summary">
@@ -564,22 +761,30 @@
                                                             {{ strtoupper(substr($student->name, 0, 1)) }}
                                                         </div>
                                                         <div>
+                                                            <p>Nama Siswa</p>
                                                             <p class="registration-modal-summary-name">{{ $student->name }}</p>
-                                                            <p>{{ $student->email ?: 'No email' }}</p>
                                                         </div>
                                                     </div>
-                                                    <x-ui.badge :type="$student->is_active ? 'success' : 'warning'">
+                                                    <span class="registration-status-badge {{ $student->is_active ? 'is-success' : 'is-warning' }}">
                                                         {{ $student->is_active ? 'ACTIVE' : 'INACTIVE' }}
-                                                    </x-ui.badge>
+                                                    </span>
                                                 </div>
                                                 <section class="registration-modal-grid">
+                                                    <article>
+                                                        <p>Email Siswa</p>
+                                                        <p>{{ $student->email ?: '-' }}</p>
+                                                    </article>
+                                                    <article>
+                                                        <p>Telepon</p>
+                                                        <p>{{ $student->phone ?: '-' }}</p>
+                                                    </article>
                                                     <article>
                                                         <p>Umur</p>
                                                         <p>{{ $student->age ? $student->age . ' Tahun' : '-' }}</p>
                                                     </article>
                                                     <article>
-                                                        <p>Telepon</p>
-                                                        <p>{{ $student->phone ?: '-' }}</p>
+                                                        <p>Mulai Kursus</p>
+                                                        <p>{{ $student->start_date ? \Carbon\Carbon::parse($student->start_date)->format('d M Y') : '-' }}</p>
                                                     </article>
                                                     <article class="registration-modal-item-full">
                                                         <p>Alamat</p>
@@ -590,17 +795,19 @@
                                                         <p>{{ $student->classes->pluck('name')->join(', ') ?: '-' }}</p>
                                                     </article>
                                                     <article>
-                                                        <p>Mulai Kursus</p>
-                                                        <p>{{ $student->start_date ? \Carbon\Carbon::parse($student->start_date)->format('d M Y') : '-' }}</p>
-                                                    </article>
-                                                    <article>
                                                         <p>Berakhir Pada</p>
                                                         <p>{{ $student->end_date ? \Carbon\Carbon::parse($student->end_date)->format('d M Y') : '-' }}</p>
+                                                    </article>
+                                                    <article>
+                                                        <p>Status Akun</p>
+                                                        <p>{{ $student->is_active ? 'Aktif' : 'Non-aktif' }}</p>
                                                     </article>
                                                 </section>
                                             </div>
                                             <footer class="registration-modal-footer">
                                                 <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close">Tutup</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(2)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');">Edit Data</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-danger" onclick="if(confirm('Hapus siswa ini?')) this.closest('.action-icons').querySelector('form.delete-form').submit();">Hapus</button>
                                             </footer>
                                         </div>
                                     </details>
@@ -621,12 +828,12 @@
                                                         <p>Perbarui informasi profil siswa</p>
                                                     </div>
                                                 </div>
-                                                <button type="button" class="registration-modal-close-btn action-popover-close" aria-label="Tutup"><i data-lucide="x"></i></button>
+                                                <button type="button" class="registration-modal-close-btn" aria-label="Tutup" onclick="this.closest('details').removeAttribute('open');"><i data-lucide="x"></i></button>
                                             </header>
                                             <div class="registration-modal-body">
                                                 <section class="registration-edit-grid">
                                                     <div class="registration-edit-field">
-                                                        <label class="registration-edit-label">Nama</label>
+                                                        <label class="registration-edit-label">Nama Lengkap</label>
                                                         <input type="text" name="name" value="{{ $student->name }}" required>
                                                     </div>
                                                     <div class="registration-edit-field">
@@ -656,11 +863,11 @@
                                                         </select>
                                                     </div>
                                                     <div class="registration-edit-field">
-                                                        <label class="registration-edit-label">Start Date</label>
+                                                        <label class="registration-edit-label">Mulai Kursus</label>
                                                         <input type="date" name="start_date" value="{{ $student->start_date ? \Carbon\Carbon::parse($student->start_date)->format('Y-m-d') : '' }}">
                                                     </div>
                                                     <div class="registration-edit-field">
-                                                        <label class="registration-edit-label">Duration (Months)</label>
+                                                        <label class="registration-edit-label">Durasi (Bulan)</label>
                                                         <select name="duration_months">
                                                             @foreach([1, 2, 3, 4, 6, 12] as $m)
                                                                 <option value="{{ $m }}" @selected((int)($student->duration_months ?? 0) === $m)>{{ $m }} Bulan</option>
@@ -668,10 +875,10 @@
                                                         </select>
                                                     </div>
                                                     <div class="registration-edit-field">
-                                                        <label class="registration-edit-label">Status</label>
+                                                        <label class="registration-edit-label">Status Akun</label>
                                                         <select name="is_active">
-                                                            <option value="1" @selected($student->is_active)>Active</option>
-                                                            <option value="0" @selected(!$student->is_active)>Inactive</option>
+                                                            <option value="1" @selected($student->is_active)>Aktif</option>
+                                                            <option value="0" @selected(!$student->is_active)>Non-aktif</option>
                                                         </select>
                                                     </div>
                                                 </section>
@@ -684,7 +891,7 @@
                                     </details>
 
                                     {{-- Delete Button --}}
-                                    <form method="POST" action="{{ route('super-admin.students.destroy', $student) }}" onsubmit="return confirm('Hapus siswa ini?');">
+                                    <form class="delete-form" method="POST" action="{{ route('super-admin.students.destroy', $student) }}" onsubmit="return confirm('Hapus siswa ini?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-icon btn-icon-danger" title="Hapus" aria-label="Hapus"><i data-lucide="trash-2"></i></button>

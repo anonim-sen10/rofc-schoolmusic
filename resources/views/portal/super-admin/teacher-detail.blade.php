@@ -19,7 +19,7 @@
                 <tr><th>Alamat</th><td>{{ $teacher->address ?? '-' }}</td></tr>
                 <tr><th>Jenis Kelamin</th><td>{{ $teacher->gender ?? '-' }}</td></tr>
                 <tr><th>Agama</th><td>{{ $teacher->religion ?? '-' }}</td></tr>
-                <tr><th>Instrument</th><td>{{ $teacher->instrument }}</td></tr>
+                <tr><th>Bidang / Instrumen</th><td>{{ $teacher->instrument }}</td></tr>
                 <tr><th>Class</th><td>{{ $teacher->classes->pluck('name')->implode(', ') ?: '-' }}</td></tr>
             </tbody>
         </table>
