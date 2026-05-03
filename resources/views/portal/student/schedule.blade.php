@@ -24,6 +24,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @foreach($schedules as $sched)
                         @php
                             $pendingRequest = \App\Models\RescheduleRequest::where('student_id', $student->id)
                                 ->where('old_session_id', $sched->id)
