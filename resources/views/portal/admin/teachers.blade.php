@@ -6,6 +6,8 @@ $menuItems = [
     ['label' => 'Students', 'url' => route('admin.students.index')],
     ['label' => 'Registrations', 'url' => route('admin.registrations.index')],
     ['label' => 'Schedule', 'url' => route('admin.schedule.index')],
+    ['label' => 'Attendance Monitoring', 'url' => route('admin.attendance.index'), 'icon' => 'check-circle'],
+    ['label' => 'Reschedule Requests', 'url' => route('admin.module', ['module' => 'reschedule']), 'icon' => 'refresh-cw'],
     ['label' => 'Gallery', 'url' => route('admin.module', ['module' => 'gallery'])],
     ['label' => 'Blog', 'url' => route('admin.module', ['module' => 'blog'])],
     ['label' => 'Events', 'url' => route('admin.module', ['module' => 'events'])],

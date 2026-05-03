@@ -6,6 +6,8 @@ $menuItems = [
     ['label' => 'Students', 'url' => route('admin.students.index')],
     ['label' => 'Registrations', 'url' => route('admin.registrations.index')],
     ['label' => 'Schedule', 'url' => route('admin.schedule.index')],
+    ['label' => 'Attendance Monitoring', 'url' => route('admin.attendance.index'), 'icon' => 'check-circle'],
+    ['label' => 'Reschedule Requests', 'url' => route('admin.module', ['module' => 'reschedule']), 'icon' => 'refresh-cw'],
     ['label' => 'Gallery', 'url' => route('admin.module', ['module' => 'gallery'])],
     ['label' => 'Blog', 'url' => route('admin.module', ['module' => 'blog'])],
     ['label' => 'Events', 'url' => route('admin.module', ['module' => 'events'])],
@@ -20,7 +22,7 @@ $homeRoute = route('admin.dashboard');
 @section('content')
 <x-ui.card title="Daftar Pendaftaran" subtitle="Semua submission dari form pendaftaran" data-searchable>
     @if ($registrations->isNotEmpty())
-        <x-ui.table :headers="['Nama', 'Email', 'Jadwal', 'Status', 'Action']">
+        <x-ui.table :headers="['Nama', 'Email', 'Mulai', 'Durasi', 'Status', 'Action']">
             @foreach($registrations as $registration)
                 @php
                     $status = strtolower($registration->status ?? 'pending');
@@ -29,7 +31,8 @@ $homeRoute = route('admin.dashboard');
                 <tr>
                     <td>{{ $registration->full_name }}</td>
                     <td>{{ $registration->email }}</td>
-                    <td>{{ $registration->preferred_schedule }}</td>
+                    <td>{{ $registration->start_date ? \Carbon\Carbon::parse($registration->start_date)->format('d M Y') : '-' }}</td>
+                    <td>{{ $registration->duration_months ?? 0 }} Bulan</td>
                     <td><x-ui.badge :type="$badgeType">{{ strtoupper($status) }}</x-ui.badge></td>
                     <td>
                         @if ($status !== 'accepted')

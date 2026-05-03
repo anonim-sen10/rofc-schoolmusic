@@ -1,4 +1,4 @@
-@php
+    @php
     $resolvedRoleKey = $roleKey ?? (auth()->user()->primaryRole() ?? 'custom_role');
     $resolvedPanelTitle = $panelTitle ?? ($portal['title'] ?? 'SchoolMusic Portal');
     $resolvedHomeRoute = $homeRoute ?? (($portal['prefix'] ?? null) ? route($portal['prefix'].'.dashboard') : route('portal.redirect'));
@@ -37,13 +37,16 @@
     };
     $brandLogoUrl = $resolveFirstAsset($brandLogoCandidates);
     $brandLogoIconUrl = $resolveFirstAsset($brandLogoIconCandidates) ?? $brandLogoUrl;
-    $iconMap = [
+$iconMap = [
         'dashboard' => 'layout-dashboard',
+        'my_schedule' => 'calendar-days',
+        'schedule' => 'calendar-days',
+        'my_classes' => 'book-open',
         'classes' => 'book-open',
         'teachers' => 'music-2',
+        'my_students' => 'graduation-cap',
         'students' => 'graduation-cap',
         'registrations' => 'clipboard-list',
-        'schedule' => 'calendar-days',
         'blog' => 'newspaper',
         'gallery' => 'image',
         'events' => 'calendar',
@@ -54,6 +57,9 @@
         'reports' => 'bar-chart-3',
         'materials' => 'folder-open',
         'attendance' => 'user-check',
+        'reschedule' => 'refresh-cw',
+        'attendance_monitoring' => 'check-circle',
+        'student_progress' => 'activity',
         'progress' => 'activity',
         'profile' => 'user-round',
     ];
@@ -174,6 +180,7 @@
             </div>
         </div>
     </div>
+    @stack('modals')
     <script>
         if (window.lucide) {
             window.lucide.createIcons();
