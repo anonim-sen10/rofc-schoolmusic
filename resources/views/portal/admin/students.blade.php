@@ -150,7 +150,7 @@ $homeRoute = route('admin.dashboard');
     }
 
     .registration-modal-footer {
-        padding: 1rem 1.25rem;
+        padding: 1.25rem 1.5rem;
         border-top: 1px solid #e2e8f0;
         display: flex;
         justify-content: flex-end;
@@ -158,10 +158,42 @@ $homeRoute = route('admin.dashboard');
         background: #f8fafc;
     }
     .registration-modal-btn {
-        padding: 0.6rem 1.25rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+        padding: 0.65rem 1.25rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.875rem;
+        white-space: nowrap;
+        transition: all 0.2s;
     }
-    .registration-modal-btn-secondary { background: #fff; border: 1px solid #cbd5e1; color: #334155; }
-    .registration-modal-btn-primary { background: #2563eb; border: 1px solid #2563eb; color: #fff; }
+    .registration-modal-btn i {
+        width: 1.15rem;
+        height: 1.15rem;
+    }
+    .registration-modal-btn-secondary { background: #fff; border: 1px solid #e2e8f0; color: #475569; }
+    .registration-modal-btn-secondary:hover { background: #f1f5f9; border-color: #cbd5e1; }
+    .registration-modal-btn-primary { 
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); 
+        border: 1px solid #1d4ed8; 
+        color: #fff; 
+    }
+    .registration-modal-btn-primary:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+    }
+    .registration-modal-btn-danger {
+        background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+        border: 1px solid #be123c;
+        color: #fff;
+    }
+    .registration-modal-btn-danger:hover {
+        background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+        box-shadow: 0 10px 15px -3px rgba(225, 29, 72, 0.3);
+    }
 
     .action-icons { display: flex; gap: 0.5rem; align-items: center; }
 </style>
@@ -279,9 +311,9 @@ $homeRoute = route('admin.dashboard');
                                             </section>
                                         </div>
                                         <footer class="registration-modal-footer">
-                                            <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close">Tutup</button>
-                                            <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(2)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');">Edit Data</button>
-                                            <button type="button" class="registration-modal-btn registration-modal-btn-danger" onclick="if(confirm('Hapus siswa ini?')) this.closest('.action-icons').querySelector('form.delete-form').submit();">Hapus</button>
+                                            <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x"></i> Tutup</button>
+                                            <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(2)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');"><i data-lucide="pencil"></i> Edit Data</button>
+                                            <button type="button" class="registration-modal-btn registration-modal-btn-danger" onclick="if(confirm('Hapus siswa ini?')) this.closest('.action-icons').querySelector('form.delete-form').submit();"><i data-lucide="trash-2"></i> Hapus</button>
                                         </footer>
                                     </div>
                                 </details>
@@ -358,8 +390,8 @@ $homeRoute = route('admin.dashboard');
                                             </section>
                                         </div>
                                         <footer class="registration-modal-footer">
-                                            <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close">Batal</button>
-                                            <button type="submit" class="registration-modal-btn registration-modal-btn-primary">Simpan Perubahan</button>
+                                            <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x"></i> Batal</button>
+                                            <button type="submit" class="registration-modal-btn registration-modal-btn-primary"><i data-lucide="check"></i> Simpan Perubahan</button>
                                         </footer>
                                     </form>
                                 </details>
@@ -413,7 +445,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.querySelectorAll('details.action-popover').forEach(details => {
-        details.addEventListener('toggle', syncBodyModalState);
+        details.addEventListener('toggle', () => {
+            if (details.open && window.lucide) {
+                window.lucide.createIcons();
+            }
+            syncBodyModalState();
+        });
     });
     syncBodyModalState();
 });

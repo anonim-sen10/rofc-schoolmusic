@@ -38,7 +38,7 @@ $homeRoute = route('admin.dashboard');
                         @if ($status !== 'accepted')
                             <form class="module-form" method="POST" action="{{ route('admin.registrations.approve', $registration->id) }}" onsubmit="return confirm('Approve registrasi ini? Akun user dan student akan dibuat otomatis.');" style="margin-bottom: 0.5rem;">
                                 @csrf
-                                <button type="submit">Approve</button>
+                                <button type="submit"><i data-lucide="check-circle"></i> Approve</button>
                             </form>
                         @endif
 
@@ -52,7 +52,7 @@ $homeRoute = route('admin.dashboard');
                                     <option value="rejected" @selected($status === 'rejected')>rejected</option>
                                 </select>
                             </label>
-                            <button type="submit">Update</button>
+                            <button type="submit"><i data-lucide="refresh-cw"></i> Update</button>
                         </form>
                     </td>
                 </tr>

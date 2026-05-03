@@ -122,9 +122,9 @@
                                                 </section>
                                             </div>
                                             <footer class="registration-modal-footer">
-                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close">Tutup</button>
-                                                <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(2)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');">Edit Akses</button>
-                                                <button type="button" class="registration-modal-btn registration-modal-btn-danger" onclick="if(confirm('Hapus user ini?')) this.closest('.action-icons').querySelector('form.delete-form').submit();">Hapus</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x"></i> Tutup</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(2)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');"><i data-lucide="user-cog"></i> Edit Akses</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-danger" onclick="if(confirm('Hapus user ini?')) this.closest('.action-icons').querySelector('form.delete-form').submit();"><i data-lucide="trash-2"></i> Hapus</button>
                                             </footer>
                                         </div>
                                     </details>
@@ -172,8 +172,8 @@
                                                 </section>
                                             </div>
                                             <footer class="registration-modal-footer">
-                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close">Batal</button>
-                                                <button type="submit" class="registration-modal-btn registration-modal-btn-primary">Simpan Perubahan</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x"></i> Batal</button>
+                                                <button type="submit" class="registration-modal-btn registration-modal-btn-primary"><i data-lucide="check"></i> Simpan Perubahan</button>
                                             </footer>
                                         </form>
                                     </details>
@@ -344,9 +344,9 @@
                                                 </section>
                                             </div>
                                             <footer class="registration-modal-footer">
-                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close">Tutup</button>
-                                                <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(2)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');">Edit Data</button>
-                                                <button type="button" class="registration-modal-btn registration-modal-btn-danger" onclick="if(confirm('Hapus teacher ini?')) this.closest('.action-icons').querySelector('form.delete-form').submit();">Hapus</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x"></i> Tutup</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(2)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');"><i data-lucide="pencil"></i> Edit Data</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-danger" onclick="if(confirm('Hapus teacher ini?')) this.closest('.action-icons').querySelector('form.delete-form').submit();"><i data-lucide="trash-2"></i> Hapus</button>
                                             </footer>
                                         </div>
                                     </details>
@@ -428,8 +428,9 @@
 
                                             {{-- ─── FOOTER ─── --}}
                                             <footer class="te-modal-footer">
-                                                <button type="button" class="te-btn te-btn--secondary action-popover-close">Cancel</button>
+                                                <button type="button" class="te-btn te-btn--secondary action-popover-close"><i data-lucide="x"></i> Batal</button>
                                                 <button type="submit" class="te-btn te-btn--primary">
+                                                    <i data-lucide="save"></i>
                                                     <span class="te-btn-label">Save Changes</span>
                                                     <span class="te-btn-spinner" aria-hidden="true">
                                                         <svg class="te-spin" width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="31.42 31.42" stroke-dashoffset="10"/></svg>
@@ -805,9 +806,9 @@
                                                 </section>
                                             </div>
                                             <footer class="registration-modal-footer">
-                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close">Tutup</button>
-                                                <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(2)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');">Edit Data</button>
-                                                <button type="button" class="registration-modal-btn registration-modal-btn-danger" onclick="if(confirm('Hapus siswa ini?')) this.closest('.action-icons').querySelector('form.delete-form').submit();">Hapus</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x"></i> Tutup</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(2)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');"><i data-lucide="pencil"></i> Edit Data</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-danger" onclick="if(confirm('Hapus siswa ini?')) this.closest('.action-icons').querySelector('form.delete-form').submit();"><i data-lucide="trash-2"></i> Hapus</button>
                                             </footer>
                                         </div>
                                     </details>
@@ -884,8 +885,8 @@
                                                 </section>
                                             </div>
                                             <footer class="registration-modal-footer">
-                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close">Batal</button>
-                                                <button type="submit" class="registration-modal-btn registration-modal-btn-primary">Simpan Perubahan</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x"></i> Batal</button>
+                                                <button type="submit" class="registration-modal-btn registration-modal-btn-primary"><i data-lucide="check"></i> Simpan Perubahan</button>
                                             </footer>
                                         </form>
                                     </details>
@@ -3083,6 +3084,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitBtn.classList.add('is-loading');
                 submitBtn.setAttribute('aria-busy', 'true');
                 submitBtn.disabled = true;
+            }
+        });
+    });
+
+    // Re-initialize Lucide icons when popovers open
+    document.querySelectorAll('details.action-popover').forEach(details => {
+        details.addEventListener('toggle', () => {
+            if (details.open && window.lucide) {
+                window.lucide.createIcons();
             }
         });
     });
