@@ -22,6 +22,8 @@ class StoreStudentRequest extends FormRequest
             'is_active' => ['nullable', 'boolean'],
             'class_ids' => ['nullable', 'array'],
             'class_ids.*' => ['exists:classes,id'],
+            'start_date' => ['nullable', 'date'],
+            'duration_months' => ['nullable', 'integer', 'min:1', 'max:12'],
         ];
     }
 }

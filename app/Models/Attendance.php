@@ -10,20 +10,23 @@ class Attendance extends Model
 {
     use HasFactory;
 
-    protected $table = 'attendance';
+    protected $table = 'attendances';
 
     protected $fillable = [
-        'class_id',
+        'schedule_id',
+        'session_id',
         'student_id',
         'teacher_id',
-        'attendance_date',
         'status',
+        'latitude',
+        'longitude',
         'note',
     ];
 
-    protected $casts = [
-        'attendance_date' => 'date',
-    ];
+    public function session(): BelongsTo
+    {
+        return $this->belongsTo(ScheduleSession::class, 'session_id');
+    }
 
     public function student(): BelongsTo
     {
@@ -35,8 +38,20 @@ class Attendance extends Model
         return $this->belongsTo(Teacher::class);
     }
 
-    public function class(): BelongsTo
+    public function schedule(): BelongsTo
     {
-        return $this->belongsTo(MusicClass::class, 'class_id');
+        return $this->belongsTo(Schedule::class);
+    }
+
+    public function class(): \Illuminate\Database\Eloquent\Relations\HasOneThrough
+    {
+        return $this->hasOneThrough(
+            MusicClass::class,
+            Schedule::class,
+            'id',
+            'id',
+            'schedule_id',
+            'class_id'
+        );
     }
 }

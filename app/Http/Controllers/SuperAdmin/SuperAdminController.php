@@ -338,10 +338,17 @@ class SuperAdminController extends Controller
 
     public function destroyStudent(Student $student): RedirectResponse
     {
-        $student->classes()->detach();
-        $student->delete();
+        DB::transaction(function () use ($student) {
+            $user = $student->user;
+            if ($user) {
+                // Cascades will handle student and related data
+                $user->delete();
+            } else {
+                $student->delete();
+            }
+        });
 
-        return back()->with('success', 'Siswa berhasil dihapus.');
+        return back()->with('success', 'Siswa dan data terkait berhasil dihapus.');
     }
 
     public function storeRegistration(Request $request): RedirectResponse
@@ -462,6 +469,8 @@ class SuperAdminController extends Controller
                 'age' => $studentAge,
                 'phone' => $registration->no_hp_siswa ?: $registration->phone,
                 'email' => $registration->email,
+                'address' => $registration->alamat,
+                'no_hp' => $registration->no_hp_siswa ?: $registration->phone,
                 'is_active' => true,
             ]
         );
@@ -640,9 +649,12 @@ class SuperAdminController extends Controller
             ]);
         }
 
-        $user->delete();
+        DB::transaction(function () use ($user) {
+            // Database cascades handle Student, Teacher, etc.
+            $user->delete();
+        });
 
-        return back()->with('success', 'User berhasil dihapus.');
+        return back()->with('success', 'User dan seluruh data terkait berhasil dihapus.');
     }
 
     public function storeRole(Request $request): RedirectResponse
@@ -702,8 +714,8 @@ class SuperAdminController extends Controller
             ->keyBy(fn ($row) => sprintf('%04d-%02d', (int) $row->year, (int) $row->month));
 
         $attendanceRows = Attendance::query()
-            ->selectRaw('YEAR(attendance_date) as year, MONTH(attendance_date) as month, COUNT(*) as total, SUM(CASE WHEN status IN ("present", "late") THEN 1 ELSE 0 END) as present_total')
-            ->whereBetween('attendance_date', [$rangeStart, $rangeEnd])
+            ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(*) as total, SUM(CASE WHEN status IN ("present", "late") THEN 1 ELSE 0 END) as present_total')
+            ->whereBetween('created_at', [$rangeStart, $rangeEnd])
             ->groupBy('year', 'month')
             ->get()
             ->keyBy(fn ($row) => sprintf('%04d-%02d', (int) $row->year, (int) $row->month));
@@ -793,14 +805,14 @@ class SuperAdminController extends Controller
                 'registrations_pending' => Registration::where('status', 'pending')->count(),
                 'invoices_unpaid' => Invoice::whereIn('status', ['draft', 'issued', 'overdue'])->count(),
                 'teacher_attendance_today' => TeacherAttendance::whereDate('attendance_date', now()->toDateString())->count(),
-                'student_attendance_today' => Attendance::whereDate('attendance_date', now()->toDateString())->count(),
+                'student_attendance_today' => Attendance::whereDate('created_at', now()->toDateString())->count(),
                 'progress_updates_today' => StudentProgress::whereDate('created_at', now()->toDateString())->count(),
                 'materials_uploaded' => Material::count(),
             ],
             'recentRegistrations' => Registration::latest()->take(8)->get(),
             'recentPayments' => Payment::with('student')->latest()->take(8)->get(),
             'recentTeacherAttendances' => TeacherAttendance::with('teacher')->latest('attendance_date')->take(8)->get(),
-            'recentStudentAttendances' => Attendance::with(['student', 'class'])->latest('attendance_date')->take(8)->get(),
+            'recentStudentAttendances' => Attendance::with(['student', 'class'])->latest('created_at')->take(8)->get(),
             'recentProgress' => StudentProgress::latest()->take(8)->get(),
         ]);
     }
@@ -832,7 +844,7 @@ class SuperAdminController extends Controller
             'classesForManagement' => MusicClass::query()->with(['teacher'])->orderBy('name')->get(),
             'classesForSchedule' => MusicClass::query()->with('teacher')->orderBy('name')->get(),
             'schedulesForManagement' => $scheduleFeatureReady
-                ? Schedule::query()->with(['musicClass.teacher', 'teacher'])->orderBy('day')->orderBy('time')->get()
+                ? Schedule::query()->with(['musicClass.teacher', 'teacher', 'student.user'])->orderBy('day')->orderBy('time')->get()
                 : collect(),
             'scheduleFeatureReady' => $scheduleFeatureReady,
             'dayOptions' => self::SCHEDULE_DAY_OPTIONS,
@@ -841,7 +853,7 @@ class SuperAdminController extends Controller
                 ->where('status', 'accepted')
                 ->latest('updated_at')
                 ->get(),
-            'registrationsForManagement' => Registration::query()->with('class')->latest()->get(),
+            'registrationsForManagement' => Registration::query()->with(['class', 'schedules'])->latest()->get(),
             'studentsForSchedule' => Student::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'email']),
             'studentsForFinance' => Student::query()->orderBy('name')->get(['id', 'name']),
             'classesForFinance' => MusicClass::query()->orderBy('name')->get(['id', 'name']),
@@ -924,6 +936,8 @@ class SuperAdminController extends Controller
                 ['key' => 'schedule', 'label' => 'Schedule', 'icon' => 'calendar-days'],
                 ['key' => 'students', 'label' => 'Students', 'icon' => 'graduation-cap'],
                 ['key' => 'registrations', 'label' => 'Registrations', 'icon' => 'clipboard-list'],
+                ['key' => 'reschedule', 'label' => 'Reschedule Requests', 'icon' => 'refresh-cw'],
+                ['key' => 'attendance', 'label' => 'Attendance Monitoring', 'icon' => 'check-circle'],
                 ['key' => 'finance', 'label' => 'Finance', 'icon' => 'wallet'],
                 ['key' => 'reports', 'label' => 'Reports', 'icon' => 'bar-chart-3'],
                 ['key' => 'blog', 'label' => 'Blog', 'icon' => 'newspaper'],
@@ -1014,12 +1028,27 @@ class SuperAdminController extends Controller
             'registrations' => [
                 'title' => 'Registrations',
                 'description' => 'Data pendaftaran masuk website.',
-                'columns' => ['Nama', 'Email', 'Telepon', 'Status'],
-                'rows' => Registration::latest()->take(30)->get()->map(fn (Registration $registration) => [
+                'columns' => ['Nama', 'Email', 'Telepon', 'Instrumen', 'Jadwal', 'Status'],
+                'rows' => Registration::with(['class', 'schedules'])->latest()->take(50)->get()->map(fn (Registration $registration) => [
                     $registration->full_name,
                     $registration->email,
                     $registration->phone,
-                    $registration->status,
+                    $registration->class?->name ?? ($registration->instrumen ?? '-'),
+                    $registration->schedules->count().' Slot',
+                    strtoupper((string) $registration->status),
+                ])->all(),
+            ],
+            'reschedule' => [
+                'title' => 'Reschedule Requests',
+                'description' => 'Permintaan pindah jadwal dari siswa.',
+                'columns' => ['Siswa', 'Lama', 'Baru', 'Guru', 'Status', 'Aksi'],
+                'rows' => \App\Models\RescheduleRequest::with(['student', 'oldSchedule', 'newSchedule.teacher'])->latest()->take(50)->get()->map(fn ($r) => [
+                    $r->student->name,
+                    $r->oldSchedule->day . ' ' . substr((string)$r->oldSchedule->time, 0, 5),
+                    $r->newSchedule->day . ' ' . substr((string)$r->newSchedule->time, 0, 5),
+                    $r->newSchedule->teacher->name ?? '-',
+                    strtoupper($r->status),
+                    $r // Pass object for custom rendering in blade
                 ])->all(),
             ],
             'finance' => [
@@ -1039,7 +1068,7 @@ class SuperAdminController extends Controller
                 'columns' => ['Laporan', 'Jumlah'],
                 'rows' => [
                     ['Absensi Guru Hari Ini', (string) TeacherAttendance::whereDate('attendance_date', now()->toDateString())->count()],
-                    ['Absensi Siswa Hari Ini', (string) Attendance::whereDate('attendance_date', now()->toDateString())->count()],
+                    ['Absensi Siswa Hari Ini', (string) Attendance::whereDate('created_at', now()->toDateString())->count()],
                     ['Update Progress Hari Ini', (string) StudentProgress::whereDate('created_at', now()->toDateString())->count()],
                     ['Upload Materi Total', (string) Material::count()],
                 ],
@@ -1103,7 +1132,7 @@ class SuperAdminController extends Controller
                     (string) ($activity->user_id ?? '-'),
                     $activity->module ?? '-',
                     $activity->action,
-                ])->all(),
+                ])->all(),  
             ],
             default => abort(404),
         };

@@ -37,6 +37,8 @@ class Registration extends Model
         'hari_pilihan',
         'pengalaman',
         'deskripsi_pengalaman',
+        'start_date',
+        'duration_months',
     ];
 
     protected $casts = [
@@ -54,5 +56,9 @@ class Registration extends Model
     public function schedule(): BelongsTo
     {
         return $this->belongsTo(Schedule::class, 'schedule_id');
+    }
+    public function schedules()
+    {
+        return $this->belongsToMany(Schedule::class, 'registration_schedules');
     }
 }

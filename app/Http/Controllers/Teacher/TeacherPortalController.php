@@ -24,13 +24,7 @@ class TeacherPortalController extends Controller
 
     private function teacherAcceptedClassesQuery(int $teacherId)
     {
-        $query = MusicClass::query()->where('teacher_id', $teacherId);
-
-        if ($this->hasAssignmentStatusColumn()) {
-            $query->where('assignment_status', 'accepted');
-        }
-
-        return $query;
+        return MusicClass::query()->where('teacher_id', $teacherId);
     }
 
     private function teacherFromUser(int $userId): Teacher
@@ -41,21 +35,62 @@ class TeacherPortalController extends Controller
         );
     }
 
-    public function dashboard(Request $request): View
+public function dashboard(Request $request): View
     {
         $teacher = $this->teacherFromUser($request->user()->id);
+        $todayDay = now()->dayOfWeek; // 0 = Sunday, 1 = Monday, etc.
+        $today = now()->toDateString();
+        
+        // Map Laravel dayOfWeek to our day names
+        $dayMap = [
+            0 => 'sunday',
+            1 => 'monday',
+            2 => 'tuesday',
+            3 => 'wednesday',
+            4 => 'thursday',
+            5 => 'friday',
+            6 => 'saturday',
+        ];
+        $todayDayName = $dayMap[$todayDay];
+        
+        // Get today's sessions (booked only)
+        $todaySchedules = \App\Models\ScheduleSession::query()
+            ->where('teacher_id', $teacher->id)
+            ->where('session_date', $today)
+            ->where('status', 'booked')
+            ->with([
+                'musicClass:id,name',
+                'student:id,name,address'
+            ])
+            ->orderBy('time')
+            ->get();
+        
+        // Count completed (attended) lessons for today
+        $completedCount = Attendance::query()
+            ->where('teacher_id', $teacher->id)
+            ->whereDate('created_at', $today)
+            ->where('status', 'present')
+            ->count();
+
         $acceptedClasses = $this->teacherAcceptedClassesQuery($teacher->id)->orderBy('name')->get(['id', 'name', 'schedule']);
         $classIds = $acceptedClasses->pluck('id');
 
         return view('portal.teacher.dashboard', [
             'teacher' => $teacher,
+            'todaySchedules' => $todaySchedules,
+            'completedCount' => $completedCount,
             'classCount' => $classIds->count(),
             'studentCount' => Student::whereHas('classes', fn ($q) => $q->whereIn('classes.id', $classIds))->count(),
-            'attendanceCount' => Attendance::where('teacher_id', $teacher->id)->whereDate('attendance_date', now()->toDateString())->count() + TeacherAttendance::where('teacher_id', $teacher->id)->whereDate('attendance_date', now()->toDateString())->count(),
+            'attendanceCount' => Attendance::where('teacher_id', $teacher->id)->whereDate('created_at', now()->toDateString())->count() + TeacherAttendance::where('teacher_id', $teacher->id)->whereDate('attendance_date', now()->toDateString())->count(),
             'progressCount' => StudentProgress::where('teacher_id', $teacher->id)->count(),
             'assignedClasses' => $acceptedClasses,
             'latestProgress' => StudentProgress::with('student:id,name')->where('teacher_id', $teacher->id)->latest()->take(5)->get(),
             'hasTeacherAttendanceToday' => TeacherAttendance::query()->where('teacher_id', $teacher->id)->whereDate('attendance_date', now()->toDateString())->exists(),
+            'pendingRescheduleRequests' => \App\Models\RescheduleRequest::with(['student:id,name', 'oldSchedule', 'newSchedule'])
+                ->whereHas('oldSchedule', fn($q) => $q->where('teacher_id', $teacher->id))
+                ->where('status', 'pending')
+                ->latest()
+                ->get(),
         ]);
     }
 
@@ -88,7 +123,7 @@ class TeacherPortalController extends Controller
             'classOptions' => $classes,
             'hasAssignedClasses' => $hasAssignedClasses,
             'classStudents' => $classStudents,
-            'records' => Attendance::with(['class', 'student'])->where('teacher_id', $teacher->id)->latest('attendance_date')->take(20)->get(),
+            'records' => Attendance::with(['class', 'student'])->where('teacher_id', $teacher->id)->latest('created_at')->take(20)->get(),
             'teacherRecords' => TeacherAttendance::with('teacher')->where('teacher_id', $teacher->id)->latest('attendance_date')->take(20)->get(),
             'hasTeacherAttendanceToday' => $hasTeacherAttendanceToday,
         ]);
@@ -154,7 +189,7 @@ class TeacherPortalController extends Controller
             'class_id' => $class->id,
             'student_id' => $student->id,
             'teacher_id' => $teacher->id,
-            'attendance_date' => $data['attendance_date'],
+            'created_at' => $data['attendance_date'],
             'status' => $data['status'],
             'note' => $data['note'] ?? null,
         ]);
@@ -289,17 +324,76 @@ class TeacherPortalController extends Controller
         ]);
     }
 
-    public function schedule(Request $request): View
+public function schedule(Request $request): View
     {
         $teacher = $this->teacherFromUser($request->user()->id);
 
+        $schedules = \App\Models\ScheduleSession::query()
+            ->where('teacher_id', $teacher->id)
+            ->whereIn('status', ['booked', 'rescheduled', 'completed'])
+            ->with(['musicClass', 'student.user', 'attendance'])
+            ->orderBy('session_date')
+            ->orderBy('time')
+            ->get();
+
         return view('portal.teacher.schedule', [
             'teacher' => $teacher,
-            'schedules' => MusicClass::where('teacher_id', $teacher->id)
-                ->with(['students:id,name'])
-                ->withCount('students')
-                ->orderBy('name')
-                ->get(),
+            'schedules' => $schedules,
+        ]);
+    }
+
+    public function storeScheduleAttendance(Request $request)
+    {
+        $teacher = $this->teacherFromUser($request->user()->id);
+
+        $validated = $request->validate([
+            'session_id' => 'required|exists:schedule_sessions,id',
+            'status' => 'required|in:present,absent,reschedule',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'note' => 'nullable|string',
+        ]);
+
+        $session = \App\Models\ScheduleSession::where('id', $validated['session_id'])
+            ->where('teacher_id', $teacher->id)
+            ->where('status', 'booked')
+            ->firstOrFail();
+
+        if ($session->attendance()->exists()) {
+            return back()->with('error', 'Attendance already exists for this session.');
+        }
+
+        $session->attendance()->create([
+            'teacher_id' => $teacher->id,
+            'student_id' => $session->student_id,
+            'status' => $validated['status'],
+            'latitude' => $validated['latitude'],
+            'longitude' => $validated['longitude'],
+            'note' => $validated['note'],
+            'session_id' => $session->id,
+            'schedule_id' => $session->schedule_id,
+        ]);
+
+        $session->update(['status' => 'completed']);
+
+        return back()->with('success', 'Attendance recorded successfully.');
+    }
+
+    public function myClasses(Request $request): View
+    {
+        $teacher = $this->teacherFromUser($request->user()->id);
+
+        $classes = MusicClass::query()
+            ->where('teacher_id', $teacher->id)
+            ->with(['students:id,name'])
+            ->withCount('students')
+            ->withCount('schedules')
+            ->orderBy('name')
+            ->get();
+
+        return view('portal.teacher.my-classes', [
+            'teacher' => $teacher,
+            'classes' => $classes,
         ]);
     }
 
