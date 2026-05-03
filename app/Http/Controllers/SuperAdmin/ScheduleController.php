@@ -27,23 +27,62 @@ class ScheduleController extends Controller
             return back()->with('error', 'Tabel schedules belum tersedia. Jalankan migrasi terlebih dahulu.');
         }
 
-        $data = $this->validatePayload($request);
+        $data = $request->validate([
+            'class_id' => ['required', 'integer', 'exists:classes,id'],
+            'day' => ['required', 'string', Rule::in(self::DAY_OPTIONS)],
+            'start_time' => ['required', 'date_format:H:i', 'before:end_time'],
+            'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
+            'interval' => ['required', 'integer', 'min:1'],
+        ]);
+
         $class = MusicClass::query()->findOrFail($data['class_id']);
 
-        $payload = [
-            'class_id' => $class->id,
-            'day' => $data['day'],
-            'time' => $data['time'],
-            'teacher_id' => $class->teacher_id,
-        ];
+        $startTime = \Carbon\Carbon::parse($data['start_time']);
+        $endTime = \Carbon\Carbon::parse($data['end_time']);
+        $interval = (int) $data['interval'];
 
-        if (Schema::hasColumn('schedules', 'status')) {
-            $payload['status'] = 'available';
+        $currentTime = $startTime->copy();
+        $insertedCount = 0;
+        $skippedCount = 0;
+
+        $hasStatusColumn = Schema::hasColumn('schedules', 'status');
+
+        while ($currentTime->lt($endTime)) {
+            $timeString = $currentTime->format('H:i');
+
+            $duplicateExists = Schedule::query()
+                ->where('class_id', $class->id)
+                ->where('day', $data['day'])
+                ->where('time', $timeString)
+                ->exists();
+
+            if (! $duplicateExists) {
+                $payload = [
+                    'class_id' => $class->id,
+                    'day' => $data['day'],
+                    'time' => $timeString,
+                    'teacher_id' => $class->teacher_id,
+                ];
+
+                if ($hasStatusColumn) {
+                    $payload['status'] = 'available';
+                }
+
+                Schedule::query()->create($payload);
+                $insertedCount++;
+            } else {
+                $skippedCount++;
+            }
+
+            $currentTime->addMinutes($interval);
         }
 
-        Schedule::query()->create($payload);
+        $message = "Berhasil membuat {$insertedCount} jadwal baru.";
+        if ($skippedCount > 0) {
+            $message .= " Dilewati {$skippedCount} jadwal karena duplikat.";
+        }
 
-        return back()->with('success', 'Jadwal kelas berhasil ditambahkan.');
+        return back()->with('success', $message);
     }
 
     public function update(Request $request, Schedule $schedule): RedirectResponse

@@ -64,7 +64,12 @@ class PortalController extends Controller
             abort(404);
         }
 
-        return view('portal.module', [
+        $view = "portal.{$role}.{$module}";
+        if (! view()->exists($view)) {
+            $view = 'portal.module';
+        }
+
+        return view($view, [
             'roleKey' => $role,
             'portal' => $config,
             'moduleKey' => $module,
@@ -86,6 +91,7 @@ class PortalController extends Controller
                     ['key' => 'teachers', 'label' => 'Teachers'],
                     ['key' => 'students', 'label' => 'Students'],
                     ['key' => 'registrations', 'label' => 'Registrations'],
+                    ['key' => 'reschedule', 'label' => 'Reschedule'],
                     ['key' => 'finance', 'label' => 'Finance'],
                     ['key' => 'reports', 'label' => 'Reports'],
                     ['key' => 'blog', 'label' => 'Blog'],
@@ -93,6 +99,8 @@ class PortalController extends Controller
                     ['key' => 'events', 'label' => 'Events'],
                     ['key' => 'testimonials', 'label' => 'Testimonials'],
                     ['key' => 'settings', 'label' => 'Settings'],
+                    ['key' => 'attendance', 'label' => 'Attendance Monitoring'],
+                    ['key' => 'reschedule', 'label' => 'Reschedule Requests'],
                     ['key' => 'logs', 'label' => 'Logs'],
                 ],
                 'stats' => [
@@ -115,6 +123,8 @@ class PortalController extends Controller
                     'events' => ['title' => 'Events', 'description' => 'Kelola event workshop, recital, dan konser.'],
                     'testimonials' => ['title' => 'Testimonials', 'description' => 'Kelola testimoni siswa dan orang tua.'],
                     'settings' => ['title' => 'Settings', 'description' => 'Konfigurasi website dan sistem utama.'],
+                    'attendance' => ['title' => 'Attendance Monitoring', 'description' => 'Pantau absensi guru dan siswa secara real-time.'],
+                    'reschedule' => ['title' => 'Reschedule Requests', 'description' => 'Approve/Reject pindah jadwal siswa.'],
                     'logs' => ['title' => 'System Logs', 'description' => 'Audit trail aktivitas sistem.'],
                 ],
             ],
@@ -131,6 +141,8 @@ class PortalController extends Controller
                     ['key' => 'gallery', 'label' => 'Gallery', 'icon' => 'image'],
                     ['key' => 'blog', 'label' => 'Blog', 'icon' => 'newspaper'],
                     ['key' => 'events', 'label' => 'Events', 'icon' => 'calendar'],
+                    ['key' => 'attendance', 'label' => 'Attendance Monitoring', 'icon' => 'check-circle'],
+                    ['key' => 'reschedule', 'label' => 'Reschedule Requests', 'icon' => 'refresh-cw'],
                     ['key' => 'testimonials', 'label' => 'Testimonials', 'icon' => 'message-square-quote'],
                 ],
                 'stats' => [
@@ -147,6 +159,8 @@ class PortalController extends Controller
                     'gallery' => ['title' => 'Gallery', 'description' => 'Upload dan kelola media website.'],
                     'blog' => ['title' => 'Blog', 'description' => 'Buat dan kelola artikel sekolah.'],
                     'events' => ['title' => 'Events', 'description' => 'Kelola event dan jadwal kegiatan.'],
+                    'attendance' => ['title' => 'Attendance Monitoring', 'description' => 'Pantau absensi harian kelas dan pengajar.'],
+                    'reschedule' => ['title' => 'Reschedule Requests', 'description' => 'Kelola permintaan perubahan jadwal.'],
                     'testimonials' => ['title' => 'Testimonials', 'description' => 'Kelola testimoni siswa/orang tua.'],
                 ],
             ],

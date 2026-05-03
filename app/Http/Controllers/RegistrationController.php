@@ -35,6 +35,31 @@ class RegistrationController extends Controller
         return view('pages.register', compact('classes', 'dayOptions'));
     }
 
+    public function getSchedulesByClass(int $class_id): JsonResponse
+    {
+        if (! Schema::hasTable('schedules')) {
+            return response()->json(['grouped' => []]);
+        }
+
+        $schedules = Schedule::query()
+            ->where('class_id', $class_id)
+            ->orderByRaw("FIELD(day, 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu')")
+            ->orderBy('time')
+            ->get(['id', 'day', 'time', 'status'])
+            ->map(function ($s) {
+                return [
+                    'id' => $s->id,
+                    'day' => $s->day,
+                    'time' => substr((string) $s->time, 0, 5),
+                    'status' => $s->status,
+                ];
+            });
+
+        $grouped = $schedules->groupBy('day');
+
+        return response()->json(['grouped' => $grouped]);
+    }
+
     public function getAvailableSchedules(int $class_id, string $day): JsonResponse
     {
         if (! Schema::hasTable('schedules') || ! Schema::hasColumn('schedules', 'status')) {
@@ -97,13 +122,15 @@ class RegistrationController extends Controller
                 'required',
                 Rule::exists('classes', 'id')->where(fn ($query) => $query->where('status', 'active')),
             ],
-            'day' => ['required', 'string', Rule::in(self::DAY_OPTIONS)],
-            'schedule_id' => ['required', 'integer', 'exists:schedules,id'],
+            'schedule_ids' => ['required', 'array', 'min:1'],
+            'schedule_ids.*' => ['integer', 'exists:schedules,id'],
             'program_tambahan' => ['nullable', 'array'],
             'program_tambahan.*' => ['string', 'max:120'],
 
             'pengalaman' => ['required', 'boolean'],
             'deskripsi_pengalaman' => ['nullable', 'string', 'max:2000'],
+            'start_date' => ['required', 'date', 'after_or_equal:today'],
+            'duration_months' => ['required', 'integer', 'in:1,2,3,6,12'],
         ]);
 
         $selectedClass = MusicClass::query()
@@ -117,22 +144,21 @@ class RegistrationController extends Controller
                 ->withInput();
         }
 
-        $scheduleQuery = Schedule::query()
-            ->whereKey((int) $validated['schedule_id'])
+        $schedules = Schedule::query()
+            ->whereIn('id', $validated['schedule_ids'])
             ->where('class_id', (int) $validated['class_id'])
-            ->where('day', $validated['day'])
-            ->where('status', 'available');
+            ->where('status', 'available')
+            ->get(['id', 'day', 'time']);
 
-        $selectedSchedule = $scheduleQuery->first(['id', 'day', 'time']);
-
-        if (! $selectedSchedule) {
+        if ($schedules->count() !== count($validated['schedule_ids'])) {
             return back()
-                ->withErrors(['schedule_id' => 'Slot jadwal sudah dibooking user lain. Silakan pilih slot lain.'])
+                ->withErrors(['schedule_ids' => 'Salah satu atau lebih slot jadwal sudah dibooking user lain. Silakan pilih slot lain.'])
                 ->withInput();
         }
 
         $instrumentName = (string) $selectedClass->name;
-        $scheduleText = $selectedSchedule->day.' - '.substr((string) $selectedSchedule->time, 0, 5);
+        $scheduleTexts = $schedules->map(fn($s) => $s->day.' - '.substr((string) $s->time, 0, 5))->toArray();
+        $scheduleText = implode(', ', $scheduleTexts);
 
         $tanggalLahir = Carbon::parse($validated['tanggal_lahir']);
 
@@ -153,13 +179,15 @@ class RegistrationController extends Controller
             'email_ortu' => $validated['email_ortu'] ?? null,
 
             'class_id' => $validated['class_id'],
-            'schedule_id' => $validated['schedule_id'],
+            'schedule_id' => $validated['schedule_ids'][0] ?? null,
             'instrumen' => $instrumentName,
             'program_tambahan' => $validated['program_tambahan'] ?? [],
-            'hari_pilihan' => [$validated['day']],
+            'hari_pilihan' => $schedules->pluck('day')->unique()->values()->toArray(),
 
             'pengalaman' => (bool) $validated['pengalaman'],
             'deskripsi_pengalaman' => $validated['deskripsi_pengalaman'] ?? null,
+            'start_date' => $validated['start_date'],
+            'duration_months' => $validated['duration_months'],
 
             // Backward compatibility for existing admin modules using legacy columns.
             'full_name' => $validated['nama_lengkap'],
@@ -187,7 +215,6 @@ class RegistrationController extends Controller
                 'Email Ortu: '.($validated['email_ortu'] ?? '-'),
                 'Instrumen: '.$instrumentName,
                 'Program Tambahan: '.implode(', ', $validated['program_tambahan'] ?? []),
-                'Hari Pilihan: '.$validated['day'],
                 'Jadwal Terpilih: '.$scheduleText,
                 'Pengalaman: '.((bool) $validated['pengalaman'] ? 'Ya' : 'Tidak'),
             ];
@@ -201,7 +228,11 @@ class RegistrationController extends Controller
             $filteredPayload['notes'] = trim($baseNotes.($baseNotes !== '' ? "\n\n" : '').$legacyNotes);
         }
 
-        Registration::create($filteredPayload);
+        $registration = Registration::create($filteredPayload);
+        
+        if (method_exists($registration, 'schedules')) {
+            $registration->schedules()->sync($validated['schedule_ids']);
+        }
 
         return back()->with('success', 'Pendaftaran Anda berhasil dikirim. Kami akan menghubungi Anda untuk proses berikutnya.');
     }
@@ -210,8 +241,12 @@ class RegistrationController extends Controller
     {
         try {
             DB::transaction(function () use ($id): void {
-                $registration = Registration::query()->lockForUpdate()->findOrFail($id);
+                $registration = Registration::query()
+                    ->with(['schedules', 'class'])
+                    ->lockForUpdate()
+                    ->findOrFail($id);
 
+                // 1. Validation Checks
                 if (strtolower((string) $registration->status) === 'accepted') {
                     throw ValidationException::withMessages([
                         'registration' => 'Registrasi ini sudah berstatus accepted.',
@@ -219,125 +254,151 @@ class RegistrationController extends Controller
                 }
 
                 $email = strtolower(trim((string) $registration->email));
-
                 if ($email === '') {
-                    throw ValidationException::withMessages([
-                        'email' => 'Email pada registrasi tidak valid.',
-                    ]);
+                    throw ValidationException::withMessages(['email' => 'Email pendaftaran tidak valid.']);
                 }
 
                 if (User::query()->where('email', $email)->exists()) {
+                    throw ValidationException::withMessages(['email' => 'Email sudah terdaftar pada akun lain.']);
+                }
+
+                // 2. Collect Schedules
+                $requestedSchedules = collect();
+                
+                // Try pivot table first
+                if ($registration->schedules->isNotEmpty()) {
+                    $requestedSchedules = $registration->schedules()->lockForUpdate()->get();
+                } 
+                // Fallback to legacy single schedule_id column
+                elseif ($registration->schedule_id) {
+                    $sch = Schedule::query()->lockForUpdate()->find($registration->schedule_id);
+                    if ($sch) {
+                        $requestedSchedules->push($sch);
+                    }
+                }
+
+                if ($requestedSchedules->isEmpty()) {
                     throw ValidationException::withMessages([
-                        'email' => 'Email sudah terdaftar pada akun user.',
+                        'schedules' => 'Pendaftaran ini tidak memiliki jadwal terpilih. Silakan edit dan pilih minimal 1 jadwal.'
                     ]);
                 }
 
-                $assignedSchedule = null;
-                if (Schema::hasTable('schedules') && Schema::hasColumn('registrations', 'schedule_id') && $registration->schedule_id) {
-                    if (! Schema::hasColumn('schedules', 'status')) {
+                // 3. Availability Check (CRITICAL)
+                foreach ($requestedSchedules as $sch) {
+                    if (strtolower((string) $sch->status) !== 'available') {
                         throw ValidationException::withMessages([
-                            'schedule_id' => 'Kolom status pada schedule belum tersedia. Jalankan migrasi terlebih dahulu.',
-                        ]);
-                    }
-
-                    $scheduleQuery = Schedule::query()
-                        ->lockForUpdate()
-                        ->whereKey((int) $registration->schedule_id)
-                        ->where('status', 'available');
-
-                    $assignedSchedule = $scheduleQuery->first();
-
-                    if (! $assignedSchedule) {
-                        throw ValidationException::withMessages([
-                            'schedule_id' => 'Slot jadwal sudah diambil user lain. Silakan pilih slot lain.',
+                            'schedule_id' => "Slot jadwal {$sch->day} ".substr((string)$sch->time, 0, 5)." sudah tidak tersedia (sudah dibooking). Silakan ganti jadwal terlebih dahulu."
                         ]);
                     }
                 }
 
-                $studentName = trim((string) ($registration->nama_lengkap ?: $registration->full_name));
-                if ($studentName === '') {
-                    $studentName = 'Siswa ROFC';
-                }
-
-                $phone = trim((string) ($registration->no_hp_siswa ?: $registration->phone));
-
-                $studentAge = null;
-                if (is_numeric($registration->age) && (int) $registration->age > 0) {
-                    $studentAge = (int) $registration->age;
-                } elseif ($registration->tanggal_lahir) {
-                    $studentAge = Carbon::parse($registration->tanggal_lahir)->age;
-                }
-
+                // 4. Create User Account
+                $studentName = trim((string) ($registration->nama_lengkap ?: $registration->full_name)) ?: 'Siswa ROFC';
                 $user = User::query()->create([
                     'name' => $studentName,
                     'email' => $email,
-                    'password' => Hash::make('123456'),
+                    'password' => Hash::make('123456'), // Default password
                 ]);
 
-                // Backward compatibility if users table still has direct role column.
-                if (Schema::hasColumn('users', 'role')) {
-                    DB::table('users')->where('id', $user->id)->update(['role' => 'student']);
-                }
-
+                // Assign Student Role
                 $studentRole = Role::query()->firstOrCreate(
                     ['slug' => 'student'],
                     ['name' => 'Student', 'description' => 'Portal siswa.']
                 );
                 $user->roles()->syncWithoutDetaching([$studentRole->id]);
+                if (Schema::hasColumn('users', 'role')) {
+                    $user->update(['role' => 'student']);
+                }
 
-                $studentPayload = [
+                // 5. Create Student Profile
+                $phone = trim((string) ($registration->no_hp_siswa ?: $registration->phone));
+                $studentAge = $registration->tanggal_lahir 
+                    ? Carbon::parse($registration->tanggal_lahir)->age 
+                    : (is_numeric($registration->age) ? (int)$registration->age : null);
+
+                $startDate = $registration->start_date ?? now()->toDateString();
+                $duration = $registration->duration_months ?? 1;
+                $endDate = Carbon::parse($startDate)->addMonths($duration)->toDateString();
+
+                $student = Student::query()->create([
                     'user_id' => $user->id,
                     'name' => $studentName,
                     'age' => $studentAge,
-                    'phone' => $phone !== '' ? $phone : null,
+                    'phone' => $phone ?: null,
                     'email' => $email,
+                    'address' => $registration->alamat ?? null,
                     'is_active' => true,
-                ];
+                    'class_id' => $registration->class_id ?: $requestedSchedules->first()->class_id,
+                    'start_date' => $startDate,
+                    'duration_months' => $duration,
+                    'end_date' => $endDate,
+                ]);
 
-                if ($registration->class_id && Schema::hasColumn('students', 'class_id')) {
-                    $studentPayload['class_id'] = $registration->class_id;
+                // 6. Assign Schedules & Update Status
+                foreach ($requestedSchedules as $sch) {
+                    $sch->update([
+                        'student_id' => $student->id,
+                        'status' => 'booked',
+                    ]);
+
+                    // GENERATE SESSIONS for next 4 weeks
+                    $this->generateInitialSessions($student, $sch);
                 }
 
-                if (Schema::hasColumn('students', 'schedule_id') && $registration->schedule_id) {
-                    $studentPayload['schedule_id'] = $registration->schedule_id;
-                }
-
-                $student = Student::query()->create($studentPayload);
-
-                // Backward compatibility if students table stores class/no_hp directly.
-                if ($registration->class_id && Schema::hasColumn('students', 'class_id')) {
-                    DB::table('students')->where('id', $student->id)->update(['class_id' => $registration->class_id]);
-                }
-
-                if ($registration->schedule_id && Schema::hasColumn('students', 'schedule_id')) {
-                    DB::table('students')->where('id', $student->id)->update(['schedule_id' => $registration->schedule_id]);
-                }
-
-                if ($phone !== '' && Schema::hasColumn('students', 'no_hp')) {
-                    DB::table('students')->where('id', $student->id)->update(['no_hp' => $phone]);
-                }
-
-                if ($registration->class_id && method_exists($student, 'classes')) {
-                    $student->classes()->syncWithoutDetaching([$registration->class_id]);
-                }
-
+                // 7. Finalize Registration
                 $registration->update(['status' => 'accepted']);
-
-                if ($assignedSchedule) {
-                    $assignedSchedule->update(['status' => 'booked']);
-                }
             });
-        } catch (ValidationException $exception) {
-            $errors = $exception->errors();
-            $message = collect($errors)->flatten()->first() ?: 'Validasi approve gagal.';
 
-            return back()->withErrors($errors)->with('error', $message);
+            return back()->with('success', 'Pendaftaran berhasil disetujui. Akun siswa telah dibuat dan jadwal telah di-book.');
+        } catch (ValidationException $exception) {
+            return back()->withErrors($exception->errors())->with('error', $exception->getMessage());
         } catch (\Throwable $exception) {
             report($exception);
+            return back()->with('error', 'Terjadi kesalahan sistem saat menyetujui pendaftaran: ' . $exception->getMessage());
+        }
+    }
 
-            return back()->with('error', 'Proses approve gagal. Silakan coba lagi.');
+    private function generateInitialSessions(Student $student, Schedule $schedule): void
+    {
+        $dayName = $schedule->day; 
+        $engDay = $this->mapDayToEnglish($dayName);
+        
+        $currentDate = Carbon::parse($student->start_date);
+        $endDate = Carbon::parse($student->end_date);
+        
+        // Find first occurrence of $engDay on or after $startDate
+        if (strtolower($currentDate->format('l')) !== strtolower($engDay)) {
+            $currentDate->modify("next $engDay");
         }
 
-        return back()->with('success', 'Registrasi berhasil di-approve. Akun user dan data siswa sudah dibuat.');
+        while ($currentDate->lte($endDate)) {
+            \App\Models\ScheduleSession::create([
+                'schedule_id' => $schedule->id,
+                'student_id' => $student->id,
+                'teacher_id' => $schedule->teacher_id,
+                'class_id' => $schedule->class_id,
+                'session_date' => $currentDate->toDateString(),
+                'time' => $schedule->time,
+                'status' => 'booked',
+            ]);
+            
+            $currentDate->addWeek();
+        }
+    }
+
+    private function mapDayToEnglish(string $day): string
+    {
+        $map = [
+            'senin' => 'monday',
+            'selasa' => 'tuesday',
+            'rabu' => 'wednesday',
+            'kamis' => 'thursday',
+            'jumat' => 'friday',
+            'sabtu' => 'saturday',
+            'minggu' => 'sunday',
+        ];
+        
+        $lower = strtolower($day);
+        return $map[$lower] ?? $lower;
     }
 }
