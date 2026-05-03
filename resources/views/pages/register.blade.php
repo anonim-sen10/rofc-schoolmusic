@@ -406,6 +406,143 @@
             grid-template-columns: 1fr;
         }
     }
+    .multi-schedule-wrapper {
+        margin-top: 0.8rem;
+    }
+    .selected-preview-wrap {
+        margin-bottom: 1.2rem;
+        padding: 0.8rem;
+        background: #f0f7ff;
+        border: 1px dashed #2563eb;
+        border-radius: 0.8rem;
+    }
+    .selected-preview-title {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #2563eb;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .selected-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .selected-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: #2563eb;
+        color: #fff;
+        padding: 0.3rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        animation: tag-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes tag-pop {
+        from { transform: scale(0.8); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    .schedule-accordion {
+        border: 1px solid #e2e8f0;
+        border-radius: 0.8rem;
+        overflow: hidden;
+    }
+    .accordion-item {
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .accordion-item:last-child { border-bottom: 0; }
+    .accordion-header {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.9rem 1.1rem;
+        background: #fff;
+        border: 0;
+        cursor: pointer;
+        transition: background 0.2s;
+        text-align: left;
+    }
+    .accordion-header:hover { background: #f8fafc; }
+    .accordion-header h4 {
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    .accordion-icon {
+        width: 1.2rem;
+        height: 1.2rem;
+        transition: transform 0.3s ease;
+    }
+    .accordion-item.is-active .accordion-icon { transform: rotate(180deg); }
+    .accordion-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        background: #fcfdfe;
+    }
+    .accordion-item.is-active .accordion-content {
+        max-height: 400px;
+    }
+    .schedule-options {
+        padding: 1rem 1.1rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 0.6rem;
+    }
+    .schedule-opt {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.6rem 0.8rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.6rem;
+        background: #fff;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .schedule-opt:hover:not(.is-booked) {
+        border-color: #2563eb;
+        background: #f0f7ff;
+    }
+    .schedule-opt.is-selected {
+        border-color: #2563eb;
+        background: #eff6ff;
+        box-shadow: 0 0 0 1px #2563eb;
+    }
+    .schedule-opt.is-booked {
+        background: #f1f5f9;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+    .schedule-opt input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+    }
+    .schedule-time {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #334155;
+    }
+    .schedule-status {
+        font-size: 0.7rem;
+        color: #ef4444;
+        font-weight: 700;
+    }
+    .validation-error-msg {
+        color: #ef4444;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-top: 0.4rem;
+        display: none;
+    }
 </style>
 
 <section class="register-page">
@@ -606,21 +743,38 @@
                                 </label>
 
                                 <label class="register-field">
-                                    <span>Hari</span>
-                                    <select class="register-input" name="day" id="day-select" required>
-                                        <option value="">Pilih Hari</option>
-                                        @foreach ($dayOptions as $hari)
-                                            <option value="{{ $hari }}" {{ old('day') === $hari ? 'selected' : '' }}>{{ $hari }}</option>
-                                        @endforeach
+                                    <span>Tanggal Mulai Belajar</span>
+                                    <input class="register-input" type="date" name="start_date" value="{{ old('start_date', date('Y-m-d')) }}" required>
+                                </label>
+
+                                <label class="register-field">
+                                    <span>Durasi Belajar</span>
+                                    <select class="register-input" name="duration_months" required>
+                                        <option value="1" {{ old('duration_months') == 1 ? 'selected' : '' }}>1 Bulan</option>
+                                        <option value="2" {{ old('duration_months') == 2 ? 'selected' : '' }}>2 Bulan</option>
+                                        <option value="3" {{ old('duration_months') == 3 ? 'selected' : '' }}>3 Bulan</option>
+                                        <option value="6" {{ old('duration_months') == 6 ? 'selected' : '' }}>6 Bulan</option>
+                                        <option value="12" {{ old('duration_months') == 12 ? 'selected' : '' }}>1 Tahun</option>
                                     </select>
                                 </label>
 
-                                <label class="register-field full">
-                                    <span>Jam (Slot Tersedia)</span>
-                                    <select class="register-input" name="schedule_id" id="schedule-select" required data-old-value="{{ old('schedule_id') }}">
-                                        <option value="">Pilih class dan hari terlebih dahulu</option>
-                                    </select>
-                                </label>
+                                <div class="register-field full">
+                                    <span>Pilih Jadwal (Bisa pilih lebih dari satu)</span>
+                                    <div class="multi-schedule-wrapper">
+                                        <!-- Selected Preview -->
+                                        <div id="selected-preview" class="selected-preview-wrap" style="display: none;">
+                                            <span class="selected-preview-title">Jadwal Terpilih:</span>
+                                            <div id="selected-tags" class="selected-tags"></div>
+                                        </div>
+
+                                        <!-- Accordion Container -->
+                                        <div id="schedule-container" class="schedule-accordion">
+                                            <p class="text-muted" style="padding: 1rem; font-size: 0.85rem; font-style: italic;">Silakan pilih instrumen terlebih dahulu.</p>
+                                        </div>
+                                        
+                                        <div id="schedule-error" class="validation-error-msg">Silakan pilih setidaknya satu jadwal.</div>
+                                    </div>
+                                </div>
 
                                 <div class="register-field full">
                                     <span>Program Tambahan (opsional)</span>
@@ -767,11 +921,17 @@
 
         const getFieldDisplayValue = (fieldName) => {
             if (!registerForm) return '-';
+            
+            if (fieldName === 'schedule_id') {
+                const checked = Array.from(document.querySelectorAll('input[name="schedule_ids[]"]:checked'));
+                return checked.length ? checked.map(cb => cb.dataset.label).join(', ') : '-';
+            }
+
             const field = registerForm.elements[fieldName];
             if (!field) return '-';
 
             if (field instanceof RadioNodeList) {
-                if (fieldName === 'program_tambahan') {
+                if (fieldName === 'program_tambahan' || fieldName === 'program_tambahan[]') {
                     const values = Array.from(field)
                         .filter((item) => item.checked)
                         .map((item) => item.value);
@@ -801,7 +961,20 @@
             confirmTargets.forEach((target) => {
                 const key = target.getAttribute('data-confirm');
                 if (!key) return;
-                target.textContent = getFieldDisplayValue(key);
+                
+                let val = '-';
+                if (key === 'schedule_id') {
+                    const checked = Array.from(document.querySelectorAll('input[name="schedule_ids[]"]:checked'));
+                    val = checked.length ? checked.map(cb => cb.dataset.label).join(', ') : '-';
+                } else if (key === 'day') {
+                    target.closest('article').style.display = 'none';
+                    return;
+                } else {
+                    val = getFieldDisplayValue(key);
+                }
+
+                target.textContent = val;
+                target.closest('article').style.display = '';
             });
         };
 
@@ -875,89 +1048,129 @@
         setStep(1);
 
         const classSelect = document.querySelector('select[name="class_id"]');
-        const daySelect = document.getElementById('day-select');
-        const scheduleSelect = document.getElementById('schedule-select');
-        const oldScheduleId = scheduleSelect?.dataset.oldValue || '';
+        const scheduleContainer = document.getElementById('schedule-container');
+        const selectedPreview = document.getElementById('selected-preview');
+        const selectedTags = document.getElementById('selected-tags');
+        const scheduleError = document.getElementById('schedule-error');
 
-        const resetScheduleOptions = (message) => {
-            if (!scheduleSelect) return;
+        const updateSelectedPreview = () => {
+            const checked = Array.from(document.querySelectorAll('input[name="schedule_ids[]"]:checked'));
+            if (checked.length === 0) {
+                if (selectedPreview) selectedPreview.style.display = 'none';
+                if (selectedTags) selectedTags.innerHTML = '';
+                return;
+            }
 
-            scheduleSelect.innerHTML = '';
-
-            const option = document.createElement('option');
-            option.value = '';
-            option.textContent = message;
-
-            scheduleSelect.appendChild(option);
-            scheduleSelect.value = '';
+            if (selectedPreview) selectedPreview.style.display = 'block';
+            if (selectedTags) {
+                selectedTags.innerHTML = checked.map(cb => `
+                    <span class="selected-tag">
+                        ${cb.dataset.label}
+                        <svg onclick="const target = document.querySelector('input[name=\\'schedule_ids[]\\'][value=\\'${cb.value}\\']'); if(target){target.click();}" style="cursor:pointer; width:14px; height:14px" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </span>
+                `).join('');
+            }
+            
+            if (scheduleError) scheduleError.style.display = 'none';
         };
 
         const loadSchedules = async () => {
-            if (!classSelect || !daySelect || !scheduleSelect) {
-                return;
-            }
+            if (!classSelect || !scheduleContainer) return;
 
             const classId = classSelect.value;
-            const day = daySelect.value;
-
-            if (!classId || !day) {
-                resetScheduleOptions('Pilih class dan hari terlebih dahulu');
+            if (!classId) {
+                scheduleContainer.innerHTML = '<p class="text-muted" style="padding: 1rem; font-size: 0.85rem; font-style: italic;">Silakan pilih instrumen terlebih dahulu.</p>';
+                if (selectedPreview) selectedPreview.style.display = 'none';
                 return;
             }
 
-            resetScheduleOptions('Memuat jadwal...');
+            scheduleContainer.innerHTML = '<p class="text-muted" style="padding: 1rem; font-size: 0.85rem;">Memuat jadwal...</p>';
 
             try {
-                const endpoint = `/get-available-schedules/${encodeURIComponent(classId)}/${encodeURIComponent(day)}`;
-                const response = await fetch(endpoint, {
-                    headers: {
-                        'Accept': 'application/json',
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error('Gagal mengambil data jadwal');
-                }
-
+                const response = await fetch(`/schedules/by-class/${classId}`);
                 const data = await response.json();
-                const schedules = Array.isArray(data.schedules) ? data.schedules : [];
+                const grouped = data.grouped || {};
 
-                scheduleSelect.innerHTML = '';
-
-                if (schedules.length === 0) {
-                    resetScheduleOptions('Tidak ada slot tersedia untuk pilihan ini');
+                if (Object.keys(grouped).length === 0) {
+                    scheduleContainer.innerHTML = '<p class="text-danger" style="padding: 1rem; font-size: 0.85rem;">Tidak ada jadwal tersedia untuk instrumen ini.</p>';
                     return;
                 }
 
-                const placeholderOption = document.createElement('option');
-                placeholderOption.value = '';
-                placeholderOption.textContent = 'Pilih Jam';
-                scheduleSelect.appendChild(placeholderOption);
+                let html = '';
+                let index = 0;
+                for (const day in grouped) {
+                    const isActive = index === 0 ? 'is-active' : '';
+                    html += `
+                        <div class="accordion-item ${isActive}">
+                            <button type="button" class="accordion-header">
+                                <h4>${day}</h4>
+                                <svg class="accordion-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="schedule-options">
+                                    ${grouped[day].map(s => {
+                                        const isBooked = String(s.status).toLowerCase() === 'booked';
+                                        return `
+                                            <label class="schedule-opt ${isBooked ? 'is-booked' : ''}">
+                                                <input type="checkbox" name="schedule_ids[]" value="${s.id}" data-label="${day} ${s.time}" ${isBooked ? 'disabled' : ''}>
+                                                <div class="schedule-time">${s.time}</div>
+                                                ${isBooked ? '<div class="schedule-status">(Full)</div>' : ''}
+                                            </label>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    index++;
+                }
+                scheduleContainer.innerHTML = html;
 
-                schedules.forEach((schedule) => {
-                    const option = document.createElement('option');
-                    option.value = String(schedule.id);
-                    option.textContent = schedule.label ?? `${schedule.day} - ${schedule.time}`;
-                    scheduleSelect.appendChild(option);
+                // Accordion logic
+                scheduleContainer.querySelectorAll('.accordion-header').forEach(header => {
+                    header.addEventListener('click', () => {
+                        const item = header.parentElement;
+                        const wasActive = item.classList.contains('is-active');
+                        scheduleContainer.querySelectorAll('.accordion-item').forEach(i => i.classList.remove('is-active'));
+                        if (!wasActive) item.classList.add('is-active');
+                    });
                 });
 
-                if (oldScheduleId !== '') {
-                    const exists = schedules.some((schedule) => String(schedule.id) === String(oldScheduleId));
-                    if (exists) {
-                        scheduleSelect.value = String(oldScheduleId);
-                    }
-                }
+                // Checkbox logic
+                scheduleContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.addEventListener('change', () => {
+                        cb.closest('.schedule-opt').classList.toggle('is-selected', cb.checked);
+                        updateSelectedPreview();
+                    });
+                });
+
             } catch (error) {
-                resetScheduleOptions('Terjadi kesalahan saat memuat jadwal');
+                console.error(error);
+                scheduleContainer.innerHTML = '<p class="text-danger" style="padding: 1rem; font-size: 0.85rem;">Gagal memuat jadwal. Silakan coba lagi.</p>';
             }
         };
 
         classSelect?.addEventListener('change', loadSchedules);
-        daySelect?.addEventListener('change', loadSchedules);
 
-        if (classSelect && daySelect && classSelect.value && daySelect.value) {
-            loadSchedules();
-        }
+        // Update validateStep to include schedule check
+        const originalValidateStep = validateStep;
+        window.validateStep = (stepNumber) => {
+            if (stepNumber === 2) {
+                const checked = document.querySelectorAll('input[name="schedule_ids[]"]:checked');
+                if (checked.length === 0) {
+                    if (scheduleError) {
+                        scheduleError.style.display = 'block';
+                        scheduleError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    return false;
+                }
+            }
+            return originalValidateStep(stepNumber);
+        };
     });
 </script>
 @endsection

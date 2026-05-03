@@ -2772,3 +2772,87 @@ html.sidebar-collapsed .brand-logo-content {
     transform: translateY(-1px);
     box-shadow: 0 10px 20px rgba(37, 99, 235, 0.22);
 }
+
+.registration-schedule-count {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    background: rgba(99, 102, 241, 0.15);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #b4bbff;
+}
+
+.registration-modal-schedules-section {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+}
+
+.registration-modal-schedules-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.85rem;
+}
+
+.registration-modal-schedules-header h4 {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    font-size: 1rem;
+    color: var(--text);
+}
+
+.registration-modal-schedules-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.15);
+    color: #86efac;
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.registration-modal-schedules-list .registration-modal-schedules-ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.registration-modal-schedules-list li {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--line);
+    padding: 0.65rem 0.85rem;
+    border-radius: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.registration-modal-schedules-list li:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(148, 163, 184, 0.3);
+}
+
+.registration-modal-schedules-list li i {
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--success);
+    flex-shrink: 0;
+}
+
+.registration-modal-schedules-list .no-schedule {
+    font-style: italic;
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding: 0.5rem 0;
+}

@@ -16,10 +16,21 @@ class Schedule extends Model
         'day',
         'time',
         'teacher_id',
+        'student_id',
         'status',
     ];
 
+    public function student(): BelongsTo
+    {
+        return $this->belongsTo(Student::class);
+    }
+
     public function musicClass(): BelongsTo
+    {
+        return $this->belongsTo(MusicClass::class, 'class_id');
+    }
+
+    public function class(): BelongsTo
     {
         return $this->belongsTo(MusicClass::class, 'class_id');
     }
@@ -34,8 +45,12 @@ class Schedule extends Model
         return $this->hasMany(Registration::class, 'schedule_id');
     }
 
-    public function students(): HasMany
+    public function attendance(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
-        return $this->hasMany(Student::class, 'schedule_id');
+        return $this->hasOne(Attendance::class);
+    }
+    public function rescheduleRequests(): HasMany
+    {
+        return $this->hasMany(RescheduleRequest::class, 'old_schedule_id');
     }
 }
