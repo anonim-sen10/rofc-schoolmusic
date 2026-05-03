@@ -126,7 +126,20 @@ class AcademicManagementController extends Controller
         $student->classes()->sync($request->input('class_ids', []));
 
         return back()->with('success', 'Data siswa berhasil diperbarui.');
+    }
 
+    public function destroyStudent(Student $student): RedirectResponse
+    {
+        \Illuminate\Support\Facades\DB::transaction(function () use ($student) {
+            $user = $student->user;
+            if ($user) {
+                $user->delete();
+            } else {
+                $student->delete();
+            }
+        });
+
+        return back()->with('success', 'Siswa berhasil dihapus.');
     }
 
     public function schedule(): View

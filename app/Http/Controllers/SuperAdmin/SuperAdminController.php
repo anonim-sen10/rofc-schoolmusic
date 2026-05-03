@@ -320,16 +320,26 @@ class SuperAdminController extends Controller
             'is_active' => ['required', 'in:1,0'],
             'class_ids' => ['nullable', 'array'],
             'class_ids.*' => ['integer', 'exists:classes,id'],
+            'start_date' => ['nullable', 'date'],
+            'duration_months' => ['nullable', 'integer', 'min:1', 'max:12'],
         ]);
 
-        $student->update([
+        $payload = [
             'name' => $data['name'],
             'age' => $data['age'] ?? null,
             'phone' => $data['phone'] ?? null,
             'email' => $data['email'] ?? null,
             'address' => $data['address'] ?? null,
             'is_active' => (bool) ($data['is_active'] ?? '1'),
-        ]);
+            'start_date' => $data['start_date'] ?? null,
+            'duration_months' => $data['duration_months'] ?? null,
+        ];
+
+        if (!empty($payload['start_date']) && !empty($payload['duration_months'])) {
+            $payload['end_date'] = \Carbon\Carbon::parse($payload['start_date'])->addMonths((int)$payload['duration_months'])->toDateString();
+        }
+
+        $student->update($payload);
 
         $student->classes()->sync($data['class_ids'] ?? []);
 
@@ -848,6 +858,7 @@ class SuperAdminController extends Controller
                 : collect(),
             'scheduleFeatureReady' => $scheduleFeatureReady,
             'dayOptions' => self::SCHEDULE_DAY_OPTIONS,
+            'studentsForManagement' => Student::query()->with('classes')->latest()->get(),
             'approvedRegistrationsForStudents' => Registration::query()
                 ->with('class')
                 ->where('status', 'accepted')
@@ -1011,19 +1022,15 @@ class SuperAdminController extends Controller
             ],
             'students' => [
                 'title' => 'Students',
-                'description' => 'Daftar siswa dari pendaftaran yang sudah disetujui.',
-                'columns' => ['Nama', 'Email', 'Telepon', 'Status'],
-                'rows' => Registration::query()
-                    ->where('status', 'accepted')
-                    ->latest()
-                    ->take(30)
-                    ->get()
-                    ->map(fn (Registration $registration) => [
-                        $registration->full_name,
-                        $registration->email,
-                        $registration->phone,
-                        'APPROVED',
-                    ])->all(),
+                'description' => 'Daftar siswa aktif dan manajemen profil.',
+                'columns' => ['Nama', 'Email', 'Telepon', 'Kelas', 'Status'],
+                'rows' => Student::with('classes')->latest()->take(30)->get()->map(fn (Student $student) => [
+                    $student->name,
+                    $student->email,
+                    $student->phone,
+                    $student->classes->pluck('name')->join(', '),
+                    $student->is_active ? 'ACTIVE' : 'INACTIVE',
+                ])->all(),
             ],
             'registrations' => [
                 'title' => 'Registrations',

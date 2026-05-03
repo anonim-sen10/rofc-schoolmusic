@@ -514,7 +514,7 @@
     </section>
 
     <section class="card" data-searchable>
-        <h3>Daftar Student Approved</h3>
+        <h3>Daftar Seluruh Siswa</h3>
         <div class="table-wrap">
             <table>
                 <thead>
@@ -523,23 +523,178 @@
                         <th>Email</th>
                         <th>Telepon</th>
                         <th>Kelas</th>
-                        <th>Status Approval</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($approvedRegistrationsForStudents as $registrationItem)
+                    @forelse($studentsForManagement as $student)
                         <tr>
-                            <td>{{ $registrationItem->full_name }}</td>
-                            <td>{{ $registrationItem->email }}</td>
-                            <td>{{ $registrationItem->phone }}</td>
-                            <td>{{ $registrationItem->class?->name ?? '-' }}</td>
+                            <td>{{ $student->name }}</td>
+                            <td>{{ $student->email ?: '-' }}</td>
+                            <td>{{ $student->phone ?: '-' }}</td>
+                            <td>{{ $student->classes->pluck('name')->join(', ') ?: '-' }}</td>
                             <td>
-                                <x-ui.badge type="success">APPROVED</x-ui.badge>
+                                <x-ui.badge :type="$student->is_active ? 'success' : 'warning'">
+                                    {{ $student->is_active ? 'ACTIVE' : 'INACTIVE' }}
+                                </x-ui.badge>
+                            </td>
+                            <td>
+                                <div class="action-icons">
+                                    {{-- Detail Button --}}
+                                    <details class="action-popover registration-style-popover">
+                                        <summary class="btn-icon" title="Detail" aria-label="Detail"><i data-lucide="eye"></i></summary>
+                                        <div class="action-popover-form registration-edit-form">
+                                            <header class="registration-modal-header">
+                                                <div class="registration-modal-header-left">
+                                                    <span class="registration-modal-icon">
+                                                        <i data-lucide="eye"></i>
+                                                    </span>
+                                                    <div>
+                                                        <h3>Detail Siswa</h3>
+                                                        <p>Informasi lengkap profil siswa</p>
+                                                    </div>
+                                                </div>
+                                                <button type="button" class="registration-modal-close-btn action-popover-close" aria-label="Tutup"><i data-lucide="x"></i></button>
+                                            </header>
+                                            <div class="registration-modal-body">
+                                                <div class="registration-modal-summary">
+                                                    <div class="registration-modal-summary-left">
+                                                        <div class="registration-modal-avatar">
+                                                            {{ strtoupper(substr($student->name, 0, 1)) }}
+                                                        </div>
+                                                        <div>
+                                                            <p class="registration-modal-summary-name">{{ $student->name }}</p>
+                                                            <p>{{ $student->email ?: 'No email' }}</p>
+                                                        </div>
+                                                    </div>
+                                                    <x-ui.badge :type="$student->is_active ? 'success' : 'warning'">
+                                                        {{ $student->is_active ? 'ACTIVE' : 'INACTIVE' }}
+                                                    </x-ui.badge>
+                                                </div>
+                                                <section class="registration-modal-grid">
+                                                    <article>
+                                                        <p>Umur</p>
+                                                        <p>{{ $student->age ? $student->age . ' Tahun' : '-' }}</p>
+                                                    </article>
+                                                    <article>
+                                                        <p>Telepon</p>
+                                                        <p>{{ $student->phone ?: '-' }}</p>
+                                                    </article>
+                                                    <article class="registration-modal-item-full">
+                                                        <p>Alamat</p>
+                                                        <p>{{ $student->address ?: '-' }}</p>
+                                                    </article>
+                                                    <article class="registration-modal-item-full">
+                                                        <p>Kelas Terdaftar</p>
+                                                        <p>{{ $student->classes->pluck('name')->join(', ') ?: '-' }}</p>
+                                                    </article>
+                                                    <article>
+                                                        <p>Mulai Kursus</p>
+                                                        <p>{{ $student->start_date ? \Carbon\Carbon::parse($student->start_date)->format('d M Y') : '-' }}</p>
+                                                    </article>
+                                                    <article>
+                                                        <p>Berakhir Pada</p>
+                                                        <p>{{ $student->end_date ? \Carbon\Carbon::parse($student->end_date)->format('d M Y') : '-' }}</p>
+                                                    </article>
+                                                </section>
+                                            </div>
+                                            <footer class="registration-modal-footer">
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close">Tutup</button>
+                                            </footer>
+                                        </div>
+                                    </details>
+
+                                    {{-- Edit Button --}}
+                                    <details class="action-popover registration-style-popover">
+                                        <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
+                                        <form class="action-popover-form registration-edit-form" method="POST" action="{{ route('super-admin.students.update', $student) }}">
+                                            @csrf
+                                            @method('PUT')
+                                            <header class="registration-modal-header">
+                                                <div class="registration-modal-header-left">
+                                                    <span class="registration-modal-icon">
+                                                        <i data-lucide="pencil-line"></i>
+                                                    </span>
+                                                    <div>
+                                                        <h3>Edit Data Siswa</h3>
+                                                        <p>Perbarui informasi profil siswa</p>
+                                                    </div>
+                                                </div>
+                                                <button type="button" class="registration-modal-close-btn action-popover-close" aria-label="Tutup"><i data-lucide="x"></i></button>
+                                            </header>
+                                            <div class="registration-modal-body">
+                                                <section class="registration-edit-grid">
+                                                    <div class="registration-edit-field">
+                                                        <label class="registration-edit-label">Nama</label>
+                                                        <input type="text" name="name" value="{{ $student->name }}" required>
+                                                    </div>
+                                                    <div class="registration-edit-field">
+                                                        <label class="registration-edit-label">Umur</label>
+                                                        <input type="number" name="age" value="{{ $student->age }}">
+                                                    </div>
+                                                    <div class="registration-edit-field">
+                                                        <label class="registration-edit-label">Email</label>
+                                                        <input type="email" name="email" value="{{ $student->email }}">
+                                                    </div>
+                                                    <div class="registration-edit-field">
+                                                        <label class="registration-edit-label">Telepon</label>
+                                                        <input type="text" name="phone" value="{{ $student->phone }}">
+                                                    </div>
+                                                    <div class="registration-edit-field registration-edit-field-full">
+                                                        <label class="registration-edit-label">Alamat</label>
+                                                        <textarea name="address" rows="2">{{ $student->address }}</textarea>
+                                                    </div>
+                                                    <div class="registration-edit-field registration-edit-field-full">
+                                                        <label class="registration-edit-label">Kelas</label>
+                                                        <select multiple name="class_ids[]" size="4">
+                                                            @foreach($classesForManagement as $classItem)
+                                                                <option value="{{ $classItem->id }}" @selected($student->classes->contains($classItem->id))>
+                                                                    {{ $classItem->name }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="registration-edit-field">
+                                                        <label class="registration-edit-label">Start Date</label>
+                                                        <input type="date" name="start_date" value="{{ $student->start_date ? \Carbon\Carbon::parse($student->start_date)->format('Y-m-d') : '' }}">
+                                                    </div>
+                                                    <div class="registration-edit-field">
+                                                        <label class="registration-edit-label">Duration (Months)</label>
+                                                        <select name="duration_months">
+                                                            @foreach([1, 2, 3, 4, 6, 12] as $m)
+                                                                <option value="{{ $m }}" @selected((int)($student->duration_months ?? 0) === $m)>{{ $m }} Bulan</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="registration-edit-field">
+                                                        <label class="registration-edit-label">Status</label>
+                                                        <select name="is_active">
+                                                            <option value="1" @selected($student->is_active)>Active</option>
+                                                            <option value="0" @selected(!$student->is_active)>Inactive</option>
+                                                        </select>
+                                                    </div>
+                                                </section>
+                                            </div>
+                                            <footer class="registration-modal-footer">
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close">Batal</button>
+                                                <button type="submit" class="registration-modal-btn registration-modal-btn-primary">Simpan Perubahan</button>
+                                            </footer>
+                                        </form>
+                                    </details>
+
+                                    {{-- Delete Button --}}
+                                    <form method="POST" action="{{ route('super-admin.students.destroy', $student) }}" onsubmit="return confirm('Hapus siswa ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn-icon btn-icon-danger" title="Hapus" aria-label="Hapus"><i data-lucide="trash-2"></i></button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5">Belum ada student approved. Approve data di menu Registrations untuk menampilkannya di sini.</td>
+                            <td colspan="6">Belum ada data siswa. Tambahkan siswa baru untuk menampilkannya di sini.</td>
                         </tr>
                     @endforelse
                 </tbody>
