@@ -122,7 +122,11 @@ class AcademicManagementController extends Controller
             $payload['end_date'] = \Carbon\Carbon::parse($payload['start_date'])->addMonths((int)$payload['duration_months'])->toDateString();
         }
 
-        ]);
+        $student->update($payload);
+        $student->classes()->sync($request->input('class_ids', []));
+
+        return back()->with('success', 'Data siswa berhasil diperbarui.');
+
     }
 
     public function schedule(): View
