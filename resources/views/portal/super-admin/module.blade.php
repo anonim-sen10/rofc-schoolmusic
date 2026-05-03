@@ -1018,11 +1018,10 @@
                 <thead>
                     <tr>
                         <th>Nama Lengkap</th>
-                        <th>Nama Panggilan</th>
                         <th>Email</th>
-                        <th>Telepon Siswa</th>
+                        <th>Telepon</th>
                         <th>Instrumen</th>
-                        <th>Hari Pilihan</th>
+                        <th>Jadwal</th>
                         <th>Status</th>
                         <th>Aksi</th>
                     </tr>
@@ -1170,15 +1169,17 @@
                                 'updateAction' => route('super-admin.registrations.update', $registrationItem),
                                 'editTriggerId' => $editTriggerId,
                                 'deleteAction' => route('super-admin.registrations.destroy', $registrationItem),
+                                'schedules' => $registrationItem->schedules->map(fn($s) => [
+                                    'label' => $s->day . ' ' . substr((string)$s->time, 0, 5)
+                                ])->all(),
                             ];
                         @endphp
                         <tr>
                             <td>{{ $namaLengkap }}</td>
-                            <td>{{ $namaPanggilan }}</td>
                             <td>{{ $registrationItem->email }}</td>
                             <td>{{ $teleponSiswa }}</td>
                             <td>{{ $instrumenText }}</td>
-                            <td>{{ $hariPilihanText }}</td>
+                            <td><span class="registration-schedule-count">{{ $registrationItem->schedules->count() }} Slot</span></td>
                             <td><x-ui.badge :type="$registrationBadge">{{ strtoupper($registrationStatus) }}</x-ui.badge></td>
                             <td>
                                 <div class="action-icons class-action-icons">
@@ -1217,7 +1218,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8">No registrations yet. Website leads will appear here automatically.</td>
+                            <td colspan="7">No registrations yet. Website leads will appear here automatically.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -1289,11 +1290,20 @@
 
                     <article><p>Instrumen</p><p data-registration-field="instrument">-</p></article>
                     <article><p>Program Tambahan</p><p data-registration-field="additionalProgram">-</p></article>
-                    <article><p>Hari Pilihan</p><p data-registration-field="preferredDays">-</p></article>
                     <article><p>Pengalaman Belajar</p><p data-registration-field="experience">-</p></article>
                     <article class="registration-modal-item-full"><p>Deskripsi Pengalaman</p><p data-registration-field="experienceDescription">-</p></article>
                     <article><p>Status</p><p data-registration-field="status">-</p></article>
                     <article><p>Kelas Terpilih</p><p data-registration-field="selectedClass">-</p></article>
+                </section>
+
+                <section class="registration-modal-schedules-section">
+                    <div class="registration-modal-schedules-header">
+                        <h4>Jadwal Dipilih</h4>
+                        <span class="registration-modal-schedules-badge" id="registration-modal-schedules-badge">0 Jadwal</span>
+                    </div>
+                    <div id="registration-modal-schedules-list" class="registration-modal-schedules-list">
+                        <!-- JS populated -->
+                    </div>
                 </section>
             </div>
 
@@ -1685,6 +1695,23 @@
                 fields.forEach((key) => setField(key, payload[key]));
                 applyStatusBadge(payload.status);
 
+                // Handle schedules list
+                const schedulesList = document.getElementById("registration-modal-schedules-list");
+                const schedulesBadge = document.getElementById("registration-modal-schedules-badge");
+                if (schedulesList) {
+                    const schedules = payload.schedules || [];
+                    if (schedulesBadge) {
+                        schedulesBadge.textContent = `${schedules.length} Jadwal Dipilih`;
+                        schedulesBadge.style.display = schedules.length > 0 ? 'inline-block' : 'none';
+                    }
+                    if (schedules.length > 0) {
+                        schedulesList.innerHTML = `<ul class="registration-modal-schedules-ul">${schedules.map(s => `<li><i data-lucide="check-circle-2"></i> ${s.label.replace(' ', ' - ')}</li>`).join('')}</ul>`;
+                        if (window.lucide) window.lucide.createIcons();
+                    } else {
+                        schedulesList.innerHTML = '<p class="no-schedule">No schedule selected</p>';
+                    }
+                }
+
                 const fullName = String(payload.fullName || "-").trim();
                 avatar.textContent = fullName === "-"
                     ? "-"
@@ -1993,6 +2020,85 @@
     </section>
 @endif
 
+@if ($moduleKey === 'reschedule')
+    <section class="card" data-searchable>
+        <h3>Reschedule Requests</h3>
+        <p class="ui-card-subtitle">Daftar permintaan perubahan jadwal siswa yang memerlukan persetujuan.</p>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        @foreach ($columns as $column)
+                            <th>{{ $column }}</th>
+                        @endforeach
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($rows as $row)
+                        @php $requestObj = $row[5]; @endphp
+                        <tr>
+                            <td>{{ $row[0] }}</td>
+                            <td>{{ $row[1] }}</td>
+                            <td>{{ $row[2] }}</td>
+                            <td>{{ $row[3] }}</td>
+                            <td>
+                                @php
+                                    $status = strtolower($requestObj->status);
+                                    $type = $status === 'approved' ? 'success' : ($status === 'rejected' ? 'danger' : 'warning');
+                                @endphp
+                                <x-ui.badge :type="$type">{{ strtoupper($status) }}</x-ui.badge>
+                            </td>
+                            <td>
+                                @if($status === 'pending')
+                                    <div style="display:flex; gap:0.5rem;">
+                                        <form action="{{ route('super-admin.reschedule.approve', $requestObj->id) }}" method="POST" onsubmit="return confirm('Approve reschedule ini?')">
+                                            @csrf
+                                            <button type="submit" class="btn-res-approve" title="Approve">
+                                                <i data-lucide="check"></i>
+                                            </button>
+                                        </form>
+                                        <form action="{{ route('super-admin.reschedule.reject', $requestObj->id) }}" method="POST" onsubmit="return confirm('Reject reschedule ini?')">
+                                            @csrf
+                                            <button type="submit" class="btn-res-reject" title="Reject">
+                                                <i data-lucide="x"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                @else
+                                    <span class="text-muted">No Actions</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6">No reschedule requests found.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <style>
+        .btn-res-approve, .btn-res-reject {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-res-approve { background: rgba(34, 197, 94, 0.15); color: #86efac; }
+        .btn-res-approve:hover { background: #166534; color: #fff; }
+        .btn-res-reject { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
+        .btn-res-reject:hover { background: #991b1b; color: #fff; }
+        .btn-res-approve i, .btn-res-reject i { width: 16px; height: 16px; }
+    </style>
+@endif
+
 @if ($moduleKey === 'finance')
     <section class="stats-grid" data-searchable>
         <article class="card stat">
@@ -2082,7 +2188,7 @@
     @php
         $scheduleFeatureReady = (bool) ($scheduleFeatureReady ?? false);
         $availableDayOptions = $dayOptions ?? ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-        $openScheduleCreate = $errors->hasAny(['class_id', 'day', 'time']);
+        $openScheduleCreate = $errors->hasAny(['class_id', 'day', 'start_time', 'end_time', 'interval']);
     @endphp
 
     @if (! $scheduleFeatureReady)
@@ -2116,8 +2222,14 @@
                             @endforeach
                         </select>
                     </label>
-                    <label>Jam
-                        <input type="time" name="time" value="{{ old('time') }}" required>
+                    <label>Start Time
+                        <input type="time" name="start_time" value="{{ old('start_time') }}" required>
+                    </label>
+                    <label>End Time
+                        <input type="time" name="end_time" value="{{ old('end_time') }}" required>
+                    </label>
+                    <label>Interval (menit)
+                        <input type="number" name="interval" value="{{ old('interval', 60) }}" min="1" required>
                     </label>
                     <label>Teacher (otomatis dari class)
                         <input type="text" value="-" data-schedule-teacher-preview readonly>
@@ -2132,96 +2244,321 @@
 
         <section class="card" data-searchable>
             <h3>Daftar Jadwal Class</h3>
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Class</th>
-                            <th>Hari</th>
-                            <th>Jam</th>
-                            <th>Pengajar</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($schedulesForManagement as $scheduleItem)
-                            @php
-                                $teacherName = $scheduleItem->teacher?->name ?? ($scheduleItem->musicClass?->teacher?->name ?? '-');
-                                $timeValue = substr((string) $scheduleItem->time, 0, 5);
-                            @endphp
-                            <tr>
-                                <td>{{ $scheduleItem->musicClass?->name ?? '-' }}</td>
-                                <td>{{ $scheduleItem->day }}</td>
-                                <td>{{ $timeValue !== '' ? $timeValue : '-' }}</td>
-                                <td>{{ $teacherName }}</td>
-                                <td>
-                                    <div class="action-icons">
-                                        <details class="action-popover registration-style-popover schedule-edit-popover">
-                                            <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
-                                            <form class="action-popover-form registration-edit-form" method="POST" action="{{ route('super-admin.schedule.update', $scheduleItem) }}">
-                                                @csrf
-                                                @method('PUT')
-                                                <header class="registration-modal-header">
-                                                    <div class="registration-modal-header-left">
-                                                        <span class="registration-modal-icon">
-                                                            <i data-lucide="pencil-line"></i>
-                                                        </span>
-                                                        <div>
-                                                            <h3>Edit Jadwal</h3>
-                                                            <p>Perbarui jadwal dan waktu kelas</p>
-                                                        </div>
-                                                    </div>
-                                                    <button type="button" class="registration-modal-close-btn action-popover-close" aria-label="Tutup"><i data-lucide="x"></i></button>
-                                                </header>
-                                                <div class="registration-modal-body">
-                                                    <section class="registration-edit-grid">
-                                                        <div class="registration-edit-field registration-edit-field-full">
-                                                            <label class="registration-edit-label">Class</label>
-                                                            <select name="class_id" required>
-                                                                <option value="">Pilih kelas</option>
-                                                                @foreach($classesForSchedule as $class)
-                                                                    <option value="{{ $class->id }}" @selected((int) $scheduleItem->class_id === (int) $class->id)>{{ $class->name }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                        <div class="registration-edit-field">
-                                                            <label class="registration-edit-label">Hari</label>
-                                                            <select name="day" required>
-                                                                <option value="">Pilih hari</option>
-                                                                @foreach($availableDayOptions as $dayOption)
-                                                                    <option value="{{ $dayOption }}" @selected($scheduleItem->day === $dayOption)>{{ $dayOption }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                        <div class="registration-edit-field">
-                                                            <label class="registration-edit-label">Jam</label>
-                                                            <input type="time" name="time" value="{{ $timeValue }}" required>
-                                                        </div>
-                                                    </section>
-                                                </div>
-                                                <footer class="registration-modal-footer">
-                                                    <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close">Batal</button>
-                                                    <button type="submit" class="registration-modal-btn registration-modal-btn-primary">Simpan Perubahan</button>
-                                                </footer>
-                                            </form>
-                                        </details>
+            @php
+                $nestedSchedules = [];
+                foreach ($schedulesForManagement as $scheduleItem) {
+                    $className = $scheduleItem->musicClass?->name ?? 'Unknown Class';
+                    $teacherName = $scheduleItem->teacher?->name ?? ($scheduleItem->musicClass?->teacher?->name ?? 'Unknown Teacher');
+                    $day = $scheduleItem->day;
+                    
+                    if (!isset($nestedSchedules[$className])) {
+                        $nestedSchedules[$className] = [];
+                    }
+                    if (!isset($nestedSchedules[$className][$teacherName])) {
+                        $nestedSchedules[$className][$teacherName] = [];
+                    }
+                    if (!isset($nestedSchedules[$className][$teacherName][$day])) {
+                        $nestedSchedules[$className][$teacherName][$day] = [];
+                    }
+                    $nestedSchedules[$className][$teacherName][$day][] = $scheduleItem;
+                }
+            @endphp
 
-                                        <form method="POST" action="{{ route('super-admin.schedule.destroy', $scheduleItem) }}" onsubmit="return confirm('Hapus jadwal class ini?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn-icon btn-icon-danger" title="Hapus" aria-label="Hapus"><i data-lucide="trash-2"></i></button>
-                                        </form>
+            <style>
+                .schedule-nested-container {
+                    margin-top: 1.5rem;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1rem;
+                }
+                
+                /* Class Accordion */
+                .class-details {
+                    border: 1px solid #e2e8f0;
+                    border-radius: 0.75rem;
+                    background: #fff;
+                    overflow: hidden;
+                }
+                .class-summary {
+                    padding: 1rem 1.25rem;
+                    background: #f8fafc;
+                    font-weight: 600;
+                    font-size: 1.05rem;
+                    color: #0f172a;
+                    cursor: pointer;
+                    list-style: none;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                    user-select: none;
+                }
+                .class-summary::-webkit-details-marker {
+                    display: none;
+                }
+                .class-summary i {
+                    color: #64748b;
+                    transition: transform 0.2s ease;
+                }
+                .class-details[open] > .class-summary i {
+                    transform: rotate(90deg);
+                }
+                .class-body {
+                    padding: 1.25rem;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.85rem;
+                }
+
+                /* Teacher Accordion */
+                .teacher-details {
+                    border: 1px solid #e2e8f0;
+                    border-radius: 0.5rem;
+                    background: #fff;
+                    overflow: hidden;
+                }
+                .teacher-summary {
+                    padding: 0.85rem 1rem;
+                    font-weight: 600;
+                    font-size: 0.95rem;
+                    color: #1e293b;
+                    cursor: pointer;
+                    list-style: none;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    user-select: none;
+                }
+                .teacher-summary::-webkit-details-marker {
+                    display: none;
+                }
+                .teacher-summary i {
+                    color: #64748b;
+                    transition: transform 0.2s ease;
+                    width: 18px;
+                    height: 18px;
+                }
+                .teacher-details[open] > .teacher-summary i {
+                    transform: rotate(90deg);
+                }
+                .teacher-details[open] > .teacher-summary {
+                    border-bottom: 1px solid #e2e8f0;
+                    background: #f8fafc;
+                }
+                .teacher-body {
+                    padding: 0;
+                }
+
+                /* Day Group */
+                .day-group {
+                    padding: 1rem;
+                }
+                .day-group:not(:last-child) {
+                    border-bottom: 1px dashed #e2e8f0;
+                }
+                .day-title {
+                    font-size: 0.95rem;
+                    font-weight: 600;
+                    color: #334155;
+                    margin-bottom: 0.75rem;
+                }
+                
+                /* Time Slots */
+                .schedule-slots-grid {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.75rem;
+                }
+                .schedule-slot-btn {
+                    background: #f1f5f9;
+                    color: #475569;
+                    border: 1px solid #cbd5e1;
+                    border-radius: 0.5rem;
+                    padding: 0.5rem 1rem;
+                    font-size: 0.875rem;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                }
+                .schedule-slot-btn:hover {
+                    background: #e2e8f0;
+                    border-color: #94a3b8;
+                }
+                .schedule-slot-btn.is-booked {
+                    background: #dcfce7;
+                    color: #166534;
+                    border-color: #bbf7d0;
+                }
+                .schedule-slot-btn.is-booked:hover {
+                    background: #bbf7d0;
+                    border-color: #86efac;
+                }
+            </style>
+
+            <div class="schedule-nested-container">
+                @forelse ($nestedSchedules as $className => $teachers)
+                    <details class="class-details">
+                        <summary class="class-summary">
+                            <i data-lucide="chevron-right"></i>
+                            Class: {{ $className }}
+                        </summary>
+                        <div class="class-body">
+                            @foreach ($teachers as $teacherName => $days)
+                                <details class="teacher-details">
+                                    <summary class="teacher-summary">
+                                        <i data-lucide="chevron-right"></i>
+                                        Teacher: {{ $teacherName }}
+                                    </summary>
+                                    <div class="teacher-body">
+                                        @foreach ($days as $day => $slots)
+                                            <div class="day-group">
+                                                <h4 class="day-title">{{ $day }}</h4>
+                                                <div class="schedule-slots-grid">
+                                                    @foreach ($slots as $slot)
+                                                        @php
+                                                            $timeValue = substr((string) $slot->time, 0, 5);
+                                                            $isBooked = strtolower((string) $slot->status) === 'booked';
+                                                            $student = $slot->student;
+                                                            $studentName = $student?->user?->name ?? ($student?->name ?? '-');
+                                                            $studentPhone = $student?->phone ?? '-';
+                                                            $studentAddress = $student?->address ?? '-';
+                                                            
+                                                            $slotPayload = [
+                                                                'time' => $timeValue,
+                                                                'status' => strtolower((string) $slot->status),
+                                                                'isBooked' => $isBooked,
+                                                                'studentName' => $studentName,
+                                                                'teacherName' => $teacherName,
+                                                                'className' => $className,
+                                                                'day' => $day,
+                                                                'address' => $studentAddress,
+                                                                'phone' => $studentPhone,
+                                                            ];
+                                                        @endphp
+                                                        <button 
+                                                            type="button" 
+                                                            class="schedule-slot-btn {{ $isBooked ? 'is-booked' : '' }}"
+                                                            data-schedule-slot='@json($slotPayload, JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_TAG | JSON_HEX_QUOT)'
+                                                            onclick="openScheduleModal(this)"
+                                                        >
+                                                            {{ $timeValue }}
+                                                        </button>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endforeach
                                     </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5">Belum ada jadwal class. Tambahkan jadwal berdasarkan hari dan jam.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                                </details>
+                            @endforeach
+                        </div>
+                    </details>
+                @empty
+                    <p style="color: #64748b;">No schedule available.</p>
+                @endforelse
             </div>
+
+            <!-- Modal for Schedule Details -->
+            <div class="registration-modal" id="schedule-detail-modal" aria-hidden="true">
+                <div class="registration-modal-overlay" onclick="closeScheduleModal()"></div>
+                <div class="registration-modal-panel" role="dialog" aria-modal="true" style="max-width: 500px;">
+                    <header class="registration-modal-header">
+                        <div class="registration-modal-header-left">
+                            <span class="registration-modal-icon">
+                                <i data-lucide="calendar"></i>
+                            </span>
+                            <div>
+                                <h3 id="schedule-modal-title">Detail Jadwal</h3>
+                                <p>Informasi lengkap slot waktu kelas</p>
+                            </div>
+                        </div>
+                        <button type="button" class="registration-modal-close-btn" onclick="closeScheduleModal()" aria-label="Close">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </header>
+
+                    <div class="registration-modal-body">
+                        <!-- Used for available slot -->
+                        <div id="schedule-available-message" style="display: none; padding: 2rem; text-align: center; color: #64748b;">
+                            <i data-lucide="info" style="width: 3rem; height: 3rem; margin: 0 auto 1rem; color: #94a3b8;"></i>
+                            <p style="font-size: 1.1rem; font-weight: 500; color: #0f172a;">This slot is available</p>
+                        </div>
+
+                        <!-- Used for booked slot -->
+                        <div id="schedule-booked-details" style="display: none;">
+                            <section class="registration-modal-summary">
+                                <div class="registration-modal-summary-left">
+                                    <span class="registration-modal-avatar" id="schedule-student-avatar">-</span>
+                                    <div>
+                                        <p>Nama Siswa</p>
+                                        <p class="registration-modal-summary-name" id="schedule-student-name">-</p>
+                                    </div>
+                                </div>
+                                <span class="registration-status-badge is-success">BOOKED</span>
+                            </section>
+
+                            <section class="registration-modal-grid">
+                                <article><p>Class Name</p><p id="schedule-class-name">-</p></article>
+                                <article><p>Teacher Name</p><p id="schedule-teacher-name">-</p></article>
+                                <article><p>Day</p><p id="schedule-day">-</p></article>
+                                <article><p>Time</p><p id="schedule-time">-</p></article>
+                                <article><p>Phone Number</p><p id="schedule-phone">-</p></article>
+                                <article><p>Address</p><p id="schedule-address">-</p></article>
+                            </section>
+                        </div>
+                    </div>
+                    
+                    <footer class="registration-modal-footer">
+                        <button type="button" class="registration-modal-btn registration-modal-btn-secondary" onclick="closeScheduleModal()">Tutup</button>
+                    </footer>
+                </div>
+            </div>
+
+            <script>
+                function openScheduleModal(button) {
+                    const payload = JSON.parse(button.getAttribute('data-schedule-slot') || '{}');
+                    const modal = document.getElementById('schedule-detail-modal');
+                    
+                    const availableMsg = document.getElementById('schedule-available-message');
+                    const bookedDetails = document.getElementById('schedule-booked-details');
+                    
+                    if (payload.isBooked) {
+                        availableMsg.style.display = 'none';
+                        bookedDetails.style.display = 'block';
+                        
+                        document.getElementById('schedule-student-name').textContent = payload.studentName;
+                        document.getElementById('schedule-student-avatar').textContent = payload.studentName.charAt(0).toUpperCase();
+                        document.getElementById('schedule-class-name').textContent = payload.className;
+                        document.getElementById('schedule-teacher-name').textContent = payload.teacherName;
+                        document.getElementById('schedule-day').textContent = payload.day;
+                        document.getElementById('schedule-time').textContent = payload.time;
+                        document.getElementById('schedule-phone').textContent = payload.phone;
+                        document.getElementById('schedule-address').textContent = payload.address;
+                    } else {
+                        availableMsg.style.display = 'block';
+                        bookedDetails.style.display = 'none';
+                    }
+                    
+                    modal.style.display = "flex";
+                    requestAnimationFrame(() => {
+                        modal.classList.add("is-open");
+                    });
+                    modal.setAttribute("aria-hidden", "false");
+                    document.body.style.overflow = "hidden";
+                    
+                    if (window.lucide) {
+                        window.lucide.createIcons();
+                    }
+                }
+                
+                function closeScheduleModal() {
+                    const modal = document.getElementById('schedule-detail-modal');
+                    modal.classList.remove("is-open");
+                    modal.setAttribute("aria-hidden", "true");
+                    setTimeout(() => {
+                        modal.style.display = "none";
+                        document.body.style.overflow = "";
+                    }, 200);
+                }
+            </script>
         </section>
 
         <script>
@@ -2246,7 +2583,7 @@
     @endif
 @endif
 
-@if (! in_array($moduleKey, ['users', 'roles', 'teachers', 'schedule', 'classes', 'students', 'registrations', 'finance', 'blog', 'gallery', 'events', 'testimonials', 'settings', 'logs'], true))
+@if (! in_array($moduleKey, ['users', 'roles', 'teachers', 'schedule', 'classes', 'students', 'registrations', 'reschedule', 'finance', 'blog', 'gallery', 'events', 'testimonials', 'settings', 'logs'], true))
 <section class="card" data-searchable>
     <div class="table-wrap">
         <table>
