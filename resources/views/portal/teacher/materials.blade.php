@@ -1,4 +1,16 @@
-@php $menuItems=[['label'=>'Dashboard','url'=>route('teacher.dashboard')],['label'=>'Attendance','url'=>route('teacher.attendance.index')],['label'=>'Student Progress','url'=>route('teacher.student-progress.index')],['label'=>'Materials','url'=>route('teacher.materials.index')],['label'=>'My Classes','url'=>route('teacher.my-classes.index')],['label'=>'My Students','url'=>route('teacher.my-students.index')],['label'=>'Schedule','url'=>route('teacher.schedule.index')]]; $panelTitle='Teacher Portal'; $homeRoute=route('teacher.dashboard'); @endphp
+@php
+    $menuItems = [
+        ['label' => 'Dashboard', 'url' => route('teacher.dashboard')],
+        ['label' => 'My Classes', 'url' => route('teacher.my-classes.index')],
+        ['label' => 'My Schedule', 'url' => route('teacher.schedule.index')],
+        ['label' => 'Attendance', 'url' => route('teacher.attendance.index')],
+        ['label' => 'Student Progress', 'url' => route('teacher.student-progress.index')],
+        ['label' => 'My Students', 'url' => route('teacher.my-students.index')],
+        ['label' => 'Materials', 'url' => route('teacher.materials.index')],
+    ];
+    $panelTitle = 'Teacher Portal';
+    $homeRoute = route('teacher.dashboard');
+@endphp
 @extends('portal.layouts.app')
 @section('title','Materials')
 @section('page-title','Materials Upload')
