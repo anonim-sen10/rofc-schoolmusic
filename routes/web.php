@@ -28,6 +28,7 @@ Route::view('/events', 'pages.events')->name('events');
 Route::view('/blog', 'pages.blog')->name('blog');
 Route::view('/contact', 'pages.contact')->name('contact');
 Route::get('/register', [RegistrationController::class, 'create'])->name('register');
+Route::get('/schedules/by-class/{class_id}', [RegistrationController::class, 'getSchedulesByClass'])->name('register.schedules.by-class');
 Route::get('/get-available-schedules/{class_id}/{day}', [RegistrationController::class, 'getAvailableSchedules'])->name('register.schedules.available');
 
 Route::post('/contact', function (Request $request) {
@@ -48,7 +49,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
 });
 
-Route::middleware(  'auth')->group(function () {
+Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('/portal', [PortalController::class, 'redirectByRole'])->name('portal.redirect');
     Route::get('/portal/custom', [PortalController::class, 'customDashboard'])->name('portal.custom.dashboard');
@@ -85,15 +86,23 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'role:su
     Route::put('/users/{user}', [SuperAdminController::class, 'updateUser'])->name('users.update');
     Route::delete('/users/{user}', [SuperAdminController::class, 'destroyUser'])->name('users.destroy');
     Route::post('/roles', [SuperAdminController::class, 'storeRole'])->name('roles.store');
+    Route::get('/attendance', [AcademicManagementController::class, 'attendance'])->name('attendance.index');
     Route::get('/{module}', function (string $module) {
         if ($module === 'schedule') {
             return app(SuperAdminScheduleController::class)->index();
         }
 
+        if ($module === 'attendance') {
+            return app(AcademicManagementController::class)->attendance(request());
+        }
+
         return app(SuperAdminController::class)->module($module);
     })
-        ->whereIn('module', ['users', 'roles', 'classes', 'teachers', 'schedule', 'students', 'registrations', 'finance', 'reports', 'blog', 'gallery', 'events', 'testimonials', 'settings', 'logs'])
+        ->whereIn('module', ['users', 'roles', 'classes', 'teachers', 'schedule', 'students', 'registrations', 'reschedule', 'finance', 'reports', 'blog', 'gallery', 'events', 'testimonials', 'settings', 'logs', 'attendance'])
         ->name('module');
+    // Reschedule management
+    Route::post('/reschedule/{id}/approve', [\App\Http\Controllers\Admin\RescheduleManagementController::class, 'approve'])->name('reschedule.approve');
+    Route::post('/reschedule/{id}/reject', [\App\Http\Controllers\Admin\RescheduleManagementController::class, 'reject'])->name('reschedule.reject');
 });
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_admin'])->group(function () {
@@ -117,10 +126,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::get('/schedule', [AcademicManagementController::class, 'schedule'])->name('schedule.index');
     Route::post('/schedule/teacher', [AcademicManagementController::class, 'assignScheduleTeacher'])->name('schedule.teacher');
     Route::post('/schedule/students', [AcademicManagementController::class, 'assignScheduleStudents'])->name('schedule.students');
+    Route::get('/attendance', [AcademicManagementController::class, 'attendance'])->name('attendance.index');
 
     Route::get('/{module}', fn (string $module) => app(PortalController::class)->module('admin', $module))
-        ->whereIn('module', ['gallery', 'blog', 'events', 'testimonials'])
+        ->whereIn('module', ['gallery', 'blog', 'events', 'testimonials', 'attendance', 'reschedule'])
         ->name('module');
+    // Reschedule management
+    Route::post('/reschedule/{id}/approve', [\App\Http\Controllers\Admin\RescheduleManagementController::class, 'approve'])->name('reschedule.approve');
+    Route::post('/reschedule/{id}/reject', [\App\Http\Controllers\Admin\RescheduleManagementController::class, 'reject'])->name('reschedule.reject');
 });
 
 Route::prefix('finance')->name('finance.')->middleware(['auth', 'role:finance'])->group(function () {
@@ -150,10 +163,11 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'role:teacher'])
     Route::post('/student-progress', [TeacherProgressController::class, 'store'])->name('student-progress.store');
     Route::get('/materials', [TeacherPortalController::class, 'materials'])->name('materials.index');
     Route::post('/materials', [TeacherPortalController::class, 'storeMaterial'])->name('materials.store');
-    Route::get('/my-classes', [TeacherPortalController::class, 'attendance'])->name('my-classes.index');
+Route::get('/my-classes', [TeacherPortalController::class, 'myClasses'])->name('my-classes.index');
     Route::get('/my-students', [TeacherStudentController::class, 'index'])->name('my-students.index');
     Route::get('/schedule', [TeacherPortalController::class, 'schedule'])->name('schedule.index');
     Route::post('/schedule/{class}/respond', [TeacherPortalController::class, 'respondSchedule'])->name('schedule.respond');
+    Route::post('/schedule/attendance', [TeacherPortalController::class, 'storeScheduleAttendance'])->name('schedule.attendance.store');
 });
 
 Route::prefix('student')->name('student.')->middleware(['auth', 'role:student'])->group(function () {
@@ -167,4 +181,8 @@ Route::prefix('student')->name('student.')->middleware(['auth', 'role:student'])
     Route::get('/profile', [StudentPortalController::class, 'profile'])->name('profile.index');
     Route::put('/profile', [StudentPortalController::class, 'updateProfile'])->name('profile.update');
     Route::get('/events', fn () => view('portal.student.events'))->name('events.index');
+    
+    // Reschedule
+    Route::get('/schedule/available-slots', [StudentPortalController::class, 'availableSlots'])->name('schedule.available-slots');
+    Route::post('/schedule/reschedule', [StudentPortalController::class, 'requestReschedule'])->name('schedule.reschedule.request');
 });
