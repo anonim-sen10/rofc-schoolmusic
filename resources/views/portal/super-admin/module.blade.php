@@ -1757,409 +1757,289 @@
 @endif
 
 @if ($moduleKey === 'schedule')
+    {{-- Tailwind & Alpine.js CDN for immediate result --}}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        .font-saas { font-family: 'Inter', sans-serif; }
+        [x-cloak] { display: none !important; }
+    </style>
+
     @php
         $scheduleFeatureReady = (bool) ($scheduleFeatureReady ?? false);
         $availableDayOptions = $dayOptions ?? ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-        $openScheduleCreate = $errors->hasAny(['class_id', 'day', 'start_time', 'end_time', 'interval']);
     @endphp
 
-    @if (! $scheduleFeatureReady)
-        <section class="card" data-searchable>
-            <x-ui.badge type="danger">ERROR</x-ui.badge>
-            <p style="margin-top: 0.5rem;">Fitur schedule belum aktif karena tabel <strong>schedules</strong> belum ada. Jalankan migrasi di server: <strong>php artisan migrate --force</strong>.</p>
-        </section>
-    @else
-        <section class="card" data-searchable>
-            <details class="teacher-create" @if($openScheduleCreate) open @endif>
-                <summary>Tambah Jadwal Class</summary>
-                <form class="module-form module-form-grid teacher-create-form" method="POST" action="{{ route('super-admin.schedule.store') }}">
-                    @csrf
-                    <label>Class
-                        <select name="class_id" data-schedule-class-select required>
-                            <option value="">Pilih class</option>
-                            @foreach($classesForSchedule as $class)
-                                <option
-                                    value="{{ $class->id }}"
-                                    data-teacher-name="{{ $class->teacher?->name ?? 'Belum ada pengajar' }}"
-                                    @selected((string) old('class_id') === (string) $class->id)
-                                >{{ $class->name }}</option>
-                            @endforeach
-                        </select>
-                    </label>
-                    <div style="grid-column: span 2;">
-                        <label style="margin-bottom: 0.5rem; display: block;">Hari (Pilih satu atau lebih)</label>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.75rem; background: #f8fafc; padding: 1rem; border-radius: 0.8rem; border: 1px solid #e2e8f0;">
-                            @foreach($availableDayOptions as $dayOption)
-                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 500; color: #475569; font-size: 0.875rem;">
-                                    <input type="checkbox" name="days[]" value="{{ $dayOption }}" @checked(is_array(old('days')) && in_array($dayOption, old('days'))) style="width: 1.1rem; height: 1.1rem; accent-color: #2563eb;">
-                                    {{ $dayOption }}
-                                </label>
-                            @endforeach
+    <div 
+        x-data="{ 
+            studentModalOpen: false, 
+            studentData: {},
+            showStudent(data) {
+                this.studentData = data;
+                this.studentModalOpen = true;
+                if (window.lucide) {
+                    setTimeout(() => window.lucide.createIcons(), 50);
+                }
+            }
+        }"
+        class="font-saas py-2"
+    >
+        {{-- Header Section --}}
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-5 gap-4 px-1">
+            <div>
+                <h1 class="text-xl font-bold text-gray-900 tracking-tight">Schedule Dashboard</h1>
+                <p class="text-gray-400 text-[11px] font-medium tracking-wide uppercase">Music School Management System</p>
+            </div>
+            <div x-data="{ open: false }">
+                <button @click="open = !open" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[12px] font-bold rounded-lg transition-all shadow-md shadow-indigo-100 active:scale-95">
+                    <i data-lucide="plus" class="w-3.5 h-3.5 mr-1.5"></i>
+                    Add Schedule
+                </button>
+
+                {{-- Modal for Create Schedule --}}
+                <div x-show="open" x-cloak class="fixed inset-0 z-[150] overflow-y-auto">
+                    <div class="flex items-center justify-center min-h-screen p-4 text-center">
+                        <div @click="open = false" x-show="open" x-transition.opacity class="fixed inset-0 bg-gray-950/60 backdrop-blur-sm transition-opacity"></div>
+                        <div x-show="open" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="inline-block bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all w-full max-w-sm border border-white/20">
+                            <form method="POST" action="{{ route('super-admin.schedule.store') }}" class="p-6">
+                                @csrf
+                                <div class="flex items-center justify-between mb-5">
+                                    <h3 class="text-lg font-bold text-gray-900">Create Schedule</h3>
+                                    <button type="button" @click="open = false" class="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-100 rounded-md transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
+                                </div>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Class</label>
+                                        <select name="class_id" class="w-full h-10 px-3 rounded-lg border-gray-100 bg-gray-50 focus:border-indigo-500 focus:ring-indigo-500 text-xs font-semibold text-gray-700">
+                                            @foreach($classesForSchedule as $class)
+                                                <option value="{{ $class->id }}">{{ $class->name }} ({{ $class->teacher?->name ?? 'No Teacher' }})</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Days</label>
+                                        <div class="grid grid-cols-4 gap-1.5">
+                                            @foreach($availableDayOptions as $dayOption)
+                                                <label class="flex items-center justify-center py-1.5 rounded-md border border-gray-100 hover:border-indigo-100 hover:bg-indigo-50 cursor-pointer transition-all">
+                                                    <input type="checkbox" name="days[]" value="{{ $dayOption }}" class="w-3 h-3 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                                    <span class="ml-1.5 text-[10px] font-bold text-gray-600">{{ substr($dayOption, 0, 3) }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Start</label>
+                                            <input type="time" name="start_time" class="w-full h-10 px-3 rounded-lg border-gray-100 bg-gray-50 text-xs font-semibold">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">End</label>
+                                            <input type="time" name="end_time" class="w-full h-10 px-3 rounded-lg border-gray-100 bg-gray-50 text-xs font-semibold">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Interval (Mins)</label>
+                                        <input type="number" name="interval" value="60" class="w-full h-10 px-3 rounded-lg border-gray-100 bg-gray-50 text-xs font-semibold">
+                                    </div>
+                                </div>
+                                <div class="mt-6 flex flex-col gap-2">
+                                    <button type="submit" class="w-full py-3 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-md active:scale-95">Save Schedule</button>
+                                    <button type="button" @click="open = false" class="w-full py-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-all">Cancel</button>
+                                </div>
+                            </form>
                         </div>
-                        @error('days')
-                            <p style="color: #dc2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ $message }}</p>
-                        @enderror
                     </div>
-                    <label>Start Time
-                        <input type="time" name="start_time" value="{{ old('start_time') }}" required>
-                    </label>
-                    <label>End Time
-                        <input type="time" name="end_time" value="{{ old('end_time') }}" required>
-                    </label>
-                    <label>Interval (menit)
-                        <input type="number" name="interval" value="{{ old('interval', 60) }}" min="1" required>
-                    </label>
-                    <label>Teacher (otomatis dari class)
-                        <input type="text" value="-" data-schedule-teacher-preview readonly>
-                    </label>
-                    <div class="form-actions">
-                        <button type="submit">Simpan Jadwal</button>
-                        <button type="reset" class="btn-secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        {{-- Main Content --}}
+        @php
+            $nestedSchedules = [];
+            foreach ($schedulesForManagement as $scheduleItem) {
+                $className = $scheduleItem->musicClass?->name ?? 'Unassigned Class';
+                $teacherName = $scheduleItem->teacher?->name ?? ($scheduleItem->musicClass?->teacher?->name ?? 'Belum ada pengajar');
+                $day = $scheduleItem->day;
+                if (!isset($nestedSchedules[$className])) $nestedSchedules[$className] = [];
+                if (!isset($nestedSchedules[$className][$teacherName])) $nestedSchedules[$className][$teacherName] = [];
+                if (!isset($nestedSchedules[$className][$teacherName][$day])) $nestedSchedules[$className][$teacherName][$day] = [];
+                $nestedSchedules[$className][$teacherName][$day][] = $scheduleItem;
+            }
+        @endphp
+
+        <div class="space-y-3">
+            @forelse ($nestedSchedules as $className => $teachers)
+                <div x-data="{ open: false }" class="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+                    {{-- Class Header --}}
+                    <div @click="open = !open" class="px-5 py-3 bg-white flex items-center justify-between cursor-pointer group">
+                        <div class="flex items-center gap-4">
+                            <div class="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 ring-2 ring-indigo-50/30 transition-all">
+                                <i data-lucide="music" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-[15px] font-bold text-gray-800 group-hover:text-indigo-600 transition-colors">Class: {{ $className }}</h2>
+                                <p class="text-[10px] font-bold text-gray-400 tracking-wider uppercase">{{ count($teachers) }} Teachers</p>
+                            </div>
+                        </div>
+                        <div class="w-7 h-7 rounded-full bg-gray-50 flex items-center justify-center">
+                            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-gray-400 transform transition-transform duration-300" :class="open ? 'rotate-180' : ''"></i>
+                        </div>
                     </div>
-                </form>
-            </details>
-        </section>
 
-        <section class="card" data-searchable>
-            <h3>Daftar Jadwal Class</h3>
-            @php
-                $nestedSchedules = [];
-                foreach ($schedulesForManagement as $scheduleItem) {
-                    $className = $scheduleItem->musicClass?->name ?? 'Unknown Class';
-                    $teacherName = $scheduleItem->teacher?->name ?? ($scheduleItem->musicClass?->teacher?->name ?? 'Unknown Teacher');
-                    $day = $scheduleItem->day;
-                    
-                    if (!isset($nestedSchedules[$className])) {
-                        $nestedSchedules[$className] = [];
-                    }
-                    if (!isset($nestedSchedules[$className][$teacherName])) {
-                        $nestedSchedules[$className][$teacherName] = [];
-                    }
-                    if (!isset($nestedSchedules[$className][$teacherName][$day])) {
-                        $nestedSchedules[$className][$teacherName][$day] = [];
-                    }
-                    $nestedSchedules[$className][$teacherName][$day][] = $scheduleItem;
-                }
-            @endphp
+                    {{-- Class Content (Teachers) --}}
+                    <div x-show="open" x-collapse x-cloak class="px-5 pb-3 space-y-3">
+                        @foreach ($teachers as $teacherName => $days)
+                            <div x-data="{ openTeacher: false }" class="bg-gray-50/50 rounded-xl border border-gray-100 overflow-hidden">
+                                <div @click="openTeacher = !openTeacher" class="px-4 py-2.5 flex items-center justify-between cursor-pointer group">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-7 h-7 rounded-full bg-white border border-indigo-100 flex items-center justify-center text-indigo-500">
+                                            <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                                        </div>
+                                        <h3 class="text-[13px] font-bold text-gray-700">Instructor: <span class="text-indigo-600 font-extrabold">{{ $teacherName }}</span></h3>
+                                    </div>
+                                    <i data-lucide="chevron-down" class="w-3 h-3 text-gray-400 transform transition-transform duration-200" :class="openTeacher ? 'rotate-180' : ''"></i>
+                                </div>
 
-            <style>
-                .schedule-nested-container {
-                    margin-top: 1.5rem;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 1rem;
-                }
-                
-                /* Class Accordion */
-                .class-details {
-                    border: 1px solid #e2e8f0;
-                    border-radius: 0.75rem;
-                    background: #fff;
-                    overflow: hidden;
-                }
-                .class-summary {
-                    padding: 1rem 1.25rem;
-                    background: #f8fafc;
-                    font-weight: 600;
-                    font-size: 1.05rem;
-                    color: #0f172a;
-                    cursor: pointer;
-                    list-style: none;
-                    display: flex;
-                    align-items: center;
-                    gap: 0.75rem;
-                    user-select: none;
-                }
-                .class-summary::-webkit-details-marker {
-                    display: none;
-                }
-                .class-summary i {
-                    color: #64748b;
-                    transition: transform 0.2s ease;
-                }
-                .class-details[open] > .class-summary i {
-                    transform: rotate(90deg);
-                }
-                .class-body {
-                    padding: 1.25rem;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 0.85rem;
-                }
-
-                /* Teacher Accordion */
-                .teacher-details {
-                    border: 1px solid #e2e8f0;
-                    border-radius: 0.5rem;
-                    background: #fff;
-                    overflow: hidden;
-                }
-                .teacher-summary {
-                    padding: 0.85rem 1rem;
-                    font-weight: 600;
-                    font-size: 0.95rem;
-                    color: #1e293b;
-                    cursor: pointer;
-                    list-style: none;
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                    user-select: none;
-                }
-                .teacher-summary::-webkit-details-marker {
-                    display: none;
-                }
-                .teacher-summary i {
-                    color: #64748b;
-                    transition: transform 0.2s ease;
-                    width: 18px;
-                    height: 18px;
-                }
-                .teacher-details[open] > .teacher-summary i {
-                    transform: rotate(90deg);
-                }
-                .teacher-details[open] > .teacher-summary {
-                    border-bottom: 1px solid #e2e8f0;
-                    background: #f8fafc;
-                }
-                .teacher-body {
-                    padding: 0;
-                }
-
-                /* Day Group */
-                .day-group {
-                    padding: 1rem;
-                }
-                .day-group:not(:last-child) {
-                    border-bottom: 1px dashed #e2e8f0;
-                }
-                .day-title {
-                    font-size: 0.95rem;
-                    font-weight: 600;
-                    color: #334155;
-                    margin-bottom: 0.75rem;
-                }
-                
-                /* Time Slots */
-                .schedule-slots-grid {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 0.75rem;
-                }
-                .schedule-slot-btn {
-                    background: #f1f5f9;
-                    color: #475569;
-                    border: 1px solid #cbd5e1;
-                    border-radius: 0.5rem;
-                    padding: 0.5rem 1rem;
-                    font-size: 0.875rem;
-                    font-weight: 500;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                }
-                .schedule-slot-btn:hover {
-                    background: #e2e8f0;
-                    border-color: #94a3b8;
-                }
-                .schedule-slot-btn.is-booked {
-                    background: #dcfce7;
-                    color: #166534;
-                    border-color: #bbf7d0;
-                }
-                .schedule-slot-btn.is-booked:hover {
-                    background: #bbf7d0;
-                    border-color: #86efac;
-                }
-            </style>
-
-            <div class="schedule-nested-container">
-                @forelse ($nestedSchedules as $className => $teachers)
-                    <details class="class-details">
-                        <summary class="class-summary">
-                            <i data-lucide="chevron-right"></i>
-                            Class: {{ $className }}
-                        </summary>
-                        <div class="class-body">
-                            @foreach ($teachers as $teacherName => $days)
-                                <details class="teacher-details">
-                                    <summary class="teacher-summary">
-                                        <i data-lucide="chevron-right"></i>
-                                        Teacher: {{ $teacherName }}
-                                    </summary>
-                                    <div class="teacher-body">
+                                {{-- Days Grid --}}
+                                <div x-show="openTeacher" x-collapse x-cloak class="px-4 pb-4 pt-0">
+                                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
                                         @foreach ($days as $day => $slots)
-                                            <div class="day-group">
-                                                <h4 class="day-title">{{ $day }}</h4>
-                                                <div class="schedule-slots-grid">
+                                            <div class="bg-white p-4 rounded-xl border border-gray-50 shadow-sm">
+                                                <div class="flex items-center justify-between mb-3">
+                                                    <div class="px-2 py-0.5 bg-indigo-600 text-white text-[8px] font-black rounded-md tracking-wider uppercase">{{ $day }}</div>
+                                                    <span class="text-[8px] font-bold text-gray-300 uppercase">{{ count($slots) }} Slots</span>
+                                                </div>
+                                                
+                                                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                                                     @foreach ($slots as $slot)
                                                         @php
-                                                            $timeValue = substr((string) $slot->time, 0, 5);
-                                                            $isBooked = strtolower((string) $slot->status) === 'booked';
+                                                            $isBooked = (bool)$slot->student_id;
+                                                            $timeLabel = substr((string)$slot->time, 0, 5);
                                                             $student = $slot->student;
-                                                            $studentName = $student?->user?->name ?? ($student?->name ?? '-');
-                                                            $studentPhone = $student?->phone ?? '-';
-                                                            $studentAddress = $student?->address ?? '-';
-                                                            
-                                                            $slotPayload = [
-                                                                'time' => $timeValue,
-                                                                'status' => strtolower((string) $slot->status),
-                                                                'isBooked' => $isBooked,
-                                                                'studentName' => $studentName,
-                                                                'teacherName' => $teacherName,
-                                                                'className' => $className,
-                                                                'day' => $day,
-                                                                'address' => $studentAddress,
-                                                                'phone' => $studentPhone,
-                                                            ];
+                                                            $studentPayload = $isBooked ? [
+                                                                'id' => $student?->id,
+                                                                'name' => $student?->user?->name ?? ($student?->name ?? '-'),
+                                                                'phone' => $student?->phone ?? '-',
+                                                                'address' => $student?->address ?? '-',
+                                                                'class_name' => $className,
+                                                                'teacher_name' => $teacherName
+                                                            ] : null;
                                                         @endphp
-                                                        <button 
-                                                            type="button" 
-                                                            class="schedule-slot-btn {{ $isBooked ? 'is-booked' : '' }}"
-                                                            data-schedule-slot='@json($slotPayload, JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_TAG | JSON_HEX_QUOT)'
-                                                            onclick="openScheduleModal(this)"
-                                                        >
-                                                            {{ $timeValue }}
-                                                        </button>
+                                                        <div x-data="{ showActions: false }" class="relative">
+                                                            <button 
+                                                                @click="
+                                                                    if ({{ $isBooked ? 'true' : 'false' }}) {
+                                                                        showStudent(@js($studentPayload))
+                                                                    } else {
+                                                                        showActions = !showActions
+                                                                    }
+                                                                "
+                                                                class="w-full py-1.5 rounded-lg text-[10px] font-black transition-all border
+                                                                    {{ $isBooked 
+                                                                        ? 'bg-indigo-600 border-indigo-600 text-white hover:bg-indigo-700 hover:scale-105 shadow-md shadow-indigo-50' 
+                                                                        : 'bg-white border-gray-50 text-gray-500 hover:border-indigo-500 hover:text-indigo-600 hover:bg-indigo-50/30' }}"
+                                                            >
+                                                                {{ $timeLabel }}
+                                                                @if($isBooked)
+                                                                    <div class="text-[6px] opacity-80 font-black">FULL</div>
+                                                                @endif
+                                                            </button>
+
+                                                            @if(!$isBooked)
+                                                            <div x-show="showActions" @click.away="showActions = false" x-transition.opacity class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-28 bg-gray-900 rounded-lg shadow-xl z-50 p-1 border border-white/10">
+                                                                <form method="POST" action="{{ route('super-admin.schedule.destroy', $slot) }}" onsubmit="return confirm('Hapus?')">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit" class="w-full flex items-center justify-center px-2 py-1.5 text-[9px] font-bold text-white hover:bg-red-500 rounded-md transition-all">
+                                                                        <i data-lucide="trash-2" class="w-2.5 h-2.5 mr-1.5"></i> Delete
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                            @endif
+                                                        </div>
                                                     @endforeach
                                                 </div>
                                             </div>
                                         @endforeach
                                     </div>
-                                </details>
-                            @endforeach
-                        </div>
-                    </details>
-                @empty
-                    <p style="color: #64748b;">No schedule available.</p>
-                @endforelse
-            </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @empty
+                <div class="text-center py-20 bg-white border-2 border-dashed border-gray-100 rounded-3xl">
+                    <i data-lucide="calendar-off" class="w-8 h-8 text-gray-200 mx-auto mb-4"></i>
+                    <h3 class="text-base font-bold text-gray-800">No Schedules</h3>
+                </div>
+            @endforelse
+        </div>
 
-            <!-- Modal for Schedule Details -->
-            <div class="registration-modal" id="schedule-detail-modal" aria-hidden="true">
-                <div class="registration-modal-overlay" onclick="closeScheduleModal()"></div>
-                <div class="registration-modal-panel" role="dialog" aria-modal="true" style="max-width: 500px;">
-                    <header class="registration-modal-header">
-                        <div class="registration-modal-header-left">
-                            <span class="registration-modal-icon">
-                                <i data-lucide="calendar"></i>
-                            </span>
-                            <div>
-                                <h3 id="schedule-modal-title">Detail Jadwal</h3>
-                                <p>Informasi lengkap slot waktu kelas</p>
+        {{-- Student Detail Modal --}}
+        <div x-show="studentModalOpen" x-cloak class="fixed inset-0 z-[300] flex items-center justify-center p-4">
+            {{-- Light Backdrop --}}
+            <div @click="studentModalOpen = false" x-show="studentModalOpen" x-transition.opacity class="fixed inset-0 bg-white/10 backdrop-blur-[2px] transition-opacity"></div>
+            
+            <div x-show="studentModalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="relative bg-white rounded-[2rem] text-left overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.1)] transform transition-all w-full max-w-[320px] border border-gray-100">
+                <div class="px-6 py-8">
+                    <button @click="studentModalOpen = false" class="absolute top-5 right-5 text-gray-300 hover:text-indigo-500 transition-colors">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+
+                    <div class="flex flex-col items-center mb-6">
+                        <div class="w-16 h-16 rounded-2xl bg-indigo-600 flex items-center justify-center text-white text-xl font-bold mb-4 shadow-lg shadow-indigo-100">
+                            <span x-text="studentData.name ? studentData.name.charAt(0).toUpperCase() : '?'"></span>
+                        </div>
+                        <h3 class="text-base font-bold text-gray-900 text-center" x-text="studentData.name || '-'"></h3>
+                        <p class="text-[9px] font-bold text-indigo-500 mt-1 uppercase tracking-widest" x-text="'ID: #' + (studentData.id || '00')"></p>
+                    </div>
+
+                    <div class="space-y-4 px-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-medium text-gray-400">Class Unit</span>
+                            <span class="text-[11px] font-bold text-gray-800" x-text="studentData.class_name || '-'"></span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-medium text-gray-400">Instructor</span>
+                            <span class="text-[11px] font-bold text-gray-800" x-text="studentData.teacher_name || '-'"></span>
+                        </div>
+                        
+                        <div class="pt-2 space-y-4">
+                            <div class="flex items-start gap-4">
+                                <i data-lucide="phone" class="w-3.5 h-3.5 text-indigo-500 shrink-0 mt-0.5"></i>
+                                <div>
+                                    <p class="text-[11px] font-bold text-gray-800" x-text="studentData.phone || '-'"></p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-indigo-500 shrink-0 mt-0.5"></i>
+                                <div>
+                                    <p class="text-[11px] font-bold text-gray-800 leading-relaxed" x-text="studentData.address || '-'"></p>
+                                </div>
                             </div>
                         </div>
-                        <button type="button" class="registration-modal-close-btn" onclick="closeScheduleModal()" aria-label="Close">
-                            <i data-lucide="x"></i>
-                        </button>
-                    </header>
-
-                    <div class="registration-modal-body">
-                        <!-- Used for available slot -->
-                        <div id="schedule-available-message" style="display: none; padding: 2rem; text-align: center; color: #64748b;">
-                            <i data-lucide="info" style="width: 3rem; height: 3rem; margin: 0 auto 1rem; color: #94a3b8;"></i>
-                            <p style="font-size: 1.1rem; font-weight: 500; color: #0f172a;">This slot is available</p>
-                        </div>
-
-                        <!-- Used for booked slot -->
-                        <div id="schedule-booked-details" style="display: none;">
-                            <section class="registration-modal-summary">
-                                <div class="registration-modal-summary-left">
-                                    <span class="registration-modal-avatar" id="schedule-student-avatar">-</span>
-                                    <div>
-                                        <p>Nama Siswa</p>
-                                        <p class="registration-modal-summary-name" id="schedule-student-name">-</p>
-                                    </div>
-                                </div>
-                                <span class="registration-status-badge is-success">BOOKED</span>
-                            </section>
-
-                            <section class="registration-modal-grid">
-                                <article><p>Class Name</p><p id="schedule-class-name">-</p></article>
-                                <article><p>Teacher Name</p><p id="schedule-teacher-name">-</p></article>
-                                <article><p>Day</p><p id="schedule-day">-</p></article>
-                                <article><p>Time</p><p id="schedule-time">-</p></article>
-                                <article><p>Phone Number</p><p id="schedule-phone">-</p></article>
-                                <article><p>Address</p><p id="schedule-address">-</p></article>
-                            </section>
-                        </div>
                     </div>
-                    
-                    <footer class="registration-modal-footer">
-                        <button type="button" class="registration-modal-btn registration-modal-btn-secondary" onclick="closeScheduleModal()">Tutup</button>
-                    </footer>
+
+                    <div class="mt-8">
+                        <button @click="studentModalOpen = false" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-[11px] transition-all active:scale-95">
+                            Close Profile
+                        </button>
+                    </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <script>
-                function openScheduleModal(button) {
-                    const payload = JSON.parse(button.getAttribute('data-schedule-slot') || '{}');
-                    const modal = document.getElementById('schedule-detail-modal');
-                    
-                    const availableMsg = document.getElementById('schedule-available-message');
-                    const bookedDetails = document.getElementById('schedule-booked-details');
-                    
-                    if (payload.isBooked) {
-                        availableMsg.style.display = 'none';
-                        bookedDetails.style.display = 'block';
-                        
-                        document.getElementById('schedule-student-name').textContent = payload.studentName;
-                        document.getElementById('schedule-student-avatar').textContent = payload.studentName.charAt(0).toUpperCase();
-                        document.getElementById('schedule-class-name').textContent = payload.className;
-                        document.getElementById('schedule-teacher-name').textContent = payload.teacherName;
-                        document.getElementById('schedule-day').textContent = payload.day;
-                        document.getElementById('schedule-time').textContent = payload.time;
-                        document.getElementById('schedule-phone').textContent = payload.phone;
-                        document.getElementById('schedule-address').textContent = payload.address;
-                    } else {
-                        availableMsg.style.display = 'block';
-                        bookedDetails.style.display = 'none';
-                    }
-                    
-                    modal.style.display = "flex";
-                    requestAnimationFrame(() => {
-                        modal.classList.add("is-open");
-                    });
-                    modal.setAttribute("aria-hidden", "false");
-                    document.body.style.overflow = "hidden";
-                    
-                    if (window.lucide) {
-                        window.lucide.createIcons();
-                    }
-                }
-                
-                function closeScheduleModal() {
-                    const modal = document.getElementById('schedule-detail-modal');
-                    modal.classList.remove("is-open");
-                    modal.setAttribute("aria-hidden", "true");
-                    setTimeout(() => {
-                        modal.style.display = "none";
-                        document.body.style.overflow = "";
-                    }, 200);
-                }
-            </script>
-        </section>
-
-        <script>
-            document.addEventListener("DOMContentLoaded", () => {
-                const classSelect = document.querySelector("[data-schedule-class-select]");
-                const teacherPreview = document.querySelector("[data-schedule-teacher-preview]");
-
-                if (!classSelect || !teacherPreview) {
-                    return;
-                }
-
-                const syncTeacherPreview = () => {
-                    const selectedOption = classSelect.options[classSelect.selectedIndex];
-                    const teacherName = selectedOption ? selectedOption.getAttribute("data-teacher-name") : "";
-                    teacherPreview.value = teacherName && teacherName.trim() !== "" ? teacherName : "Belum ada pengajar";
-                };
-
-                classSelect.addEventListener("change", syncTeacherPreview);
-                syncTeacherPreview();
-            });
-        </script>
-    @endif
+    <script>
+        // Re-initialize Lucide icons for the redesign
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    </script>
 @endif
+
+    {{-- Final Cleanup: Legacy Schedule Code Removed --}}
 
 @if (! in_array($moduleKey, ['users', 'roles', 'teachers', 'schedule', 'classes', 'students', 'registrations', 'reschedule', 'finance', 'blog', 'gallery', 'events', 'testimonials', 'settings', 'logs'], true))
 <section class="card" data-searchable>
