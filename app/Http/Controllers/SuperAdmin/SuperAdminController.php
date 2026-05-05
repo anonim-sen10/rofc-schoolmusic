@@ -635,26 +635,32 @@ class SuperAdminController extends Controller
         $user->roles()->sync([$role->id]);
 
         if ($data['role'] === 'teacher') {
-            Teacher::query()->firstOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'name' => $user->name,
-                    'instrument' => $data['instrument'] ?? 'General',
-                    'is_active' => true,
-                ]
-            );
+            $teacher = Teacher::query()->firstOrCreate(['user_id' => $user->id], [
+                'name' => $user->name,
+                'instrument' => $data['instrument'] ?? 'General',
+                'is_active' => true,
+            ]);
+            
+            $teacher->update([
+                'name' => $user->name,
+                'instrument' => $data['instrument'] ?? $teacher->instrument,
+                'phone' => $data['phone'] ?? $teacher->phone,
+            ]);
         }
 
         if ($data['role'] === 'student') {
-            Student::query()->firstOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'phone' => $data['phone'] ?? null,
-                    'is_active' => true,
-                ]
-            );
+            $student = Student::query()->firstOrCreate(['user_id' => $user->id], [
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $data['phone'] ?? null,
+                'is_active' => true,
+            ]);
+
+            $student->update([
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $data['phone'] ?? $student->phone,
+            ]);
         }
 
         return redirect()->route('super-admin.module', ['module' => 'roles'])->with('success', 'Data user berhasil diperbarui.');
@@ -669,7 +675,11 @@ class SuperAdminController extends Controller
         }
 
         DB::transaction(function () use ($user) {
-            // Database cascades handle Student, Teacher, etc.
+            // Delete associated profiles to trigger clean up
+            // Note: DB foreign keys will set student_id to NULL in schedules table automatically
+            Student::where('user_id', $user->id)->delete();
+            Teacher::where('user_id', $user->id)->delete();
+
             $user->delete();
         });
 
