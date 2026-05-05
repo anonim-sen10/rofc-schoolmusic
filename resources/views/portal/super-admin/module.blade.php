@@ -1926,7 +1926,7 @@
         <div>
             {{-- Modal for Create Schedule --}}
             <div x-show="addModalOpen" x-cloak 
-                class="absolute inset-0 z-[100] flex items-start justify-center pt-20"
+                class="absolute inset-0 z-[100] flex items-center justify-center"
                 style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(4px);">
                 
                 <div x-show="addModalOpen" 
@@ -1934,7 +1934,7 @@
                     x-transition:enter-start="opacity-0 scale-95" 
                     x-transition:enter-end="opacity-100 scale-100" 
                     @click.away="addModalOpen = false"
-                    class="relative bg-white rounded-3xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.15)] w-full max-w-[320px] border border-gray-100/50 overflow-hidden">
+                    class="relative bg-white rounded-3xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.15)] w-full max-w-[320px] border border-gray-100/50 overflow-hidden transform -translate-y-5">
                     
                     <form method="POST" action="{{ route('super-admin.schedule.store') }}" class="p-6">
                         @csrf
@@ -1998,10 +1998,10 @@
 
             {{-- Student Detail Modal --}}
             <div x-show="studentModalOpen" x-cloak 
-                class="absolute inset-0 z-[100] flex items-start justify-center pt-20"
+                class="absolute inset-0 z-[100] flex items-center justify-center"
                 style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(4px);">
                 
-                <div x-show="studentModalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="relative bg-white rounded-[2rem] text-left overflow-hidden shadow-[0_25px_60px_-15px_rgba(0,0,0,0.15)] transform transition-all w-full max-w-[320px] border border-gray-100">
+                <div x-show="studentModalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="relative bg-white rounded-[2rem] text-left overflow-hidden shadow-[0_25px_60px_-15px_rgba(0,0,0,0.15)] transform transition-all w-full max-w-[320px] border border-gray-100 -translate-y-5">
                     <div class="px-6 py-8">
                         <button @click="studentModalOpen = false" class="absolute top-5 right-5 text-gray-300 hover:text-indigo-500 transition-colors">
                             <i data-lucide="x" class="w-4 h-4"></i>
