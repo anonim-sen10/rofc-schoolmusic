@@ -1799,23 +1799,22 @@
 
                 {{-- Modal for Create Schedule --}}
                 <div x-show="open" x-cloak class="fixed inset-0 z-[150] flex items-center justify-center p-4">
-                    {{-- Light Backdrop --}}
-                    <div @click="open = false" x-show="open" x-transition.opacity class="fixed inset-0 bg-white/10 backdrop-blur-[2px] transition-opacity"></div>
+                    <div @click="open = false" x-show="open" x-transition.opacity class="fixed inset-0 bg-white/5 backdrop-blur-[1px] transition-opacity"></div>
                     
-                    <div x-show="open" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="relative bg-white rounded-[2rem] text-left overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.1)] transform transition-all w-full max-w-[360px] border border-gray-100">
-                        <form method="POST" action="{{ route('super-admin.schedule.store') }}" class="p-8">
+                    <div x-show="open" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="relative bg-white rounded-[1.5rem] text-left overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.1)] transform transition-all w-full max-w-[340px] border border-gray-100">
+                        <form method="POST" action="{{ route('super-admin.schedule.store') }}" class="px-6 py-5">
                             @csrf
-                            <div class="flex items-center justify-between mb-6">
-                                <h3 class="text-lg font-bold text-gray-900">Create Schedule</h3>
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-base font-bold text-gray-900">Create Schedule</h3>
                                 <button type="button" @click="open = false" class="text-gray-300 hover:text-indigo-500 transition-colors">
-                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
                                 </button>
                             </div>
                             
-                            <div class="space-y-5">
+                            <div class="space-y-3.5">
                                 <div>
-                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Select Class</label>
-                                    <select name="class_id" class="w-full h-10 px-0 bg-transparent border-0 border-b border-gray-100 focus:border-indigo-500 focus:ring-0 text-[13px] font-bold text-gray-700 transition-all">
+                                    <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Select Class</label>
+                                    <select name="class_id" class="w-full h-8 px-0 bg-transparent border-0 border-b border-gray-100 focus:border-indigo-500 focus:ring-0 text-[12px] font-bold text-gray-700 transition-all">
                                         @foreach($classesForSchedule as $class)
                                             <option value="{{ $class->id }}">{{ $class->name }} ({{ $class->teacher?->name ?? 'No Teacher' }})</option>
                                         @endforeach
@@ -1823,39 +1822,39 @@
                                 </div>
 
                                 <div>
-                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Active Days</label>
-                                    <div class="grid grid-cols-4 gap-2">
+                                    <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2">Active Days</label>
+                                    <div class="grid grid-cols-4 gap-x-1 gap-y-1.5">
                                         @foreach($availableDayOptions as $dayOption)
-                                            <label class="flex items-center gap-2 cursor-pointer group">
-                                                <input type="checkbox" name="days[]" value="{{ $dayOption }}" class="w-3.5 h-3.5 rounded border-gray-200 text-indigo-600 focus:ring-indigo-500">
-                                                <span class="text-[11px] font-bold text-gray-500 group-hover:text-indigo-600 transition-colors">{{ substr($dayOption, 0, 3) }}</span>
+                                            <label class="flex items-center gap-1.5 cursor-pointer group">
+                                                <input type="checkbox" name="days[]" value="{{ $dayOption }}" class="w-3 h-3 rounded border-gray-200 text-indigo-600 focus:ring-indigo-500">
+                                                <span class="text-[10px] font-bold text-gray-500 group-hover:text-indigo-600 transition-colors">{{ substr($dayOption, 0, 3) }}</span>
                                             </label>
                                         @endforeach
                                     </div>
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-6">
+                                <div class="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Start Time</label>
-                                        <input type="time" name="start_time" class="w-full h-10 px-0 bg-transparent border-0 border-b border-gray-100 focus:border-indigo-500 focus:ring-0 text-[13px] font-bold text-gray-700">
+                                        <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Start Time</label>
+                                        <input type="time" name="start_time" class="w-full h-8 px-0 bg-transparent border-0 border-b border-gray-100 focus:border-indigo-500 focus:ring-0 text-[12px] font-bold text-gray-700">
                                     </div>
                                     <div>
-                                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">End Time</label>
-                                        <input type="time" name="end_time" class="w-full h-10 px-0 bg-transparent border-0 border-b border-gray-100 focus:border-indigo-500 focus:ring-0 text-[13px] font-bold text-gray-700">
+                                        <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">End Time</label>
+                                        <input type="time" name="end_time" class="w-full h-10 px-0 bg-transparent border-0 border-b border-gray-100 focus:border-indigo-500 focus:ring-0 text-[12px] font-bold text-gray-700">
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Interval (Minutes)</label>
-                                    <input type="number" name="interval" value="60" class="w-full h-10 px-0 bg-transparent border-0 border-b border-gray-100 focus:border-indigo-500 focus:ring-0 text-[13px] font-bold text-gray-700">
+                                    <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Interval (Mins)</label>
+                                    <input type="number" name="interval" value="60" class="w-full h-8 px-0 bg-transparent border-0 border-b border-gray-100 focus:border-indigo-500 focus:ring-0 text-[12px] font-bold text-gray-700">
                                 </div>
                             </div>
 
-                            <div class="mt-10">
-                                <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-[12px] transition-all shadow-lg shadow-indigo-100 active:scale-95">
+                            <div class="mt-7">
+                                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-[11px] transition-all shadow-md active:scale-95">
                                     Save Schedule
                                 </button>
-                                <button type="button" @click="open = false" class="w-full mt-2 py-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors">
+                                <button type="button" @click="open = false" class="w-full mt-1.5 py-1 text-[10px] font-bold text-gray-400 hover:text-gray-600 transition-colors">
                                     Cancel
                                 </button>
                             </div>
