@@ -350,6 +350,14 @@ class SuperAdminController extends Controller
 
         $student->update($payload);
 
+        // Sync with Login Account (User) if exists
+        if ($student->user) {
+            $student->user->update([
+                'name' => $data['name'],
+                'email' => $data['email'] ?? $student->user->email,
+            ]);
+        }
+
         $student->classes()->sync($data['class_ids'] ?? []);
 
         return back()->with('success', 'Data siswa berhasil diperbarui.');
