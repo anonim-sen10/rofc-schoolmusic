@@ -137,6 +137,10 @@ class SuperAdminController extends Controller
             $payload['photo_path'] = $request->file('photo')->store('teachers', 'public');
         }
 
+        if ($request->hasFile('ktp')) {
+            $payload['ktp_path'] = $request->file('ktp')->store('teachers/ktp', 'public');
+        }
+
         Teacher::query()->create($payload);
 
         return back()->with('success', 'Akun teacher dan data guru berhasil dibuat.');
@@ -203,6 +207,10 @@ class SuperAdminController extends Controller
 
         if ($request->hasFile('photo')) {
             $payload['photo_path'] = $request->file('photo')->store('teachers', 'public');
+        }
+
+        if ($request->hasFile('ktp')) {
+            $payload['ktp_path'] = $request->file('ktp')->store('teachers/ktp', 'public');
         }
 
         $teacher->update($payload);

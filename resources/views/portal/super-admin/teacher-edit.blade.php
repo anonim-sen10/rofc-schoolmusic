@@ -64,6 +64,12 @@
         <label>Upload Foto Profile
             <input type="file" name="photo" accept="image/*">
         </label>
+        <label>Upload KTP Guru
+            <input type="file" name="ktp" accept="image/*">
+            @if($teacher->ktp_path)
+                <small style="color: #059669;">KTP sudah ada.</small>
+            @endif
+        </label>
         <button type="submit">Simpan Perubahan</button>
     </form>
 

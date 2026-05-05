@@ -22,6 +22,7 @@ class Teacher extends Model
         'bio',
         'experience',
         'photo_path',
+        'ktp_path',
         'is_active',
     ];
 

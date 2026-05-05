@@ -34,11 +34,25 @@
                 <tr><th>Agama</th><td>{{ $teacher->religion ?? '-' }}</td></tr>
                 <tr><th>Bidang / Instrumen</th><td>{{ $teacher->instrument }}</td></tr>
                 <tr><th>Class</th><td>{{ $teacher->classes->pluck('name')->implode(', ') ?: '-' }}</td></tr>
+                <tr>
+                    <th>KTP Guru</th>
+                    <td>
+                        @if($teacher->ktp_path)
+                            <div style="margin-top: 0.5rem;">
+                                <img src="{{ asset('storage/' . $teacher->ktp_path) }}" style="width: 100%; max-width: 300px; border-radius: 0.5rem; cursor: zoom-in; border: 1px solid #e2e8f0;" onclick="showLightbox(this.src)">
+                            </div>
+                        @else
+                            <span style="color: #ef4444; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.25rem;">
+                                <i data-lucide="alert-circle" style="width: 1rem; height: 1rem;"></i> Belum diupload
+                            </span>
+                        @endif
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
 
-    <div style="margin-top: 1rem; display: flex; gap: 0.6rem;">
+    <div style="margin-top: 1.5rem; display: flex; gap: 0.6rem;">
         <a href="{{ route('super-admin.teachers.edit', $teacher) }}" class="logout-btn">Edit</a>
         <a href="{{ route('super-admin.module', ['module' => 'teachers']) }}" class="logout-btn">Kembali</a>
     </div>

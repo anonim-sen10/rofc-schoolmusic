@@ -238,6 +238,9 @@
                 <label>Upload Foto Profile
                     <input type="file" name="photo" accept="image/*">
                 </label>
+                <label>Upload KTP Guru
+                    <input type="file" name="ktp" accept="image/*">
+                </label>
                 <div class="form-actions">
                     <button type="submit">Simpan Teacher</button>
                     <button type="reset" class="btn-secondary">Cancel</button>
@@ -338,6 +341,19 @@
                                                         <p>Kelas Diampu</p>
                                                         <p>{{ $teacher->classes->pluck('name')->join(', ') ?: '-' }}</p>
                                                     </article>
+                                                    <article class="registration-modal-item-full">
+                                                         <p>KTP Guru</p>
+                                                         @if($teacher->ktp_path)
+                                                            <div style="margin-top: 0.5rem;">
+                                                                <img src="{{ asset('storage/' . $teacher->ktp_path) }}" style="width: 100%; max-height: 200px; object-fit: contain; border-radius: 0.5rem; border: 1px solid #e2e8f0; cursor: zoom-in;" onclick="showLightbox(this.src)">
+                                                            </div>
+                                                         @else
+                                                            <div style="margin-top: 0.5rem; padding: 1rem; background: #fff1f2; border: 1px dashed #fecdd3; border-radius: 0.5rem; color: #be123c; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
+                                                                <i data-lucide="alert-circle" style="width: 1rem; height: 1rem;"></i>
+                                                                KTP belum diupload. Silakan edit data untuk melengkapi.
+                                                            </div>
+                                                         @endif
+                                                     </article>
                                                 </section>
                                             </div>
                                             <footer class="registration-modal-footer">
@@ -401,8 +417,17 @@
                                                             @endforeach
                                                         </select>
                                                     </label>
-                                                    <label style="grid-column: span 2;">Password Baru (opsional)
+                                                    <label>Password Baru (opsional)
                                                         <input type="password" name="password" placeholder="Kosongkan jika tidak diganti">
+                                                    </label>
+                                                    <label>Upload Foto Profile
+                                                        <input type="file" name="photo" accept="image/*">
+                                                    </label>
+                                                    <label style="grid-column: span 2;">Upload KTP Guru
+                                                        <input type="file" name="ktp" accept="image/*">
+                                                        @if($teacher->ktp_path)
+                                                            <small style="color: #059669;">KTP sudah ada.</small>
+                                                        @endif
                                                     </label>
                                                     <label style="grid-column: span 2;">Alamat
                                                         <textarea name="address" rows="3" placeholder="Masukkan alamat lengkap" required>{{ $teacher->address }}</textarea>
