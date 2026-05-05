@@ -863,7 +863,14 @@ class SuperAdminController extends Controller
             'classesForManagement' => MusicClass::query()->with(['teacher'])->orderBy('name')->get(),
             'classesForSchedule' => MusicClass::query()->with('teacher')->orderBy('name')->get(),
             'schedulesForManagement' => $scheduleFeatureReady
-                ? Schedule::query()->with(['musicClass.teacher', 'teacher', 'student.user'])->orderBy('day')->orderBy('time')->get()
+                ? Schedule::query()
+                    ->with(['musicClass.teacher', 'teacher', 'student.user'])
+                    ->orderBy('time')
+                    ->get()
+                    ->sortBy(function ($schedule) {
+                        $dayOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+                        return array_search($schedule->day, $dayOrder);
+                    })
                 : collect(),
             'scheduleFeatureReady' => $scheduleFeatureReady,
             'dayOptions' => self::SCHEDULE_DAY_OPTIONS,
