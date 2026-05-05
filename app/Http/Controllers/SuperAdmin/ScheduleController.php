@@ -31,8 +31,8 @@ class ScheduleController extends Controller
             'class_id' => ['required', 'integer', 'exists:classes,id'],
             'days' => ['required', 'array', 'min:1'],
             'days.*' => ['required', 'string', Rule::in(self::DAY_OPTIONS)],
-            'start_time' => ['required', 'date_format:H:i', 'before:end_time'],
-            'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
+            'start_time' => ['required', 'date_format:H:i', 'before_or_equal:end_time'],
+            'end_time' => ['required', 'date_format:H:i', 'after_or_equal:start_time'],
             'interval' => ['required', 'integer', 'min:1'],
         ]);
 
@@ -47,7 +47,7 @@ class ScheduleController extends Controller
             $interval = (int) $data['interval'];
             $currentTime = $startTime->copy();
 
-            while ($currentTime->lt($endTime)) {
+            while ($currentTime->lte($endTime)) {
                 $timeString = $currentTime->format('H:i');
 
                 $duplicateExists = Schedule::query()
