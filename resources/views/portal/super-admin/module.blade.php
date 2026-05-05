@@ -294,7 +294,7 @@
                                                 <div class="registration-modal-summary">
                                                     <div class="registration-modal-summary-left">
                                                         @if($teacher->photo_path)
-                                                            <img src="{{ asset('storage/' . $teacher->photo_path) }}" class="registration-modal-avatar" style="object-fit: cover;">
+                                                            <img src="{{ asset('storage/' . $teacher->photo_path) }}" class="registration-modal-avatar" style="object-fit: cover;" onclick="showLightbox(this.src)">
                                                         @else
                                                             <div class="registration-modal-avatar">
                                                                 {{ strtoupper(substr($teacher->name, 0, 1)) }}

@@ -335,4 +335,36 @@ document.addEventListener("DOMContentLoaded", () => {
             );
         }
     }
+
+    // --- Simple Lightbox Feature ---
+    const lightbox = document.createElement("div");
+    lightbox.className = "portal-lightbox";
+    lightbox.hidden = true;
+    lightbox.innerHTML = `
+        <div class="portal-lightbox-overlay"></div>
+        <div class="portal-lightbox-content">
+            <img src="" alt="Enlarged view" id="lightbox-img-el">
+            <button class="portal-lightbox-close" aria-label="Close lightbox">&times;</button>
+        </div>
+    `;
+    document.body.appendChild(lightbox);
+
+    window.showLightbox = (src) => {
+        const lbImg = document.getElementById("lightbox-img-el");
+        if (!lbImg || !src) return;
+        lbImg.src = src;
+        lightbox.hidden = false;
+        setTimeout(() => lightbox.classList.add("is-open"), 10);
+    };
+
+    const closeLightbox = () => {
+        lightbox.classList.remove("is-open");
+        setTimeout(() => (lightbox.hidden = true), 300);
+    };
+
+    lightbox.querySelector(".portal-lightbox-overlay").addEventListener("click", closeLightbox);
+    lightbox.querySelector(".portal-lightbox-close").addEventListener("click", closeLightbox);
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !lightbox.hidden) closeLightbox();
+    });
 });
