@@ -29,55 +29,56 @@ class ScheduleController extends Controller
 
         $data = $request->validate([
             'class_id' => ['required', 'integer', 'exists:classes,id'],
-            'day' => ['required', 'string', Rule::in(self::DAY_OPTIONS)],
+            'days' => ['required', 'array', 'min:1'],
+            'days.*' => ['required', 'string', Rule::in(self::DAY_OPTIONS)],
             'start_time' => ['required', 'date_format:H:i', 'before:end_time'],
             'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
             'interval' => ['required', 'integer', 'min:1'],
         ]);
 
         $class = MusicClass::query()->findOrFail($data['class_id']);
-
-        $startTime = \Carbon\Carbon::parse($data['start_time']);
-        $endTime = \Carbon\Carbon::parse($data['end_time']);
-        $interval = (int) $data['interval'];
-
-        $currentTime = $startTime->copy();
         $insertedCount = 0;
         $skippedCount = 0;
-
         $hasStatusColumn = Schema::hasColumn('schedules', 'status');
 
-        while ($currentTime->lt($endTime)) {
-            $timeString = $currentTime->format('H:i');
+        foreach ($data['days'] as $day) {
+            $startTime = \Carbon\Carbon::parse($data['start_time']);
+            $endTime = \Carbon\Carbon::parse($data['end_time']);
+            $interval = (int) $data['interval'];
+            $currentTime = $startTime->copy();
 
-            $duplicateExists = Schedule::query()
-                ->where('class_id', $class->id)
-                ->where('day', $data['day'])
-                ->where('time', $timeString)
-                ->exists();
+            while ($currentTime->lt($endTime)) {
+                $timeString = $currentTime->format('H:i');
 
-            if (! $duplicateExists) {
-                $payload = [
-                    'class_id' => $class->id,
-                    'day' => $data['day'],
-                    'time' => $timeString,
-                    'teacher_id' => $class->teacher_id,
-                ];
+                $duplicateExists = Schedule::query()
+                    ->where('class_id', $class->id)
+                    ->where('day', $day)
+                    ->where('time', $timeString)
+                    ->exists();
 
-                if ($hasStatusColumn) {
-                    $payload['status'] = 'available';
+                if (! $duplicateExists) {
+                    $payload = [
+                        'class_id' => $class->id,
+                        'day' => $day,
+                        'time' => $timeString,
+                        'teacher_id' => $class->teacher_id,
+                    ];
+
+                    if ($hasStatusColumn) {
+                        $payload['status'] = 'available';
+                    }
+
+                    Schedule::query()->create($payload);
+                    $insertedCount++;
+                } else {
+                    $skippedCount++;
                 }
 
-                Schedule::query()->create($payload);
-                $insertedCount++;
-            } else {
-                $skippedCount++;
+                $currentTime->addMinutes($interval);
             }
-
-            $currentTime->addMinutes($interval);
         }
 
-        $message = "Berhasil membuat {$insertedCount} jadwal baru.";
+        $message = "Berhasil membuat {$insertedCount} jadwal baru untuk ".count($data['days'])." hari.";
         if ($skippedCount > 0) {
             $message .= " Dilewati {$skippedCount} jadwal karena duplikat.";
         }

@@ -4,6 +4,7 @@
 @section('page-title', $moduleTitle)
 
 @section('content')
+
 @if ($moduleKey === 'users')
     <section class="card" data-searchable>
         <h3>Buat Akun Login Baru</h3>
@@ -146,17 +147,14 @@
                                                 <button type="button" class="registration-modal-close-btn" aria-label="Tutup" onclick="this.closest('details').removeAttribute('open');"><i data-lucide="x"></i></button>
                                             </header>
                                             <div class="registration-modal-body">
-                                                <section class="registration-edit-grid">
-                                                    <div class="registration-edit-field">
-                                                        <label class="registration-edit-label">Nama</label>
+                                                <div class="module-form-grid">
+                                                    <label>Nama
                                                         <input type="text" name="name" value="{{ $userRow->name }}" required>
-                                                    </div>
-                                                    <div class="registration-edit-field">
-                                                        <label class="registration-edit-label">Email</label>
+                                                    </label>
+                                                    <label>Email
                                                         <input type="email" name="email" value="{{ $userRow->email }}" required>
-                                                    </div>
-                                                    <div class="registration-edit-field">
-                                                        <label class="registration-edit-label">Role</label>
+                                                    </label>
+                                                    <label>Role
                                                         <select name="role" required>
                                                             <option value="super_admin" @selected($userRow->hasRole('super_admin'))>Super Admin</option>
                                                             <option value="admin" @selected($userRow->hasRole('admin'))>Admin</option>
@@ -164,12 +162,11 @@
                                                             <option value="teacher" @selected($userRow->hasRole('teacher'))>Teacher</option>
                                                             <option value="student" @selected($userRow->hasRole('student'))>Siswa</option>
                                                         </select>
-                                                    </div>
-                                                    <div class="registration-edit-field">
-                                                        <label class="registration-edit-label">Password Baru (opsional)</label>
+                                                    </label>
+                                                    <label>Password Baru (opsional)
                                                         <input type="password" name="password" placeholder="Kosongkan jika tidak diganti">
-                                                    </div>
-                                                </section>
+                                                    </label>
+                                                </div>
                                             </div>
                                             <footer class="registration-modal-footer">
                                                 <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x"></i> Batal</button>
@@ -356,85 +353,68 @@
                                             @csrf
                                             @method('PUT')
                                             {{-- ─── HEADER ─── --}}
-                                            <header class="te-modal-header">
-                                                <div class="te-modal-header-left">
-                                                    <span class="te-modal-icon">
+                                            <header class="registration-modal-header">
+                                                <div class="registration-modal-header-left">
+                                                    <span class="registration-modal-icon">
                                                         <i data-lucide="user-pen"></i>
                                                     </span>
                                                     <div>
-                                                        <h3 class="te-modal-title">Edit Teacher</h3>
-                                                        <p class="te-modal-subtitle">Perbarui informasi data pengajar</p>
+                                                        <h3>Edit Teacher</h3>
+                                                        <p>Perbarui informasi data pengajar</p>
                                                     </div>
                                                 </div>
-                                                <button type="button" class="te-modal-close action-popover-close" aria-label="Tutup">
+                                                <button type="button" class="registration-modal-close-btn action-popover-close" aria-label="Tutup">
                                                     <i data-lucide="x"></i>
                                                 </button>
                                             </header>
 
                                             {{-- ─── BODY ─── --}}
-                                            <div class="te-modal-body">
-                                                <div class="te-modal-grid">
-                                                    {{-- Row 1 --}}
-                                                    <div class="te-field" id="field-name-{{ $teacher->id }}">
-                                                        <label class="te-label" for="te-name-{{ $teacher->id }}">Nama</label>
-                                                        <input class="te-input" type="text" id="te-name-{{ $teacher->id }}" name="name" value="{{ $teacher->name }}" placeholder="Masukkan nama lengkap" required>
-                                                        <span class="te-error-text" aria-live="polite"></span>
-                                                    </div>
-                                                    <div class="te-field" id="field-gender-{{ $teacher->id }}">
-                                                        <label class="te-label" for="te-gender-{{ $teacher->id }}">Jenis Kelamin</label>
-                                                        <div class="te-select-wrap">
-                                                            <select class="te-input te-select" id="te-gender-{{ $teacher->id }}" name="gender" required>
-                                                                <option value="" disabled>Pilih jenis kelamin</option>
-                                                                <option value="laki-laki" @selected($teacher->gender === 'laki-laki')>Laki-laki</option>
-                                                                <option value="perempuan" @selected($teacher->gender === 'perempuan')>Perempuan</option>
-                                                            </select>
-                                                            <i data-lucide="chevron-down" class="te-select-icon"></i>
-                                                        </div>
-                                                        <span class="te-error-text" aria-live="polite"></span>
-                                                    </div>
-
-                                                    {{-- Row 2 --}}
-                                                    <div class="te-field" id="field-email-{{ $teacher->id }}">
-                                                        <label class="te-label" for="te-email-{{ $teacher->id }}">Email</label>
-                                                        <input class="te-input" type="email" id="te-email-{{ $teacher->id }}" name="email" value="{{ $teacher->user?->email }}" placeholder="contoh@email.com" required>
-                                                        <span class="te-error-text" aria-live="polite"></span>
-                                                    </div>
-                                                    <div class="te-field" id="field-religion-{{ $teacher->id }}">
-                                                        <label class="te-label" for="te-religion-{{ $teacher->id }}">Agama</label>
-                                                        <input class="te-input" type="text" id="te-religion-{{ $teacher->id }}" name="religion" value="{{ $teacher->religion }}" placeholder="Masukkan agama" required>
-                                                        <span class="te-error-text" aria-live="polite"></span>
-                                                    </div>
-
-                                                    {{-- Row 3 --}}
-                                                    <div class="te-field" id="field-phone-{{ $teacher->id }}">
-                                                        <label class="te-label" for="te-phone-{{ $teacher->id }}">Nomor HP</label>
-                                                        <input class="te-input" type="text" id="te-phone-{{ $teacher->id }}" name="phone" value="{{ $teacher->phone }}" placeholder="08xxxxxxxxxx" required>
-                                                        <span class="te-error-text" aria-live="polite"></span>
-                                                    </div>
-                                                    <div class="te-field" id="field-instrument-{{ $teacher->id }}">
-                                                        <label class="te-label" for="te-instrument-{{ $teacher->id }}">Bidang / Instrumen</label>
-                                                        <input class="te-input" type="text" id="te-instrument-{{ $teacher->id }}" name="instrument" value="{{ $teacher->instrument }}" placeholder="Drum, Piano, Vocal, dll">
-                                                        <span class="te-error-text" aria-live="polite"></span>
-                                                    </div>
-
-                                                    {{-- Full-width: Alamat --}}
-                                                    <div class="te-field te-field--full" id="field-address-{{ $teacher->id }}">
-                                                        <label class="te-label" for="te-address-{{ $teacher->id }}">Alamat</label>
-                                                        <textarea class="te-input te-textarea" id="te-address-{{ $teacher->id }}" name="address" rows="3" placeholder="Masukkan alamat lengkap" required>{{ $teacher->address }}</textarea>
-                                                        <span class="te-error-text" aria-live="polite"></span>
-                                                    </div>
+                                            <div class="registration-modal-body">
+                                                <div class="module-form-grid">
+                                                    <label>Nama
+                                                        <input type="text" name="name" value="{{ $teacher->name }}" placeholder="Masukkan nama lengkap" required>
+                                                    </label>
+                                                    <label>Jenis Kelamin
+                                                        <select name="gender" required>
+                                                            <option value="" disabled>Pilih jenis kelamin</option>
+                                                            <option value="laki-laki" @selected($teacher->gender === 'laki-laki')>Laki-laki</option>
+                                                            <option value="perempuan" @selected($teacher->gender === 'perempuan')>Perempuan</option>
+                                                        </select>
+                                                    </label>
+                                                    <label>Email
+                                                        <input type="email" name="email" value="{{ $teacher->user?->email }}" placeholder="contoh@email.com" required>
+                                                    </label>
+                                                    <label>Agama
+                                                        <input type="text" name="religion" value="{{ $teacher->religion }}" placeholder="Masukkan agama" required>
+                                                    </label>
+                                                    <label>Nomor HP
+                                                        <input type="text" name="phone" value="{{ $teacher->phone }}" placeholder="08xxxxxxxxxx" required>
+                                                    </label>
+                                                    <label>Bidang / Instrumen
+                                                        <input type="text" name="instrument" value="{{ $teacher->instrument }}" placeholder="Drum, Piano, Vocal, dll">
+                                                    </label>
+                                                    <label>Assign Class
+                                                        <select name="class_id">
+                                                            <option value="">Pilih class (opsional)</option>
+                                                            @foreach ($classesForManagement as $classOption)
+                                                                <option value="{{ $classOption->id }}" @selected($teacher->classes->contains($classOption->id))>{{ $classOption->name }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </label>
+                                                    <label style="grid-column: span 2;">Password Baru (opsional)
+                                                        <input type="password" name="password" placeholder="Kosongkan jika tidak diganti">
+                                                    </label>
+                                                    <label style="grid-column: span 2;">Alamat
+                                                        <textarea name="address" rows="3" placeholder="Masukkan alamat lengkap" required>{{ $teacher->address }}</textarea>
+                                                    </label>
                                                 </div>
                                             </div>
 
                                             {{-- ─── FOOTER ─── --}}
-                                            <footer class="te-modal-footer">
-                                                <button type="button" class="te-btn te-btn--secondary action-popover-close"><i data-lucide="x"></i> Batal</button>
-                                                <button type="submit" class="te-btn te-btn--primary">
-                                                    <i data-lucide="save"></i>
-                                                    <span class="te-btn-label">Save Changes</span>
-                                                    <span class="te-btn-spinner" aria-hidden="true">
-                                                        <svg class="te-spin" width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="31.42 31.42" stroke-dashoffset="10"/></svg>
-                                                    </span>
+                                            <footer class="registration-modal-footer">
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x"></i> Batal</button>
+                                                <button type="submit" class="registration-modal-btn registration-modal-btn-primary">
+                                                    <i data-lucide="save"></i> Simpan Perubahan
                                                 </button>
                                             </footer>
                                         </form>
@@ -599,36 +579,31 @@
                                             <button type="button" class="registration-modal-close-btn action-popover-close" aria-label="Tutup"><i data-lucide="x"></i></button>
                                         </header>
                                         <div class="registration-modal-body">
-                                            <section class="registration-edit-grid">
-                                                <div class="registration-edit-field">
-                                                    <label class="registration-edit-label">Nama Kelas</label>
+                                            <div class="module-form-grid">
+                                                <label style="grid-column: span 2;">Nama Kelas
                                                     <input type="text" name="name" value="{{ $classItem->name }}" required>
-                                                </div>
-                                                <div class="registration-edit-field">
-                                                    <label class="registration-edit-label">Harga</label>
-                                                    <input type="number" name="price" min="0" step="1000" value="{{ (int) ($classItem->price ?? 0) }}">
-                                                </div>
-                                                <div class="registration-edit-field registration-edit-field-full">
-                                                    <label class="registration-edit-label">Deskripsi</label>
-                                                    <textarea name="description" rows="2">{{ $classItem->description }}</textarea>
-                                                </div>
-                                                <div class="registration-edit-field">
-                                                    <label class="registration-edit-label">Guru</label>
+                                                </label>
+                                                <label style="grid-column: span 2;">Deskripsi
+                                                    <textarea name="description" rows="3">{{ $classItem->description }}</textarea>
+                                                </label>
+                                                <label>Harga
+                                                    <input type="number" name="price" min="0" step="1000" value="{{ $classItem->price ?? 0 }}">
+                                                </label>
+                                                <label>Guru
                                                     <select name="teacher_id">
-                                                        <option value="">Tanpa guru</option>
+                                                        <option value="">Pilih guru (opsional)</option>
                                                         @foreach ($teachersForClassOptions as $teacherOption)
-                                                            <option value="{{ $teacherOption->id }}" @selected((int) $classItem->teacher_id === (int) $teacherOption->id)>{{ $teacherOption->name }}</option>
+                                                            <option value="{{ $teacherOption->id }}" @selected((string) $classItem->teacher_id === (string) $teacherOption->id)>{{ $teacherOption->name }}</option>
                                                         @endforeach
                                                     </select>
-                                                </div>
-                                                <div class="registration-edit-field">
-                                                    <label class="registration-edit-label">Status</label>
+                                                </label>
+                                                <label style="grid-column: span 2;">Status
                                                     <select name="status" required>
                                                         <option value="active" @selected($classItem->status === 'active')>Active</option>
                                                         <option value="inactive" @selected($classItem->status === 'inactive')>Inactive</option>
                                                     </select>
-                                                </div>
-                                            </section>
+                                                </label>
+                                            </div>
                                         </div>
                                         <footer class="registration-modal-footer">
                                             <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close">Batal</button>
@@ -832,57 +807,49 @@
                                                 <button type="button" class="registration-modal-close-btn" aria-label="Tutup" onclick="this.closest('details').removeAttribute('open');"><i data-lucide="x"></i></button>
                                             </header>
                                             <div class="registration-modal-body">
-                                                <section class="registration-edit-grid">
-                                                    <div class="registration-edit-field">
-                                                        <label class="registration-edit-label">Nama Lengkap</label>
+                                                <div class="module-form-grid">
+                                                    <label>Nama Lengkap
                                                         <input type="text" name="name" value="{{ $student->name }}" required>
-                                                    </div>
-                                                    <div class="registration-edit-field">
-                                                        <label class="registration-edit-label">Umur</label>
+                                                    </label>
+                                                    <label>Umur
                                                         <input type="number" name="age" value="{{ $student->age }}">
-                                                    </div>
-                                                    <div class="registration-edit-field">
-                                                        <label class="registration-edit-label">Email</label>
+                                                    </label>
+                                                    <label>Email
                                                         <input type="email" name="email" value="{{ $student->email }}">
-                                                    </div>
-                                                    <div class="registration-edit-field">
-                                                        <label class="registration-edit-label">Telepon</label>
+                                                    </label>
+                                                    <label>Telepon
                                                         <input type="text" name="phone" value="{{ $student->phone }}">
-                                                    </div>
-                                                    <div class="registration-edit-field registration-edit-field-full">
-                                                        <label class="registration-edit-label">Alamat</label>
+                                                    </label>
+                                                    <label style="grid-column: span 2;">Alamat
                                                         <textarea name="address" rows="2">{{ $student->address }}</textarea>
-                                                    </div>
-                                                    <div class="registration-edit-field registration-edit-field-full">
-                                                        <label class="registration-edit-label">Kelas</label>
-                                                        <select multiple name="class_ids[]" size="4">
+                                                    </label>
+                                                    <label style="grid-column: span 2;">Kelas
+                                                        <select multiple name="class_ids[]" size="4" style="height: auto; min-height: 100px;">
                                                             @foreach($classesForManagement as $classItem)
                                                                 <option value="{{ $classItem->id }}" @selected($student->classes->contains($classItem->id))>
                                                                     {{ $classItem->name }}
                                                                 </option>
                                                             @endforeach
                                                         </select>
-                                                    </div>
-                                                    <div class="registration-edit-field">
-                                                        <label class="registration-edit-label">Mulai Kursus</label>
+                                                        <small style="color: #64748b; font-size: 0.75rem; margin-top: 0.25rem; display: block;">Tahan Ctrl/Cmd untuk memilih lebih dari satu.</small>
+                                                    </label>
+                                                    <label>Mulai Kursus
                                                         <input type="date" name="start_date" value="{{ $student->start_date ? \Carbon\Carbon::parse($student->start_date)->format('Y-m-d') : '' }}">
-                                                    </div>
-                                                    <div class="registration-edit-field">
-                                                        <label class="registration-edit-label">Durasi (Bulan)</label>
+                                                    </label>
+                                                    <label>Durasi (Bulan)
                                                         <select name="duration_months">
                                                             @foreach([1, 2, 3, 4, 6, 12] as $m)
                                                                 <option value="{{ $m }}" @selected((int)($student->duration_months ?? 0) === $m)>{{ $m }} Bulan</option>
                                                             @endforeach
                                                         </select>
-                                                    </div>
-                                                    <div class="registration-edit-field">
-                                                        <label class="registration-edit-label">Status Akun</label>
+                                                    </label>
+                                                    <label style="grid-column: span 2;">Status Akun
                                                         <select name="is_active">
                                                             <option value="1" @selected($student->is_active)>Aktif</option>
                                                             <option value="0" @selected(!$student->is_active)>Non-aktif</option>
                                                         </select>
-                                                    </div>
-                                                </section>
+                                                    </label>
+                                                </div>
                                             </div>
                                             <footer class="registration-modal-footer">
                                                 <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x"></i> Batal</button>
@@ -918,333 +885,15 @@
         $hariOptions = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
     @endphp
 
+
+
     <style>
-        .registration-modal {
-            position: fixed;
-            inset: 0;
-            z-index: 80;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-            transition: opacity .2s ease, visibility .2s ease;
-        }
-
-        [data-registration-edit-modal] {
-            z-index: 90;
-        }
-
-        .registration-modal.is-open {
-            opacity: 1;
-            visibility: visible;
-            pointer-events: auto;
-        }
-
-        .registration-modal-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(2, 6, 23, .58);
-            backdrop-filter: blur(4px);
-        }
-
-        .registration-modal-panel {
-            position: relative;
-            width: min(700px, 100%);
-            max-height: calc(100vh - 2rem);
-            border-radius: 1rem;
-            border: 1px solid #d5deeb;
-            background: #fff;
-            box-shadow: 0 28px 56px rgba(2, 6, 23, .35);
-            overflow: hidden;
-            transform: scale(.96);
-            opacity: 0;
-            transition: transform .2s ease, opacity .2s ease;
-        }
-
-        .registration-modal.is-open .registration-modal-panel {
-            transform: scale(1);
-            opacity: 1;
-        }
-
-        .registration-modal-header {
-            display: flex;
-            justify-content: space-between;
-            gap: .75rem;
-            align-items: flex-start;
-            padding: 1.1rem 1.25rem;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .registration-modal-header-left {
-            display: flex;
-            align-items: center;
-            gap: .7rem;
-        }
-
-        .registration-modal-icon {
-            width: 2.5rem;
-            height: 2.5rem;
-            border-radius: .75rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            color: #1d4ed8;
-            background: #eff6ff;
-        }
-
-        .registration-modal-header h3 {
-            margin: 0;
-            color: #0f172a;
-            font-size: 1.02rem;
-        }
-
-        .registration-modal-header p {
-            margin: .18rem 0 0;
-            color: #64748b;
-            font-size: .84rem;
-        }
-
-        .registration-modal-close-btn {
-            width: 2.1rem;
-            height: 2.1rem;
-            border-radius: .6rem;
-            border: 1px solid #dbe3ef;
-            background: #fff;
-            color: #64748b;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .registration-modal-close-btn:hover {
-            background: #f8fafc;
-            color: #334155;
-        }
-
-        .registration-modal-body {
-            max-height: 68vh;
-            overflow-y: auto;
-            padding: 1.1rem 1.25rem;
-        }
-
-        .registration-modal-summary {
-            margin-bottom: .9rem;
-            border-radius: .9rem;
-            border: 1px solid #dbe3ef;
-            background: #f8fafc;
-            padding: .8rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: .8rem;
-        }
-
-        .registration-modal-summary-left {
-            display: flex;
-            align-items: center;
-            gap: .7rem;
-        }
-
-        .registration-modal-avatar {
-            width: 2.7rem;
-            height: 2.7rem;
-            border-radius: 999px;
-            background: #dbeafe;
-            color: #1e40af;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-        }
-
-        .registration-modal-summary p {
-            margin: 0;
-            color: #64748b;
-            font-size: .8rem;
-        }
-
-        .registration-modal-summary-name {
-            margin-top: .2rem !important;
-            color: #0f172a !important;
-            font-size: .95rem !important;
-            font-weight: 700;
-        }
-
-        .registration-modal-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: .65rem;
-        }
-
-        .registration-modal-grid > article {
-            border: 1px solid #dbe3ef;
-            border-radius: .75rem;
-            padding: .7rem;
-            background: #fff;
-        }
-
-        .registration-modal-grid > article > p:first-child {
-            margin: 0;
-            font-size: .76rem;
-            color: #64748b;
-        }
-
-        .registration-modal-grid > article > p:last-child {
-            margin: .24rem 0 0;
-            color: #0f172a;
-            font-weight: 600;
-            line-height: 1.45;
-        }
-
-        .registration-modal-item-full {
-            grid-column: 1 / -1;
-        }
-
-        .registration-status-badge {
-            display: inline-flex;
-            align-items: center;
-            border-radius: 999px;
-            padding: .28rem .7rem;
-            font-size: .72rem;
-            font-weight: 700;
-            background: #e2e8f0;
-            color: #334155;
-        }
-
-        .registration-status-badge.is-success {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .registration-status-badge.is-warning {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .registration-status-badge.is-danger {
-            background: #ffe4e6;
-            color: #be123c;
-        }
-
-        .registration-status-badge.is-neutral {
-            background: #e2e8f0;
-            color: #334155;
-        }
-
-        .registration-modal-footer {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-            gap: .55rem;
-            padding: .9rem 1.25rem 1.1rem;
-            border-top: 1px solid #e2e8f0;
-            background: #fff;
-        }
-
-        .registration-modal-btn {
-            border-radius: .65rem;
-            border: 1px solid transparent;
-            padding: .52rem .9rem;
-            font-size: .82rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .registration-modal-btn-secondary {
-            border-color: #cbd5e1;
-            background: #fff;
-            color: #334155;
-        }
-
-        .registration-modal-btn-secondary:hover {
-            background: #f8fafc;
-        }
-
-        .registration-modal-btn-primary {
-            background: #2563eb;
-            color: #fff;
-        }
-
-        .registration-modal-btn-primary:hover {
-            background: #1d4ed8;
-        }
-
-        .registration-modal-btn-danger {
-            background: #e11d48;
-            color: #fff;
-        }
-
-        .registration-modal-btn-danger:hover {
-            background: #be123c;
-        }
-
-        .registration-edit-form .registration-edit-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: .65rem;
-        }
-
-        .registration-edit-form .registration-edit-grid > label {
-            display: grid;
-            gap: .35rem;
-            color: #334155;
-            font-size: .82rem;
-        }
-
-        .registration-edit-form .registration-edit-field-full {
-            grid-column: 1 / -1;
-        }
-
-        .registration-edit-form input,
-        .registration-edit-form select,
-        .registration-edit-form textarea {
-            width: 100%;
-            border: 1px solid #cbd5e1;
-            border-radius: .75rem;
-            padding: .52rem .7rem;
-            font-size: .84rem;
-            color: #0f172a;
-            background: #fff;
-        }
-
-        .registration-edit-form select[multiple] {
-            min-height: 5.9rem;
-        }
-
-        .registration-edit-form input:focus,
-        .registration-edit-form select:focus,
-        .registration-edit-form textarea:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, .15);
-        }
-
-        .registration-edit-footer {
-            margin-top: 1rem;
-            padding: .9rem 0 0;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        @media (max-width: 900px) {
-            .registration-modal {
-                padding: .75rem;
-            }
-
-            .registration-modal-header,
-            .registration-modal-body,
-            .registration-modal-footer {
-                padding-left: .9rem;
-                padding-right: .9rem;
-            }
-
-            .registration-modal-grid,
-            .registration-edit-form .registration-edit-grid {
-                grid-template-columns: 1fr;
-            }
+        /* Highlight search results */
+        [data-searchable] mark {
+            background: #fef08a;
+            color: #111;
+            padding: 0 0.1rem;
+            border-radius: 0.1rem;
         }
     </style>
 
@@ -1553,24 +1202,114 @@
                                         </form>
                                     @endif
 
-                                    <button
-                                        type="button"
-                                        class="btn-icon"
-                                        title="Detail"
-                                        aria-label="Detail"
-                                        data-registration-detail-trigger
-                                        data-registration='@json($detailPayload, JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_TAG | JSON_HEX_QUOT)'
-                                    ><i data-lucide="eye"></i></button>
+                                    {{-- Detail Popover --}}
+                                    <details class="action-popover registration-style-popover">
+                                        <summary class="btn-icon" title="Detail" aria-label="Detail"><i data-lucide="eye"></i></summary>
+                                        <div class="action-popover-form registration-edit-form">
+                                            <header class="registration-modal-header">
+                                                <div class="registration-modal-header-left">
+                                                    <span class="registration-modal-icon"><i data-lucide="clipboard-list"></i></span>
+                                                    <div><h3>Detail Pendaftaran</h3><p>Informasi lengkap data siswa</p></div>
+                                                </div>
+                                                <button type="button" class="registration-modal-close-btn" aria-label="Tutup" onclick="this.closest('details').removeAttribute('open');"><i data-lucide="x"></i></button>
+                                            </header>
+                                            <div class="registration-modal-body">
+                                                <div class="registration-modal-summary">
+                                                    <div class="registration-modal-summary-left">
+                                                        <div class="registration-modal-avatar">
+                                                            {{ strtoupper(substr($namaLengkap, 0, 1)) }}
+                                                        </div>
+                                                        <div>
+                                                            <p>Nama Siswa</p>
+                                                            <p class="registration-modal-summary-name">{{ $namaLengkap }}</p>
+                                                        </div>
+                                                    </div>
+                                                    <x-ui.badge :type="$registrationBadge">{{ strtoupper($registrationStatus) }}</x-ui.badge>
+                                                </div>
+                                                <section class="registration-modal-grid">
+                                                    <article><p>Nama Panggilan</p><p>{{ $namaPanggilan }}</p></article>
+                                                    <article><p>Jenis Kelamin</p><p>{{ $jenisKelamin }}</p></article>
+                                                    <article><p>Tempat Lahir</p><p>{{ $tempatLahir }}</p></article>
+                                                    <article><p>Tanggal Lahir</p><p>{{ $tanggalLahirText }}</p></article>
+                                                    <article><p>Kewarganegaraan</p><p>{{ $kewarganegaraan }}</p></article>
+                                                    <article><p>No HP Siswa</p><p>{{ $teleponSiswa }}</p></article>
+                                                    <article class="registration-modal-item-full"><p>Email Siswa</p><p>{{ $registrationItem->email }}</p></article>
+                                                    <article class="registration-modal-item-full"><p>Alamat</p><p>{{ $alamat }}</p></article>
+                                                    <article><p>Nama Orang Tua</p><p>{{ $namaOrtu }}</p></article>
+                                                    <article><p>Pekerjaan Orang Tua</p><p>{{ $pekerjaanOrtu }}</p></article>
+                                                    <article><p>No HP Orang Tua</p><p>{{ $noHpOrtu }}</p></article>
+                                                    <article><p>Email Orang Tua</p><p>{{ $emailOrtu }}</p></article>
+                                                    <article><p>Instrumen</p><p>{{ $instrumenText }}</p></article>
+                                                    <article><p>Program Tambahan</p><p>{{ $programTambahanText }}</p></article>
+                                                    <article><p>Pengalaman Belajar</p><p>{{ $pengalamanText }}</p></article>
+                                                    <article class="registration-modal-item-full"><p>Deskripsi Pengalaman</p><p>{{ $deskripsiPengalaman }}</p></article>
+                                                    <article><p>Status</p><p>{{ strtoupper($registrationStatus) }}</p></article>
+                                                    <article><p>Kelas Terpilih</p><p>{{ $registrationItem->class?->name ?? '-' }}</p></article>
+                                                </section>
+                                            </div>
+                                            <footer class="registration-modal-footer">
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary" onclick="this.closest('details').removeAttribute('open');">Tutup</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(3)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');">Edit Data</button>
+                                            </footer>
+                                        </div>
+                                    </details>
 
-                                    <button
-                                        type="button"
-                                        class="btn-icon"
-                                        id="{{ $editTriggerId }}"
-                                        title="Edit"
-                                        aria-label="Edit"
-                                        data-registration-edit-trigger
-                                        data-registration='@json($detailPayload, JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_TAG | JSON_HEX_QUOT)'
-                                    ><i data-lucide="pencil-line"></i></button>
+                                    {{-- Edit Popover --}}
+                                    <details class="action-popover registration-style-popover">
+                                        <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
+                                        <form class="action-popover-form registration-edit-form" method="POST" action="{{ route('super-admin.registrations.update', $registrationItem) }}">
+                                            @csrf
+                                            @method('PUT')
+                                            <header class="registration-modal-header">
+                                                <div class="registration-modal-header-left">
+                                                    <span class="registration-modal-icon"><i data-lucide="pencil-line"></i></span>
+                                                    <div><h3>Edit Pendaftaran</h3><p>Perbarui informasi pendaftaran siswa</p></div>
+                                                </div>
+                                                <button type="button" class="registration-modal-close-btn" aria-label="Tutup" onclick="this.closest('details').removeAttribute('open');"><i data-lucide="x"></i></button>
+                                            </header>
+                                            <div class="registration-modal-body">
+                                                <div class="module-form-grid">
+                                                    <label>Nama Lengkap <input type="text" name="nama_lengkap" value="{{ $namaLengkap }}" required></label>
+                                                    <label>Nama Panggilan <input type="text" name="nama_panggilan" value="{{ $namaPanggilan }}" required></label>
+                                                    <label>Jenis Kelamin
+                                                        <select name="jenis_kelamin" required>
+                                                            <option value="laki-laki" @selected($jenisKelamin === 'laki-laki')>Laki-laki</option>
+                                                            <option value="perempuan" @selected($jenisKelamin === 'perempuan')>Perempuan</option>
+                                                        </select>
+                                                    </label>
+                                                    <label>Tempat Lahir <input type="text" name="tempat_lahir" value="{{ $tempatLahir }}" required></label>
+                                                    <label>Tanggal Lahir <input type="date" name="tanggal_lahir" value="{{ $tanggalLahirInput }}" required></label>
+                                                    <label>Kewarganegaraan <input type="text" name="kewarganegaraan" value="{{ $kewarganegaraan }}" required></label>
+                                                    <label style="grid-column: span 2;">Alamat <textarea name="alamat" rows="3" required>{{ $alamat }}</textarea></label>
+                                                    <label>No HP Siswa <input type="tel" name="no_hp_siswa" value="{{ $teleponSiswa }}" required></label>
+                                                    <label>Email Siswa <input type="email" name="email" value="{{ $registrationItem->email }}" required></label>
+                                                    <label>Nama Orang Tua <input type="text" name="nama_ortu" value="{{ $namaOrtu }}" required></label>
+                                                    <label>Pekerjaan Orang Tua <input type="text" name="pekerjaan_ortu" value="{{ $pekerjaanOrtu }}"></label>
+                                                    <label>No HP Orang Tua <input type="tel" name="no_hp_ortu" value="{{ $noHpOrtu }}" required></label>
+                                                    <label>Email Orang Tua <input type="email" name="email_ortu" value="{{ $emailOrtu }}"></label>
+                                                    <label>Instrumen
+                                                        <select name="instrumen" required>
+                                                            @foreach($instrumenOptions as $instrumenItem)
+                                                                <option value="{{ $instrumenItem }}" @selected($instrumenValue === $instrumenItem)>{{ $instrumenItem }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </label>
+                                                    <label>Status
+                                                        <select name="status" required>
+                                                            <option value="pending" @selected($registrationStatus === 'pending')>pending</option>
+                                                            <option value="accepted" @selected($registrationStatus === 'accepted')>accepted</option>
+                                                            <option value="rejected" @selected($registrationStatus === 'rejected')>rejected</option>
+                                                        </select>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <footer class="registration-modal-footer">
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary" onclick="this.closest('details').removeAttribute('open');">Batal</button>
+                                                <button type="submit" class="registration-modal-btn registration-modal-btn-primary">Simpan Perubahan</button>
+                                            </footer>
+                                        </form>
+                                    </details>
+
                                     <form method="POST" action="{{ route('super-admin.registrations.destroy', $registrationItem) }}" onsubmit="return confirm('Hapus registration ini?');">
                                         @csrf
                                         @method('DELETE')
@@ -1589,570 +1328,15 @@
         </div>
     </section>
 
-    <div
-        class="registration-modal"
-        data-registration-modal
-        aria-hidden="true"
-    >
-        <div class="registration-modal-overlay" data-registration-modal-overlay></div>
 
-        <div
-            class="registration-modal-panel"
-            data-registration-modal-panel
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="registration-modal-title"
-        >
-            <header class="registration-modal-header">
-                <div class="registration-modal-header-left">
-                    <span class="registration-modal-icon">
-                        <i data-lucide="clipboard-list"></i>
-                    </span>
-                    <div>
-                        <h3 id="registration-modal-title">Detail Pendaftaran</h3>
-                        <p>Informasi lengkap data siswa</p>
-                    </div>
-                </div>
 
-                <button
-                    type="button"
-                    class="registration-modal-close-btn"
-                    data-registration-modal-close
-                    aria-label="Close"
-                >
-                    <i data-lucide="x"></i>
-                </button>
-            </header>
 
-            <div class="registration-modal-body">
-                <section class="registration-modal-summary">
-                    <div class="registration-modal-summary-left">
-                        <span class="registration-modal-avatar" id="registration-modal-avatar">-</span>
-                        <div>
-                            <p>Nama Siswa</p>
-                            <p class="registration-modal-summary-name" data-registration-field="fullName">-</p>
-                        </div>
-                    </div>
-                    <span class="registration-status-badge" data-registration-status-badge>-</span>
-                </section>
-
-                <section class="registration-modal-grid">
-                    <article><p>Nama Panggilan</p><p data-registration-field="nickName">-</p></article>
-                    <article><p>Jenis Kelamin</p><p data-registration-field="gender">-</p></article>
-                    <article><p>Tempat Lahir</p><p data-registration-field="birthPlace">-</p></article>
-                    <article><p>Tanggal Lahir</p><p data-registration-field="birthDate">-</p></article>
-                    <article><p>Kewarganegaraan</p><p data-registration-field="citizenship">-</p></article>
-                    <article><p>No HP Siswa</p><p data-registration-field="studentPhone">-</p></article>
-                    <article class="registration-modal-item-full"><p>Email Siswa</p><p data-registration-field="studentEmail">-</p></article>
-                    <article class="registration-modal-item-full"><p>Alamat</p><p data-registration-field="address">-</p></article>
-
-                    <article><p>Nama Orang Tua</p><p data-registration-field="parentName">-</p></article>
-                    <article><p>Pekerjaan Orang Tua</p><p data-registration-field="parentJob">-</p></article>
-                    <article><p>No HP Orang Tua</p><p data-registration-field="parentPhone">-</p></article>
-                    <article><p>Email Orang Tua</p><p data-registration-field="parentEmail">-</p></article>
-
-                    <article><p>Instrumen</p><p data-registration-field="instrument">-</p></article>
-                    <article><p>Program Tambahan</p><p data-registration-field="additionalProgram">-</p></article>
-                    <article><p>Pengalaman Belajar</p><p data-registration-field="experience">-</p></article>
-                    <article class="registration-modal-item-full"><p>Deskripsi Pengalaman</p><p data-registration-field="experienceDescription">-</p></article>
-                    <article><p>Status</p><p data-registration-field="status">-</p></article>
-                    <article><p>Kelas Terpilih</p><p data-registration-field="selectedClass">-</p></article>
-                </section>
-
-                <section class="registration-modal-schedules-section">
-                    <div class="registration-modal-schedules-header">
-                        <h4>Jadwal Dipilih</h4>
-                        <span class="registration-modal-schedules-badge" id="registration-modal-schedules-badge">0 Jadwal</span>
-                    </div>
-                    <div id="registration-modal-schedules-list" class="registration-modal-schedules-list">
-                        <!-- JS populated -->
-                    </div>
-                </section>
-            </div>
-
-            <footer class="registration-modal-footer">
-                <button type="button" class="registration-modal-btn registration-modal-btn-secondary" data-registration-modal-close>Tutup</button>
-                <button type="button" class="registration-modal-btn registration-modal-btn-primary" data-registration-modal-edit>Edit Data</button>
-                <button type="button" class="registration-modal-btn registration-modal-btn-danger" data-registration-modal-delete>Hapus</button>
-            </footer>
-        </div>
-    </div>
-
-    <div
-        class="registration-modal"
-        data-registration-edit-modal
-        aria-hidden="true"
-    >
-        <div class="registration-modal-overlay" data-registration-edit-modal-overlay></div>
-
-        <div
-            class="registration-modal-panel"
-            data-registration-edit-modal-panel
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="registration-edit-modal-title"
-        >
-            <header class="registration-modal-header">
-                <div class="registration-modal-header-left">
-                    <span class="registration-modal-icon">
-                        <i data-lucide="pencil-line"></i>
-                    </span>
-                    <div>
-                        <h3 id="registration-edit-modal-title">Edit Data Pendaftaran</h3>
-                        <p>Perbarui informasi pendaftaran siswa</p>
-                    </div>
-                </div>
-
-                <button
-                    type="button"
-                    class="registration-modal-close-btn"
-                    data-registration-edit-modal-close
-                    aria-label="Close"
-                >
-                    <i data-lucide="x"></i>
-                </button>
-            </header>
-
-            <form method="POST" class="registration-modal-body registration-edit-form" data-registration-edit-form>
-                @csrf
-                @method('PUT')
-
-                <section class="registration-edit-grid">
-                    <div class="registration-edit-field">
-                        <label class="registration-edit-label">Nama Lengkap</label>
-                        <input type="text" name="nama_lengkap" required>
-                    </div>
-                    <div class="registration-edit-field">
-                        <label class="registration-edit-label">Nama Panggilan</label>
-                        <input type="text" name="nama_panggilan" required>
-                    </div>
-
-                    <div class="registration-edit-field">
-                        <label class="registration-edit-label">Jenis Kelamin</label>
-                        <select name="jenis_kelamin" required>
-                            <option value="">Pilih jenis kelamin</option>
-                            <option value="laki-laki">Laki-laki</option>
-                            <option value="perempuan">Perempuan</option>
-                        </select>
-                    </div>
-                    <div class="registration-edit-field">
-                        <label class="registration-edit-label">Tempat Lahir</label>
-                        <input type="text" name="tempat_lahir" required>
-                    </div>
-
-                    <div class="registration-edit-field">
-                        <label class="registration-edit-label">Tanggal Lahir</label>
-                        <input type="date" name="tanggal_lahir" required>
-                    </div>
-                    <div class="registration-edit-field">
-                        <label class="registration-edit-label">Kewarganegaraan</label>
-                        <input type="text" name="kewarganegaraan" required>
-                    </div>
-
-                    <div class="registration-edit-field registration-edit-field-full">
-                        <label class="registration-edit-label">Alamat</label>
-                        <textarea name="alamat" rows="3" required></textarea>
-                    </div>
-
-                    <div class="registration-edit-field">
-                        <label class="registration-edit-label">No HP Siswa</label>
-                        <input type="tel" name="no_hp_siswa" required>
-                    </div>
-                    <div class="registration-edit-field">
-                        <label class="registration-edit-label">Email Siswa</label>
-                        <input type="email" name="email" required>
-                    </div>
-
-                    <div class="registration-edit-field">
-                        <label class="registration-edit-label">Nama Orang Tua</label>
-                        <input type="text" name="nama_ortu" required>
-                    </div>
-                    <div class="registration-edit-field">
-                        <label class="registration-edit-label">Pekerjaan Orang Tua</label>
-                        <input type="text" name="pekerjaan_ortu">
-                    </div>
-
-                    <div class="registration-edit-field">
-                        <label class="registration-edit-label">No HP Orang Tua</label>
-                        <input type="tel" name="no_hp_ortu" required>
-                    </div>
-                    <div class="registration-edit-field">
-                        <label class="registration-edit-label">Email Orang Tua</label>
-                        <input type="email" name="email_ortu">
-                    </div>
-
-                    <div class="registration-edit-field">
-                        <label class="registration-edit-label">Instrumen</label>
-                        <select name="instrumen" required>
-                            <option value="">Pilih instrumen</option>
-                            @foreach($instrumenOptions as $instrumenItem)
-                                <option value="{{ $instrumenItem }}">{{ $instrumenItem }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="registration-edit-field">
-                        <label class="registration-edit-label">Program Tambahan</label>
-                        <select name="program_tambahan[]" multiple>
-                            @foreach($programTambahanOptions as $programItem)
-                                <option value="{{ $programItem }}">{{ $programItem }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="registration-edit-field">
-                        <label class="registration-edit-label">Hari Pilihan</label>
-                        <select name="hari_pilihan[]" multiple required>
-                            @foreach($hariOptions as $hariItem)
-                                <option value="{{ $hariItem }}">{{ $hariItem }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="registration-edit-field">
-                        <label class="registration-edit-label">Pernah Belajar Musik</label>
-                        <select name="pengalaman" required>
-                            <option value="">Pilih</option>
-                            <option value="1">Ya</option>
-                            <option value="0">Tidak</option>
-                        </select>
-                    </div>
-
-                    <div class="registration-edit-field registration-edit-field-full">
-                        <label class="registration-edit-label">Deskripsi Pengalaman</label>
-                        <textarea name="deskripsi_pengalaman" rows="3"></textarea>
-                    </div>
-
-                    <div class="registration-edit-field">
-                        <label class="registration-edit-label">Kelas</label>
-                        <select name="class_id">
-                            <option value="">Pilih kelas</option>
-                            @foreach($classesForManagement as $classItem)
-                                <option value="{{ $classItem->id }}">{{ $classItem->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="registration-edit-field">
-                        <label class="registration-edit-label">Status</label>
-                        <select name="status" required>
-                            <option value="">Pilih status</option>
-                            <option value="pending">Pending</option>
-                            <option value="accepted">Accepted</option>
-                            <option value="rejected">Rejected</option>
-                        </select>
-                    </div>
-                </section>
-
-                <footer class="registration-modal-footer registration-edit-footer">
-                    <button type="button" class="registration-modal-btn registration-modal-btn-secondary" data-registration-edit-modal-close>Batal</button>
-                    <button type="submit" class="registration-modal-btn registration-modal-btn-primary">Simpan Perubahan</button>
-                </footer>
-            </form>
-        </div>
-    </div>
 
     <form method="POST" data-registration-modal-delete-form style="display:none;">
         @csrf
         @method('DELETE')
     </form>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const detailModal = document.querySelector("[data-registration-modal]");
-            const editModal = document.querySelector("[data-registration-edit-modal]");
-
-            if (!detailModal || !editModal) {
-                return;
-            }
-
-            const detailPanel = detailModal.querySelector("[data-registration-modal-panel]");
-            const detailOverlay = detailModal.querySelector("[data-registration-modal-overlay]");
-            const detailCloseButtons = detailModal.querySelectorAll("[data-registration-modal-close]");
-            const detailTriggerButtons = document.querySelectorAll("[data-registration-detail-trigger]");
-            const detailEditButton = detailModal.querySelector("[data-registration-modal-edit]");
-            const detailDeleteButton = detailModal.querySelector("[data-registration-modal-delete]");
-
-            const editPanel = editModal.querySelector("[data-registration-edit-modal-panel]");
-            const editOverlay = editModal.querySelector("[data-registration-edit-modal-overlay]");
-            const editCloseButtons = editModal.querySelectorAll("[data-registration-edit-modal-close]");
-            const editTriggerButtons = document.querySelectorAll("[data-registration-edit-trigger]");
-            const editForm = editModal.querySelector("[data-registration-edit-form]");
-
-            const deleteForm = document.querySelector("[data-registration-modal-delete-form]");
-            const avatar = document.getElementById("registration-modal-avatar");
-            const statusBadge = detailModal.querySelector("[data-registration-status-badge]");
-            const fieldNodes = new Map(
-                Array.from(detailModal.querySelectorAll("[data-registration-field]"))
-                    .map((node) => [node.getAttribute("data-registration-field"), node]),
-            );
-
-            let activePayload = null;
-            let activeDeleteAction = "";
-
-            const parsePayload = (button) => {
-                let payload = {};
-                try {
-                    payload = JSON.parse(button.getAttribute("data-registration") || "{}");
-                } catch {
-                    payload = {};
-                }
-
-                return payload;
-            };
-
-            const syncBodyScroll = () => {
-                const detailOpen = detailModal.getAttribute("aria-hidden") === "false";
-                const editOpen = editModal.getAttribute("aria-hidden") === "false";
-                document.body.style.overflow = detailOpen || editOpen ? "hidden" : "";
-            };
-
-            const setModalState = (modal, panel, isOpen) => {
-                if (isOpen) {
-                    modal.style.display = "flex";
-                    requestAnimationFrame(() => {
-                        modal.classList.add("is-open");
-                    });
-                } else {
-                    modal.classList.remove("is-open");
-                    modal.style.display = "none";
-                }
-
-                modal.setAttribute("aria-hidden", String(!isOpen));
-                syncBodyScroll();
-            };
-
-            const setField = (key, value) => {
-                const target = fieldNodes.get(key);
-                if (!target) {
-                    return;
-                }
-
-                const safeValue = String(value ?? "").trim();
-                target.textContent = safeValue !== "" ? safeValue : "-";
-            };
-
-            const applyStatusBadge = (statusValue) => {
-                const safeStatus = String(statusValue || "-").toUpperCase();
-                statusBadge.textContent = safeStatus;
-                statusBadge.className = "registration-status-badge";
-
-                if (safeStatus === "ACCEPTED" || safeStatus === "DITERIMA") {
-                    statusBadge.classList.add("is-success");
-                    return;
-                }
-
-                if (safeStatus === "PENDING") {
-                    statusBadge.classList.add("is-warning");
-                    return;
-                }
-
-                if (safeStatus === "REJECTED" || safeStatus === "DITOLAK") {
-                    statusBadge.classList.add("is-danger");
-                    return;
-                }
-
-                statusBadge.classList.add("is-neutral");
-            };
-
-            const normalizeArray = (value) => {
-                if (Array.isArray(value)) {
-                    return value.map((item) => String(item).trim()).filter(Boolean);
-                }
-
-                const safeValue = String(value ?? "").trim();
-                if (safeValue === "" || safeValue === "-") {
-                    return [];
-                }
-
-                return safeValue.split(",").map((item) => item.trim()).filter(Boolean);
-            };
-
-            const setInputValue = (name, value) => {
-                const element = editForm.elements.namedItem(name);
-                if (!element) {
-                    return;
-                }
-
-                const safeValue = String(value ?? "").trim();
-                element.value = safeValue === "-" ? "" : safeValue;
-            };
-
-            const setMultiSelectValues = (name, values) => {
-                const element = editForm.elements.namedItem(name);
-                if (!(element instanceof HTMLSelectElement)) {
-                    return;
-                }
-
-                const selected = new Set(values);
-                Array.from(element.options).forEach((option) => {
-                    option.selected = selected.has(option.value);
-                });
-            };
-
-            const openEditModal = (payload) => {
-                activePayload = payload || activePayload || {};
-                if (!activePayload || !editForm) {
-                    return;
-                }
-
-                if (activePayload.updateAction) {
-                    editForm.setAttribute("action", String(activePayload.updateAction));
-                }
-
-                setInputValue("nama_lengkap", activePayload.fullName);
-                setInputValue("nama_panggilan", activePayload.nickName);
-                setInputValue("jenis_kelamin", activePayload.gender);
-                setInputValue("tempat_lahir", activePayload.birthPlace);
-                setInputValue("tanggal_lahir", activePayload.birthDateInput);
-                setInputValue("kewarganegaraan", activePayload.citizenship === "-" ? "Indonesia" : activePayload.citizenship);
-                setInputValue("alamat", activePayload.address);
-                setInputValue("no_hp_siswa", activePayload.studentPhone);
-                setInputValue("email", activePayload.studentEmail);
-                setInputValue("nama_ortu", activePayload.parentName);
-                setInputValue("pekerjaan_ortu", activePayload.parentJob);
-                setInputValue("no_hp_ortu", activePayload.parentPhone);
-                setInputValue("email_ortu", activePayload.parentEmail);
-                setInputValue("instrumen", activePayload.instrumentValue || activePayload.instrument);
-                setInputValue("pengalaman", activePayload.experienceValue || "0");
-                setInputValue("deskripsi_pengalaman", activePayload.experienceDescription);
-                setInputValue("class_id", activePayload.classId || "");
-                setInputValue("status", activePayload.statusValue || "pending");
-
-                setMultiSelectValues("program_tambahan[]", normalizeArray(activePayload.additionalProgramRaw || activePayload.additionalProgram));
-                setMultiSelectValues("hari_pilihan[]", normalizeArray(activePayload.preferredDaysRaw || activePayload.preferredDays));
-
-                setModalState(editModal, editPanel, true);
-            };
-
-            const closeDetailModal = () => {
-                setModalState(detailModal, detailPanel, false);
-                activeDeleteAction = "";
-            };
-
-            const closeEditModal = () => {
-                setModalState(editModal, editPanel, false);
-            };
-
-            const openModalWithData = (payload) => {
-                const fields = [
-                    "fullName",
-                    "nickName",
-                    "gender",
-                    "birthPlace",
-                    "birthDate",
-                    "citizenship",
-                    "studentPhone",
-                    "studentEmail",
-                    "address",
-                    "parentName",
-                    "parentJob",
-                    "parentPhone",
-                    "parentEmail",
-                    "instrument",
-                    "additionalProgram",
-                    "preferredDays",
-                    "experience",
-                    "experienceDescription",
-                    "status",
-                    "selectedClass",
-                ];
-
-                fields.forEach((key) => setField(key, payload[key]));
-                applyStatusBadge(payload.status);
-
-                // Handle schedules list
-                const schedulesList = document.getElementById("registration-modal-schedules-list");
-                const schedulesBadge = document.getElementById("registration-modal-schedules-badge");
-                if (schedulesList) {
-                    const schedules = payload.schedules || [];
-                    if (schedulesBadge) {
-                        schedulesBadge.textContent = `${schedules.length} Jadwal Dipilih`;
-                        schedulesBadge.style.display = schedules.length > 0 ? 'inline-block' : 'none';
-                    }
-                    if (schedules.length > 0) {
-                        schedulesList.innerHTML = `<ul class="registration-modal-schedules-ul">${schedules.map(s => `<li><i data-lucide="check-circle-2"></i> ${s.label.replace(' ', ' - ')}</li>`).join('')}</ul>`;
-                        if (window.lucide) window.lucide.createIcons();
-                    } else {
-                        schedulesList.innerHTML = '<p class="no-schedule">No schedule selected</p>';
-                    }
-                }
-
-                const fullName = String(payload.fullName || "-").trim();
-                avatar.textContent = fullName === "-"
-                    ? "-"
-                    : fullName
-                        .split(/\s+/)
-                        .filter(Boolean)
-                        .slice(0, 2)
-                        .map((chunk) => chunk.charAt(0).toUpperCase())
-                        .join("");
-
-                activePayload = payload;
-                activeDeleteAction = String(payload.deleteAction || "");
-
-                setModalState(detailModal, detailPanel, true);
-            };
-
-            detailTriggerButtons.forEach((button) => {
-                button.addEventListener("click", () => {
-                    openModalWithData(parsePayload(button));
-                });
-            });
-
-            editTriggerButtons.forEach((button) => {
-                button.addEventListener("click", () => {
-                    openEditModal(parsePayload(button));
-                });
-            });
-
-            detailCloseButtons.forEach((button) => {
-                button.addEventListener("click", closeDetailModal);
-            });
-
-            editCloseButtons.forEach((button) => {
-                button.addEventListener("click", closeEditModal);
-            });
-
-            detailOverlay.addEventListener("click", closeDetailModal);
-            editOverlay.addEventListener("click", closeEditModal);
-
-            document.addEventListener("keydown", (event) => {
-                if (event.key !== "Escape") {
-                    return;
-                }
-
-                if (editModal.getAttribute("aria-hidden") === "false") {
-                    closeEditModal();
-                    return;
-                }
-
-                if (detailModal.getAttribute("aria-hidden") === "false") {
-                    closeDetailModal();
-                }
-            });
-
-            detailEditButton.addEventListener("click", () => {
-                closeDetailModal();
-                if (!activePayload) {
-                    return;
-                }
-
-                openEditModal(activePayload);
-            });
-
-            detailDeleteButton.addEventListener("click", () => {
-                if (!activeDeleteAction || !deleteForm) {
-                    return;
-                }
-
-                const confirmed = window.confirm("Hapus registration ini?");
-                if (!confirmed) {
-                    return;
-                }
-
-                deleteForm.setAttribute("action", activeDeleteAction);
-                deleteForm.submit();
-            });
-        });
-    </script>
 @endif
 
 @if ($moduleKey === 'blog')
@@ -2577,14 +1761,20 @@
                             @endforeach
                         </select>
                     </label>
-                    <label>Hari
-                        <select name="day" required>
-                            <option value="">Pilih hari</option>
+                    <div style="grid-column: span 2;">
+                        <label style="margin-bottom: 0.5rem; display: block;">Hari (Pilih satu atau lebih)</label>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.75rem; background: #f8fafc; padding: 1rem; border-radius: 0.8rem; border: 1px solid #e2e8f0;">
                             @foreach($availableDayOptions as $dayOption)
-                                <option value="{{ $dayOption }}" @selected(old('day') === $dayOption)>{{ $dayOption }}</option>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 500; color: #475569; font-size: 0.875rem;">
+                                    <input type="checkbox" name="days[]" value="{{ $dayOption }}" @checked(is_array(old('days')) && in_array($dayOption, old('days'))) style="width: 1.1rem; height: 1.1rem; accent-color: #2563eb;">
+                                    {{ $dayOption }}
+                                </label>
                             @endforeach
-                        </select>
-                    </label>
+                        </div>
+                        @error('days')
+                            <p style="color: #dc2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ $message }}</p>
+                        @enderror
+                    </div>
                     <label>Start Time
                         <input type="time" name="start_time" value="{{ old('start_time') }}" required>
                     </label>
@@ -3099,3 +2289,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 @endpush
+
+
+
