@@ -1768,7 +1768,10 @@
 
     @php
         $scheduleFeatureReady = (bool) ($scheduleFeatureReady ?? false);
-        $availableDayOptions = $dayOptions ?? ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat',     <div 
+        $availableDayOptions = $dayOptions ?? ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+    @endphp
+
+    <div 
         x-data="{ 
             studentModalOpen: false, 
             addModalOpen: false,
