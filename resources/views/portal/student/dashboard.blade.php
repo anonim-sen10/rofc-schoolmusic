@@ -38,8 +38,7 @@
                 <table class="att-table">
                     <thead>
                         <tr>
-                            <th>Day</th>
-                            <th>Time</th>
+                            <th>Schedule</th>
                             <th>Class</th>
                             <th>Teacher</th>
                         </tr>
@@ -47,8 +46,7 @@
                     <tbody>
                         @foreach($schedules as $sched)
                             <tr>
-                                <td>{{ $sched->day }}</td>
-                                <td>{{ \Carbon\Carbon::parse($sched->time)->format('H:i') }}</td>
+                                <td><strong>{{ $sched->session_date->translatedFormat('l, d M Y') }} - {{ \Carbon\Carbon::parse($sched->time)->format('H:i') }}</strong></td>
                                 <td>{{ $sched->musicClass->name ?? '-' }}</td>
                                 <td>{{ $sched->teacher->name ?? '-' }}</td>
                             </tr>

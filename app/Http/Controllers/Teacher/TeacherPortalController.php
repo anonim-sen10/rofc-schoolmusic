@@ -86,7 +86,7 @@ public function dashboard(Request $request): View
             'assignedClasses' => $acceptedClasses,
             'latestProgress' => StudentProgress::with('student:id,name')->where('teacher_id', $teacher->id)->latest()->take(5)->get(),
             'hasTeacherAttendanceToday' => TeacherAttendance::query()->where('teacher_id', $teacher->id)->whereDate('attendance_date', now()->toDateString())->exists(),
-            'pendingRescheduleRequests' => \App\Models\RescheduleRequest::with(['student:id,name', 'oldSchedule', 'newSchedule'])
+            'pendingRescheduleRequests' => \App\Models\RescheduleRequest::with(['student:id,name', 'oldSchedule', 'newSchedule', 'oldSession'])
                 ->whereHas('oldSchedule', fn($q) => $q->where('teacher_id', $teacher->id))
                 ->where('status', 'pending')
                 ->latest()

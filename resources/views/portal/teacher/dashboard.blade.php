@@ -107,7 +107,13 @@
                 @foreach($pendingRescheduleRequests as $request)
                     <tr style="border-bottom: 1px solid #f1f5f9;">
                         <td style="padding: 0.75rem;"><strong>{{ $request->student->name }}</strong></td>
-                        <td style="padding: 0.75rem; font-size: 0.875rem; color: #475569;">{{ ucfirst($request->oldSchedule->day) }} {{ substr($request->oldSchedule->time, 0, 5) }}</td>
+                        <td style="padding: 0.75rem; font-size: 0.875rem; color: #475569;">
+                            @if($request->oldSession)
+                                {{ $request->oldSession->session_date->translatedFormat('l, d M Y') }} - {{ substr($request->oldSession->time, 0, 5) }}
+                            @else
+                                {{ ucfirst($request->oldSchedule->day) }} {{ substr($request->oldSchedule->time, 0, 5) }}
+                            @endif
+                        </td>
                         <td style="padding: 0.75rem; font-size: 0.875rem; color: #475569;">{{ ucfirst($request->newSchedule->day) }} {{ substr($request->newSchedule->time, 0, 5) }}</td>
                         <td style="padding: 0.75rem;">
                             <span style="background-color: #fef9c3; color: #854d0e; font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 9999px; font-weight: 600; white-space: nowrap;">

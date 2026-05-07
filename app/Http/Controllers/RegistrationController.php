@@ -122,8 +122,7 @@ class RegistrationController extends Controller
                 'required',
                 Rule::exists('classes', 'id')->where(fn ($query) => $query->where('status', 'active')),
             ],
-            'schedule_ids' => ['required', 'array', 'min:1'],
-            'schedule_ids.*' => ['integer', 'exists:schedules,id'],
+            'schedule_id' => ['required', 'integer', 'exists:schedules,id'],
             'program_tambahan' => ['nullable', 'array'],
             'program_tambahan.*' => ['string', 'max:120'],
 
@@ -144,21 +143,20 @@ class RegistrationController extends Controller
                 ->withInput();
         }
 
-        $schedules = Schedule::query()
-            ->whereIn('id', $validated['schedule_ids'])
+        $schedule = Schedule::query()
+            ->where('id', $validated['schedule_id'])
             ->where('class_id', (int) $validated['class_id'])
             ->where('status', 'available')
-            ->get(['id', 'day', 'time']);
+            ->first(['id', 'day', 'time']);
 
-        if ($schedules->count() !== count($validated['schedule_ids'])) {
+        if (! $schedule) {
             return back()
-                ->withErrors(['schedule_ids' => 'Salah satu atau lebih slot jadwal sudah dibooking user lain. Silakan pilih slot lain.'])
+                ->withErrors(['schedule_id' => 'Slot jadwal sudah tidak tersedia atau tidak valid. Silakan pilih slot lain.'])
                 ->withInput();
         }
 
         $instrumentName = (string) $selectedClass->name;
-        $scheduleTexts = $schedules->map(fn($s) => $s->day.' - '.substr((string) $s->time, 0, 5))->toArray();
-        $scheduleText = implode(', ', $scheduleTexts);
+        $scheduleText = $schedule->day.' - '.substr((string) $schedule->time, 0, 5);
 
         $tanggalLahir = Carbon::parse($validated['tanggal_lahir']);
 
@@ -179,10 +177,10 @@ class RegistrationController extends Controller
             'email_ortu' => $validated['email_ortu'] ?? null,
 
             'class_id' => $validated['class_id'],
-            'schedule_id' => $validated['schedule_ids'][0] ?? null,
+            'schedule_id' => $validated['schedule_id'],
             'instrumen' => $instrumentName,
             'program_tambahan' => $validated['program_tambahan'] ?? [],
-            'hari_pilihan' => $schedules->pluck('day')->unique()->values()->toArray(),
+            'hari_pilihan' => [$schedule->day],
 
             'pengalaman' => (bool) $validated['pengalaman'],
             'deskripsi_pengalaman' => $validated['deskripsi_pengalaman'] ?? null,
@@ -231,7 +229,7 @@ class RegistrationController extends Controller
         $registration = Registration::create($filteredPayload);
         
         if (method_exists($registration, 'schedules')) {
-            $registration->schedules()->sync($validated['schedule_ids']);
+            $registration->schedules()->sync([$validated['schedule_id']]);
         }
 
         return back()->with('success', 'Pendaftaran Anda berhasil dikirim. Kami akan menghubungi Anda untuk proses berikutnya.');
@@ -279,7 +277,7 @@ class RegistrationController extends Controller
 
                 if ($requestedSchedules->isEmpty()) {
                     throw ValidationException::withMessages([
-                        'schedules' => 'Pendaftaran ini tidak memiliki jadwal terpilih. Silakan edit dan pilih minimal 1 jadwal.'
+                        'schedule_id' => 'Pendaftaran ini tidak memiliki jadwal terpilih. Silakan edit dan pilih minimal 1 jadwal.'
                     ]);
                 }
 
@@ -317,7 +315,7 @@ class RegistrationController extends Controller
                     : (is_numeric($registration->age) ? (int)$registration->age : null);
 
                 $startDate = $registration->start_date ?? now()->toDateString();
-                $duration = $registration->duration_months ?? 1;
+                $duration = (int)($registration->duration_months ?? 1);
                 $endDate = Carbon::parse($startDate)->addMonths($duration)->toDateString();
 
                 $student = Student::query()->create([
@@ -341,7 +339,7 @@ class RegistrationController extends Controller
                         'status' => 'booked',
                     ]);
 
-                    // GENERATE SESSIONS for next 4 weeks
+                    // GENERATE SESSIONS: duration_months * 4
                     $this->generateInitialSessions($student, $sch);
                 }
 
@@ -364,14 +362,16 @@ class RegistrationController extends Controller
         $engDay = $this->mapDayToEnglish($dayName);
         
         $currentDate = Carbon::parse($student->start_date);
-        $endDate = Carbon::parse($student->end_date);
+        
+        // Total sessions = duration_months * 4
+        $totalSessions = (int)(($student->duration_months ?: 1) * 4);
         
         // Find first occurrence of $engDay on or after $startDate
         if (strtolower($currentDate->format('l')) !== strtolower($engDay)) {
             $currentDate->modify("next $engDay");
         }
 
-        while ($currentDate->lte($endDate)) {
+        for ($i = 0; $i < $totalSessions; $i++) {
             \App\Models\ScheduleSession::create([
                 'schedule_id' => $schedule->id,
                 'student_id' => $student->id,

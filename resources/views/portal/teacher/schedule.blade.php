@@ -86,7 +86,6 @@
             <thead>
                 <tr>
                     <th>Jadwal</th>
-                    <th>Waktu</th>
                     <th>Nama Siswa</th>
                     <th>Kelas</th>
                     <th>Alamat</th>
@@ -97,8 +96,7 @@
             <tbody>
                 @forelse($schedules as $schedule)
                     <tr>
-                        <td>{{ $schedule->session_date->translatedFormat('l, d M Y') }}</td>
-                        <td>{{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}</td>
+                        <td><strong>{{ $schedule->session_date->translatedFormat('l, d M Y') }} - {{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}</strong></td>
                         <td>{{ $schedule->student->user->name ?? ($schedule->student->name ?? '-') }}</td>
                         <td>{{ $schedule->musicClass->name ?? '-' }}</td>
                         <td>{{ $schedule->student->address ?? '-' }}</td>

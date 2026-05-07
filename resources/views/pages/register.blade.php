@@ -759,7 +759,7 @@
                                 </label>
 
                                 <div class="register-field full">
-                                    <span>Pilih Jadwal (Bisa pilih lebih dari satu)</span>
+                                    <span>Pilih Jadwal</span>
                                     <div class="multi-schedule-wrapper">
                                         <!-- Selected Preview -->
                                         <div id="selected-preview" class="selected-preview-wrap" style="display: none;">
@@ -772,7 +772,7 @@
                                             <p class="text-muted" style="padding: 1rem; font-size: 0.85rem; font-style: italic;">Silakan pilih instrumen terlebih dahulu.</p>
                                         </div>
                                         
-                                        <div id="schedule-error" class="validation-error-msg">Silakan pilih setidaknya satu jadwal.</div>
+                                        <div id="schedule-error" class="validation-error-msg">Silakan pilih satu jadwal belajar.</div>
                                     </div>
                                 </div>
 
@@ -923,8 +923,8 @@
             if (!registerForm) return '-';
             
             if (fieldName === 'schedule_id') {
-                const checked = Array.from(document.querySelectorAll('input[name="schedule_ids[]"]:checked'));
-                return checked.length ? checked.map(cb => cb.dataset.label).join(', ') : '-';
+                const checked = document.querySelector('input[name="schedule_id"]:checked');
+                return checked ? checked.dataset.label : '-';
             }
 
             const field = registerForm.elements[fieldName];
@@ -964,8 +964,8 @@
                 
                 let val = '-';
                 if (key === 'schedule_id') {
-                    const checked = Array.from(document.querySelectorAll('input[name="schedule_ids[]"]:checked'));
-                    val = checked.length ? checked.map(cb => cb.dataset.label).join(', ') : '-';
+                    const checked = document.querySelector('input[name="schedule_id"]:checked');
+                    val = checked ? checked.dataset.label : '-';
                 } else if (key === 'day') {
                     target.closest('article').style.display = 'none';
                     return;
@@ -1054,8 +1054,8 @@
         const scheduleError = document.getElementById('schedule-error');
 
         const updateSelectedPreview = () => {
-            const checked = Array.from(document.querySelectorAll('input[name="schedule_ids[]"]:checked'));
-            if (checked.length === 0) {
+            const checked = document.querySelector('input[name="schedule_id"]:checked');
+            if (!checked) {
                 if (selectedPreview) selectedPreview.style.display = 'none';
                 if (selectedTags) selectedTags.innerHTML = '';
                 return;
@@ -1063,14 +1063,14 @@
 
             if (selectedPreview) selectedPreview.style.display = 'block';
             if (selectedTags) {
-                selectedTags.innerHTML = checked.map(cb => `
+                selectedTags.innerHTML = `
                     <span class="selected-tag">
-                        ${cb.dataset.label}
-                        <svg onclick="const target = document.querySelector('input[name=\\'schedule_ids[]\\'][value=\\'${cb.value}\\']'); if(target){target.click();}" style="cursor:pointer; width:14px; height:14px" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        ${checked.dataset.label}
+                        <svg onclick="const target = document.querySelector('input[name=\\'schedule_id\\'][value=\\'${checked.value}\\']'); if(target){target.checked = false; target.dispatchEvent(new Event(\\'change\\'));}" style="cursor:pointer; width:14px; height:14px" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </span>
-                `).join('');
+                `;
             }
             
             if (scheduleError) scheduleError.style.display = 'none';
@@ -1116,7 +1116,7 @@
                                         const isBooked = String(s.status).toLowerCase() === 'booked';
                                         return `
                                             <label class="schedule-opt ${isBooked ? 'is-booked' : ''}">
-                                                <input type="checkbox" name="schedule_ids[]" value="${s.id}" data-label="${day} ${s.time}" ${isBooked ? 'disabled' : ''}>
+                                                <input type="radio" name="schedule_id" value="${s.id}" data-label="${day} ${s.time}" ${isBooked ? 'disabled' : ''}>
                                                 <div class="schedule-time">${s.time}</div>
                                                 ${isBooked ? '<div class="schedule-status">(Full)</div>' : ''}
                                             </label>
@@ -1140,10 +1140,13 @@
                     });
                 });
 
-                // Checkbox logic
-                scheduleContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-                    cb.addEventListener('change', () => {
-                        cb.closest('.schedule-opt').classList.toggle('is-selected', cb.checked);
+                // Radio logic
+                scheduleContainer.querySelectorAll('input[type="radio"]').forEach(radio => {
+                    radio.addEventListener('change', () => {
+                        scheduleContainer.querySelectorAll('.schedule-opt').forEach(opt => opt.classList.remove('is-selected'));
+                        if (radio.checked) {
+                            radio.closest('.schedule-opt').classList.add('is-selected');
+                        }
                         updateSelectedPreview();
                     });
                 });
@@ -1160,8 +1163,8 @@
         const originalValidateStep = validateStep;
         window.validateStep = (stepNumber) => {
             if (stepNumber === 2) {
-                const checked = document.querySelectorAll('input[name="schedule_ids[]"]:checked');
-                if (checked.length === 0) {
+                const checked = document.querySelector('input[name="schedule_id"]:checked');
+                if (!checked) {
                     if (scheduleError) {
                         scheduleError.style.display = 'block';
                         scheduleError.scrollIntoView({ behavior: 'smooth', block: 'center' });

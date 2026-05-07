@@ -242,27 +242,55 @@ class AcademicManagementController extends Controller
                 $student->classes()->syncWithoutDetaching([$registration->class_id]);
             }
 
-            // Sync multiple schedules if available
-            if (method_exists($registration, 'schedules')) {
-                $schedules = $registration->schedules;
-                foreach ($schedules as $sch) {
-                    $sch->update([
-                        'status' => 'booked',
-                        'student_id' => $student->id
-                    ]);
-                }
-            } elseif ($registration->schedule_id) {
-                // Fallback for single schedule
-                $sch = \App\Models\Schedule::find($registration->schedule_id);
-                if ($sch) {
-                    $sch->update([
-                        'status' => 'booked',
-                        'student_id' => $student->id
-                    ]);
+            // Generate Sessions
+            if ($registration->schedule_id && $registration->start_date) {
+                $schedule = \App\Models\Schedule::find($registration->schedule_id);
+                if ($schedule) {
+                    $startDate = \Carbon\Carbon::parse($registration->start_date);
+                    $durationMonths = (int)($registration->duration_months ?: 1);
+                    $totalSessions = $durationMonths * 4;
+                    
+                    $dayName = $schedule->day;
+                    $engDay = $this->mapDayToEnglish($dayName);
+                    
+                    // Find first occurrence of $engDay on or after $startDate
+                    if (strtolower($startDate->format('l')) !== strtolower($engDay)) {
+                        $startDate->modify("next $engDay");
+                    }
+
+                    for ($i = 0; $i < $totalSessions; $i++) {
+                        \App\Models\ScheduleSession::create([
+                            'registration_id' => $registration->id,
+                            'student_id' => $student->id,
+                            'schedule_id' => $schedule->id,
+                            'class_id' => $registration->class_id,
+                            'teacher_id' => $schedule->teacher_id,
+                            'session_date' => $startDate->toDateString(),
+                            'time' => $schedule->time,
+                            'status' => 'booked',
+                        ]);
+                        $startDate->addWeek();
+                    }
                 }
             }
         }
 
         return back()->with('success', 'Status pendaftaran berhasil diperbarui.');
+    }
+
+    private function mapDayToEnglish(string $day): string
+    {
+        $map = [
+            'senin' => 'monday',
+            'selasa' => 'tuesday',
+            'rabu' => 'wednesday',
+            'kamis' => 'thursday',
+            'jumat' => 'friday',
+            'sabtu' => 'saturday',
+            'minggu' => 'sunday',
+        ];
+        
+        $lower = strtolower($day);
+        return $map[$lower] ?? $lower;
     }
 }

@@ -14,8 +14,7 @@
             <table class="att-table">
                 <thead>
                     <tr>
-                        <th>Date</th>
-                        <th>Time</th>
+                        <th>Schedule</th>
                         <th>Class</th>
                         <th>Teacher</th>
                         <th>Status</th>
@@ -32,8 +31,7 @@
                                 ->first();
                         @endphp
                         <tr>
-                            <td><strong>{{ $sched->session_date->translatedFormat('l, d M Y') }}</strong></td>
-                            <td>{{ \Carbon\Carbon::parse($sched->time)->format('H:i') }}</td>
+                            <td><strong>{{ $sched->session_date->translatedFormat('l, d M Y') }} - {{ \Carbon\Carbon::parse($sched->time)->format('H:i') }}</strong></td>
                             <td>{{ $sched->musicClass->name ?? '-' }}</td>
                             <td>{{ $sched->teacher->name ?? '-' }}</td>
                             <td>

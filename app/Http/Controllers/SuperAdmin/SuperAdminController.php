@@ -1083,9 +1083,11 @@ class SuperAdminController extends Controller
                 'title' => 'Reschedule Requests',
                 'description' => 'Permintaan pindah jadwal dari siswa.',
                 'columns' => ['Siswa', 'Lama', 'Baru', 'Guru', 'Status', 'Aksi'],
-                'rows' => \App\Models\RescheduleRequest::with(['student', 'oldSchedule', 'newSchedule.teacher'])->latest()->take(50)->get()->map(fn ($r) => [
+                'rows' => \App\Models\RescheduleRequest::with(['student', 'oldSession', 'newSchedule.teacher'])->latest()->take(50)->get()->map(fn ($r) => [
                     $r->student->name,
-                    $r->oldSchedule->day . ' ' . substr((string)$r->oldSchedule->time, 0, 5),
+                    $r->oldSession 
+                        ? $r->oldSession->session_date->format('l, d M Y') . ' - ' . substr((string)$r->oldSession->start_time, 0, 5)
+                        : ($r->oldSchedule ? $r->oldSchedule->day . ' ' . substr((string)$r->oldSchedule->time, 0, 5) : '-'),
                     $r->newSchedule->day . ' ' . substr((string)$r->newSchedule->time, 0, 5),
                     $r->newSchedule->teacher->name ?? '-',
                     strtoupper($r->status),

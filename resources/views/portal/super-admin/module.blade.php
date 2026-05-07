@@ -1216,7 +1216,17 @@
                             <td>{{ $registrationItem->email }}</td>
                             <td>{{ $teleponSiswa }}</td>
                             <td>{{ $instrumenText }}</td>
-                            <td><span class="registration-schedule-count">{{ $registrationItem->schedules->count() }} Slot</span></td>
+                            <td>
+                                @if($registrationItem->schedules->isNotEmpty())
+                                    @php $sch = $registrationItem->schedules->first(); @endphp
+                                    <span class="registration-schedule-count">{{ $sch->day }} {{ substr((string)$sch->time, 0, 5) }}</span>
+                                @elseif($registrationItem->schedule_id)
+                                    @php $sch = \App\Models\Schedule::find($registrationItem->schedule_id); @endphp
+                                    <span class="registration-schedule-count">{{ $sch ? $sch->day . ' ' . substr((string)$sch->time, 0, 5) : '-' }}</span>
+                                @else
+                                    <span class="registration-schedule-count">-</span>
+                                @endif
+                            </td>
                             <td><x-ui.badge :type="$registrationBadge">{{ strtoupper($registrationStatus) }}</x-ui.badge></td>
                             <td>
                                 <div class="action-icons class-action-icons">
