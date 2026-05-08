@@ -389,8 +389,9 @@ public function schedule(Request $request): View
 
         $classes = MusicClass::query()
             ->where('teacher_id', $teacher->id)
-            ->with(['students:id,name'])
-            ->withCount('students')
+            ->withCount(['schedules as students_count' => function($query) {
+                $query->select(\DB::raw('count(distinct student_id)'))->whereNotNull('student_id');
+            }])
             ->withCount(['schedules' => function($query) {
                 $query->whereNotNull('student_id');
             }])
