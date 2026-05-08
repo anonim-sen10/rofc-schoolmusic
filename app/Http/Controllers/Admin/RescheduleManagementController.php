@@ -31,11 +31,6 @@ class RescheduleManagementController extends Controller
                     // Accurate logic would be picking a specific date, but here we'll assume it's moved to the new template's next occurrence.
                     
                     $oldSession->update([
-                        'schedule_id' => $newScheduleTemplate->id,
-                        'teacher_id' => $newScheduleTemplate->teacher_id,
-                        'time' => $newScheduleTemplate->time,
-                        // session_date should ideally be updated too, but we'll leave it to the user to pick in future UI.
-                        // For now, mark as rescheduled.
                         'status' => 'rescheduled',
                     ]);
 
