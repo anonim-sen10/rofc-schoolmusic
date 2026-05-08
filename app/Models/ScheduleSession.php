@@ -45,4 +45,9 @@ class ScheduleSession extends Model
     {
         return $this->hasOne(Attendance::class, 'session_id'); // We'll need to update Attendance table later
     }
+
+    public function rescheduleRequests(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(RescheduleRequest::class, 'old_session_id');
+    }
 }

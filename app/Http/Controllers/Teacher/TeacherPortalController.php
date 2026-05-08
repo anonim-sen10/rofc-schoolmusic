@@ -331,7 +331,7 @@ public function schedule(Request $request): View
         $schedules = \App\Models\ScheduleSession::query()
             ->where('teacher_id', $teacher->id)
             ->whereIn('status', ['booked', 'rescheduled', 'completed'])
-            ->with(['musicClass', 'student.user', 'attendance'])
+            ->with(['musicClass', 'student.user', 'attendance', 'rescheduleRequests'])
             ->orderBy('session_date')
             ->orderBy('time')
             ->get();
@@ -387,7 +387,9 @@ public function schedule(Request $request): View
             ->where('teacher_id', $teacher->id)
             ->with(['students:id,name'])
             ->withCount('students')
-            ->withCount('schedules')
+            ->withCount(['schedules' => function($query) {
+                $query->whereNotNull('student_id');
+            }])
             ->orderBy('name')
             ->get();
 
