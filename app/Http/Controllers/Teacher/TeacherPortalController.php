@@ -359,6 +359,10 @@ public function schedule(Request $request): View
             ->where('status', 'booked')
             ->firstOrFail();
 
+        if ($session->session_date->isFuture()) {
+            return back()->with('error', 'Cannot record attendance for a future session.');
+        }
+
         if ($session->attendance()->exists()) {
             return back()->with('error', 'Attendance already exists for this session.');
         }
