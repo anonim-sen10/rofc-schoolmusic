@@ -4,9 +4,130 @@
 @section('page-title', $moduleTitle)
 
 @section('content')
+<style>
+    /* Premium Table Hover & Micro-interactions */
+    .table-wrap table tbody tr {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .table-wrap table tbody tr:hover {
+        background-color: #f8fbff !important;
+        transform: translateX(4px);
+    }
+
+    .premium-create-card-btn {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 1.25rem;
+        padding: 1.25rem 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-weight: 700;
+        color: #1e293b;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        width: fit-content;
+        margin-bottom: 2rem;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: 1rem;
+        border-style: solid;
+    }
+
+    .premium-create-card-btn:hover {
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        border-color: #6366f1;
+        color: #6366f1;
+    }
+
+    .premium-create-card-btn i {
+        color: #6366f1;
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+    
+    /* Schedule Tooltip Style */
+    .schedule-tooltip-wrap {
+        position: relative;
+        display: inline-block;
+        color: #6366f1;
+        font-weight: 600;
+        border-bottom: 1px dashed #c7d2fe;
+        cursor: help;
+        transition: all 0.2s;
+    }
+    .schedule-tooltip-wrap:hover {
+        color: #4338ca;
+        border-bottom-color: #4338ca;
+    }
+    
+    .schedule-tooltip {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%) translateY(0);
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(12px);
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        padding: 14px;
+        border-radius: 14px;
+        z-index: 1000;
+        width: 220px;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        pointer-events: none;
+    }
+    
+    .schedule-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -6px;
+        border-width: 6px;
+        border-style: solid;
+        border-color: #fff transparent transparent transparent;
+    }
+    
+    .schedule-tooltip-wrap:hover .schedule-tooltip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(-12px);
+    }
+    
+    .tooltip-header {
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .tooltip-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4px;
+        font-size: 0.8rem;
+    }
+    .tooltip-day { font-weight: 700; color: #1e293b; }
+    .tooltip-time { color: #64748b; font-variant-numeric: tabular-nums; }
+</style>
 
 @if ($moduleKey === 'users')
-    <section class="card" data-searchable>
+    <button type="button" class="premium-create-card-btn" onclick="const form = document.getElementById('form-create-user'); if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';">
+        <i data-lucide="user-plus"></i>
+        Buat Akun Login Baru
+    </button>
+
+    <section class="card" id="form-create-user" style="display: none;" data-searchable>
         <h3>Buat Akun Login Baru</h3>
         <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.users.store') }}">
             @csrf
@@ -200,10 +321,14 @@
 @endif
 
 @if ($moduleKey === 'teachers')
-    <section class="card" data-searchable>
-        <details class="teacher-create" @if($errors->any()) open @endif>
-            <summary>Create Teacher</summary>
-            <form class="module-form module-form-grid teacher-create-form" method="POST" enctype="multipart/form-data" action="{{ route('super-admin.teachers.store') }}">
+    <button type="button" class="premium-create-card-btn" onclick="const form = document.getElementById('form-create-teacher'); if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';">
+        <i data-lucide="user-plus"></i>
+        Tambah Teacher Baru
+    </button>
+    
+    <section class="card" id="form-create-teacher" style="display: @if($errors->any()) block @else none @endif;" data-searchable>
+        <h3>Tambah Teacher Baru</h3>
+        <form class="module-form module-form-grid teacher-create-form" method="POST" enctype="multipart/form-data" action="{{ route('super-admin.teachers.store') }}">
                 @csrf
                 <label>Nama
                     <input type="text" name="name" value="{{ old('name') }}" required>
@@ -246,7 +371,7 @@
                     <button type="reset" class="btn-secondary">Cancel</button>
                 </div>
             </form>
-        </details>
+
     </section>
 
     <section class="card" data-searchable>
@@ -464,10 +589,14 @@
 @endif
 
 @if ($moduleKey === 'classes')
-    <section class="card" data-searchable>
-        <details class="teacher-create" @if($errors->any()) open @endif>
-            <summary>Create Class</summary>
-            <form class="module-form module-form-grid teacher-create-form" method="POST" action="{{ route('super-admin.classes.store') }}">
+    <button type="button" class="premium-create-card-btn" onclick="const form = document.getElementById('form-create-class'); if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';">
+        <i data-lucide="plus-circle"></i>
+        Tambah Class Baru
+    </button>
+
+    <section class="card" id="form-create-class" style="display: @if($errors->any()) block @else none @endif;" data-searchable>
+        <h3>Tambah Class Baru</h3>
+        <form class="module-form module-form-grid teacher-create-form" method="POST" action="{{ route('super-admin.classes.store') }}">
                 @csrf
                 <label>Nama Kelas
                     <input type="text" name="name" value="{{ old('name') }}" required>
@@ -497,7 +626,7 @@
                     <button type="reset" class="btn-secondary">Cancel</button>
                 </div>
             </form>
-        </details>
+
     </section>
 
     <section class="card" data-searchable>
@@ -520,7 +649,36 @@
                             <td>{{ $classItem->name }}</td>
                             <td>{{ $classItem->teacher?->name ?? '-' }}</td>
                             <td>Rp{{ number_format((int) ($classItem->price ?? 0), 0, ',', '.') }}</td>
-                            <td>{{ $classItem->schedule ?? '-' }}</td>
+                            <td class="class-schedule-cell">
+                                @php
+                                    $bookedSchedules = $classItem->schedules->where('status', 'booked');
+                                    $bookedDays = $bookedSchedules->pluck('day')->unique()->values();
+                                    
+                                    $dayOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+                                    $sortedDays = $bookedDays->sortBy(function($day) use ($dayOrder) {
+                                        return array_search($day, $dayOrder);
+                                    });
+                                @endphp
+
+                                @if($sortedDays->isNotEmpty())
+                                    <div class="schedule-tooltip-wrap">
+                                        <span>{{ $sortedDays->implode(', ') }}</span>
+                                        <div class="schedule-tooltip">
+                                            <div class="tooltip-header"><i data-lucide="clock" style="width: 10px; height: 10px;"></i> Waktu Belajar Siswa</div>
+                                            @foreach($sortedDays as $day)
+                                                <div class="tooltip-row">
+                                                    <span class="tooltip-day">{{ $day }}</span>
+                                                    <span class="tooltip-time">
+                                                        {{ $bookedSchedules->where('day', $day)->pluck('time')->map(fn($t) => substr((string)$t, 0, 5))->implode(', ') }}
+                                                    </span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @else
+                                    <span style="color: #cbd5e1;">-</span>
+                                @endif
+                            </td>
                             <td>
                                 <x-ui.badge :type="$classItem->status === 'active' ? 'success' : 'warning'">
                                     {{ strtoupper($classItem->status) }}
@@ -966,12 +1124,10 @@
 
     </style>
 
-    <div class="student-list-header" style="margin-bottom: 2rem;">
-        <button type="button" class="btn-add-student" onclick="const modal = document.getElementById('modal-create-student'); if(modal) modal.style.display = 'flex';">
-            <i data-lucide="user-plus"></i>
-            Tambah Siswa Baru
-        </button>
-    </div>
+    <button type="button" class="premium-create-card-btn" onclick="const modal = document.getElementById('modal-create-student'); if(modal) modal.style.display = 'flex';">
+        <i data-lucide="user-plus"></i>
+        Tambah Siswa Baru
+    </button>
 
 
     <section class="card" data-searchable>

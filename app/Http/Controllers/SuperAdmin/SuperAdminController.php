@@ -919,8 +919,8 @@ class SuperAdminController extends Controller
             'classTypeOptions' => self::TEACHER_CLASS_OPTIONS,
             'teachersForManagement' => Teacher::query()->with(['user', 'classes'])->latest()->take(50)->get(),
             'teachersForClassOptions' => Teacher::query()->orderBy('name')->get(['id', 'name']),
-            'classesForManagement' => MusicClass::query()->with(['teacher'])->orderBy('name')->get(),
-            'classesForSchedule' => MusicClass::query()->with('teacher')->orderBy('name')->get(),
+            'classesForManagement' => MusicClass::query()->with(['teacher', 'schedules'])->orderBy('name')->get(),
+            'classesForSchedule' => MusicClass::query()->with(['teacher', 'schedules'])->orderBy('name')->get(),
             'schedulesForManagement' => $scheduleFeatureReady
                 ? Schedule::query()
                     ->with(['musicClass.teacher', 'teacher', 'student.user'])
