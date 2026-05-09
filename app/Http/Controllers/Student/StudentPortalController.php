@@ -181,11 +181,34 @@ class StudentPortalController extends Controller
             ->orderBy('time')
             ->get(['id', 'day', 'time']);
 
-        $grouped = $slots->groupBy('day')->map(fn($daySlots) => $daySlots->map(fn($s) => [
-            'id' => $s->id,
-            'day' => $s->day,
-            'time' => substr((string)$s->time, 0, 5),
-        ]));
+        $dayMap = [
+            'Senin' => \Carbon\Carbon::MONDAY,
+            'Selasa' => \Carbon\Carbon::TUESDAY,
+            'Rabu' => \Carbon\Carbon::WEDNESDAY,
+            'Kamis' => \Carbon\Carbon::THURSDAY,
+            'Jumat' => \Carbon\Carbon::FRIDAY,
+            'Sabtu' => \Carbon\Carbon::SATURDAY,
+            'Minggu' => \Carbon\Carbon::SUNDAY,
+        ];
+
+        $grouped = $slots->groupBy('day')->map(function($daySlots, $dayName) use ($dayMap) {
+            $carbonDay = $dayMap[$dayName] ?? \Carbon\Carbon::MONDAY;
+            
+            // Calculate the date for the upcoming occurrence of this day
+            $now = \Carbon\Carbon::now();
+            if ($now->dayOfWeek === $carbonDay) {
+                $date = $now;
+            } else {
+                $date = $now->copy()->next($carbonDay);
+            }
+
+            return $daySlots->map(fn($s) => [
+                'id' => $s->id,
+                'day' => $s->day,
+                'date_label' => $date->translatedFormat('l, d M Y'),
+                'time' => substr((string)$s->time, 0, 5),
+            ]);
+        });
 
         return response()->json(['grouped' => $grouped]);
     }

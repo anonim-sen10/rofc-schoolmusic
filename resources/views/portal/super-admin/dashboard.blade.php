@@ -116,6 +116,121 @@
     </x-ui.card>
 </section>
 
+<section class="split-grid-sa" data-searchable>
+    <x-ui.card class="card-loading" title="System Activity Feed" subtitle="Audit trail of recent system changes">
+        <ul class="activity-feed">
+            @forelse ($recentActivities as $activity)
+                <li class="activity-item">
+                    <div class="activity-icon {{ $activity->action }}">
+                        @php
+                            $icon = $activity->action === 'created' ? 'plus' : ($activity->action === 'updated' ? 'edit-3' : 'trash-2');
+                        @endphp
+                        <i data-lucide="{{ $icon }}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <p class="activity-title">{{ $activity->description }}</p>
+                        <p class="activity-meta">By <strong>{{ $activity->user?->name ?? 'System' }}</strong> • {{ $activity->created_at->diffForHumans() }}</p>
+                    </div>
+                </li>
+            @empty
+                <x-ui.empty-state title="No activities logged" description="Activities will appear here as users interact with the system." icon="history" />
+            @endforelse
+        </ul>
+    </x-ui.card>
+
+    <x-ui.card class="card-loading" title="Quick Insights" subtitle="Global system status overview">
+        <div class="insight-stats-grid">
+            <div class="insight-stat">
+                <span class="label">Total Records Logged</span>
+                <span class="value">{{ \DB::table('activities')->count() }}</span>
+            </div>
+            <div class="insight-stat">
+                <span class="label">Most Active User</span>
+                <span class="value">
+                    @php
+                        $topUser = \DB::table('activities')
+                            ->select('user_id', \DB::raw('count(*) as total'))
+                            ->groupBy('user_id')
+                            ->orderByDesc('total')
+                            ->first();
+                        $topUserName = $topUser ? (\App\Models\User::find($topUser->user_id)?->name ?? 'System') : '-';
+                    @endphp
+                    {{ $topUserName }}
+                </span>
+            </div>
+            <div class="insight-stat">
+                <span class="label">Today's Activities</span>
+                <span class="value">{{ \DB::table('activities')->whereDate('created_at', today())->count() }}</span>
+            </div>
+        </div>
+    </x-ui.card>
+</section>
+
+<style>
+    .activity-feed {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        padding: 0.5rem;
+    }
+    .activity-item {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    .activity-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        shrink: 0;
+    }
+    .activity-icon i {
+        width: 16px;
+        height: 16px;
+    }
+    .activity-icon.created { background: #ecfdf5; color: #059669; }
+    .activity-icon.updated { background: #eff6ff; color: #2563eb; }
+    .activity-icon.deleted { background: #fef2f2; color: #dc2626; }
+    
+    .activity-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 2px;
+    }
+    .activity-meta {
+        font-size: 11px;
+        color: #64748b;
+    }
+    
+    .insight-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1.5rem;
+        padding: 0.5rem;
+    }
+    .insight-stat {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    .insight-stat .label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+    .insight-stat .value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #0f172a;
+    }
+</style>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script id="dashboard-chart-data" type="application/json">@json($chartData)</script>
 @endsection

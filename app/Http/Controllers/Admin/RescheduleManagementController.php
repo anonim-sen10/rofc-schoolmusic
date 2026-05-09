@@ -34,13 +34,33 @@ class RescheduleManagementController extends Controller
                         'status' => 'rescheduled',
                     ]);
 
+                    // Calculate the correct date for the new session based on the template's day
+                    $dayMap = [
+                        'Senin' => \Carbon\Carbon::MONDAY,
+                        'Selasa' => \Carbon\Carbon::TUESDAY,
+                        'Rabu' => \Carbon\Carbon::WEDNESDAY,
+                        'Kamis' => \Carbon\Carbon::THURSDAY,
+                        'Jumat' => \Carbon\Carbon::FRIDAY,
+                        'Sabtu' => \Carbon\Carbon::SATURDAY,
+                        'Minggu' => \Carbon\Carbon::SUNDAY,
+                    ];
+                    
+                    $newDay = $dayMap[$newScheduleTemplate->day] ?? \Carbon\Carbon::MONDAY;
+                    $oldDate = \Carbon\Carbon::parse($oldSession->session_date);
+                    // Find the date for the new day in the same week as the old date
+                    $newSessionDate = $oldDate->copy()->startOfWeek()->addDays($newDay - 1);
+                    
+                    // If the calculated date is in the past relative to the old session's start of week logic, 
+                    // or we want to ensure it's the "nearest" one, we could refine this.
+                    // But usually, reschedule stays in the same week block or moves forward.
+                    
                     // Create the NEW session for the student in the new slot
                     \App\Models\ScheduleSession::create([
                         'schedule_id' => $newScheduleTemplate->id,
                         'student_id' => $resRequest->student_id,
                         'teacher_id' => $newScheduleTemplate->teacher_id,
                         'class_id' => $oldSession->class_id,
-                        'session_date' => $oldSession->session_date, // Keep same date for now
+                        'session_date' => $newSessionDate,
                         'time' => $newScheduleTemplate->time,
                         'status' => 'booked',
                     ]);

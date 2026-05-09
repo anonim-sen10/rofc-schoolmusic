@@ -8,20 +8,34 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+use App\Traits\LogsActivity;
+
 class Student extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected $fillable = [
         'user_id',
         'name',
+        'nama_panggilan',
+        'jenis_kelamin',
+        'tempat_lahir',
+        'tanggal_lahir',
+        'kewarganegaraan',
         'age',
         'phone',
         'email',
         'address',
+        'nama_ortu',
+        'pekerjaan_ortu',
+        'no_hp_ortu',
+        'email_ortu',
         'no_hp',
         'class_id',
         'schedule_id',
+        'program_tambahan',
+        'pengalaman',
+        'deskripsi_pengalaman',
         'is_active',
         'start_date',
         'duration_months',
@@ -30,6 +44,8 @@ class Student extends Model
 
     protected $casts = [
         'is_active' => 'bool',
+        'program_tambahan' => 'array',
+        'pengalaman' => 'bool',
     ];
 
     public function user(): BelongsTo

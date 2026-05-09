@@ -198,7 +198,7 @@ function openRescheduleModal(btn) {
                     data.grouped[day].forEach(slot => {
                         const opt = document.createElement('option');
                         opt.value = slot.id;
-                        opt.textContent = `${slot.day} - ${slot.time}`;
+                        opt.textContent = `${slot.date_label} - ${slot.time}`;
                         group.appendChild(opt);
                     });
                     select.appendChild(group);

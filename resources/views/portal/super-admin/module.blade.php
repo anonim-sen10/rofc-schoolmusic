@@ -656,63 +656,328 @@
 @endif
 
 @if ($moduleKey === 'students')
-    <section class="card" data-searchable>
-        @php
-            $openStudentCreate = $errors->hasAny([
-                'name',
-                'age',
-                'email',
-                'phone',
-                'address',
-                'is_active',
-                'class_ids',
-                'class_ids.*',
-            ]);
-            $oldClassIds = collect(old('class_ids', []))->map(fn ($id) => (string) $id);
-        @endphp
+    <style>
+        .premium-form-card {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(12px);
+        }
 
-        <details class="teacher-create" @if($openStudentCreate) open @endif>
-            <summary>Create Student</summary>
-            <form class="module-form module-form-grid teacher-create-form" method="POST" action="{{ route('super-admin.students.store') }}">
-                @csrf
-                <label>Nama
-                    <input type="text" name="name" value="{{ old('name') }}" required>
-                </label>
-                <label>Umur
-                    <input type="number" name="age" min="4" max="80" value="{{ old('age') }}">
-                </label>
-                <label>Email
-                    <input type="email" name="email" value="{{ old('email') }}">
-                </label>
-                <label>Telepon
-                    <input type="text" name="phone" value="{{ old('phone') }}">
-                </label>
-                <label>Alamat
-                    <textarea name="address" rows="2">{{ old('address') }}</textarea>
-                </label>
-                <label>Kelas
-                    <select name="class_ids[]" multiple size="6">
-                        @foreach($classesForManagement as $classItem)
-                            <option value="{{ $classItem->id }}" @selected($oldClassIds->contains((string) $classItem->id))>{{ $classItem->name }}</option>
-                        @endforeach
-                    </select>
-                </label>
-                <label>Status
-                    <select name="is_active" required>
-                        <option value="1" @selected(old('is_active', '1') === '1')>Active</option>
-                        <option value="0" @selected(old('is_active') === '0')>Inactive</option>
-                    </select>
-                </label>
-                <div class="form-actions">
-                    <button type="submit">Simpan Student</button>
-                    <button type="reset" class="btn-secondary">Cancel</button>
-                </div>
-            </form>
-        </details>
-    </section>
+        .premium-form-container {
+            background: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 1);
+            border-radius: 2.5rem;
+            width: 100%;
+            max-width: 950px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 3rem;
+            position: relative;
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(0, 0, 0, 0.05);
+            animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalSlideUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .premium-form-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .premium-form-icon {
+            width: 4.5rem;
+            height: 4.5rem;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            box-shadow: 0 12px 24px rgba(99, 102, 241, 0.3);
+            flex-shrink: 0;
+        }
+
+        .premium-form-title h2 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.025em;
+        }
+
+        .premium-form-title p {
+            margin: 0.35rem 0 0 0;
+            color: #64748b;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .premium-modal-close {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            color: #64748b;
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+        }
+
+        .premium-modal-close:hover {
+            background: #fee2e2;
+            color: #ef4444;
+            border-color: #fecaca;
+            transform: rotate(90deg);
+        }
+
+        .premium-form-group {
+            margin-bottom: 3rem;
+            background: #f8fafc;
+            padding: 2rem;
+            border-radius: 2rem;
+            border: 1px solid #f1f5f9;
+            transition: all 0.3s ease;
+        }
+
+        .premium-form-group:hover {
+            background: #ffffff;
+            border-color: #e2e8f0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+        }
+
+        .premium-form-group-title {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 2px solid #ffffff;
+        }
+
+        .premium-form-group-title span {
+            width: 2rem;
+            height: 2rem;
+            background: #6366f1;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 800;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
+        }
+
+        .premium-form-group-title h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .premium-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.75rem;
+        }
+
+        .premium-form-grid .full-width {
+            grid-column: span 2;
+        }
+
+        .premium-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .premium-field label {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #475569;
+            margin-left: 0.25rem;
+        }
+
+        .premium-input, .premium-select, .premium-textarea {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 0.9rem 1.25rem;
+            color: #0f172a;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .premium-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .premium-input:hover, .premium-select:hover, .premium-textarea:hover {
+            border-color: #cbd5e1;
+        }
+
+        .premium-input:focus, .premium-select:focus, .premium-textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .premium-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.25rem;
+            padding-right: 3rem;
+        }
+
+        .premium-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .premium-form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1.25rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .btn-premium-primary {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: #ffffff;
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 1.25rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .btn-premium-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(99, 102, 241, 0.35);
+            filter: brightness(1.05);
+        }
+
+        .btn-premium-primary:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-premium-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            padding: 1rem 3rem;
+            border-radius: 1.25rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-premium-secondary:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .student-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .student-list-header h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+        }
+
+        .btn-add-student {
+            background: #ffffff;
+            color: #4f46e5;
+            padding: 0.85rem 1.75rem;
+            border-radius: 1.15rem;
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1.5px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-add-student:hover {
+            border-color: #6366f1;
+            background: #f5f3ff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.15);
+        }
+
+        @media (max-width: 768px) {
+            .premium-form-container {
+                padding: 2rem;
+                border-radius: 2rem;
+            }
+            .premium-form-grid {
+                grid-template-columns: 1fr;
+            }
+            .premium-form-grid .full-width {
+                grid-column: span 1;
+            }
+        }
+
+    </style>
+
+    <div class="student-list-header" style="margin-bottom: 2rem;">
+        <button type="button" class="btn-add-student" onclick="const modal = document.getElementById('modal-create-student'); if(modal) modal.style.display = 'flex';">
+            <i data-lucide="user-plus"></i>
+            Tambah Siswa Baru
+        </button>
+    </div>
+
 
     <section class="card" data-searchable>
-        <h3>Daftar Seluruh Siswa</h3>
+        <div class="student-list-header">
+            <h3>Daftar Seluruh Siswa</h3>
+        </div>
         <div class="table-wrap">
             <table>
                 <thead>
@@ -731,7 +996,15 @@
                             <td>{{ $student->name }}</td>
                             <td>{{ $student->email ?: '-' }}</td>
                             <td>{{ $student->phone ?: '-' }}</td>
-                            <td>{{ $student->classes->pluck('name')->join(', ') ?: '-' }}</td>
+                            <td>
+                                @if($student->class)
+                                    {{ $student->class->name }}
+                                @elseif($student->classes->isNotEmpty())
+                                    {{ $student->classes->pluck('name')->join(', ') }}
+                                @else
+                                    -
+                                @endif
+                            </td>
                             <td>
                                 <x-ui.badge :type="$student->is_active ? 'success' : 'warning'">
                                     {{ $student->is_active ? 'ACTIVE' : 'INACTIVE' }}
@@ -771,38 +1044,42 @@
                                                     </span>
                                                 </div>
                                                 <section class="registration-modal-grid">
-                                                    <article>
-                                                        <p>Email Siswa</p>
-                                                        <p>{{ $student->email ?: '-' }}</p>
-                                                    </article>
-                                                    <article>
-                                                        <p>Telepon</p>
-                                                        <p>{{ $student->phone ?: '-' }}</p>
-                                                    </article>
-                                                    <article>
-                                                        <p>Umur</p>
-                                                        <p>{{ $student->age ? $student->age . ' Tahun' : '-' }}</p>
-                                                    </article>
-                                                    <article>
-                                                        <p>Mulai Kursus</p>
-                                                        <p>{{ $student->start_date ? \Carbon\Carbon::parse($student->start_date)->format('d M Y') : '-' }}</p>
-                                                    </article>
-                                                    <article class="registration-modal-item-full">
-                                                        <p>Alamat</p>
-                                                        <p>{{ $student->address ?: '-' }}</p>
-                                                    </article>
+                                                    <article><p>Nama Panggilan</p><p>{{ $student->nama_panggilan ?: '-' }}</p></article>
+                                                    <article><p>Jenis Kelamin</p><p>{{ $student->jenis_kelamin ?: '-' }}</p></article>
+                                                    <article><p>Tempat Lahir</p><p>{{ $student->tempat_lahir ?: '-' }}</p></article>
+                                                    <article><p>Tanggal Lahir</p><p>{{ $student->tanggal_lahir ? \Carbon\Carbon::parse($student->tanggal_lahir)->format('d M Y') : '-' }}</p></article>
+                                                    <article><p>Kewarganegaraan</p><p>{{ $student->kewarganegaraan ?: '-' }}</p></article>
+                                                    <article><p>Umur</p><p>{{ $student->age ? $student->age . ' Tahun' : '-' }}</p></article>
+                                                    <article><p>Email Siswa</p><p>{{ $student->email ?: '-' }}</p></article>
+                                                    <article><p>No. HP Siswa</p><p>{{ $student->phone ?: '-' }}</p></article>
+                                                    <article class="registration-modal-item-full"><p>Alamat Domisili</p><p>{{ $student->address ?: '-' }}</p></article>
+                                                    
+                                                    <article><p>Nama Orang Tua</p><p>{{ $student->nama_ortu ?: '-' }}</p></article>
+                                                    <article><p>Pekerjaan Ortu</p><p>{{ $student->pekerjaan_ortu ?: '-' }}</p></article>
+                                                    <article><p>No. HP Orang Tua</p><p>{{ $student->no_hp_ortu ?: '-' }}</p></article>
+                                                    <article><p>Email Orang Tua</p><p>{{ $student->email_ortu ?: '-' }}</p></article>
+
                                                     <article class="registration-modal-item-full">
                                                         <p>Kelas Terdaftar</p>
-                                                        <p>{{ $student->classes->pluck('name')->join(', ') ?: '-' }}</p>
+                                                        <p>
+                                                            @if($student->class)
+                                                                {{ $student->class->name }}
+                                                            @elseif($student->classes->isNotEmpty())
+                                                                {{ $student->classes->pluck('name')->join(', ') }}
+                                                            @else
+                                                                -
+                                                            @endif
+                                                        </p>
                                                     </article>
-                                                    <article>
-                                                        <p>Berakhir Pada</p>
-                                                        <p>{{ $student->end_date ? \Carbon\Carbon::parse($student->end_date)->format('d M Y') : '-' }}</p>
+                                                    <article><p>Mulai Kursus</p><p>{{ $student->start_date ? \Carbon\Carbon::parse($student->start_date)->format('d M Y') : '-' }}</p></article>
+                                                    <article><p>Berakhir Pada</p><p>{{ $student->end_date ? \Carbon\Carbon::parse($student->end_date)->format('d M Y') : '-' }}</p></article>
+                                                    
+                                                    <article class="registration-modal-item-full">
+                                                        <p>Program Tambahan</p>
+                                                        <p>{{ is_array($student->program_tambahan) ? implode(', ', $student->program_tambahan) : '-' }}</p>
                                                     </article>
-                                                    <article>
-                                                        <p>Status Akun</p>
-                                                        <p>{{ $student->is_active ? 'Aktif' : 'Non-aktif' }}</p>
-                                                    </article>
+                                                    <article><p>Pengalaman Musik</p><p>{{ $student->pengalaman ? 'Sudah Pernah' : 'Belum Pernah' }}</p></article>
+                                                    <article class="registration-modal-item-full"><p>Deskripsi Pengalaman</p><p>{{ $student->deskripsi_pengalaman ?: '-' }}</p></article>
                                                 </section>
                                             </div>
                                             <footer class="registration-modal-footer">
@@ -821,64 +1098,60 @@
                                             @method('PUT')
                                             <header class="registration-modal-header">
                                                 <div class="registration-modal-header-left">
-                                                    <span class="registration-modal-icon">
-                                                        <i data-lucide="pencil-line"></i>
-                                                    </span>
-                                                    <div>
-                                                        <h3>Edit Data Siswa</h3>
-                                                        <p>Perbarui informasi profil siswa</p>
-                                                    </div>
+                                                    <span class="registration-modal-icon"><i data-lucide="pencil-line"></i></span>
+                                                    <div><h3>Edit Data Siswa</h3><p>Perbarui informasi lengkap profil siswa</p></div>
                                                 </div>
                                                 <button type="button" class="registration-modal-close-btn" aria-label="Tutup" onclick="this.closest('details').removeAttribute('open');"><i data-lucide="x"></i></button>
                                             </header>
                                             <div class="registration-modal-body">
-                                                <div class="module-form-grid">
-                                                    <label>Nama Lengkap
-                                                        <input type="text" name="name" value="{{ $student->name }}" required>
+                                                <div class="module-form-grid" style="grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                                                    <label style="grid-column: span 2;">Nama Lengkap <input type="text" name="name" value="{{ $student->name }}" required></label>
+                                                    <label>Nama Panggilan <input type="text" name="nama_panggilan" value="{{ $student->nama_panggilan }}"></label>
+                                                    <label>Jenis Kelamin
+                                                        <select name="jenis_kelamin">
+                                                            <option value="laki-laki" @selected($student->jenis_kelamin === 'laki-laki')>Laki-laki</option>
+                                                            <option value="perempuan" @selected($student->jenis_kelamin === 'perempuan')>Perempuan</option>
+                                                        </select>
                                                     </label>
-                                                    <label>Umur
-                                                        <input type="number" name="age" value="{{ $student->age }}">
-                                                    </label>
-                                                    <label>Email
-                                                        <input type="email" name="email" value="{{ $student->email }}">
-                                                    </label>
-                                                    <label>Telepon
-                                                        <input type="text" name="phone" value="{{ $student->phone }}">
-                                                    </label>
-                                                    <label style="grid-column: span 2;">Alamat
-                                                        <textarea name="address" rows="2">{{ $student->address }}</textarea>
-                                                    </label>
-                                                    <label style="grid-column: span 2;">Kelas
-                                                        <select multiple name="class_ids[]" size="4" style="height: auto; min-height: 100px;">
+                                                    <label>Tempat Lahir <input type="text" name="tempat_lahir" value="{{ $student->tempat_lahir }}"></label>
+                                                    <label>Tanggal Lahir <input type="date" name="tanggal_lahir" value="{{ $student->tanggal_lahir }}"> </label>
+                                                    <label>Umur <input type="number" name="age" value="{{ $student->age }}"></label>
+                                                    <label>No. HP Siswa <input type="text" name="phone" value="{{ $student->phone }}"></label>
+                                                    <label style="grid-column: span 2;">Email Siswa <input type="email" name="email" value="{{ $student->email }}"></label>
+                                                    <label style="grid-column: span 2;">Alamat <textarea name="address" rows="2">{{ $student->address }}</textarea></label>
+                                                    
+                                                    <div style="grid-column: span 2; margin-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.5rem;"><h4 style="font-size: 0.85rem; color: #818cf8;">Data Orang Tua</h4></div>
+                                                    <label>Nama Ortu <input type="text" name="nama_ortu" value="{{ $student->nama_ortu }}"></label>
+                                                    <label>Pekerjaan Ortu <input type="text" name="pekerjaan_ortu" value="{{ $student->pekerjaan_ortu }}"></label>
+                                                    <label>No. HP Ortu <input type="text" name="no_hp_ortu" value="{{ $student->no_hp_ortu }}"></label>
+                                                    <label>Email Ortu <input type="email" name="email_ortu" value="{{ $student->email_ortu }}"></label>
+                                                    
+                                                    <div style="grid-column: span 2; margin-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.5rem;"><h4 style="font-size: 0.85rem; color: #818cf8;">Akademik & Status</h4></div>
+                                                    <label style="grid-column: span 2;">Kelas Terdaftar
+                                                        <select name="class_ids[]" multiple style="height: 100px;">
                                                             @foreach($classesForManagement as $classItem)
-                                                                <option value="{{ $classItem->id }}" @selected($student->classes->contains($classItem->id))>
-                                                                    {{ $classItem->name }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                        <small style="color: #64748b; font-size: 0.75rem; margin-top: 0.25rem; display: block;">Tahan Ctrl/Cmd untuk memilih lebih dari satu.</small>
-                                                    </label>
-                                                    <label>Mulai Kursus
-                                                        <input type="date" name="start_date" value="{{ $student->start_date ? \Carbon\Carbon::parse($student->start_date)->format('Y-m-d') : '' }}">
-                                                    </label>
-                                                    <label>Durasi (Bulan)
-                                                        <select name="duration_months">
-                                                            @foreach([1, 2, 3, 4, 6, 12] as $m)
-                                                                <option value="{{ $m }}" @selected((int)($student->duration_months ?? 0) === $m)>{{ $m }} Bulan</option>
+                                                                <option value="{{ $classItem->id }}" @selected($student->classes->contains($classItem->id))>{{ $classItem->name }}</option>
                                                             @endforeach
                                                         </select>
                                                     </label>
-                                                    <label style="grid-column: span 2;">Status Akun
-                                                        <select name="is_active">
+                                                    <label>Status
+                                                        <select name="is_active" required>
                                                             <option value="1" @selected($student->is_active)>Aktif</option>
-                                                            <option value="0" @selected(!$student->is_active)>Non-aktif</option>
+                                                            <option value="0" @selected(!$student->is_active)>Tidak Aktif</option>
                                                         </select>
                                                     </label>
+                                                    <label>Pengalaman Musik
+                                                        <select name="pengalaman">
+                                                            <option value="0" @selected(!$student->pengalaman)>Belum Ada</option>
+                                                            <option value="1" @selected($student->pengalaman)>Ada</option>
+                                                        </select>
+                                                    </label>
+                                                    <label style="grid-column: span 2;">Deskripsi Pengalaman <textarea name="deskripsi_pengalaman" rows="2">{{ $student->deskripsi_pengalaman }}</textarea></label>
                                                 </div>
                                             </div>
                                             <footer class="registration-modal-footer">
-                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x"></i> Batal</button>
-                                                <button type="submit" class="registration-modal-btn registration-modal-btn-primary"><i data-lucide="check"></i> Simpan Perubahan</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary" onclick="this.closest('details').removeAttribute('open');">Batal</button>
+                                                <button type="submit" class="registration-modal-btn registration-modal-btn-primary">Simpan Perubahan</button>
                                             </footer>
                                         </form>
                                     </details>
@@ -904,11 +1177,6 @@
 @endif
 
 @if ($moduleKey === 'registrations')
-    @php
-        $instrumenOptions = ['Drum', 'Piano', 'Guitar', 'Vocal', 'Violin', 'Bass', 'Keyboard', 'Music Theory'];
-        $programTambahanOptions = ['Teori Musik', 'Ensemble / Band', 'Skill Teknik (ajang kompetisi)', 'Ujian Sertifikat bertaraf international'];
-        $hariOptions = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-    @endphp
 
 
 
@@ -923,31 +1191,8 @@
     </style>
 
     <section class="card" data-searchable>
-        @php
-            $openRegistrationCreate = $errors->hasAny([
-                'nama_lengkap',
-                'nama_panggilan',
-                'jenis_kelamin',
-                'tempat_lahir',
-                'tanggal_lahir',
-                'kewarganegaraan',
-                'alamat',
-                'email',
-                'no_hp_siswa',
-                'nama_ortu',
-                'no_hp_ortu',
-                'instrumen',
-                'hari_pilihan',
-                'class_id',
-                'pengalaman',
-                'deskripsi_pengalaman',
-                'status',
-            ]);
-            $oldProgramTambahan = old('program_tambahan', []);
-            $oldHariPilihan = old('hari_pilihan', []);
-        @endphp
 
-        <details class="teacher-create" @if($openRegistrationCreate) open @endif>
+        <details class="teacher-create" {{ $openRegistrationCreate ? 'open' : '' }}>
             <summary>Create Registration</summary>
             <form class="module-form module-form-grid teacher-create-form" method="POST" action="{{ route('super-admin.registrations.store') }}">
                 @csrf
@@ -1005,14 +1250,14 @@
                 <label>Program Tambahan
                     <select name="program_tambahan[]" multiple>
                         @foreach($programTambahanOptions as $programItem)
-                            <option value="{{ $programItem }}" @selected(in_array($programItem, $oldProgramTambahan, true))>{{ $programItem }}</option>
+                            <option value="{{ $programItem }}" @selected(in_array($programItem, old('program_tambahan', []), true))>{{ $programItem }}</option>
                         @endforeach
                     </select>
                 </label>
                 <label>Hari Pilihan
                     <select name="hari_pilihan[]" multiple required>
                         @foreach($hariOptions as $hariItem)
-                            <option value="{{ $hariItem }}" @selected(in_array($hariItem, $oldHariPilihan, true))>{{ $hariItem }}</option>
+                            <option value="{{ $hariItem }}" @selected(in_array($hariItem, old('hari_pilihan', []), true))>{{ $hariItem }}</option>
                         @endforeach
                     </select>
                 </label>
@@ -1878,7 +2123,7 @@
                                                                 'name' => $student?->user?->name ?? ($student?->name ?? '-'),
                                                                 'phone' => $student?->phone ?? '-',
                                                                 'address' => $student?->address ?? '-',
-                                                                'class_name' => $className,
+                                                                'class_name' => $student->class?->name ?? $student->classes?->pluck('name')->implode(', ') ?? $className,
                                                                 'teacher_name' => $teacherName
                                                             ] : null;
                                                         @endphp
@@ -2223,7 +2468,293 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+// Dynamic Schedule Loader for Admin Create Student Modal
+async function loadAdminSchedules(classId) {
+    const container = document.getElementById('admin-schedule-container');
+    const preview = document.getElementById('admin-selected-preview');
+    const tags = document.getElementById('admin-selected-tags');
+    
+    if (!classId) {
+        container.innerHTML = '<p style="padding: 1.5rem; color: #64748b; font-size: 0.9rem; font-style: italic; text-align: center;">Silakan pilih instrumen terlebih dahulu.</p>';
+        preview.style.display = 'none';
+        return;
+    }
+
+    container.innerHTML = '<p style="padding: 1.5rem; color: #64748b; font-size: 0.9rem; text-align: center;">Memuat jadwal...</p>';
+
+    try {
+        const response = await fetch(`/schedules/by-class/${classId}`);
+        const data = await response.json();
+        const grouped = data.grouped || {};
+
+        if (Object.keys(grouped).length === 0) {
+            container.innerHTML = '<p style="padding: 1.5rem; color: #ef4444; font-size: 0.9rem; text-align: center;">Tidak ada jadwal tersedia untuk instrumen ini.</p>';
+            return;
+        }
+
+        let html = '<div class="admin-schedule-accordion">';
+        let index = 0;
+        for (const day in grouped) {
+            const isActive = index === 0 ? 'is-active' : '';
+            html += `
+                <div class="admin-accordion-item ${isActive}" style="border-bottom: 1px solid #e2e8f0;">
+                    <button type="button" onclick="this.parentElement.classList.toggle('is-active')" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; background: #fff; border: 0; cursor: pointer; text-align: left;">
+                        <span style="font-weight: 700; color: #1e293b;">${day}</span>
+                        <i data-lucide="chevron-down" style="width: 1.25rem; height: 1.25rem; transition: transform 0.2s;"></i>
+                    </button>
+                    <div class="admin-accordion-content" style="display: none; padding: 0.75rem 1rem 1.25rem; background: #f8fafc;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.5rem;">
+                            ${grouped[day].map(s => {
+                                const isBooked = String(s.status).toLowerCase() === 'booked';
+                                return `
+                                    <label style="position: relative; display: flex; flex-direction: column; align-items: center; padding: 0.75rem 0.5rem; border: 1.5px solid ${isBooked ? '#e2e8f0' : '#e2e8f0'}; border-radius: 0.75rem; background: ${isBooked ? '#f1f5f9' : '#fff'}; cursor: ${isBooked ? 'not-allowed' : 'pointer'}; transition: all 0.2s; opacity: ${isBooked ? '0.6' : '1'};">
+                                        <input type="radio" name="schedule_id" value="${s.id}" data-label="${day} ${s.time}" ${isBooked ? 'disabled' : ''} onchange="updateAdminSelectedPreview(this)" style="position: absolute; opacity: 0; inset: 0;">
+                                        <span style="font-size: 0.9rem; font-weight: 700; color: #334155;">${s.time}</span>
+                                        ${isBooked ? '<span style="font-size: 0.7rem; color: #ef4444; font-weight: 700;">Full</span>' : ''}
+                                    </label>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            index++;
+        }
+        html += '</div>';
+        container.innerHTML = html;
+        if (window.lucide) window.lucide.createIcons();
+
+        // Style for accordion active state
+        const style = document.createElement('style');
+        style.textContent = `
+            .admin-accordion-item.is-active .admin-accordion-content { display: block !important; }
+            .admin-accordion-item.is-active i[data-lucide="chevron-down"] { transform: rotate(180deg); }
+            label:has(input[type="radio"]:checked) { border-color: #6366f1 !important; background: #eff6ff !important; box-shadow: 0 0 0 1px #6366f1; }
+        `;
+        document.head.appendChild(style);
+
+    } catch (error) {
+        console.error(error);
+        container.innerHTML = '<p style="padding: 1.5rem; color: #ef4444; font-size: 0.9rem; text-align: center;">Gagal memuat jadwal.</p>';
+    }
+}
+
+function updateAdminSelectedPreview(radio) {
+    const preview = document.getElementById('admin-selected-preview');
+    const tags = document.getElementById('admin-selected-tags');
+    
+    if (radio.checked) {
+        preview.style.display = 'block';
+        tags.innerHTML = `
+            <span style="display: inline-flex; align-items: center; gap: 0.5rem; background: #6366f1; color: #fff; padding: 0.4rem 0.8rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600;">
+                ${radio.dataset.label}
+                <i data-lucide="x" onclick="document.querySelector('input[name=\\'schedule_id\\'][value=\\'${radio.value}\\']').checked = false; updateAdminSelectedPreview({checked:false});" style="width: 14px; height: 14px; cursor: pointer;"></i>
+            </span>
+        `;
+        if (window.lucide) window.lucide.createIcons();
+    } else {
+        preview.style.display = 'none';
+        tags.innerHTML = '';
+    }
+}
 </script>
+@endpush
+
+@push('modals')
+<div id="modal-create-student" class="premium-form-card">
+    <div class="premium-form-container">
+        <button type="button" class="premium-modal-close" onclick="document.getElementById('modal-create-student').style.display = 'none';">
+            <i data-lucide="x"></i>
+        </button>
+
+        <div class="premium-form-header">
+            <div class="premium-form-icon">
+                <i data-lucide="user-plus"></i>
+            </div>
+            <div class="premium-form-title">
+                <h2>Tambah Siswa Baru</h2>
+                <p>Daftarkan siswa baru ke dalam sistem manajemen ROFC secara manual.</p>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ route('super-admin.students.store') }}">
+            @csrf
+            
+            {{-- STEP 1: DATA SISWA --}}
+            <div class="premium-form-group">
+                <div class="premium-form-group-title">
+                    <span><i data-lucide="user" style="width: 1rem; height: 1rem;"></i></span>
+                    <h3>Informasi Dasar Siswa</h3>
+                </div>
+                <div class="premium-form-grid">
+                    <div class="premium-field">
+                        <label for="name">Nama Lengkap</label>
+                        <input type="text" id="name" name="name" class="premium-input" value="{{ old('name') }}" placeholder="Nama sesuai identitas" required>
+                    </div>
+                    <div class="premium-field">
+                        <label for="nama_panggilan">Nama Panggilan</label>
+                        <input type="text" id="nama_panggilan" name="nama_panggilan" class="premium-input" value="{{ old('nama_panggilan') }}" placeholder="Nama panggilan">
+                    </div>
+                    <div class="premium-field">
+                        <label for="jenis_kelamin">Jenis Kelamin</label>
+                        <select id="jenis_kelamin" name="jenis_kelamin" class="premium-select">
+                            <option value="">Pilih Jenis Kelamin</option>
+                            <option value="laki-laki" @selected(old('jenis_kelamin') === 'laki-laki')>Laki-laki</option>
+                            <option value="perempuan" @selected(old('jenis_kelamin') === 'perempuan')>Perempuan</option>
+                        </select>
+                    </div>
+                    <div class="premium-field">
+                        <label for="age">Umur (Tahun)</label>
+                        <input type="number" id="age" name="age" class="premium-input" min="4" max="80" value="{{ old('age') }}" placeholder="Contoh: 12">
+                    </div>
+                    <div class="premium-field">
+                        <label for="tempat_lahir">Tempat Lahir</label>
+                        <input type="text" id="tempat_lahir" name="tempat_lahir" class="premium-input" value="{{ old('tempat_lahir') }}" placeholder="Kota kelahiran">
+                    </div>
+                    <div class="premium-field">
+                        <label for="tanggal_lahir">Tanggal Lahir</label>
+                        <input type="date" id="tanggal_lahir" name="tanggal_lahir" class="premium-input" value="{{ old('tanggal_lahir') }}">
+                    </div>
+                    <div class="premium-field">
+                        <label for="email">Email Siswa</label>
+                        <input type="email" id="email" name="email" class="premium-input" value="{{ old('email') }}" placeholder="siswa@email.com">
+                    </div>
+                    <div class="premium-field">
+                        <label for="phone">No. HP Siswa</label>
+                        <input type="text" id="phone" name="phone" class="premium-input" value="{{ old('phone') }}" placeholder="08xxxxxxxxxx">
+                    </div>
+                    <div class="premium-field full-width">
+                        <label for="address">Alamat Domisili</label>
+                        <textarea id="address" name="address" class="premium-textarea" placeholder="Alamat lengkap tempat tinggal">{{ old('address') }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            {{-- STEP 2: DATA ORANG TUA --}}
+            <div class="premium-form-group">
+                <div class="premium-form-group-title">
+                    <span><i data-lucide="users" style="width: 1rem; height: 1rem;"></i></span>
+                    <h3>Data Orang Tua / Wali</h3>
+                </div>
+                <div class="premium-form-grid">
+                    <div class="premium-field">
+                        <label for="nama_ortu">Nama Orang Tua</label>
+                        <input type="text" id="nama_ortu" name="nama_ortu" class="premium-input" value="{{ old('nama_ortu') }}" placeholder="Nama Ayah / Ibu / Wali">
+                    </div>
+                    <div class="premium-field">
+                        <label for="pekerjaan_ortu">Pekerjaan</label>
+                        <input type="text" id="pekerjaan_ortu" name="pekerjaan_ortu" class="premium-input" value="{{ old('pekerjaan_ortu') }}" placeholder="Pekerjaan Orang Tua">
+                    </div>
+                    <div class="premium-field">
+                        <label for="no_hp_ortu">No. HP Orang Tua</label>
+                        <input type="text" id="no_hp_ortu" name="no_hp_ortu" class="premium-input" value="{{ old('no_hp_ortu') }}" placeholder="08xxxxxxxxxx">
+                    </div>
+                    <div class="premium-field">
+                        <label for="email_ortu">Email Orang Tua</label>
+                        <input type="email" id="email_ortu" name="email_ortu" class="premium-input" value="{{ old('email_ortu') }}" placeholder="ortu@email.com">
+                    </div>
+                </div>
+            </div>
+
+            {{-- STEP 3: PROGRAM & JADWAL (Matching Register Form) --}}
+            <div class="premium-form-group">
+                <div class="premium-form-group-title">
+                    <span><i data-lucide="music" style="width: 1rem; height: 1rem;"></i></span>
+                    <h3>Program dan Jadwal</h3>
+                    <p style="margin: 0; font-size: 0.8rem; color: #64748b; font-weight: 400;">Pilih instrumen dan jadwal yang tersedia.</p>
+                </div>
+                <div class="premium-form-grid">
+                    <div class="premium-field">
+                        <label for="admin_class_id">Instrumen</label>
+                        <select id="admin_class_id" name="class_id" class="premium-select" required onchange="loadAdminSchedules(this.value)">
+                            <option value="">Pilih Instrumen</option>
+                            @foreach($classesForManagement as $classItem)
+                                <option value="{{ $classItem->id }}" @selected(old('class_id') == $classItem->id)>
+                                    {{ $classItem->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="premium-field">
+                        <label for="start_date">Tanggal Mulai Belajar</label>
+                        <input type="date" id="start_date" name="start_date" class="premium-input" value="{{ old('start_date', date('Y-m-d')) }}">
+                    </div>
+
+                    <div class="premium-field">
+                        <label for="duration_months">Durasi Belajar</label>
+                        <select id="duration_months" name="duration_months" class="premium-select">
+                            <option value="1" @selected(old('duration_months') == 1)>1 Bulan</option>
+                            <option value="2" @selected(old('duration_months') == 2)>2 Bulan</option>
+                            <option value="3" @selected(old('duration_months') == 3)>3 Bulan</option>
+                            <option value="6" @selected(old('duration_months') == 6)>6 Bulan</option>
+                            <option value="12" @selected(old('duration_months') == 12)>1 Tahun</option>
+                        </select>
+                    </div>
+
+                    <div class="premium-field full-width">
+                        <label>Pilih Jadwal</label>
+                        <div style="margin-top: 0.5rem;">
+                            <!-- Selected Preview -->
+                            <div id="admin-selected-preview" style="display: none; margin-bottom: 1rem; padding: 0.75rem; background: #f0f7ff; border: 1px dashed #6366f1; border-radius: 0.75rem;">
+                                <span style="font-size: 0.75rem; font-weight: 700; color: #6366f1; text-transform: uppercase; display: block; margin-bottom: 0.25rem;">Jadwal Terpilih:</span>
+                                <div id="admin-selected-tags" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
+                            </div>
+
+                            <!-- Schedule Container -->
+                            <div id="admin-schedule-container" style="border: 1px solid #e2e8f0; border-radius: 1rem; overflow: hidden; background: #fff;">
+                                <p style="padding: 1.5rem; color: #64748b; font-size: 0.9rem; font-style: italic; text-align: center;">Silakan pilih instrumen terlebih dahulu.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="premium-field full-width">
+                        <label>Program Tambahan (opsional)</label>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.75rem; margin-top: 0.5rem;">
+                            @php $oldProgramTambahan = old('program_tambahan', []); @endphp
+                            @foreach (['Teori Musik', 'Ensemble / Band', 'Skill Teknik (ajang kompetisi)', 'Ujian Sertifikat bertaraf international'] as $prog)
+                                <label style="display: flex; align-items: center; gap: 0.5rem; color: #475569; cursor: pointer; font-size: 0.9rem;">
+                                    <input type="checkbox" name="program_tambahan[]" value="{{ $prog }}" @checked(in_array($prog, $oldProgramTambahan)) style="accent-color: #6366f1; width: 1.1rem; height: 1.1rem;">
+                                    {{ $prog }}
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div class="premium-field">
+                        <label for="pengalaman">Pernah belajar musik sebelumnya?</label>
+                        <select id="pengalaman" name="pengalaman" class="premium-select">
+                            <option value="0" @selected(old('pengalaman') == '0')>Belum Pernah</option>
+                            <option value="1" @selected(old('pengalaman') == '1')>Sudah Pernah</option>
+                        </select>
+                    </div>
+
+                    <div class="premium-field full-width">
+                        <label for="deskripsi_pengalaman">Deskripsi Pengalaman</label>
+                        <textarea id="deskripsi_pengalaman" name="deskripsi_pengalaman" class="premium-textarea" placeholder="Ceritakan pengalaman belajar musik sebelumnya (jika ada)">{{ old('deskripsi_pengalaman') }}</textarea>
+                    </div>
+
+                    <div class="premium-field">
+                        <label for="is_active">Status Siswa</label>
+                        <select id="is_active" name="is_active" class="premium-select" required>
+                            <option value="1" @selected(old('is_active', '1') === '1')>Active (Aktif Belajar)</option>
+                            <option value="0" @selected(old('is_active') === '0')>Inactive (Cuti/Berhenti)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="premium-form-actions">
+                <button type="button" class="btn-premium-secondary" onclick="document.getElementById('modal-create-student').style.display = 'none';">Batal</button>
+                <button type="submit" class="btn-premium-primary">
+                    <i data-lucide="save"></i>
+                    Simpan Data & Buat Akun
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 @endpush
 
 

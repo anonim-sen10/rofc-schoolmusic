@@ -349,9 +349,10 @@ public function schedule(Request $request): View
         $validated = $request->validate([
             'session_id' => 'required|exists:schedule_sessions,id',
             'status' => 'required|in:present,absent,reschedule',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'note' => 'nullable|string',
+            'attendance_image' => 'nullable|string', // base64
         ]);
 
         $session = \App\Models\ScheduleSession::where('id', $validated['session_id'])
@@ -367,6 +368,24 @@ public function schedule(Request $request): View
             return back()->with('error', 'Attendance already exists for this session.');
         }
 
+        // Handle Image Upload
+        $imagePath = null;
+        if (!empty($validated['attendance_image'])) {
+            $imageData = $validated['attendance_image'];
+            if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
+                $imageData = substr($imageData, strpos($imageData, ',') + 1);
+                $type = strtolower($type[1]);
+                $imageData = base64_decode($imageData);
+
+                if ($imageData !== false) {
+                    $fileName = 'attendance_' . $session->id . '_' . time() . '.' . $type;
+                    $path = 'attendances/' . $fileName;
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($path, $imageData);
+                    $imagePath = $path;
+                }
+            }
+        }
+
         $session->attendance()->create([
             'teacher_id' => $teacher->id,
             'student_id' => $session->student_id,
@@ -376,6 +395,7 @@ public function schedule(Request $request): View
             'note' => $validated['note'],
             'session_id' => $session->id,
             'schedule_id' => $session->schedule_id,
+            'image_path' => $imagePath,
         ]);
 
         $session->update(['status' => 'completed']);
@@ -389,6 +409,9 @@ public function schedule(Request $request): View
 
         $classes = MusicClass::query()
             ->where('teacher_id', $teacher->id)
+            ->with([
+                'schedules.student:id,name,is_active,end_date'
+            ])
             ->withCount(['schedules as students_count' => function($query) {
                 $query->select(\DB::raw('count(distinct student_id)'))->whereNotNull('student_id');
             }])
@@ -398,9 +421,22 @@ public function schedule(Request $request): View
             ->orderBy('name')
             ->get();
 
+        $totalClasses = $classes->count();
+        $totalStudents = $classes->pluck('schedules')->flatten()->pluck('student_id')->filter()->unique()->count();
+        
+        $thisMonthSessions = \App\Models\Attendance::where('teacher_id', $teacher->id)
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+
         return view('portal.teacher.my-classes', [
             'teacher' => $teacher,
             'classes' => $classes,
+            'stats' => [
+                'totalClasses' => $totalClasses,
+                'totalStudents' => $totalStudents,
+                'thisMonthSessions' => $thisMonthSessions,
+            ]
         ]);
     }
 

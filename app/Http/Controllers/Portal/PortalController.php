@@ -256,13 +256,18 @@ class PortalController extends Controller
         return $map[$role];
     }
 
-    private function recentActivities(string $role): array
+    private function recentActivities(string $role): \Illuminate\Support\Collection
     {
-        return [
-            ['title' => 'Data updated for '.$role, 'time' => '5 menit lalu'],
-            ['title' => 'New registration submitted', 'time' => '20 menit lalu'],
-            ['title' => 'System generated monthly summary', 'time' => '1 jam lalu'],
-        ];
+        return \App\Models\Activity::with('user')
+            ->latest()
+            ->take(8)
+            ->get()
+            ->map(fn($activity) => [
+                'title' => $activity->description,
+                'time' => $activity->created_at->diffForHumans(),
+                'user' => $activity->user?->name ?? 'System',
+                'action' => $activity->action
+            ]);
     }
 
     private function notifications(string $role): array

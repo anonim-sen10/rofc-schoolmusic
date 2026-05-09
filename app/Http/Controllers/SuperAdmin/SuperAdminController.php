@@ -295,25 +295,65 @@ class SuperAdminController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
+            'nama_panggilan' => ['nullable', 'string', 'max:80'],
+            'jenis_kelamin' => ['nullable', 'in:laki-laki,perempuan'],
+            'tempat_lahir' => ['nullable', 'string', 'max:120'],
+            'tanggal_lahir' => ['nullable', 'date'],
+            'kewarganegaraan' => ['nullable', 'string', 'max:120'],
             'age' => ['nullable', 'integer', 'min:4', 'max:80'],
             'phone' => ['nullable', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:120', 'unique:students,email'],
             'address' => ['nullable', 'string', 'max:500'],
+            'nama_ortu' => ['nullable', 'string', 'max:120'],
+            'pekerjaan_ortu' => ['nullable', 'string', 'max:120'],
+            'no_hp_ortu' => ['nullable', 'string', 'max:30'],
+            'email_ortu' => ['nullable', 'email', 'max:120'],
             'is_active' => ['required', 'in:1,0'],
-            'class_ids' => ['nullable', 'array'],
-            'class_ids.*' => ['integer', 'exists:classes,id'],
+            'class_id' => ['required', 'integer', 'exists:classes,id'],
+            'schedule_id' => ['required', 'integer', 'exists:schedules,id'],
+            'start_date' => ['nullable', 'date'],
+            'duration_months' => ['nullable', 'integer', 'in:1,2,3,6,12'],
+            'program_tambahan' => ['nullable', 'array'],
+            'program_tambahan.*' => ['string', 'max:120'],
+            'pengalaman' => ['nullable', 'boolean'],
+            'deskripsi_pengalaman' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $student = Student::query()->create([
             'name' => $data['name'],
+            'nama_panggilan' => $data['nama_panggilan'] ?? null,
+            'jenis_kelamin' => $data['jenis_kelamin'] ?? null,
+            'tempat_lahir' => $data['tempat_lahir'] ?? null,
+            'tanggal_lahir' => $data['tanggal_lahir'] ?? null,
+            'kewarganegaraan' => $data['kewarganegaraan'] ?? 'Indonesia',
             'age' => $data['age'] ?? null,
             'phone' => $data['phone'] ?? null,
             'email' => $data['email'] ?? null,
             'address' => $data['address'] ?? null,
+            'nama_ortu' => $data['nama_ortu'] ?? null,
+            'pekerjaan_ortu' => $data['pekerjaan_ortu'] ?? null,
+            'no_hp_ortu' => $data['no_hp_ortu'] ?? null,
+            'email_ortu' => $data['email_ortu'] ?? null,
             'is_active' => (bool) ($data['is_active'] ?? '1'),
+            'program_tambahan' => $data['program_tambahan'] ?? [],
+            'pengalaman' => (bool) ($data['pengalaman'] ?? false),
+            'deskripsi_pengalaman' => $data['deskripsi_pengalaman'] ?? null,
+            'start_date' => $data['start_date'] ?? null,
+            'duration_months' => $data['duration_months'] ?? null,
         ]);
 
-        $student->classes()->sync($data['class_ids'] ?? []);
+        $student->class_id = $data['class_id'];
+        $student->save();
+        $student->classes()->sync([$data['class_id']]);
+
+        // Link to schedule and mark as booked
+        $schedule = \App\Models\Schedule::find($data['schedule_id']);
+        if ($schedule) {
+            $schedule->update([
+                'student_id' => $student->id,
+                'status' => 'booked'
+            ]);
+        }
 
         return back()->with('success', 'Siswa berhasil ditambahkan.');
     }
@@ -832,6 +872,7 @@ class SuperAdminController extends Controller
                 ['label' => 'Active Teachers', 'value' => Teacher::where('is_active', true)->count()],
                 ['label' => 'Net Cashflow', 'value' => 'Rp'.number_format($income - $expense - $salary, 0, ',', '.')],
             ],
+            'recentActivities' => \App\Models\Activity::with('user')->latest()->take(10)->get(),
             'chartData' => [
                 'labels' => $chartLabels,
                 'revenue' => $monthlyRevenue,
@@ -892,27 +933,27 @@ class SuperAdminController extends Controller
                 : collect(),
             'scheduleFeatureReady' => $scheduleFeatureReady,
             'dayOptions' => self::SCHEDULE_DAY_OPTIONS,
-            'studentsForManagement' => Student::query()->with('classes')->latest()->get(),
+            'studentsForManagement' => Student::query()->with(['class', 'classes'])->latest()->get(),
             'approvedRegistrationsForStudents' => Registration::query()
                 ->with('class')
                 ->where('status', 'accepted')
                 ->latest('updated_at')
                 ->get(),
             'registrationsForManagement' => Registration::query()->with(['class', 'schedules'])->latest()->get(),
-            'studentsForSchedule' => Student::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'email']),
+            'summary' => [
+                'registrations_pending' => Registration::where('status', 'pending')->count(),
+                'invoices_unpaid' => Invoice::whereIn('status', ['draft', 'issued', 'overdue'])->count(),
+                'teacher_attendance_today' => TeacherAttendance::whereDate('attendance_date', now()->toDateString())->count(),
+                'student_attendance_today' => Attendance::whereDate('created_at', now()->toDateString())->count(),
+                'progress_updates_today' => StudentProgress::whereDate('created_at', now()->toDateString())->count(),
+                'materials_uploaded' => Material::count(),
+            ],
             'studentsForFinance' => Student::query()->orderBy('name')->get(['id', 'name']),
             'classesForFinance' => MusicClass::query()->orderBy('name')->get(['id', 'name']),
-            'paymentsForFinance' => Payment::query()->with(['student', 'musicClass'])->latest()->take(100)->get(),
-            'financeSummary' => [
-                'total_invoice' => Payment::query()->count(),
-                'successful_payments' => (float) Payment::query()->where('status', 'paid')->sum('amount'),
-            ],
-            'postsForManagement' => DB::table('posts')->latest()->get(),
-            'galleriesForManagement' => DB::table('galleries')->latest()->get(),
-            'eventsForManagement' => DB::table('events')->latest()->get(),
-            'testimonialsForManagement' => DB::table('testimonials')->latest()->get(),
-            'settingsForManagement' => DB::table('settings')->orderBy('key')->get(),
-            'logsForManagement' => DB::table('activities')->latest()->take(100)->get(),
+            'instrumenOptions' => ['Drum', 'Piano', 'Guitar', 'Vocal', 'Violin', 'Bass', 'Keyboard', 'Music Theory'],
+            'programTambahanOptions' => ['Teori Musik', 'Ensemble / Band', 'Skill Teknik (ajang kompetisi)', 'Ujian Sertifikat bertaraf international'],
+            'hariOptions' => self::SCHEDULE_DAY_OPTIONS,
+            'openRegistrationCreate' => session('openRegistrationCreate', false),
         ]);
     }
 
@@ -1083,16 +1124,37 @@ class SuperAdminController extends Controller
                 'title' => 'Reschedule Requests',
                 'description' => 'Permintaan pindah jadwal dari siswa.',
                 'columns' => ['Siswa', 'Lama', 'Baru', 'Guru', 'Status', 'Aksi'],
-                'rows' => \App\Models\RescheduleRequest::with(['student', 'oldSession', 'newSchedule.teacher'])->latest()->take(50)->get()->map(fn ($r) => [
-                    $r->student->name,
-                    $r->oldSession 
-                        ? $r->oldSession->session_date->format('l, d M Y') . ' - ' . substr((string)$r->oldSession->start_time, 0, 5)
-                        : ($r->oldSchedule ? $r->oldSchedule->day . ' ' . substr((string)$r->oldSchedule->time, 0, 5) : '-'),
-                    $r->newSchedule->day . ' ' . substr((string)$r->newSchedule->time, 0, 5),
-                    $r->newSchedule->teacher->name ?? '-',
-                    strtoupper($r->status),
-                    $r // Pass object for custom rendering in blade
-                ])->all(),
+                'rows' => \App\Models\RescheduleRequest::with(['student', 'oldSession', 'newSchedule.teacher'])->latest()->take(50)->get()->map(function ($r) {
+                        $newLabel = '-';
+                        if ($r->newSchedule && $r->oldSession) {
+                            $dayMap = [
+                                'Senin' => \Carbon\Carbon::MONDAY,
+                                'Selasa' => \Carbon\Carbon::TUESDAY,
+                                'Rabu' => \Carbon\Carbon::WEDNESDAY,
+                                'Kamis' => \Carbon\Carbon::THURSDAY,
+                                'Jumat' => \Carbon\Carbon::FRIDAY,
+                                'Sabtu' => \Carbon\Carbon::SATURDAY,
+                                'Minggu' => \Carbon\Carbon::SUNDAY,
+                            ];
+                            $newDayNum = $dayMap[$r->newSchedule->day] ?? \Carbon\Carbon::MONDAY;
+                            $oldDate = \Carbon\Carbon::parse($r->oldSession->session_date);
+                            $newDate = $oldDate->copy()->startOfWeek()->addDays($newDayNum - 1);
+                            $newLabel = $newDate->translatedFormat('l, d M Y') . ' - ' . substr((string)$r->newSchedule->time, 0, 5);
+                        } else if ($r->newSchedule) {
+                            $newLabel = $r->newSchedule->day . ' ' . substr((string)$r->newSchedule->time, 0, 5);
+                        }
+
+                        return [
+                            $r->student->name,
+                            $r->oldSession 
+                                ? $r->oldSession->session_date->format('l, d M Y') . ' - ' . substr((string)$r->oldSession->time, 0, 5)
+                                : ($r->oldSchedule ? $r->oldSchedule->day . ' ' . substr((string)$r->oldSchedule->time, 0, 5) : '-'),
+                            $newLabel,
+                            $r->newSchedule->teacher->name ?? '-',
+                            strtoupper($r->status),
+                            $r // Pass object for custom rendering in blade
+                        ];
+                    })->all(),
             ],
             'finance' => [
                 'title' => 'Finance Summary',
