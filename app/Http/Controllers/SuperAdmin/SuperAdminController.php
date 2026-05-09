@@ -942,6 +942,7 @@ class SuperAdminController extends Controller
             'registrationsForManagement' => Registration::query()->with(['class', 'schedules'])->latest()->get(),
             'summary' => [
                 'registrations_pending' => Registration::where('status', 'pending')->count(),
+                'reschedule_requests_pending' => \App\Models\RescheduleRequest::where('status', 'pending')->count(),
                 'invoices_unpaid' => Invoice::whereIn('status', ['draft', 'issued', 'overdue'])->count(),
                 'teacher_attendance_today' => TeacherAttendance::whereDate('attendance_date', now()->toDateString())->count(),
                 'student_attendance_today' => Attendance::whereDate('created_at', now()->toDateString())->count(),
@@ -954,6 +955,7 @@ class SuperAdminController extends Controller
             'programTambahanOptions' => ['Teori Musik', 'Ensemble / Band', 'Skill Teknik (ajang kompetisi)', 'Ujian Sertifikat bertaraf international'],
             'hariOptions' => self::SCHEDULE_DAY_OPTIONS,
             'openRegistrationCreate' => session('openRegistrationCreate', false),
+            'logsForManagement' => \App\Models\Activity::latest()->take(100)->get(),
         ]);
     }
 

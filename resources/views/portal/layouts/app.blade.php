@@ -5,7 +5,7 @@
     $userName = auth()->user()?->name ?? 'User';
     $legacyMenuItems = $menuItems ?? [];
     $roleLabel = ucwords(str_replace('_', ' ', $resolvedRoleKey));
-    $notifCount = $summary['registrations_pending'] ?? 0;
+    $notifCount = ($summary['registrations_pending'] ?? 0) + ($summary['reschedule_requests_pending'] ?? 0);
     $brandLogoCandidates = [
         'brand/rofc-logo.png',
         'brand/rofc-logo.jpg',
@@ -125,6 +125,7 @@ $iconMap = [
                 :user-name="$userName"
                 :role-label="$roleLabel"
                 :notification-count="$notifCount"
+                :summary="$summary ?? []"
                 :show-navbar-logo="true"
                 :brand-logo-url="$brandLogoUrl"
             />
