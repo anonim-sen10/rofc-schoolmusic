@@ -142,25 +142,17 @@
         <div class="insight-stats-grid">
             <div class="insight-stat">
                 <span class="label">Total Records Logged</span>
-                <span class="value">{{ \DB::table('activities')->count() }}</span>
+                <span class="value">{{ $totalActivities }}</span>
             </div>
             <div class="insight-stat">
                 <span class="label">Most Active User</span>
                 <span class="value">
-                    @php
-                        $topUser = \DB::table('activities')
-                            ->select('user_id', \DB::raw('count(*) as total'))
-                            ->groupBy('user_id')
-                            ->orderByDesc('total')
-                            ->first();
-                        $topUserName = $topUser ? (\App\Models\User::find($topUser->user_id)?->name ?? 'System') : '-';
-                    @endphp
                     {{ $topUserName }}
                 </span>
             </div>
             <div class="insight-stat">
                 <span class="label">Today's Activities</span>
-                <span class="value">{{ \DB::table('activities')->whereDate('created_at', today())->count() }}</span>
+                <span class="value">{{ $todayActivities }}</span>
             </div>
         </div>
     </x-ui.card>
@@ -227,7 +219,7 @@
     .insight-stat .value {
         font-size: 1.5rem;
         font-weight: 800;
-        color: #0f172a;
+        color: var(--text);
     }
 </style>
 

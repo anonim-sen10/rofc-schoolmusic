@@ -208,12 +208,39 @@ public function dashboard(Request $request): View
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'note' => ['nullable', 'string'],
+            'image_proof' => ['nullable', 'string'], // base64 from camera
         ]);
 
-        $data['teacher_id'] = $teacher->id;
-        TeacherAttendance::create($data);
+        // Handle base64 Image Proof
+        $imagePath = null;
+        if (! empty($data['image_proof'])) {
+            $imageData = $data['image_proof'];
+            if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
+                $imageData = substr($imageData, strpos($imageData, ',') + 1);
+                $type = strtolower($type[1]);
+                $imageData = base64_decode($imageData);
 
-        return back()->with('success', 'Absensi guru berhasil disimpan.');
+                if ($imageData !== false) {
+                    $fileName = 'teacher_att_' . $teacher->id . '_' . time() . '.' . $type;
+                    $path = 'attendances/' . $fileName;
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($path, $imageData);
+                    $imagePath = $path;
+                }
+            }
+        }
+
+        TeacherAttendance::create([
+            'teacher_id' => $teacher->id,
+            'attendance_date' => $data['attendance_date'],
+            'status' => $data['status'],
+            'location_text' => $data['location_text'],
+            'latitude' => $data['latitude'],
+            'longitude' => $data['longitude'],
+            'note' => $data['note'],
+            'image_path' => $imagePath,
+        ]);
+
+        return back()->with('success', 'Absensi guru berhasil disimpan dengan bukti foto dan lokasi.');
     }
 
     public function progress(Request $request): View

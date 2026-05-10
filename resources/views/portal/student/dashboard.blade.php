@@ -5,37 +5,57 @@
 @section('page-subtitle', 'ROFC Private Music Management Information System - Student Workspace')
 @section('content')
 <section class="kpi-grid" data-searchable>
-	<x-ui.card title="Total Sessions">
-		<div class="kpi-row">
-			<div class="kpi-value">{{ $totalSessions }}</div>
-			<span class="kpi-icon"><i data-lucide="calendar"></i></span>
-		</div>
-	</x-ui.card>
-	<x-ui.card title="Total Present">
-		<div class="kpi-row">
-			<div class="kpi-value" style="color: #10b981;">{{ $totalPresent }}</div>
-			<span class="kpi-icon"><i data-lucide="user-check"></i></span>
-		</div>
-	</x-ui.card>
-	<x-ui.card title="Total Absent">
-		<div class="kpi-row">
-			<div class="kpi-value" style="color: #ef4444;">{{ $totalAbsent }}</div>
-			<span class="kpi-icon"><i data-lucide="user-x"></i></span>
-		</div>
-	</x-ui.card>
-	<x-ui.card title="Status">
-		<div class="kpi-row">
-			<div class="kpi-value">ACTIVE</div>
-			<span class="kpi-icon"><i data-lucide="shield-check"></i></span>
-		</div>
-	</x-ui.card>
+    <div class="card card-loading">
+        <div class="kpi-row">
+            <div>
+                <span class="eyebrow">Total Sessions</span>
+                <div class="kpi-value">{{ $totalSessions }}</div>
+            </div>
+            <span class="kpi-icon"><i data-lucide="calendar"></i></span>
+        </div>
+    </div>
+    <div class="card card-loading">
+        <div class="kpi-row">
+            <div>
+                <span class="eyebrow">Present</span>
+                <div class="kpi-value" style="color: var(--success);">{{ $totalPresent }}</div>
+            </div>
+            <span class="kpi-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);"><i data-lucide="user-check"></i></span>
+        </div>
+    </div>
+    <div class="card card-loading">
+        <div class="kpi-row">
+            <div>
+                <span class="eyebrow">Absent</span>
+                <div class="kpi-value" style="color: var(--danger);">{{ $totalAbsent }}</div>
+            </div>
+            <span class="kpi-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);"><i data-lucide="user-x"></i></span>
+        </div>
+    </div>
+    <div class="card card-loading">
+        <div class="kpi-row">
+            <div>
+                <span class="eyebrow">Status</span>
+                <div class="kpi-value">ACTIVE</div>
+            </div>
+            <span class="kpi-icon"><i data-lucide="shield-check"></i></span>
+        </div>
+    </div>
 </section>
 
 <section class="split-grid-sa" data-searchable>
-	<x-ui.card title="My Schedule" subtitle="Jadwal kelas yang Anda ikuti">
+    <div class="card">
+        <div class="ui-card-header">
+            <div>
+                <h3 class="ui-card-title">My Schedule</h3>
+                <p class="ui-card-subtitle">Jadwal kelas yang Anda ikuti</p>
+            </div>
+            <a href="{{ route('student.schedule.index') }}" class="btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Lihat Semua</a>
+        </div>
+        
         @if($schedules->isNotEmpty())
             <div class="table-wrap">
-                <table class="att-table">
+                <table>
                     <thead>
                         <tr>
                             <th>Schedule</th>
@@ -46,7 +66,7 @@
                     <tbody>
                         @foreach($schedules as $sched)
                             <tr>
-                                <td><strong>{{ $sched->session_date->translatedFormat('l, d M Y') }} - {{ \Carbon\Carbon::parse($sched->time)->format('H:i') }}</strong></td>
+                                <td><strong>{{ $sched->session_date->translatedFormat('l, d M Y') }}</strong> <br><small class="muted">{{ \Carbon\Carbon::parse($sched->time)->format('H:i') }}</small></td>
                                 <td>{{ $sched->musicClass->name ?? '-' }}</td>
                                 <td>{{ $sched->teacher->name ?? '-' }}</td>
                             </tr>
@@ -55,14 +75,25 @@
                 </table>
             </div>
         @else
-            <x-ui.empty-state title="No schedule found" description="Belum ada jadwal yang di-assign untuk Anda." icon="calendar-x" />
+            <div class="empty-state">
+                <div class="empty-state-icon"><i data-lucide="calendar-x"></i></div>
+                <h4>No schedule found</h4>
+                <p>Belum ada jadwal yang di-assign untuk Anda.</p>
+            </div>
         @endif
-	</x-ui.card>
+    </div>
 
-	<x-ui.card title="Attendance History" subtitle="Riwayat kehadiran sesi latihan Anda">
+    <div class="card">
+        <div class="ui-card-header">
+            <div>
+                <h3 class="ui-card-title">Recent Attendance</h3>
+                <p class="ui-card-subtitle">Riwayat kehadiran sesi latihan Anda</p>
+            </div>
+        </div>
+        
         @if($attendances->isNotEmpty())
             <div class="table-wrap">
-                <table class="att-table">
+                <table>
                     <thead>
                         <tr>
                             <th>Date</th>
@@ -76,13 +107,17 @@
                                 <td>{{ $att->created_at->format('d M Y') }}</td>
                                 <td>{{ $att->schedule ? \Carbon\Carbon::parse($att->schedule->time)->format('H:i') : '-' }}</td>
                                 <td>
-                                    @php $status = strtolower($att->status); @endphp
-                                    <span class="att-badge att-badge-{{ $status }}">
-                                        @if($status === 'present') ✔
-                                        @elseif($status === 'absent') ✖
-                                        @elseif($status === 'reschedule') ↻
-                                        @endif
-                                        {{ $status }}
+                                    @php 
+                                        $status = strtolower($att->status);
+                                        $badgeClass = match($status) {
+                                            'present' => 'ui-badge-success',
+                                            'absent' => 'ui-badge-danger',
+                                            'late' => 'ui-badge-warning',
+                                            default => 'ui-badge-neutral'
+                                        };
+                                    @endphp
+                                    <span class="ui-badge {{ $badgeClass }}">
+                                        {{ strtoupper($status) }}
                                     </span>
                                 </td>
                             </tr>
@@ -91,25 +126,43 @@
                 </table>
             </div>
         @else
-            <x-ui.empty-state title="No attendance records" description="Belum ada data absensi tercatat." icon="clipboard-x" />
+            <div class="empty-state">
+                <div class="empty-state-icon"><i data-lucide="clipboard-x"></i></div>
+                <h4>No attendance records</h4>
+                <p>Belum ada data absensi tercatat.</p>
+            </div>
         @endif
-	</x-ui.card>
+    </div>
 </section>
 
-<section class="split-grid-sa" style="margin-top: 1.5rem;" data-searchable>
-    <x-ui.card title="Payment" subtitle="Informasi pembayaran SPP">
-        <div style="padding: 1rem; text-align: center; color: #64748b; background: #f8fafc; border-radius: 0.5rem; border: 1px dashed #cbd5e1;">
-            <i data-lucide="clock" style="width: 24px; height: 24px; margin-bottom: 0.5rem; display: inline-block;"></i>
-            <p style="font-size: 0.9rem; font-weight: 500;">Payment Feature: Coming Soon</p>
+<section class="split-grid-sa" style="margin-top: 1rem;" data-searchable>
+    <div class="card">
+        <div class="ui-card-header">
+            <div>
+                <h3 class="ui-card-title">Payment</h3>
+                <p class="ui-card-subtitle">Informasi pembayaran SPP</p>
+            </div>
         </div>
-    </x-ui.card>
+        <div class="empty-state">
+            <div class="empty-state-icon"><i data-lucide="wallet"></i></div>
+            <h4>Payment History</h4>
+            <p>Fitur pembayaran akan segera hadir di portal siswa.</p>
+        </div>
+    </div>
 
-    <x-ui.card title="Progress" subtitle="Catatan perkembangan belajar">
-        <div style="padding: 1rem; text-align: center; color: #64748b; background: #f8fafc; border-radius: 0.5rem; border: 1px dashed #cbd5e1;">
-            <i data-lucide="trending-up" style="width: 24px; height: 24px; margin-bottom: 0.5rem; display: inline-block;"></i>
-            <p style="font-size: 0.9rem; font-weight: 500;">Progress Notes: No data yet / Coming Soon</p>
+    <div class="card">
+        <div class="ui-card-header">
+            <div>
+                <h3 class="ui-card-title">Progress Updates</h3>
+                <p class="ui-card-subtitle">Catatan perkembangan belajar dari guru</p>
+            </div>
         </div>
-    </x-ui.card>
+        <div class="empty-state">
+            <div class="empty-state-icon"><i data-lucide="activity"></i></div>
+            <h4>No progress yet</h4>
+            <p>Belum ada catatan perkembangan dari guru pengajar.</p>
+        </div>
+    </div>
 </section>
 
 <style>

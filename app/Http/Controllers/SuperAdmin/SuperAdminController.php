@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Activity;
 use App\Models\Attendance;
 use App\Models\Expense;
 use App\Models\Invoice;
@@ -10,6 +11,7 @@ use App\Models\Material;
 use App\Models\MusicClass;
 use App\Models\Payment;
 use App\Models\Registration;
+use App\Models\RescheduleRequest;
 use App\Models\Role;
 use App\Models\Schedule;
 use App\Models\Student;
@@ -19,18 +21,21 @@ use App\Models\TeacherAttendance;
 use App\Models\TeacherSalary;
 use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class SuperAdminController extends Controller
 {
+    use Traits\ManagesUsers,
+        Traits\ManagesTeachers,
+        Traits\ManagesStudents,
+        Traits\ManagesAcademics,
+        Traits\ManagesRegistrations,
+        Traits\ManagesContent;
+
     private const TEACHER_CLASS_OPTIONS = [
         'drum' => 'Drum',
         'gitar' => 'Gitar',
@@ -48,718 +53,6 @@ class SuperAdminController extends Controller
     ];
 
     private const SCHEDULE_DAY_OPTIONS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-
-    public function storeUser(Request $request): RedirectResponse
-    {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:120'],
-            'email' => ['required', 'email', 'max:120', 'unique:users,email'],
-            'role' => ['required', 'in:super_admin,admin,finance,teacher,student'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'instrument' => ['nullable', 'string', 'max:80'],
-            'phone' => ['nullable', 'string', 'max:30'],
-        ]);
-
-        $roleSlug = $data['role'];
-
-        $role = $this->resolveCoreRole($roleSlug);
-
-        $user = User::query()->create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
-
-        $user->roles()->syncWithoutDetaching([$role->id]);
-
-        if ($roleSlug === 'teacher') {
-            Teacher::query()->firstOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'name' => $user->name,
-                    'instrument' => $data['instrument'] ?? 'General',
-                    'is_active' => true,
-                ]
-            );
-        }
-
-        if ($roleSlug === 'student') {
-            Student::query()->firstOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'phone' => $data['phone'] ?? null,
-                    'is_active' => true,
-                ]
-            );
-        }
-
-        return back()->with('success', 'Akun login berhasil dibuat.');
-    }
-
-    public function storeTeacherAccount(Request $request): RedirectResponse
-    {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:120'],
-            'email' => ['required', 'email', 'max:120', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'phone' => ['required', 'string', 'max:30'],
-            'address' => ['required', 'string', 'max:500'],
-            'gender' => ['required', 'in:laki-laki,perempuan'],
-            'religion' => ['required', 'string', 'max:30'],
-            'instrument' => ['nullable', 'string', 'max:80'],
-            'photo' => ['nullable', 'image', 'max:2048'],
-        ]);
-
-        $role = $this->resolveCoreRole('teacher');
-
-        $user = User::query()->create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
-
-        $user->roles()->sync([$role->id]);
-
-        $payload = [
-            'user_id' => $user->id,
-            'name' => $data['name'],
-            'phone' => $data['phone'],
-            'address' => $data['address'],
-            'gender' => $data['gender'],
-            'religion' => $data['religion'],
-            'instrument' => $data['instrument'] ?? 'General',
-            'is_active' => true,
-        ];
-
-        if ($request->hasFile('photo')) {
-            $payload['photo_path'] = $request->file('photo')->store('teachers', 'public');
-        }
-
-        if ($request->hasFile('ktp')) {
-            $payload['ktp_path'] = $request->file('ktp')->store('teachers/ktp', 'public');
-        }
-
-        Teacher::query()->create($payload);
-
-        return back()->with('success', 'Akun teacher dan data guru berhasil dibuat.');
-    }
-
-    public function showTeacher(Teacher $teacher): View
-    {
-        $teacher->load('user', 'classes');
-
-        return view('portal.super-admin.teacher-detail', [
-            'roleKey' => 'super_admin',
-            'portal' => $this->portalConfig(),
-            'teacher' => $teacher,
-        ]);
-    }
-
-    public function editTeacher(Teacher $teacher): View
-    {
-        $teacher->load('user', 'classes');
-
-        return view('portal.super-admin.teacher-edit', [
-            'roleKey' => 'super_admin',
-            'portal' => $this->portalConfig(),
-            'teacher' => $teacher,
-            'classesForTeachers' => MusicClass::query()->orderBy('name')->get(['id', 'name']),
-        ]);
-    }
-
-    public function updateTeacher(Request $request, Teacher $teacher): RedirectResponse
-    {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:120'],
-            'email' => ['required', 'email', 'max:120', 'unique:users,email,'.($teacher->user_id ?? 'NULL')],
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-            'phone' => ['required', 'string', 'max:30'],
-            'address' => ['required', 'string', 'max:500'],
-            'gender' => ['required', 'in:laki-laki,perempuan'],
-            'religion' => ['required', 'string', 'max:30'],
-            'instrument' => ['nullable', 'string', 'max:80'],
-            'class_id' => ['nullable', 'integer', 'exists:classes,id'],
-            'photo' => ['nullable', 'image', 'max:2048'],
-        ]);
-
-        if ($teacher->user) {
-            $teacher->user->name = $data['name'];
-            $teacher->user->email = $data['email'];
-
-            if (! empty($data['password'])) {
-                $teacher->user->password = Hash::make($data['password']);
-            }
-
-            $teacher->user->save();
-        }
-
-        $payload = [
-            'name' => $data['name'],
-            'phone' => $data['phone'],
-            'address' => $data['address'],
-            'gender' => $data['gender'],
-            'religion' => $data['religion'],
-            'instrument' => $data['instrument'] ?? 'General',
-            'is_active' => true,
-        ];
-
-        if ($request->hasFile('photo')) {
-            $payload['photo_path'] = $request->file('photo')->store('teachers', 'public');
-        }
-
-        if ($request->hasFile('ktp')) {
-            $payload['ktp_path'] = $request->file('ktp')->store('teachers/ktp', 'public');
-        }
-
-        $teacher->update($payload);
-
-        if (! empty($data['class_id'])) {
-            MusicClass::query()->whereKey($data['class_id'])->update([
-                'teacher_id' => $teacher->id,
-            ]);
-        }
-
-        return redirect()->route('super-admin.module', ['module' => 'teachers'])->with('success', 'Data teacher berhasil diperbarui.');
-    }
-
-    public function destroyTeacher(Request $request, Teacher $teacher): RedirectResponse
-    {
-        $linkedUser = $teacher->user;
-
-        $teacher->delete();
-
-        if ($linkedUser) {
-            $linkedUser->delete();
-        }
-
-        return back()->with('success', 'Teacher berhasil dihapus.');
-    }
-
-    public function storeClass(Request $request): RedirectResponse
-    {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:120'],
-            'description' => ['nullable', 'string'],
-            'price' => ['nullable', 'numeric', 'min:0'],
-            'schedule' => ['nullable', 'string', 'max:120'],
-            'teacher_id' => ['nullable', 'integer', 'exists:teachers,id'],
-            'status' => ['required', 'in:active,inactive'],
-        ]);
-
-        MusicClass::query()->create([
-            'name' => $data['name'],
-            'description' => $data['description'] ?? null,
-            'price' => $data['price'] ?? 0,
-            'schedule' => $data['schedule'] ?? null,
-            'teacher_id' => $data['teacher_id'] ?? null,
-            'status' => $data['status'],
-        ]);
-
-        return back()->with('success', 'Class berhasil ditambahkan.');
-    }
-
-    public function updateClass(Request $request, MusicClass $class): RedirectResponse
-    {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:120'],
-            'description' => ['nullable', 'string'],
-            'price' => ['nullable', 'numeric', 'min:0'],
-            'schedule' => ['nullable', 'string', 'max:120'],
-            'teacher_id' => ['nullable', 'integer', 'exists:teachers,id'],
-            'status' => ['required', 'in:active,inactive'],
-        ]);
-
-        $class->update([
-            'name' => $data['name'],
-            'description' => $data['description'] ?? null,
-            'price' => $data['price'] ?? 0,
-            'schedule' => $data['schedule'] ?? null,
-            'teacher_id' => $data['teacher_id'] ?? null,
-            'status' => $data['status'],
-        ]);
-
-        return back()->with('success', 'Class berhasil diperbarui.');
-    }
-
-    public function destroyClass(MusicClass $class): RedirectResponse
-    {
-        $class->students()->detach();
-        $class->delete();
-
-        return back()->with('success', 'Class berhasil dihapus.');
-    }
-
-    public function storeStudent(Request $request): RedirectResponse
-    {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:120'],
-            'nama_panggilan' => ['nullable', 'string', 'max:80'],
-            'jenis_kelamin' => ['nullable', 'in:laki-laki,perempuan'],
-            'tempat_lahir' => ['nullable', 'string', 'max:120'],
-            'tanggal_lahir' => ['nullable', 'date'],
-            'kewarganegaraan' => ['nullable', 'string', 'max:120'],
-            'age' => ['nullable', 'integer', 'min:4', 'max:80'],
-            'phone' => ['nullable', 'string', 'max:30'],
-            'email' => ['nullable', 'email', 'max:120', 'unique:students,email'],
-            'address' => ['nullable', 'string', 'max:500'],
-            'nama_ortu' => ['nullable', 'string', 'max:120'],
-            'pekerjaan_ortu' => ['nullable', 'string', 'max:120'],
-            'no_hp_ortu' => ['nullable', 'string', 'max:30'],
-            'email_ortu' => ['nullable', 'email', 'max:120'],
-            'is_active' => ['required', 'in:1,0'],
-            'class_id' => ['required', 'integer', 'exists:classes,id'],
-            'schedule_id' => ['required', 'integer', 'exists:schedules,id'],
-            'start_date' => ['nullable', 'date'],
-            'duration_months' => ['nullable', 'integer', 'in:1,2,3,6,12'],
-            'program_tambahan' => ['nullable', 'array'],
-            'program_tambahan.*' => ['string', 'max:120'],
-            'pengalaman' => ['nullable', 'boolean'],
-            'deskripsi_pengalaman' => ['nullable', 'string', 'max:1000'],
-        ]);
-
-        $student = Student::query()->create([
-            'name' => $data['name'],
-            'nama_panggilan' => $data['nama_panggilan'] ?? null,
-            'jenis_kelamin' => $data['jenis_kelamin'] ?? null,
-            'tempat_lahir' => $data['tempat_lahir'] ?? null,
-            'tanggal_lahir' => $data['tanggal_lahir'] ?? null,
-            'kewarganegaraan' => $data['kewarganegaraan'] ?? 'Indonesia',
-            'age' => $data['age'] ?? null,
-            'phone' => $data['phone'] ?? null,
-            'email' => $data['email'] ?? null,
-            'address' => $data['address'] ?? null,
-            'nama_ortu' => $data['nama_ortu'] ?? null,
-            'pekerjaan_ortu' => $data['pekerjaan_ortu'] ?? null,
-            'no_hp_ortu' => $data['no_hp_ortu'] ?? null,
-            'email_ortu' => $data['email_ortu'] ?? null,
-            'is_active' => (bool) ($data['is_active'] ?? '1'),
-            'program_tambahan' => $data['program_tambahan'] ?? [],
-            'pengalaman' => (bool) ($data['pengalaman'] ?? false),
-            'deskripsi_pengalaman' => $data['deskripsi_pengalaman'] ?? null,
-            'start_date' => $data['start_date'] ?? null,
-            'duration_months' => $data['duration_months'] ?? null,
-        ]);
-
-        $student->class_id = $data['class_id'];
-        $student->save();
-        $student->classes()->sync([$data['class_id']]);
-
-        // Link to schedule and mark as booked
-        $schedule = \App\Models\Schedule::find($data['schedule_id']);
-        if ($schedule) {
-            $schedule->update([
-                'student_id' => $student->id,
-                'status' => 'booked'
-            ]);
-        }
-
-        return back()->with('success', 'Siswa berhasil ditambahkan.');
-    }
-
-    public function updateStudent(Request $request, Student $student): RedirectResponse
-    {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:120'],
-            'age' => ['nullable', 'integer', 'min:4', 'max:80'],
-            'phone' => ['nullable', 'string', 'max:30'],
-            'email' => ['nullable', 'email', 'max:120', 'unique:students,email,'.$student->id],
-            'address' => ['nullable', 'string', 'max:500'],
-            'is_active' => ['required', 'in:1,0'],
-            'class_ids' => ['nullable', 'array'],
-            'class_ids.*' => ['integer', 'exists:classes,id'],
-            'start_date' => ['nullable', 'date'],
-            'duration_months' => ['nullable', 'integer', 'min:1', 'max:12'],
-        ]);
-
-        $payload = [
-            'name' => $data['name'],
-            'age' => $data['age'] ?? null,
-            'phone' => $data['phone'] ?? null,
-            'email' => $data['email'] ?? null,
-            'address' => $data['address'] ?? null,
-            'is_active' => (bool) ($data['is_active'] ?? '1'),
-            'start_date' => $data['start_date'] ?? null,
-            'duration_months' => $data['duration_months'] ?? null,
-        ];
-
-        if (!empty($payload['start_date']) && !empty($payload['duration_months'])) {
-            $payload['end_date'] = \Carbon\Carbon::parse($payload['start_date'])->addMonths((int)$payload['duration_months'])->toDateString();
-        }
-
-        $student->update($payload);
-
-        // Sync with Login Account (User) if exists
-        if ($student->user) {
-            $student->user->update([
-                'name' => $data['name'],
-                'email' => $data['email'] ?? $student->user->email,
-            ]);
-        }
-
-        $student->classes()->sync($data['class_ids'] ?? []);
-
-        return back()->with('success', 'Data siswa berhasil diperbarui.');
-    }
-
-    public function destroyStudent(Student $student): RedirectResponse
-    {
-        DB::transaction(function () use ($student) {
-            $user = $student->user;
-            if ($user) {
-                // Cascades will handle student and related data
-                $user->delete();
-            } else {
-                $student->delete();
-            }
-        });
-
-        return back()->with('success', 'Siswa dan data terkait berhasil dihapus.');
-    }
-
-    public function storeRegistration(Request $request): RedirectResponse
-    {
-        $data = $request->validate($this->registrationRules());
-
-        $registration = Registration::query()->create(
-            $this->buildRegistrationPayload($data)
-        );
-
-        $this->syncStudentFromRegistration($registration);
-
-        return back()->with('success', 'Registrasi berhasil ditambahkan.');
-    }
-
-    public function updateRegistration(Request $request, Registration $registration): RedirectResponse
-    {
-        $data = $request->validate($this->registrationRules());
-
-        $registration->update($this->buildRegistrationPayload($data));
-
-        $this->syncStudentFromRegistration($registration);
-
-        return back()->with('success', 'Registrasi berhasil diperbarui.');
-    }
-
-    public function destroyRegistration(Registration $registration): RedirectResponse
-    {
-        $registration->delete();
-
-        return back()->with('success', 'Registrasi berhasil dihapus.');
-    }
-
-    private function registrationRules(): array
-    {
-        return [
-            'nama_lengkap' => ['required', 'string', 'max:120'],
-            'nama_panggilan' => ['required', 'string', 'max:80'],
-            'jenis_kelamin' => ['required', 'in:laki-laki,perempuan'],
-            'tempat_lahir' => ['required', 'string', 'max:120'],
-            'tanggal_lahir' => ['required', 'date', 'before_or_equal:today'],
-            'kewarganegaraan' => ['required', 'string', 'max:120'],
-            'alamat' => ['required', 'string', 'max:2000'],
-            'no_hp_siswa' => ['required', 'string', 'max:30'],
-            'email' => ['required', 'email', 'max:120'],
-            'nama_ortu' => ['required', 'string', 'max:120'],
-            'pekerjaan_ortu' => ['nullable', 'string', 'max:120'],
-            'no_hp_ortu' => ['required', 'string', 'max:30'],
-            'email_ortu' => ['nullable', 'email', 'max:120'],
-            'instrumen' => ['required', 'string', 'max:120'],
-            'program_tambahan' => ['nullable', 'array'],
-            'program_tambahan.*' => ['string', 'max:120'],
-            'hari_pilihan' => ['required', 'array', 'min:1'],
-            'hari_pilihan.*' => ['string', 'max:40'],
-            'pengalaman' => ['required', 'boolean'],
-            'deskripsi_pengalaman' => ['nullable', 'string', 'max:2000'],
-            'class_id' => ['nullable', 'integer', 'exists:classes,id'],
-            'status' => ['required', 'in:pending,accepted,rejected'],
-        ];
-    }
-
-    private function buildRegistrationPayload(array $data): array
-    {
-        $tanggalLahir = Carbon::parse($data['tanggal_lahir']);
-        $hariPilihan = array_values(array_unique($data['hari_pilihan']));
-        $programTambahan = array_values(array_unique($data['program_tambahan'] ?? []));
-
-        $payload = [
-            'nama_lengkap' => $data['nama_lengkap'],
-            'nama_panggilan' => $data['nama_panggilan'],
-            'jenis_kelamin' => $data['jenis_kelamin'],
-            'tempat_lahir' => $data['tempat_lahir'],
-            'tanggal_lahir' => $data['tanggal_lahir'],
-            'kewarganegaraan' => $data['kewarganegaraan'],
-            'alamat' => $data['alamat'],
-            'no_hp_siswa' => $data['no_hp_siswa'],
-            'email' => $data['email'],
-            'nama_ortu' => $data['nama_ortu'],
-            'pekerjaan_ortu' => $data['pekerjaan_ortu'] ?? null,
-            'no_hp_ortu' => $data['no_hp_ortu'],
-            'email_ortu' => $data['email_ortu'] ?? null,
-            'instrumen' => $data['instrumen'],
-            'program_tambahan' => $programTambahan,
-            'hari_pilihan' => $hariPilihan,
-            'pengalaman' => (bool) $data['pengalaman'],
-            'deskripsi_pengalaman' => $data['deskripsi_pengalaman'] ?? null,
-            'class_id' => $data['class_id'] ?? null,
-            'status' => $data['status'],
-            // Keep legacy columns populated for existing modules and reports.
-            'full_name' => $data['nama_lengkap'],
-            'age' => $tanggalLahir->age,
-            'phone' => $data['no_hp_siswa'],
-            'preferred_schedule' => implode(', ', $hariPilihan),
-            'notes' => $data['deskripsi_pengalaman'] ?? null,
-        ];
-
-        $existingColumns = Schema::getColumnListing('registrations');
-
-        return array_intersect_key($payload, array_flip($existingColumns));
-    }
-
-    private function syncStudentFromRegistration(Registration $registration): void
-    {
-        if ($registration->status !== 'accepted') {
-            return;
-        }
-
-        $studentAge = $registration->age;
-
-        if ((! is_numeric($studentAge) || (int) $studentAge <= 0) && $registration->tanggal_lahir) {
-            $studentAge = Carbon::parse($registration->tanggal_lahir)->age;
-        }
-
-        $student = Student::query()->updateOrCreate(
-            ['email' => $registration->email],
-            [
-                'name' => $registration->nama_lengkap ?: $registration->full_name,
-                'age' => $studentAge,
-                'phone' => $registration->no_hp_siswa ?: $registration->phone,
-                'email' => $registration->email,
-                'address' => $registration->alamat,
-                'no_hp' => $registration->no_hp_siswa ?: $registration->phone,
-                'is_active' => true,
-            ]
-        );
-
-        if ($registration->class_id) {
-            $student->classes()->syncWithoutDetaching([$registration->class_id]);
-        }
-    }
-
-    public function storeContent(Request $request, string $module): RedirectResponse
-    {
-        $data = $this->validateContentPayload($request, $module);
-
-        DB::table($this->contentTable($module))->insert(array_merge($data, [
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]));
-
-        return back()->with('success', 'Data '.$module.' berhasil ditambahkan.');
-    }
-
-    public function updateContent(Request $request, string $module, int $id): RedirectResponse
-    {
-        $data = $this->validateContentPayload($request, $module, $id);
-
-        DB::table($this->contentTable($module))
-            ->where('id', $id)
-            ->update(array_merge($data, ['updated_at' => now()]));
-
-        return back()->with('success', 'Data '.$module.' berhasil diperbarui.');
-    }
-
-    public function destroyContent(string $module, int $id): RedirectResponse
-    {
-        DB::table($this->contentTable($module))->where('id', $id)->delete();
-
-        return back()->with('success', 'Data '.$module.' berhasil dihapus.');
-    }
-
-    public function destroyLog(int $id): RedirectResponse
-    {
-        DB::table('activities')->where('id', $id)->delete();
-
-        return back()->with('success', 'Log aktivitas berhasil dihapus.');
-    }
-
-    public function assignScheduleTeacher(Request $request): RedirectResponse
-    {
-        $data = $request->validate([
-            'class_id' => ['required', 'integer', 'exists:classes,id'],
-            'teacher_id' => ['required', 'integer', 'exists:teachers,id'],
-        ]);
-
-        MusicClass::query()->whereKey($data['class_id'])->update([
-            'teacher_id' => $data['teacher_id'],
-            'assignment_status' => 'pending',
-            'assignment_note' => null,
-            'assigned_at' => now(),
-            'responded_at' => null,
-        ]);
-
-        return back()->with('success', 'Pengajar berhasil ditentukan untuk class.');
-    }
-
-    public function assignScheduleStudents(Request $request): RedirectResponse
-    {
-        $data = $request->validate([
-            'class_id' => ['required', 'integer', 'exists:classes,id'],
-            'student_ids' => ['required', 'array', 'min:1'],
-            'student_ids.*' => ['integer', 'exists:students,id'],
-        ]);
-
-        $class = MusicClass::query()->findOrFail($data['class_id']);
-        $class->students()->syncWithoutDetaching($data['student_ids']);
-
-        return back()->with('success', 'Siswa berhasil ditambahkan ke class.');
-    }
-
-    public function unassignScheduleTeacher(MusicClass $class): RedirectResponse
-    {
-        $class->update([
-            'teacher_id' => null,
-            'assignment_status' => 'pending',
-            'assignment_note' => null,
-            'assigned_at' => null,
-            'responded_at' => null,
-        ]);
-
-        return back()->with('success', 'Pengajar berhasil dilepas dari class.');
-    }
-
-    public function removeScheduleStudent(MusicClass $class, Student $student): RedirectResponse
-    {
-        $class->students()->detach([$student->id]);
-
-        return back()->with('success', 'Siswa berhasil dihapus dari class.');
-    }
-
-    public function showUser(User $user): View
-    {
-        $user->load('roles');
-
-        return view('portal.super-admin.user-detail', [
-            'roleKey' => 'super_admin',
-            'portal' => $this->portalConfig(),
-            'user' => $user,
-        ]);
-    }
-
-    public function editUser(User $user): View
-    {
-        $user->load('roles');
-
-        return view('portal.super-admin.user-edit', [
-            'roleKey' => 'super_admin',
-            'portal' => $this->portalConfig(),
-            'user' => $user,
-            'roleOptions' => self::CORE_ROLES,
-        ]);
-    }
-
-    public function updateUser(Request $request, User $user): RedirectResponse
-    {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:120'],
-            'email' => ['required', 'email', 'max:120', 'unique:users,email,'.$user->id],
-            'role' => ['required', 'in:super_admin,admin,finance,teacher,student'],
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-            'instrument' => ['nullable', 'string', 'max:80'],
-            'phone' => ['nullable', 'string', 'max:30'],
-        ]);
-
-        $user->name = $data['name'];
-        $user->email = $data['email'];
-
-        if (! empty($data['password'])) {
-            $user->password = Hash::make($data['password']);
-        }
-
-        $user->save();
-
-        $role = $this->resolveCoreRole($data['role']);
-        $user->roles()->sync([$role->id]);
-
-        if ($data['role'] === 'teacher') {
-            $teacher = Teacher::query()->firstOrCreate(['user_id' => $user->id], [
-                'name' => $user->name,
-                'instrument' => $data['instrument'] ?? 'General',
-                'is_active' => true,
-            ]);
-            
-            $teacher->update([
-                'name' => $user->name,
-                'instrument' => $data['instrument'] ?? $teacher->instrument,
-                'phone' => $data['phone'] ?? $teacher->phone,
-            ]);
-        }
-
-        if ($data['role'] === 'student') {
-            $student = Student::query()->firstOrCreate(['user_id' => $user->id], [
-                'name' => $user->name,
-                'email' => $user->email,
-                'phone' => $data['phone'] ?? null,
-                'is_active' => true,
-            ]);
-
-            $student->update([
-                'name' => $user->name,
-                'email' => $user->email,
-                'phone' => $data['phone'] ?? $student->phone,
-            ]);
-        }
-
-        return redirect()->route('super-admin.module', ['module' => 'roles'])->with('success', 'Data user berhasil diperbarui.');
-    }
-
-    public function destroyUser(Request $request, User $user): RedirectResponse
-    {
-        if ((int) $request->user()->id === (int) $user->id) {
-            return back()->withErrors([
-                'user' => 'Akun yang sedang dipakai tidak bisa dihapus.',
-            ]);
-        }
-
-        DB::transaction(function () use ($user) {
-            // Delete associated profiles to trigger clean up
-            // Note: DB foreign keys will set student_id to NULL in schedules table automatically
-            Student::where('user_id', $user->id)->delete();
-            Teacher::where('user_id', $user->id)->delete();
-
-            $user->delete();
-        });
-
-        return back()->with('success', 'User dan seluruh data terkait berhasil dihapus.');
-    }
-
-    public function storeRole(Request $request): RedirectResponse
-    {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:120'],
-            'slug' => ['nullable', 'string', 'max:120', 'regex:/^[a-z0-9_-]+$/', 'unique:roles,slug'],
-            'description' => ['nullable', 'string', 'max:500'],
-        ]);
-
-        $slug = $data['slug']
-            ? Str::of($data['slug'])->trim()->lower()->replace('-', '_')->replace(' ', '_')->toString()
-            : Str::of($data['name'])->trim()->lower()->replace('-', '_')->replace(' ', '_')->toString();
-
-        if (Role::query()->where('slug', $slug)->exists()) {
-            return back()->withErrors([
-                'slug' => 'Slug role sudah digunakan. Gunakan slug lain.',
-            ])->withInput();
-        }
-
-        Role::query()->create([
-            'name' => $data['name'],
-            'slug' => $slug,
-            'description' => $data['description'] ?? null,
-        ]);
-
-        return back()->with('success', 'Role baru berhasil dibuat.');
-    }
 
     public function dashboard(): View
     {
@@ -807,15 +100,13 @@ class SuperAdminController extends Controller
         });
 
         $currentMonthStart = now()->copy()->startOfMonth();
-        $previousMonthStart = now()->copy()->subMonth()->startOfMonth();
-        $previousMonthEnd = now()->copy()->subMonth()->endOfMonth();
 
         $studentsCurrent = Student::query()->where('is_active', true)->count();
         $studentsPrev = Student::query()->where('is_active', true)->where('created_at', '<', $currentMonthStart)->count();
         $teachersCurrent = Teacher::query()->where('is_active', true)->count();
         $teachersPrev = Teacher::query()->where('is_active', true)->where('created_at', '<', $currentMonthStart)->count();
         $revenueCurrent = (float) Payment::query()->where('status', 'paid')->whereBetween('paid_at', [$currentMonthStart, now()->copy()->endOfMonth()])->sum('amount');
-        $revenuePrev = (float) Payment::query()->where('status', 'paid')->whereBetween('paid_at', [$previousMonthStart, $previousMonthEnd])->sum('amount');
+        $revenuePrev = (float) Payment::query()->where('status', 'paid')->whereMonth('paid_at', now()->subMonth()->month)->sum('amount');
         $classesCurrent = MusicClass::query()->where('status', 'active')->count();
         $classesPrev = MusicClass::query()->where('status', 'active')->where('created_at', '<', $currentMonthStart)->count();
 
@@ -831,7 +122,7 @@ class SuperAdminController extends Controller
 
             return [
                 'direction' => $delta > 0 ? 'up' : ($delta < 0 ? 'down' : 'flat'),
-                'label' => ($delta > 0 ? '+' : '').number_format($delta, 1).'%',
+                'label' => ($delta > 0 ? '+' : '') . number_format($delta, 1) . '%',
             ];
         };
 
@@ -850,7 +141,7 @@ class SuperAdminController extends Controller
             ],
             [
                 'label' => 'Monthly Revenue',
-                'value' => 'Rp'.number_format($revenueCurrent, 0, ',', '.'),
+                'value' => 'Rp' . number_format($revenueCurrent, 0, ',', '.'),
                 'icon' => 'wallet',
                 'trend' => $trend($revenueCurrent, $revenuePrev),
             ],
@@ -862,6 +153,14 @@ class SuperAdminController extends Controller
             ],
         ];
 
+        $totalActivities = Activity::count();
+        $todayActivities = Activity::whereDate('created_at', today())->count();
+        $topUserRow = Activity::select('user_id', DB::raw('count(*) as total'))
+            ->groupBy('user_id')
+            ->orderByDesc('total')
+            ->first();
+        $topUserName = $topUserRow ? (User::find($topUserRow->user_id)?->name ?? 'System') : '-';
+
         return view('portal.super-admin.dashboard', [
             'roleKey' => 'super_admin',
             'portal' => $this->portalConfig(),
@@ -870,7 +169,7 @@ class SuperAdminController extends Controller
                 ['label' => 'Total Users', 'value' => User::count()],
                 ['label' => 'Active Students', 'value' => Student::where('is_active', true)->count()],
                 ['label' => 'Active Teachers', 'value' => Teacher::where('is_active', true)->count()],
-                ['label' => 'Net Cashflow', 'value' => 'Rp'.number_format($income - $expense - $salary, 0, ',', '.')],
+                ['label' => 'Net Cashflow', 'value' => 'Rp' . number_format($income - $expense - $salary, 0, ',', '.')],
             ],
             'recentActivities' => \App\Models\Activity::with('user')->latest()->take(10)->get(),
             'chartData' => [
@@ -881,6 +180,7 @@ class SuperAdminController extends Controller
             ],
             'summary' => [
                 'registrations_pending' => Registration::where('status', 'pending')->count(),
+                'reschedule_requests_pending' => RescheduleRequest::where('status', 'pending')->count(),
                 'invoices_unpaid' => Invoice::whereIn('status', ['draft', 'issued', 'overdue'])->count(),
                 'teacher_attendance_today' => TeacherAttendance::whereDate('attendance_date', now()->toDateString())->count(),
                 'student_attendance_today' => Attendance::whereDate('created_at', now()->toDateString())->count(),
@@ -892,14 +192,10 @@ class SuperAdminController extends Controller
             'recentTeacherAttendances' => TeacherAttendance::with('teacher')->latest('attendance_date')->take(8)->get(),
             'recentStudentAttendances' => Attendance::with(['student', 'class'])->latest('created_at')->take(8)->get(),
             'recentProgress' => StudentProgress::latest()->take(8)->get(),
+            'totalActivities' => $totalActivities,
+            'todayActivities' => $todayActivities,
+            'topUserName' => $topUserName,
         ]);
-    }
-
-    private function monthBuckets(int $months): Collection
-    {
-        return collect(range($months - 1, 0))->map(
-            fn (int $offset) => now()->copy()->startOfMonth()->subMonths($offset)
-        );
     }
 
     public function module(string $module): View
@@ -907,7 +203,7 @@ class SuperAdminController extends Controller
         $moduleData = $this->moduleData($module);
         $scheduleFeatureReady = $this->hasSchedulesTable();
 
-        return view('portal.super-admin.module', [
+        $data = [
             'roleKey' => 'super_admin',
             'portal' => $this->portalConfig(),
             'moduleKey' => $module,
@@ -915,99 +211,114 @@ class SuperAdminController extends Controller
             'moduleDescription' => $moduleData['description'],
             'columns' => $moduleData['columns'],
             'rows' => $moduleData['rows'],
-            'usersForRoles' => User::with('roles')->latest()->take(50)->get(),
-            'classTypeOptions' => self::TEACHER_CLASS_OPTIONS,
-            'teachersForManagement' => Teacher::query()->with(['user', 'classes'])->latest()->take(50)->get(),
-            'teachersForClassOptions' => Teacher::query()->orderBy('name')->get(['id', 'name']),
-            'classesForManagement' => MusicClass::query()->with(['teacher', 'schedules'])->orderBy('name')->get(),
-            'classesForSchedule' => MusicClass::query()->with(['teacher', 'schedules'])->orderBy('name')->get(),
-            'schedulesForManagement' => $scheduleFeatureReady
-                ? Schedule::query()
-                    ->with(['musicClass.teacher', 'teacher', 'student.user'])
-                    ->orderBy('time')
-                    ->get()
-                    ->sortBy(function ($schedule) {
-                        $dayOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-                        return array_search($schedule->day, $dayOrder);
-                    })
-                : collect(),
             'scheduleFeatureReady' => $scheduleFeatureReady,
             'dayOptions' => self::SCHEDULE_DAY_OPTIONS,
-            'studentsForManagement' => Student::query()->with(['class', 'classes'])->latest()->get(),
-            'approvedRegistrationsForStudents' => Registration::query()
-                ->with('class')
-                ->where('status', 'accepted')
-                ->latest('updated_at')
-                ->get(),
-            'registrationsForManagement' => Registration::query()->with(['class', 'schedules'])->latest()->get(),
             'summary' => [
                 'registrations_pending' => Registration::where('status', 'pending')->count(),
-                'reschedule_requests_pending' => \App\Models\RescheduleRequest::where('status', 'pending')->count(),
+                'reschedule_requests_pending' => RescheduleRequest::where('status', 'pending')->count(),
                 'invoices_unpaid' => Invoice::whereIn('status', ['draft', 'issued', 'overdue'])->count(),
                 'teacher_attendance_today' => TeacherAttendance::whereDate('attendance_date', now()->toDateString())->count(),
                 'student_attendance_today' => Attendance::whereDate('created_at', now()->toDateString())->count(),
                 'progress_updates_today' => StudentProgress::whereDate('created_at', now()->toDateString())->count(),
                 'materials_uploaded' => Material::count(),
             ],
-            'studentsForFinance' => Student::query()->orderBy('name')->get(['id', 'name']),
-            'classesForFinance' => MusicClass::query()->orderBy('name')->get(['id', 'name']),
             'instrumenOptions' => ['Drum', 'Piano', 'Guitar', 'Vocal', 'Violin', 'Bass', 'Keyboard', 'Music Theory'],
             'programTambahanOptions' => ['Teori Musik', 'Ensemble / Band', 'Skill Teknik (ajang kompetisi)', 'Ujian Sertifikat bertaraf international'],
             'hariOptions' => self::SCHEDULE_DAY_OPTIONS,
             'openRegistrationCreate' => session('openRegistrationCreate', false),
-            'logsForManagement' => \App\Models\Activity::latest()->take(100)->get(),
-        ]);
+        ];
+
+        $data['usersForRoles'] = collect();
+        $data['rolesForManagement'] = collect();
+        $data['classesForManagement'] = collect();
+        $data['teachersForClassOptions'] = collect();
+        $data['teachersForManagement'] = collect();
+        $data['schedulesForManagement'] = collect();
+        $data['studentsForManagement'] = collect();
+        $data['approvedRegistrationsForStudents'] = collect();
+        $data['registrationsForManagement'] = collect();
+        $data['studentsForFinance'] = collect();
+        $data['classesForFinance'] = collect();
+        $data['logsForManagement'] = collect();
+        $data['settingsForManagement'] = collect();
+        $data['postsForManagement'] = collect();
+        $data['galleriesForManagement'] = collect();
+        $data['eventsForManagement'] = collect();
+        $data['testimonialsForManagement'] = collect();
+
+        switch ($module) {
+            case 'users':
+            case 'roles':
+                $data['usersForRoles'] = User::with('roles')->latest()->take(100)->get();
+                break;
+            case 'classes':
+                $data['classesForManagement'] = MusicClass::with(['teacher', 'schedules'])->orderBy('name')->get();
+                $data['teachersForClassOptions'] = Teacher::query()->orderBy('name')->get(['id', 'name']);
+                break;
+            case 'teachers':
+                $data['teachersForManagement'] = Teacher::query()->with(['user', 'classes'])->latest()->get();
+                $data['classesForManagement'] = MusicClass::query()->orderBy('name')->get(['id', 'name']);
+                break;
+            case 'schedule':
+                $data['classesForSchedule'] = MusicClass::query()->with(['teacher', 'schedules'])->orderBy('name')->get();
+                $data['teachersForClassOptions'] = Teacher::query()->orderBy('name')->get(['id', 'name']);
+                $data['schedulesForManagement'] = $scheduleFeatureReady
+                    ? Schedule::query()
+                        ->with(['musicClass.teacher', 'teacher', 'student.user'])
+                        ->orderBy('time')
+                        ->get()
+                        ->sortBy(function ($schedule) {
+                            $dayOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+                            return array_search($schedule->day, $dayOrder);
+                        })
+                    : collect();
+                break;
+            case 'students':
+                $data['studentsForManagement'] = Student::query()->with(['class', 'classes'])->latest()->get();
+                $data['classesForManagement'] = MusicClass::query()->orderBy('name')->get(['id', 'name']);
+                $data['approvedRegistrationsForStudents'] = Registration::query()
+                    ->with('class')
+                    ->where('status', 'accepted')
+                    ->latest('updated_at')
+                    ->get();
+                $data['schedulesForManagement'] = $scheduleFeatureReady ? Schedule::where('status', 'available')->get() : collect();
+                break;
+            case 'registrations':
+                $data['registrationsForManagement'] = Registration::query()->with(['class', 'schedules'])->latest()->get();
+                $data['classesForManagement'] = MusicClass::query()->orderBy('name')->get(['id', 'name']);
+                break;
+            case 'finance':
+                $data['studentsForFinance'] = Student::query()->orderBy('name')->get(['id', 'name']);
+                $data['classesForFinance'] = MusicClass::query()->orderBy('name')->get(['id', 'name']);
+                break;
+            case 'blog':
+                $data['postsForManagement'] = DB::table('posts')->latest()->get();
+                break;
+            case 'gallery':
+                $data['galleriesForManagement'] = DB::table('galleries')->latest()->get();
+                break;
+            case 'events':
+                $data['eventsForManagement'] = DB::table('events')->latest()->get();
+                break;
+            case 'testimonials':
+                $data['testimonialsForManagement'] = DB::table('testimonials')->latest()->get();
+                break;
+            case 'settings':
+                $data['settingsForManagement'] = DB::table('settings')->orderBy('key')->get();
+                break;
+            case 'logs':
+                $data['logsForManagement'] = \App\Models\Activity::with('user')->latest()->take(200)->get();
+                break;
+        }
+
+        return view('portal.super-admin.module', $data);
     }
 
-    private function contentTable(string $module): string
+    private function monthBuckets(int $months): Collection
     {
-        return match ($module) {
-            'blog' => 'posts',
-            'gallery' => 'galleries',
-            'events' => 'events',
-            'testimonials' => 'testimonials',
-            'settings' => 'settings',
-            default => abort(404),
-        };
-    }
-
-    private function validateContentPayload(Request $request, string $module, ?int $id = null): array
-    {
-        return match ($module) {
-            'blog' => $request->validate([
-                'title' => ['required', 'string', 'max:255'],
-                'slug' => ['required', 'string', 'max:255', Rule::unique('posts', 'slug')->ignore($id)],
-                'excerpt' => ['nullable', 'string'],
-                'content' => ['nullable', 'string'],
-                'cover_image' => ['nullable', 'string', 'max:255'],
-                'status' => ['required', 'in:draft,published'],
-                'published_at' => ['nullable', 'date'],
-            ]),
-            'gallery' => $request->validate([
-                'title' => ['required', 'string', 'max:255'],
-                'category' => ['nullable', 'string', 'max:255'],
-                'type' => ['required', 'in:photo,video'],
-                'file_path' => ['required', 'string', 'max:255'],
-            ]),
-            'events' => $request->validate([
-                'title' => ['required', 'string', 'max:255'],
-                'description' => ['nullable', 'string'],
-                'event_date' => ['nullable', 'date'],
-                'location' => ['nullable', 'string', 'max:255'],
-                'status' => ['required', 'in:draft,upcoming,completed,cancelled'],
-            ]),
-            'testimonials' => $request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'role' => ['nullable', 'string', 'max:255'],
-                'message' => ['required', 'string'],
-                'is_published' => ['required', 'in:1,0'],
-            ]),
-            'settings' => $request->validate([
-                'key' => ['required', 'string', 'max:255', Rule::unique('settings', 'key')->ignore($id)],
-                'value' => ['nullable', 'string'],
-            ]),
-            default => abort(404),
-        };
+        return collect(range($months - 1, 0))->map(
+            fn (int $offset) => now()->copy()->startOfMonth()->subMonths($offset)
+        );
     }
 
     private function portalConfig(): array
@@ -1069,7 +380,7 @@ class SuperAdminController extends Controller
                 'rows' => MusicClass::with('teacher')->latest()->take(30)->get()->map(fn (MusicClass $class) => [
                     $class->name,
                     $class->teacher?->name ?? '-',
-                    'Rp'.number_format($class->price ?? 0, 0, ',', '.'),
+                    'Rp' . number_format($class->price ?? 0, 0, ',', '.'),
                     $class->status,
                 ])->all(),
             ],
@@ -1118,7 +429,7 @@ class SuperAdminController extends Controller
                     $registration->email,
                     $registration->phone,
                     $registration->class?->name ?? ($registration->instrumen ?? '-'),
-                    $registration->schedules->count().' Slot',
+                    $registration->schedules->count() . ' Slot',
                     strtoupper((string) $registration->status),
                 ])->all(),
             ],
@@ -1127,36 +438,36 @@ class SuperAdminController extends Controller
                 'description' => 'Permintaan pindah jadwal dari siswa.',
                 'columns' => ['Siswa', 'Lama', 'Baru', 'Guru', 'Status', 'Aksi'],
                 'rows' => \App\Models\RescheduleRequest::with(['student', 'oldSession', 'newSchedule.teacher'])->latest()->take(50)->get()->map(function ($r) {
-                        $newLabel = '-';
-                        if ($r->newSchedule && $r->oldSession) {
-                            $dayMap = [
-                                'Senin' => \Carbon\Carbon::MONDAY,
-                                'Selasa' => \Carbon\Carbon::TUESDAY,
-                                'Rabu' => \Carbon\Carbon::WEDNESDAY,
-                                'Kamis' => \Carbon\Carbon::THURSDAY,
-                                'Jumat' => \Carbon\Carbon::FRIDAY,
-                                'Sabtu' => \Carbon\Carbon::SATURDAY,
-                                'Minggu' => \Carbon\Carbon::SUNDAY,
-                            ];
-                            $newDayNum = $dayMap[$r->newSchedule->day] ?? \Carbon\Carbon::MONDAY;
-                            $oldDate = \Carbon\Carbon::parse($r->oldSession->session_date);
-                            $newDate = $oldDate->copy()->startOfWeek()->addDays($newDayNum - 1);
-                            $newLabel = $newDate->translatedFormat('l, d M Y') . ' - ' . substr((string)$r->newSchedule->time, 0, 5);
-                        } else if ($r->newSchedule) {
-                            $newLabel = $r->newSchedule->day . ' ' . substr((string)$r->newSchedule->time, 0, 5);
-                        }
-
-                        return [
-                            $r->student->name,
-                            $r->oldSession 
-                                ? $r->oldSession->session_date->format('l, d M Y') . ' - ' . substr((string)$r->oldSession->time, 0, 5)
-                                : ($r->oldSchedule ? $r->oldSchedule->day . ' ' . substr((string)$r->oldSchedule->time, 0, 5) : '-'),
-                            $newLabel,
-                            $r->newSchedule->teacher->name ?? '-',
-                            strtoupper($r->status),
-                            $r // Pass object for custom rendering in blade
+                    $newLabel = '-';
+                    if ($r->newSchedule && $r->oldSession) {
+                        $dayMap = [
+                            'Senin' => Carbon::MONDAY,
+                            'Selasa' => Carbon::TUESDAY,
+                            'Rabu' => Carbon::WEDNESDAY,
+                            'Kamis' => Carbon::THURSDAY,
+                            'Jumat' => Carbon::FRIDAY,
+                            'Sabtu' => Carbon::SATURDAY,
+                            'Minggu' => Carbon::SUNDAY,
                         ];
-                    })->all(),
+                        $newDayNum = $dayMap[$r->newSchedule->day] ?? Carbon::MONDAY;
+                        $oldDate = Carbon::parse($r->oldSession->session_date);
+                        $newDate = $oldDate->copy()->startOfWeek()->addDays($newDayNum - 1);
+                        $newLabel = $newDate->translatedFormat('l, d M Y') . ' - ' . substr((string) $r->newSchedule->time, 0, 5);
+                    } else if ($r->newSchedule) {
+                        $newLabel = $r->newSchedule->day . ' ' . substr((string) $r->newSchedule->time, 0, 5);
+                    }
+
+                    return [
+                        $r->student->name,
+                        $r->oldSession
+                            ? $r->oldSession->session_date->format('l, d M Y') . ' - ' . substr((string) $r->oldSession->time, 0, 5)
+                            : ($r->oldSchedule ? $r->oldSchedule->day . ' ' . substr((string) $r->oldSchedule->time, 0, 5) : '-'),
+                        $newLabel,
+                        $r->newSchedule->teacher->name ?? '-',
+                        strtoupper((string) $r->status),
+                        $r
+                    ];
+                })->all(),
             ],
             'finance' => [
                 'title' => 'Finance Summary',
@@ -1164,9 +475,9 @@ class SuperAdminController extends Controller
                 'columns' => ['Metrik', 'Nilai'],
                 'rows' => [
                     ['Total Invoice', (string) Payment::count()],
-                    ['Pembayaran Berhasil', 'Rp'.number_format(Payment::where('status', 'paid')->sum('amount'), 0, ',', '.')],
-                    ['Total Pengeluaran', 'Rp'.number_format(Expense::sum('amount'), 0, ',', '.')],
-                    ['Total Gaji Guru', 'Rp'.number_format(TeacherSalary::sum('total_paid'), 0, ',', '.')],
+                    ['Pembayaran Berhasil', 'Rp' . number_format(Payment::where('status', 'paid')->sum('amount'), 0, ',', '.')],
+                    ['Total Pengeluaran', 'Rp' . number_format(Expense::sum('amount'), 0, ',', '.')],
+                    ['Total Gaji Guru', 'Rp' . number_format(TeacherSalary::sum('total_paid'), 0, ',', '.')],
                 ],
             ],
             'reports' => [
@@ -1239,7 +550,7 @@ class SuperAdminController extends Controller
                     (string) ($activity->user_id ?? '-'),
                     $activity->module ?? '-',
                     $activity->action,
-                ])->all(),  
+                ])->all(),
             ],
             default => abort(404),
         };
