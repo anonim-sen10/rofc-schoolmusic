@@ -268,8 +268,11 @@ public function dashboard(Request $request): View
             ->values();
 
         $selectedStudentId = $request->integer('student_id');
-        if ($selectedStudentId && ! $students->contains(fn (Student $student) => (int) $student->id === $selectedStudentId)) {
-            abort(403, 'Siswa bukan milik teacher yang sedang login.');
+        if ($selectedStudentId) {
+            $allStudentIds = $students->pluck('id')->map(fn($id) => (int)$id)->toArray();
+            if (!in_array((int)$selectedStudentId, $allStudentIds)) {
+                abort(403, 'Siswa bukan milik teacher yang sedang login.');
+            }
         }
 
         $selectedClassId = null;
