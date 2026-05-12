@@ -20,6 +20,16 @@ Route::get('/', function () {
     return view('pages.home');
 })->name('home');
 
+// TEMPORARY: Run migration from browser
+Route::get('/run-migration', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        return "Migration successful: " . \Illuminate\Support\Facades\Artisan::output();
+    } catch (\Exception $e) {
+        return "Migration failed: " . $e->getMessage();
+    }
+});
+
 Route::view('/about', 'pages.about')->name('about');
 Route::view('/programs', 'pages.programs')->name('programs');
 Route::view('/teachers', 'pages.teachers')->name('teachers');
