@@ -25,15 +25,11 @@ class TeacherStudentController extends Controller
             ['name' => 'Teacher User '.$user->id, 'instrument' => 'General', 'is_active' => true]
         );
 
-        $teacherClassesQuery = $teacher->classes();
-        if ($this->hasAssignmentStatusColumn()) {
-            $teacherClassesQuery->where('assignment_status', 'accepted');
-        }
-
-        $classIds = $teacherClassesQuery->pluck('classes.id');
-
+        // Ambil semua kelas milik teacher ini (konsisten dengan dashboard)
+        $classIds = $teacher->classes()->pluck('classes.id');
+        
         $students = Student::query()
-            ->select(['students.id', 'students.name', 'students.is_active'])
+            ->select(['students.id', 'students.name', 'students.is_active', 'students.phone', 'students.email', 'students.address'])
             ->whereHas('classes', fn ($query) => $query->whereIn('classes.id', $classIds))
             ->with([
                 'classes' => fn ($query) => $query
