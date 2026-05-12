@@ -108,17 +108,20 @@ $iconMap = [
                 </button>
             </div>
 
-            <nav class="portal-menu">
+            <nav class="portal-menu mt-4 px-4 space-y-1">
                 @foreach ($normalizedMenu as $item)
-                    <a href="{{ $item['url'] }}" class="{{ request()->url() === $item['url'] ? 'active' : '' }}" data-tooltip="{{ $item['label'] }}">
-                        <i data-lucide="{{ $item['icon'] }}"></i>
-                        <span>{{ $item['label'] }}</span>
+                    @php $isActive = request()->url() === $item['url']; @endphp
+                    <a href="{{ $item['url'] }}" 
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group {{ $isActive ? 'bg-blue-50 text-blue-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700' }}" 
+                        data-tooltip="{{ $item['label'] }}">
+                        <i data-lucide="{{ $item['icon'] }}" class="w-5 h-5 {{ $isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600' }}"></i>
+                        <span class="text-sm font-semibold">{{ $item['label'] }}</span>
                     </a>
                 @endforeach
             </nav>
         </aside>
 
-        <div class="portal-main">
+        <div class="portal-main bg-slate-50/50 flex flex-col min-h-screen">
             <x-portal.dashboard-header
                 :title="trim($__env->yieldContent('page-title')) ?: 'Dashboard'"
                 :subtitle="trim($__env->yieldContent('page-subtitle')) ?: 'ROFC Private Music Management Information System'"
@@ -130,7 +133,7 @@ $iconMap = [
                 :brand-logo-url="$brandLogoUrl"
             />
 
-            <main class="portal-content portal-content--saas">
+            <main class="portal-content portal-content--saas pt-[100px] px-6 pb-8 lg:px-10 flex-1">
                 @if (session('success'))
                     <section class="card" data-searchable>
                         <x-ui.badge type="success">SUCCESS</x-ui.badge>
@@ -159,11 +162,14 @@ $iconMap = [
                 @yield('content')
             </main>
 
-            <footer class="portal-footer">
-                <p>&copy; {{ date('Y') }} SchoolMusic</p>
+            <footer class="portal-footer border-t border-slate-200 bg-white/50 px-8 py-4 flex items-center justify-between">
+                <p class="text-slate-400 text-xs font-medium uppercase tracking-widest">&copy; {{ date('Y') }} SchoolMusic Platform</p>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="logout-btn">Logout</button>
+                    <button type="submit" class="text-xs font-bold text-red-500 hover:text-red-600 transition-colors flex items-center gap-2">
+                        <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                        LOGOUT
+                    </button>
                 </form>
             </footer>
         </div>

@@ -3,7 +3,6 @@
         ['label' => 'Dashboard', 'url' => route('teacher.dashboard'), 'key' => 'dashboard'],
         ['label' => 'My Classes', 'url' => route('teacher.my-classes.index'), 'key' => 'my_classes'],
         ['label' => 'My Schedule', 'url' => route('teacher.schedule.index'), 'key' => 'my_schedule'],
-        ['label' => 'Attendance', 'url' => route('teacher.attendance.index'), 'key' => 'attendance'],
         ['label' => 'Student Progress', 'url' => route('teacher.student-progress.index'), 'key' => 'student_progress'],
         ['label' => 'My Students', 'url' => route('teacher.my-students.index'), 'key' => 'my_students'],
         ['label' => 'Materials', 'url' => route('teacher.materials.index'), 'key' => 'materials'],
