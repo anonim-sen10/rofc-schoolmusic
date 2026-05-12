@@ -25,10 +25,11 @@ class TeacherStudentController extends Controller
             ['name' => 'Teacher User '.$user->id, 'instrument' => 'General', 'is_active' => true]
         );
 
-        // Hanya ambil kelas yang sudah di-Accept oleh guru ini
-        $classIds = $teacher->classes()
-            ->where('assignment_status', 'accepted')
-            ->pluck('classes.id');
+        // Ambil ID Guru berdasarkan nama (fallback jika link user_id bermasalah)
+        $teacherIds = Teacher::where('name', 'like', '%' . $user->name . '%')->pluck('id');
+        
+        // Ambil semua kelas yang di-assign ke guru-guru dengan nama tersebut
+        $classIds = MusicClass::whereIn('teacher_id', $teacherIds)->pluck('id');
         
         $students = Student::query()
             ->select(['students.id', 'students.name', 'students.is_active', 'students.phone', 'students.email', 'students.address'])
