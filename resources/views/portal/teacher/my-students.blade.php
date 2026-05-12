@@ -15,9 +15,7 @@
 
 @section('title', 'My Students')
 @section('page-title', 'My Students')
-@section('page-subtitle')
-    Manajemen daftar siswa. <span class="text-[10px] opacity-30 italic">(Debug: ID #{{ $teacher->id }} | {{ $teacher->name }})</span>
-@endsection
+@section('page-subtitle', 'Manajemen daftar siswa dan pemantauan perkembangan.')
 
 @section('content')
     {{-- Modern Student Detail Modal (Compact & Floating) --}}

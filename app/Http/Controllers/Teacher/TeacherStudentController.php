@@ -29,7 +29,7 @@ class TeacherStudentController extends Controller
         // 1. Ambil ID Kelas dari tabel Classes
         $classIds = $teacher->classes()->pluck('id');
         
-        // 2. Ambil ID Siswa dari tabel ScheduleSession (untuk jaga-jaga jika tidak ada di Classes)
+        // 2. Ambil ID Siswa dari tabel ScheduleSession
         $studentIdsFromSchedule = \App\Models\ScheduleSession::where('teacher_id', $teacher->id)
             ->pluck('student_id')
             ->unique();
@@ -41,10 +41,14 @@ class TeacherStudentController extends Controller
                       ->orWhereIn('students.id', $studentIdsFromSchedule);
             })
             ->with([
-                'classes' => fn ($query) => $query
-                    ->select(['classes.id', 'classes.name'])
-                    ->where('teacher_id', $teacher->id)
-                    ->orderBy('classes.name'),
+                'classes' => function ($query) use ($teacher) {
+                    $query->select(['classes.id', 'classes.name'])
+                        ->where(function($q) use ($teacher) {
+                            $q->where('teacher_id', $teacher->id)
+                              ->orWhereHas('scheduleSessions', fn($sq) => $sq->where('teacher_id', $teacher->id));
+                        })
+                        ->distinct();
+                }
             ])
             ->orderBy('students.name')
             ->get();
