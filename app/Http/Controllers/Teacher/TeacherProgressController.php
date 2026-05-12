@@ -30,22 +30,25 @@ class TeacherProgressController extends Controller
     {
         $student = Student::query()
             ->where('id', $studentId)
-            ->whereHas('classes', function ($query) use ($teacher) {
-                $query->where('classes.teacher_id', $teacher->id);
-
-                if ($this->hasAssignmentStatusColumn()) {
-                    $query->where('classes.assignment_status', 'accepted');
-                }
+            ->where(function($query) use ($teacher) {
+                // Cek lewat Kelas
+                $query->whereHas('classes', function ($q) use ($teacher) {
+                    $q->where('classes.teacher_id', $teacher->id);
+                })
+                // ATAU Cek lewat Jadwal
+                ->orWhereHas('scheduleSessions', function ($q) use ($teacher) {
+                    $q->where('schedule_sessions.teacher_id', $teacher->id);
+                });
             })
             ->with([
                 'classes' => function ($query) use ($teacher) {
                     $query->where('classes.teacher_id', $teacher->id)
                         ->orderBy('classes.name');
-
-                    if ($this->hasAssignmentStatusColumn()) {
-                        $query->where('classes.assignment_status', 'accepted');
-                    }
                 },
+                'scheduleSessions' => function ($query) use ($teacher) {
+                    $query->where('teacher_id', $teacher->id)
+                        ->with('musicClass');
+                }
             ])
             ->first();
 
@@ -62,6 +65,10 @@ class TeacherProgressController extends Controller
         $student = $this->teacherStudentOrAbort($teacher, $student_id);
 
         $classIds = $student->classes->pluck('id');
+        if ($classIds->isEmpty()) {
+            $classIds = $student->scheduleSessions->pluck('class_id')->filter()->unique();
+        }
+        
         $selectedClassId = old('class_id', $classIds->first());
 
         return view('portal.teacher.student-progress-show', [
@@ -94,9 +101,12 @@ class TeacherProgressController extends Controller
 
         $student = $this->teacherStudentOrAbort($teacher, (int) $data['student_id']);
 
-        $isStudentClassOwnedByTeacher = $student->classes->contains(
-            fn ($class) => (int) $class->id === (int) $data['class_id']
-        );
+        $classIds = $student->classes->pluck('id');
+        if ($classIds->isEmpty()) {
+            $classIds = $student->scheduleSessions->pluck('class_id')->filter()->unique();
+        }
+
+        $isStudentClassOwnedByTeacher = $classIds->contains((int) $data['class_id']);
 
         if (! $isStudentClassOwnedByTeacher) {
             abort(403, 'Kelas siswa tidak berada di bawah teacher yang sedang login.');
