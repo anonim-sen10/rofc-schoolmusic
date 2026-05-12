@@ -246,13 +246,23 @@ public function dashboard(Request $request): View
     public function progress(Request $request): View
     {
         $teacher = $this->teacherFromUser($request->user()->id);
+        
+        // Ambil kelas resmi
         $classes = $this->teacherAcceptedClassesQuery($teacher->id)
             ->with(['students:id,name'])
             ->orderBy('name')
             ->get();
 
-        $students = $classes
-            ->flatMap(fn (MusicClass $class) => $class->students)
+        // Ambil siswa dari kelas resmi
+        $studentsFromClasses = $classes->flatMap(fn (MusicClass $class) => $class->students);
+
+        // Ambil siswa dari Jadwal (Schedule)
+        $studentsFromSchedule = Student::whereHas('scheduleSessions', fn($q) => $q->where('teacher_id', $teacher->id))
+            ->select(['id', 'name'])
+            ->get();
+
+        // Gabungkan keduanya
+        $students = $studentsFromClasses->concat($studentsFromSchedule)
             ->unique('id')
             ->sortBy('name')
             ->values();
