@@ -310,11 +310,13 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
                 <thead>
                     <tr>
                         <th>Date</th>
-                        <th>Time</th>
+                        <th>Time (Sch)</th>
+                        <th>Recorded At</th>
                         <th>Teacher</th>
                         <th>Student</th>
                         <th>Class</th>
                         <th>Status</th>
+                        <th>Proof</th>
                         <th>Location</th>
                         <th>Notes</th>
                     </tr>
@@ -324,9 +326,10 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
                         <tr>
                             <td>{{ $att->created_at->format('d M Y') }}</td>
                             <td>{{ $att->schedule ? \Carbon\Carbon::parse($att->schedule->time)->format('H:i') : '-' }}</td>
-                            <td>{{ $att->schedule->teacher->name ?? '-' }}</td>
-                            <td>{{ $att->schedule->student->user->name ?? ($att->schedule->student->name ?? '-') }}</td>
-                            <td>{{ $att->schedule->class->name ?? '-' }}</td>
+                            <td><small class="text-slate-500">{{ $att->created_at->format('H:i:s') }}</small></td>
+                            <td>{{ $att->teacher->name ?? '-' }}</td>
+                            <td>{{ $att->student->name ?? '-' }}</td>
+                            <td>{{ $att->class->name ?? '-' }}</td>
                             <td>
                                 @php $status = strtolower($att->status); @endphp
                                 <span class="att-badge att-badge-{{ $status }}">
@@ -336,6 +339,16 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
                                     @endif
                                     {{ $status }}
                                 </span>
+                            </td>
+                            <td>
+                                @if($att->image_path)
+                                    <a href="{{ asset('storage/' . $att->image_path) }}" target="_blank" class="att-proof-thumb">
+                                        <img src="{{ asset('storage/' . $att->image_path) }}" alt="Proof" 
+                                             style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid #e2e8f0;">
+                                    </a>
+                                @else
+                                    <span class="text-slate-300 text-[10px]">No Photo</span>
+                                @endif
                             </td>
                             <td>
                                 @if($att->latitude && $att->longitude)
