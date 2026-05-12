@@ -95,6 +95,12 @@
                             <td class="px-6 py-4">
                                 <div class="flex items-center justify-end gap-2">
 
+                                    <button type="button" 
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 text-white text-[10px] font-bold shadow-sm hover:bg-blue-700 transition-all active:scale-95"
+                                        onclick="openAttendanceModal('{{ $schedule->id }}', '{{ $schedule->student?->name ?: 'N/A' }}', '{{ $schedule->musicClass?->name ?: 'N/A' }}', '{{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}')">
+                                        <i data-lucide="user-check" class="w-3 h-3"></i>
+                                        <span>ATTENDANCE</span>
+                                    </button>
                                     <a href="{{ route('teacher.student-progress.input', $schedule->student_id) }}" 
                                         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-500 text-[10px] font-bold hover:bg-slate-50 transition-all active:scale-95">
                                         <i data-lucide="pencil-line" class="w-3 h-3"></i>

@@ -166,7 +166,10 @@
                             @elseif($schedule->session_date->isFuture())
                                 <span style="font-size: 0.8rem; color: #94a3b8; font-style: italic;">Upcoming</span>
                             @else
-                                <span class="text-slate-400">-</span>
+                                <button type="button" class="btn-action" 
+                                    onclick="openAttendanceModal('{{ $schedule->id }}', '{{ $schedule->student->name }}', '{{ $schedule->musicClass->name }}', '{{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}')">
+                                    Mark Attendance
+                                </button>
                             @endif
                         </td>
                     </tr>
