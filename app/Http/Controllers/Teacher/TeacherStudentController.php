@@ -41,14 +41,8 @@ class TeacherStudentController extends Controller
                       ->orWhereIn('students.id', $studentIdsFromSchedule);
             })
             ->with([
-                'classes' => function ($query) use ($teacher) {
-                    $query->select(['classes.id', 'classes.name'])
-                        ->where(function($q) use ($teacher) {
-                            $q->where('teacher_id', $teacher->id)
-                              ->orWhereHas('scheduleSessions', fn($sq) => $sq->where('teacher_id', $teacher->id));
-                        })
-                        ->distinct();
-                }
+                'classes' => fn($q) => $q->select(['classes.id', 'classes.name'])->where('teacher_id', $teacher->id),
+                'scheduleSessions' => fn($q) => $q->where('teacher_id', $teacher->id)->with('musicClass:id,name')
             ])
             ->orderBy('students.name')
             ->get();

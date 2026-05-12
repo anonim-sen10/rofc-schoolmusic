@@ -86,4 +86,9 @@ class Student extends Model
     {
         return $this->hasMany(RescheduleRequest::class);
     }
+
+    public function scheduleSessions(): HasMany
+    {
+        return $this->hasMany(ScheduleSession::class);
+    }
 }

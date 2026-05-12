@@ -140,7 +140,14 @@
                                 </div>
                             </td>
                             <td class="px-8 py-5">
-                                <span class="text-xs font-medium text-slate-500">{{ $student->classes->pluck('name')->join(', ') ?: '-' }}</span>
+                                @php
+                                    $classNames = $student->classes->pluck('name')->toArray();
+                                    if (empty($classNames)) {
+                                        $classNames = $student->scheduleSessions->pluck('musicClass.name')->filter()->unique()->toArray();
+                                    }
+                                    $displayClass = !empty($classNames) ? implode(', ', $classNames) : '-';
+                                @endphp
+                                <span class="text-xs font-medium text-slate-500">{{ $displayClass }}</span>
                             </td>
                             <td class="px-8 py-5">
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-lg {{ $student->is_active ? 'bg-green-50 text-green-700 border-green-100' : 'bg-amber-50 text-amber-700 border-amber-100' }} text-[10px] font-bold border">
@@ -153,7 +160,7 @@
                                         onclick="showStudentDetailModal({
                                             id: '{{ $student->id }}',
                                             name: '{{ addslashes($student->name) }}',
-                                            classes: '{{ addslashes($student->classes->pluck('name')->join(', ')) }}',
+                                            classes: '{{ addslashes($displayClass) }}',
                                             status: '{{ $student->is_active ? 'ACTIVE' : 'INACTIVE' }}',
                                             phone: '{{ $student->phone ?? '-' }}',
                                             email: '{{ $student->email ?? '-' }}',
