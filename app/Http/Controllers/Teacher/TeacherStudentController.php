@@ -26,19 +26,24 @@ class TeacherStudentController extends Controller
             ['name' => 'Teacher User '.$user->id, 'instrument' => 'General', 'is_active' => true]
         );
 
-        // Ambil ID Guru berdasarkan nama (fallback jika link user_id bermasalah)
-        $teacherIds = Teacher::where('name', 'like', '%' . $user->name . '%')->pluck('id');
+        // 1. Ambil ID Kelas dari tabel Classes
+        $classIds = $teacher->classes()->pluck('id');
         
-        // Ambil semua kelas yang di-assign ke guru-guru dengan nama tersebut
-        $classIds = MusicClass::whereIn('teacher_id', $teacherIds)->pluck('id');
-        
+        // 2. Ambil ID Siswa dari tabel ScheduleSession (untuk jaga-jaga jika tidak ada di Classes)
+        $studentIdsFromSchedule = \App\Models\ScheduleSession::where('teacher_id', $teacher->id)
+            ->pluck('student_id')
+            ->unique();
+
         $students = Student::query()
             ->select(['students.id', 'students.name', 'students.is_active', 'students.phone', 'students.email', 'students.address'])
-            ->whereHas('classes', fn ($query) => $query->whereIn('classes.id', $classIds))
+            ->where(function($query) use ($classIds, $studentIdsFromSchedule) {
+                $query->whereHas('classes', fn ($q) => $q->whereIn('classes.id', $classIds))
+                      ->orWhereIn('students.id', $studentIdsFromSchedule);
+            })
             ->with([
                 'classes' => fn ($query) => $query
                     ->select(['classes.id', 'classes.name'])
-                    ->whereIn('classes.id', $classIds)
+                    ->where('teacher_id', $teacher->id)
                     ->orderBy('classes.name'),
             ])
             ->orderBy('students.name')
