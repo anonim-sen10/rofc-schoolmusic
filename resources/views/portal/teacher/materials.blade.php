@@ -3,7 +3,7 @@
         ['label' => 'Dashboard', 'url' => route('teacher.dashboard')],
         ['label' => 'My Classes', 'url' => route('teacher.my-classes.index')],
         ['label' => 'My Schedule', 'url' => route('teacher.schedule.index')],
-        ['label' => 'Attendance', 'url' => route('teacher.attendance.index')],
+
         ['label' => 'Student Progress', 'url' => route('teacher.student-progress.index')],
         ['label' => 'My Students', 'url' => route('teacher.my-students.index')],
         ['label' => 'Materials', 'url' => route('teacher.materials.index')],

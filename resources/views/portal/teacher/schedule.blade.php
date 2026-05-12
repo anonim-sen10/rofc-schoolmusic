@@ -168,7 +168,7 @@
                             @else
                                 <button type="button" class="btn-action" 
                                     onclick="openAttendanceModal('{{ $schedule->id }}', '{{ $schedule->student->name }}', '{{ $schedule->musicClass->name }}', '{{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}')">
-                                    Mark Attendance
+                                    -
                                 </button>
                             @endif
                         </td>
