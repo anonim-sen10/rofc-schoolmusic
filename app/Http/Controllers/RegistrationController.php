@@ -42,16 +42,19 @@ class RegistrationController extends Controller
         }
 
         $schedules = Schedule::query()
+            ->with(['teacher.user'])
             ->where('class_id', $class_id)
+            ->where('status', 'available')
             ->orderByRaw("FIELD(day, 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu')")
             ->orderBy('time')
-            ->get(['id', 'day', 'time', 'status'])
+            ->get(['id', 'day', 'time', 'status', 'teacher_id'])
             ->map(function ($s) {
                 return [
                     'id' => $s->id,
                     'day' => $s->day,
                     'time' => substr((string) $s->time, 0, 5),
                     'status' => $s->status,
+                    'teacher_name' => $s->teacher->user->name ?? ($s->teacher->name ?? 'Guru ROFC'),
                 ];
             });
 
