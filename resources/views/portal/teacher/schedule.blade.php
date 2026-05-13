@@ -150,9 +150,7 @@
                             @endif
                         </td>
                         <td>
-                            @if($schedule->status === 'rescheduled')
-                                <span style="font-size: 0.8rem; color: #94a3b8; font-style: italic;">Locked (Rescheduled)</span>
-                            @elseif($schedule->status === 'completed')
+                            @if($schedule->status === 'completed')
                                 <span style="font-size: 0.8rem; color: #10b981; font-weight: 600;">Selesai</span>
                             @elseif($schedule->attendance)
                                 @php $status = strtolower($schedule->attendance->status); @endphp
