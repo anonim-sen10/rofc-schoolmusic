@@ -1012,6 +1012,7 @@
 
                 if (currentStep < 3) {
                     setStep(currentStep + 1);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             });
         });
@@ -1020,21 +1021,46 @@
             button.addEventListener('click', () => {
                 if (currentStep > 1) {
                     setStep(currentStep - 1);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             });
+        });
+
+        // Prevent accidental submission via Enter key
+        registerForm?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+                
+                // If on step 1 or 2, trigger the "Next" button logic
+                if (currentStep < 3) {
+                    const nextBtn = getStepPanel(currentStep).querySelector('[data-step-next]');
+                    if (nextBtn) nextBtn.click();
+                } else {
+                    // If on step 3, trigger the final submit
+                    submitFinalButton?.click();
+                }
+            }
         });
 
         if (submitFinalButton && registerForm) {
             submitFinalButton.addEventListener('click', (event) => {
                 event.preventDefault();
 
+                // Double check all steps before final submission
                 const step1Valid = validateStep(1);
                 const step2Valid = validateStep(2);
-                if (!step1Valid || !step2Valid) {
-                    setStep(!step1Valid ? 1 : 2);
+                
+                if (!step1Valid) {
+                    setStep(1);
+                    return;
+                }
+                
+                if (!step2Valid) {
+                    setStep(2);
                     return;
                 }
 
+                // Enable all inputs right before submission so Laravel receives all data
                 stepPanels.forEach((panel) => {
                     getPanelInputs(panel).forEach((input) => {
                         input.disabled = false;
