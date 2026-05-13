@@ -84,7 +84,7 @@ public function dashboard(Request $request): View
             'todaySchedules' => $todaySchedules,
             'completedCount' => $completedCount,
             'classCount' => $classIds->count(),
-            'studentCount' => Student::whereHas('classes', fn ($q) => $q->whereIn('classes.id', $classIds))->count(),
+            'studentCount' => Student::whereHas('schedules', fn ($q) => $q->where('teacher_id', $teacher->id))->count(),
             'attendanceCount' => Attendance::where('teacher_id', $teacher->id)->whereDate('created_at', now()->toDateString())->count() + TeacherAttendance::where('teacher_id', $teacher->id)->whereDate('attendance_date', now()->toDateString())->count(),
             'progressCount' => StudentProgress::where('teacher_id', $teacher->id)->count(),
             'assignedClasses' => $acceptedClasses,
@@ -453,13 +453,15 @@ public function schedule(Request $request): View
 
         $classes = $this->teacherAcceptedClassesQuery($teacher->id)
             ->with([
-                'schedules.student:id,name,is_active,end_date'
+                'schedules' => function($query) use ($teacher) {
+                    $query->where('teacher_id', $teacher->id)->with('student:id,name,is_active,end_date');
+                }
             ])
-            ->withCount(['schedules as students_count' => function($query) {
-                $query->select(\DB::raw('count(distinct student_id)'))->whereNotNull('student_id');
+            ->withCount(['schedules as students_count' => function($query) use ($teacher) {
+                $query->where('teacher_id', $teacher->id)->select(\DB::raw('count(distinct student_id)'))->whereNotNull('student_id');
             }])
-            ->withCount(['schedules' => function($query) {
-                $query->whereNotNull('student_id');
+            ->withCount(['schedules' => function($query) use ($teacher) {
+                $query->where('teacher_id', $teacher->id)->whereNotNull('student_id');
             }])
             ->orderBy('name')
             ->get();
