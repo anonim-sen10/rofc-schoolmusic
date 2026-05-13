@@ -1099,6 +1099,14 @@
             return days[date.getDay()];
         };
 
+        const resetSelection = () => {
+            const checked = document.querySelector('input[name="schedule_id"]:checked');
+            if (checked) {
+                checked.checked = false;
+            }
+            updateSelectedPreview();
+        };
+
         const updateSelectedPreview = () => {
             const checked = document.querySelector('input[name="schedule_id"]:checked');
             if (!checked) {
@@ -1210,6 +1218,7 @@
             if (!classSelect || !scheduleContainer) return;
 
             const classId = classSelect.value;
+            resetSelection();
             if (!classId) {
                 scheduleContainer.innerHTML = '<p class="text-muted" style="padding: 1rem; font-size: 0.85rem; font-style: italic;">Silakan pilih instrumen terlebih dahulu.</p>';
                 teacherSelectField.style.display = 'none';
@@ -1253,7 +1262,10 @@
             }
         };
 
-        teacherSelect?.addEventListener('change', renderSchedules);
+        teacherSelect?.addEventListener('change', () => {
+            resetSelection();
+            renderSchedules();
+        });
         startDateInput?.addEventListener('change', renderSchedules);
         classSelect?.addEventListener('change', loadSchedules);
 

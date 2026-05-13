@@ -377,9 +377,9 @@ class SuperAdminController extends Controller
                 'title' => 'Classes',
                 'description' => 'Kelas yang dibuat Admin dan assignment guru.',
                 'columns' => ['Nama Kelas', 'Guru', 'Harga', 'Status'],
-                'rows' => MusicClass::with('teacher')->latest()->take(30)->get()->map(fn (MusicClass $class) => [
+                'rows' => MusicClass::with(['teacher', 'teachers'])->latest()->take(30)->get()->map(fn (MusicClass $class) => [
                     $class->name,
-                    $class->teacher?->name ?? '-',
+                    $class->teachers->isNotEmpty() ? $class->teachers->pluck('name')->join(', ') : ($class->teacher?->name ?? '-'),
                     'Rp' . number_format($class->price ?? 0, 0, ',', '.'),
                     $class->status,
                 ])->all(),

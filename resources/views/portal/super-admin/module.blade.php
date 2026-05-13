@@ -915,13 +915,13 @@
                 <label>Harga
                     <input type="number" name="price" min="0" step="1000" value="{{ old('price', 0) }}">
                 </label>
-                <label>Guru
-                    <select name="teacher_id">
-                        <option value="">Pilih guru (opsional)</option>
+                <label>Guru (Pilih satu atau lebih)
+                    <select name="teacher_ids[]" multiple style="height: 120px;">
                         @foreach ($teachersForClassOptions as $teacherOption)
-                            <option value="{{ $teacherOption->id }}" @selected((string) old('teacher_id') === (string) $teacherOption->id)>{{ $teacherOption->name }}</option>
+                            <option value="{{ $teacherOption->id }}" @selected(is_array(old('teacher_ids')) && in_array((string)$teacherOption->id, old('teacher_ids')))>{{ $teacherOption->name }}</option>
                         @endforeach
                     </select>
+                    <small style="color: #64748b; font-size: 0.75rem;">Tahan Ctrl/Cmd untuk memilih lebih dari satu.</small>
                 </label>
                 <label>Status
                     <select name="status" required>
@@ -1036,7 +1036,7 @@
                                                     </article>
                                                     <article class="registration-modal-item-full">
                                                         <p>Guru Pengampu</p>
-                                                        <p>{{ $classItem->teacher?->name ?? 'Belum ditentukan' }}</p>
+                                                        <p>{{ $classItem->teachers->pluck('name')->join(', ') ?: ($classItem->teacher?->name ?? 'Belum ditentukan') }}</p>
                                                     </article>
                                                     <article class="registration-modal-item-full">
                                                         <p>Deskripsi Kelas</p>
@@ -1080,13 +1080,13 @@
                                                 <label>Harga
                                                     <input type="number" name="price" min="0" step="1000" value="{{ $classItem->price ?? 0 }}">
                                                 </label>
-                                                <label>Guru
-                                                    <select name="teacher_id">
-                                                        <option value="">Pilih guru (opsional)</option>
+                                                <label>Guru (Pilih satu atau lebih)
+                                                    <select name="teacher_ids[]" multiple style="height: 120px;">
                                                         @foreach ($teachersForClassOptions as $teacherOption)
-                                                            <option value="{{ $teacherOption->id }}" @selected((string) $classItem->teacher_id === (string) $teacherOption->id)>{{ $teacherOption->name }}</option>
+                                                            <option value="{{ $teacherOption->id }}" @selected($classItem->teachers->contains($teacherOption->id) || (string)$classItem->teacher_id === (string)$teacherOption->id)>{{ $teacherOption->name }}</option>
                                                         @endforeach
                                                     </select>
+                                                    <small style="color: #64748b; font-size: 0.75rem;">Tahan Ctrl/Cmd untuk memilih lebih dari satu.</small>
                                                 </label>
                                                 <label style="grid-column: span 2;">Status
                                                     <select name="status" required>
@@ -2357,12 +2357,23 @@
                         
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Class & Teacher</label>
-                                <select name="class_id" class="w-full h-9 px-0 bg-transparent border-0 border-b border-gray-100 focus:border-indigo-500 focus:ring-0 text-[12px] font-bold text-gray-700">
+                                <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Class</label>
+                                <select name="class_id" class="w-full h-10 px-3 bg-white border border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-[12px] font-bold text-gray-700 transition-all">
                                     @foreach($classesForSchedule as $class)
-                                        <option value="{{ $class->id }}">{{ $class->name }} ({{ $class->teacher?->name ?? 'No' }})</option>
+                                        <option value="{{ $class->id }}">{{ $class->name }} ({{ $class->teacher?->name ?? 'No Primary Teacher' }})</option>
                                     @endforeach
                                 </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Assign to Teacher (Optional)</label>
+                                <select name="teacher_id" class="w-full h-10 px-3 bg-white border border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-[12px] font-bold text-gray-700 transition-all">
+                                    <option value="">Use Class Primary Teacher</option>
+                                    @foreach($teachersForClassOptions as $teacher)
+                                        <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
+                                    @endforeach
+                                </select>
+                                <p class="text-[8px] text-gray-400 mt-1 italic">Jika dikosongkan, akan menggunakan guru utama kelas.</p>
                             </div>
 
                             <div>
@@ -2380,17 +2391,17 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Start Time</label>
-                                    <input type="time" name="start_time" class="w-full h-8 px-0 bg-transparent border-0 border-b border-gray-100 focus:border-indigo-500 focus:ring-0 text-[12px] font-bold text-gray-700">
+                                    <input type="time" name="start_time" class="w-full h-9 px-3 bg-white border border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-[12px] font-bold text-gray-700 transition-all">
                                 </div>
                                 <div>
                                     <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">End Time</label>
-                                    <input type="time" name="end_time" class="w-full h-8 px-0 bg-transparent border-0 border-b border-gray-100 focus:border-indigo-500 focus:ring-0 text-[12px] font-bold text-gray-700">
+                                    <input type="time" name="end_time" class="w-full h-9 px-3 bg-white border border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-[12px] font-bold text-gray-700 transition-all">
                                 </div>
                             </div>
 
                             <div>
                                 <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Interval (Mins)</label>
-                                <input type="number" name="interval" value="60" class="w-full h-8 px-0 bg-transparent border-0 border-b border-gray-100 focus:border-indigo-500 focus:ring-0 text-[12px] font-bold text-gray-700">
+                                <input type="number" name="interval" value="60" class="w-full h-9 px-3 bg-white border border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-[12px] font-bold text-gray-700 transition-all">
                             </div>
                         </div>
 

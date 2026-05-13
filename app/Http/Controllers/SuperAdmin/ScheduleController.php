@@ -29,6 +29,7 @@ class ScheduleController extends Controller
 
         $data = $request->validate([
             'class_id' => ['required', 'integer', 'exists:classes,id'],
+            'teacher_id' => ['nullable', 'integer', 'exists:teachers,id'],
             'days' => ['required', 'array', 'min:1'],
             'days.*' => ['required', 'string', Rule::in(self::DAY_OPTIONS)],
             'start_time' => ['required', 'date_format:H:i', 'before_or_equal:end_time'],
@@ -37,6 +38,7 @@ class ScheduleController extends Controller
         ]);
 
         $class = MusicClass::query()->findOrFail($data['class_id']);
+        $teacherId = $data['teacher_id'] ?: $class->teacher_id;
         $insertedCount = 0;
         $skippedCount = 0;
         $hasStatusColumn = Schema::hasColumn('schedules', 'status');
@@ -54,6 +56,7 @@ class ScheduleController extends Controller
                     ->where('class_id', $class->id)
                     ->where('day', $day)
                     ->where('time', $timeString)
+                    ->where('teacher_id', $teacherId)
                     ->exists();
 
                 if (! $duplicateExists) {
@@ -61,7 +64,7 @@ class ScheduleController extends Controller
                         'class_id' => $class->id,
                         'day' => $day,
                         'time' => $timeString,
-                        'teacher_id' => $class->teacher_id,
+                        'teacher_id' => $teacherId,
                     ];
 
                     if ($hasStatusColumn) {
@@ -94,12 +97,13 @@ class ScheduleController extends Controller
 
         $data = $this->validatePayload($request, $schedule->id);
         $class = MusicClass::query()->findOrFail($data['class_id']);
+        $teacherId = $request->input('teacher_id') ?: ($class->teacher_id);
 
         $schedule->update([
             'class_id' => $class->id,
             'day' => $data['day'],
             'time' => $data['time'],
-            'teacher_id' => $class->teacher_id,
+            'teacher_id' => $teacherId,
         ]);
 
         return back()->with('success', 'Jadwal kelas berhasil diperbarui.');

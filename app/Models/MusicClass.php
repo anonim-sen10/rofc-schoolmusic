@@ -40,6 +40,11 @@ class MusicClass extends Model
         return $this->belongsTo(Teacher::class);
     }
 
+    public function teachers(): BelongsToMany
+    {
+        return $this->belongsToMany(Teacher::class, 'class_teacher', 'class_id', 'teacher_id')->withTimestamps();
+    }
+
     public function students(): BelongsToMany
     {
         return $this->belongsToMany(Student::class, 'class_students', 'class_id', 'student_id')->withTimestamps();

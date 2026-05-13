@@ -16,18 +16,23 @@ trait ManagesAcademics
             'description' => ['nullable', 'string'],
             'price' => ['nullable', 'numeric', 'min:0'],
             'schedule' => ['nullable', 'string', 'max:120'],
-            'teacher_id' => ['nullable', 'integer', 'exists:teachers,id'],
+            'teacher_ids' => ['nullable', 'array'],
+            'teacher_ids.*' => ['integer', 'exists:teachers,id'],
             'status' => ['required', 'in:active,inactive'],
         ]);
 
-        MusicClass::query()->create([
+        $class = MusicClass::query()->create([
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
             'price' => $data['price'] ?? 0,
             'schedule' => $data['schedule'] ?? null,
-            'teacher_id' => $data['teacher_id'] ?? null,
+            'teacher_id' => !empty($data['teacher_ids']) ? $data['teacher_ids'][0] : null,
             'status' => $data['status'],
         ]);
+
+        if (!empty($data['teacher_ids'])) {
+            $class->teachers()->sync($data['teacher_ids']);
+        }
 
         return back()->with('success', 'Class berhasil ditambahkan.');
     }
@@ -39,7 +44,8 @@ trait ManagesAcademics
             'description' => ['nullable', 'string'],
             'price' => ['nullable', 'numeric', 'min:0'],
             'schedule' => ['nullable', 'string', 'max:120'],
-            'teacher_id' => ['nullable', 'integer', 'exists:teachers,id'],
+            'teacher_ids' => ['nullable', 'array'],
+            'teacher_ids.*' => ['integer', 'exists:teachers,id'],
             'status' => ['required', 'in:active,inactive'],
         ]);
 
@@ -48,9 +54,15 @@ trait ManagesAcademics
             'description' => $data['description'] ?? null,
             'price' => $data['price'] ?? 0,
             'schedule' => $data['schedule'] ?? null,
-            'teacher_id' => $data['teacher_id'] ?? null,
+            'teacher_id' => !empty($data['teacher_ids']) ? $data['teacher_ids'][0] : null,
             'status' => $data['status'],
         ]);
+
+        if (isset($data['teacher_ids'])) {
+            $class->teachers()->sync($data['teacher_ids']);
+        } else {
+            $class->teachers()->detach();
+        }
 
         return back()->with('success', 'Class berhasil diperbarui.');
     }
