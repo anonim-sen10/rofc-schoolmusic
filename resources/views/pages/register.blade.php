@@ -742,6 +742,14 @@
                                     </select>
                                 </label>
 
+                                <!-- Teacher Selection (Dynamic) -->
+                                <label class="register-field" id="teacher-selection-field" style="display: none;">
+                                    <span>Pilih Guru</span>
+                                    <select class="register-input" id="teacher-select">
+                                        <option value="">Pilih Guru</option>
+                                    </select>
+                                </label>
+
                                 <label class="register-field">
                                     <span>Tanggal Mulai Belajar</span>
                                     <input class="register-input" type="date" name="start_date" value="{{ old('start_date', date('Y-m-d')) }}" required>
@@ -1074,10 +1082,14 @@
         setStep(1);
 
         const classSelect = document.querySelector('select[name="class_id"]');
+        const teacherSelectField = document.getElementById('teacher-selection-field');
+        const teacherSelect = document.getElementById('teacher-select');
         const scheduleContainer = document.getElementById('schedule-container');
         const selectedPreview = document.getElementById('selected-preview');
         const selectedTags = document.getElementById('selected-tags');
         const scheduleError = document.getElementById('schedule-error');
+
+        let allSchedulesData = {}; // Stores the raw grouped data from server
 
         const updateSelectedPreview = () => {
             const checked = document.querySelector('input[name="schedule_id"]:checked');
@@ -1102,64 +1114,59 @@
             if (scheduleError) scheduleError.style.display = 'none';
         };
 
-        const loadSchedules = async () => {
-            if (!classSelect || !scheduleContainer) return;
-
-            const classId = classSelect.value;
-            if (!classId) {
-                scheduleContainer.innerHTML = '<p class="text-muted" style="padding: 1rem; font-size: 0.85rem; font-style: italic;">Silakan pilih instrumen terlebih dahulu.</p>';
-                if (selectedPreview) selectedPreview.style.display = 'none';
+        const renderSchedules = (groupedData, filterTeacherId = null) => {
+            if (Object.keys(groupedData).length === 0) {
+                scheduleContainer.innerHTML = '<p class="text-danger" style="padding: 1rem; font-size: 0.85rem;">Tidak ada jadwal tersedia untuk instrumen ini.</p>';
                 return;
             }
 
-            scheduleContainer.innerHTML = '<p class="text-muted" style="padding: 1rem; font-size: 0.85rem;">Memuat jadwal...</p>';
+            let html = '';
+            let index = 0;
+            let foundAny = false;
 
-            try {
-                const response = await fetch(`/schedules/by-class/${classId}`);
-                const data = await response.json();
-                const grouped = data.grouped || {};
+            for (const day in groupedData) {
+                const schedules = groupedData[day].filter(s => !filterTeacherId || String(s.teacher_id) === String(filterTeacherId));
+                
+                if (schedules.length === 0) continue;
+                foundAny = true;
 
-                if (Object.keys(grouped).length === 0) {
-                    scheduleContainer.innerHTML = '<p class="text-danger" style="padding: 1rem; font-size: 0.85rem;">Tidak ada jadwal tersedia untuk instrumen ini.</p>';
-                    return;
-                }
-
-                let html = '';
-                let index = 0;
-                for (const day in grouped) {
-                    const isActive = index === 0 ? 'is-active' : '';
-                    html += `
-                        <div class="accordion-item ${isActive}">
-                            <button type="button" class="accordion-header">
-                                <h4>${day}</h4>
-                                <svg class="accordion-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </button>
-                            <div class="accordion-content">
-                                <div class="schedule-options">
-                                    ${grouped[day].map(s => {
-                                        const isBooked = String(s.status).toLowerCase() === 'booked';
-                                        return `
-                                            <label class="schedule-opt ${isBooked ? 'is-booked' : ''}" style="flex-direction: column; align-items: flex-start; gap: 0.15rem; min-height: 64px;">
-                                                <input type="radio" name="schedule_id" value="${s.id}" data-label="${day} ${s.time} (${s.teacher_name})" ${isBooked ? 'disabled' : ''}>
-                                                <div class="schedule-time" style="font-size: 0.95rem;">${s.time}</div>
-                                                <div class="teacher-name" style="font-size: 0.68rem; color: #64748b; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">
-                                                    ${s.teacher_name}
-                                                </div>
-                                                ${isBooked ? '<div class="schedule-status">(Full)</div>' : ''}
-                                            </label>
-                                        `;
-                                    }).join('')}
-                                </div>
+                const isActive = index === 0 ? 'is-active' : '';
+                html += `
+                    <div class="accordion-item ${isActive}">
+                        <button type="button" class="accordion-header">
+                            <h4>${day}</h4>
+                            <svg class="accordion-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="schedule-options">
+                                ${schedules.map(s => {
+                                    const isBooked = String(s.status).toLowerCase() === 'booked';
+                                    return `
+                                        <label class="schedule-opt ${isBooked ? 'is-booked' : ''}" style="flex-direction: column; align-items: flex-start; gap: 0.15rem; min-height: 64px;">
+                                            <input type="radio" name="schedule_id" value="${s.id}" data-label="${day} ${s.time} (${s.teacher_name})" ${isBooked ? 'disabled' : ''}>
+                                            <div class="schedule-time" style="font-size: 0.95rem;">${s.time}</div>
+                                            <div class="teacher-name" style="font-size: 0.68rem; color: #64748b; font-weight: 500;">
+                                                ${s.teacher_name}
+                                            </div>
+                                            ${isBooked ? '<div class="schedule-status">(Full)</div>' : ''}
+                                        </label>
+                                    `;
+                                }).join('')}
                             </div>
                         </div>
-                    `;
-                    index++;
-                }
-                scheduleContainer.innerHTML = html;
+                    </div>
+                `;
+                index++;
+            }
 
-                // Accordion logic
+            if (!foundAny) {
+                scheduleContainer.innerHTML = '<p class="text-warning" style="padding: 1rem; font-size: 0.85rem;">Tidak ada jadwal tersedia untuk guru yang dipilih pada instrumen ini.</p>';
+            } else {
+                scheduleContainer.innerHTML = html;
+                
+                // Re-bind events
                 scheduleContainer.querySelectorAll('.accordion-header').forEach(header => {
                     header.addEventListener('click', () => {
                         const item = header.parentElement;
@@ -1169,7 +1176,6 @@
                     });
                 });
 
-                // Radio logic
                 scheduleContainer.querySelectorAll('input[type="radio"]').forEach(radio => {
                     radio.addEventListener('change', () => {
                         scheduleContainer.querySelectorAll('.schedule-opt').forEach(opt => opt.classList.remove('is-selected'));
@@ -1179,12 +1185,61 @@
                         updateSelectedPreview();
                     });
                 });
+            }
+        };
+
+        const loadSchedules = async () => {
+            if (!classSelect || !scheduleContainer) return;
+
+            const classId = classSelect.value;
+            if (!classId) {
+                scheduleContainer.innerHTML = '<p class="text-muted" style="padding: 1rem; font-size: 0.85rem; font-style: italic;">Silakan pilih instrumen terlebih dahulu.</p>';
+                teacherSelectField.style.display = 'none';
+                if (selectedPreview) selectedPreview.style.display = 'none';
+                return;
+            }
+
+            scheduleContainer.innerHTML = '<p class="text-muted" style="padding: 1rem; font-size: 0.85rem;">Memuat jadwal...</p>';
+
+            try {
+                const response = await fetch(`/schedules/by-class/${classId}`);
+                const data = await response.json();
+                allSchedulesData = data.grouped || {};
+
+                // Extract unique teachers
+                const teachers = [];
+                const seenTeacherIds = new Set();
+                
+                Object.values(allSchedulesData).flat().forEach(s => {
+                    if (!seenTeacherIds.has(s.teacher_id)) {
+                        seenTeacherIds.add(s.teacher_id);
+                        teachers.push({ id: s.teacher_id, name: s.teacher_name });
+                    }
+                });
+
+                // Handle Teacher Dropdown
+                if (teachers.length > 1) {
+                    teacherSelectField.style.display = 'block';
+                    teacherSelect.innerHTML = '<option value="">Pilih Guru</option>' + 
+                        teachers.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+                    
+                    scheduleContainer.innerHTML = '<p class="text-primary" style="padding: 1rem; font-size: 0.85rem; font-style: italic;">Silakan pilih guru terlebih dahulu untuk melihat jadwal.</p>';
+                } else {
+                    teacherSelectField.style.display = 'none';
+                    teacherSelect.innerHTML = '';
+                    renderSchedules(allSchedulesData);
+                }
 
             } catch (error) {
                 console.error(error);
                 scheduleContainer.innerHTML = '<p class="text-danger" style="padding: 1rem; font-size: 0.85rem;">Gagal memuat jadwal. Silakan coba lagi.</p>';
             }
         };
+
+        teacherSelect?.addEventListener('change', () => {
+            renderSchedules(allSchedulesData, teacherSelect.value);
+            updateSelectedPreview();
+        });
 
         classSelect?.addEventListener('change', loadSchedules);
 

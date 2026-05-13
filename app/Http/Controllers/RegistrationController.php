@@ -55,6 +55,7 @@ class RegistrationController extends Controller
                     'time' => substr((string) $s->time, 0, 5),
                     'status' => $s->status,
                     'teacher_name' => $s->teacher->user->name ?? ($s->teacher->name ?? 'Guru ROFC'),
+                    'teacher_id' => $s->teacher_id,
                 ];
             });
 
