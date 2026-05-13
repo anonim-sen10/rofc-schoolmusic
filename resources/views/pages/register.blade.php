@@ -1144,12 +1144,9 @@
                                 ${schedules.map(s => {
                                     const isBooked = String(s.status).toLowerCase() === 'booked';
                                     return `
-                                        <label class="schedule-opt ${isBooked ? 'is-booked' : ''}" style="flex-direction: column; align-items: flex-start; gap: 0.15rem; min-height: 64px;">
+                                        <label class="schedule-opt ${isBooked ? 'is-booked' : ''}">
                                             <input type="radio" name="schedule_id" value="${s.id}" data-label="${day} ${s.time} (${s.teacher_name})" ${isBooked ? 'disabled' : ''}>
-                                            <div class="schedule-time" style="font-size: 0.95rem;">${s.time}</div>
-                                            <div class="teacher-name" style="font-size: 0.68rem; color: #64748b; font-weight: 500;">
-                                                ${s.teacher_name}
-                                            </div>
+                                            <div class="schedule-time">${s.time}</div>
                                             ${isBooked ? '<div class="schedule-status">(Full)</div>' : ''}
                                         </label>
                                     `;
