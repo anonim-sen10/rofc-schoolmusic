@@ -1082,6 +1082,7 @@
         setStep(1);
 
         const classSelect = document.querySelector('select[name="class_id"]');
+        const startDateInput = document.querySelector('input[name="start_date"]');
         const teacherSelectField = document.getElementById('teacher-selection-field');
         const teacherSelect = document.getElementById('teacher-select');
         const scheduleContainer = document.getElementById('schedule-container');
@@ -1090,6 +1091,13 @@
         const scheduleError = document.getElementById('schedule-error');
 
         let allSchedulesData = {}; // Stores the raw grouped data from server
+
+        const getIndonesianDay = (dateString) => {
+            if (!dateString) return null;
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const date = new Date(dateString);
+            return days[date.getDay()];
+        };
 
         const updateSelectedPreview = () => {
             const checked = document.querySelector('input[name="schedule_id"]:checked');
@@ -1114,8 +1122,11 @@
             if (scheduleError) scheduleError.style.display = 'none';
         };
 
-        const renderSchedules = (groupedData, filterTeacherId = null) => {
-            if (Object.keys(groupedData).length === 0) {
+        const renderSchedules = () => {
+            const filterTeacherId = teacherSelect?.value;
+            const filterDay = getIndonesianDay(startDateInput?.value);
+
+            if (Object.keys(allSchedulesData).length === 0) {
                 scheduleContainer.innerHTML = '<p class="text-danger" style="padding: 1rem; font-size: 0.85rem;">Tidak ada jadwal tersedia untuk instrumen ini.</p>';
                 return;
             }
@@ -1124,13 +1135,16 @@
             let index = 0;
             let foundAny = false;
 
-            for (const day in groupedData) {
-                const schedules = groupedData[day].filter(s => !filterTeacherId || String(s.teacher_id) === String(filterTeacherId));
+            for (const day in allSchedulesData) {
+                // Filter by Day if selected
+                if (filterDay && day !== filterDay) continue;
+
+                const schedules = allSchedulesData[day].filter(s => !filterTeacherId || String(s.teacher_id) === String(filterTeacherId));
                 
                 if (schedules.length === 0) continue;
                 foundAny = true;
 
-                const isActive = index === 0 ? 'is-active' : '';
+                const isActive = 'is-active'; // Always active since we filter
                 html += `
                     <div class="accordion-item ${isActive}">
                         <button type="button" class="accordion-header">
@@ -1159,7 +1173,8 @@
             }
 
             if (!foundAny) {
-                scheduleContainer.innerHTML = '<p class="text-warning" style="padding: 1rem; font-size: 0.85rem;">Tidak ada jadwal tersedia untuk guru yang dipilih pada instrumen ini.</p>';
+                const dayMsg = filterDay ? ` pada hari ${filterDay}` : '';
+                scheduleContainer.innerHTML = `<p class="text-warning" style="padding: 1rem; font-size: 0.85rem;">Tidak ada jadwal tersedia${dayMsg} untuk kriteria yang dipilih.</p>`;
             } else {
                 scheduleContainer.innerHTML = html;
                 
@@ -1219,13 +1234,12 @@
                     teacherSelectField.style.display = 'block';
                     teacherSelect.innerHTML = '<option value="">Pilih Guru</option>' + 
                         teachers.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
-                    
-                    scheduleContainer.innerHTML = '<p class="text-primary" style="padding: 1rem; font-size: 0.85rem; font-style: italic;">Silakan pilih guru terlebih dahulu untuk melihat jadwal.</p>';
                 } else {
                     teacherSelectField.style.display = 'none';
                     teacherSelect.innerHTML = '';
-                    renderSchedules(allSchedulesData);
                 }
+
+                renderSchedules();
 
             } catch (error) {
                 console.error(error);
@@ -1233,11 +1247,8 @@
             }
         };
 
-        teacherSelect?.addEventListener('change', () => {
-            renderSchedules(allSchedulesData, teacherSelect.value);
-            updateSelectedPreview();
-        });
-
+        teacherSelect?.addEventListener('change', renderSchedules);
+        startDateInput?.addEventListener('change', renderSchedules);
         classSelect?.addEventListener('change', loadSchedules);
 
         // Update validateStep to include schedule check
