@@ -69,13 +69,14 @@ jobs:
           local-dir: ./
           server-dir: /rofc-laravel/
           exclude: |
-            **/.git*
-            **/node_modules/**
-            **/vendor/**
-            **/storage/logs/**
-            **/storage/framework/sessions/**
-            **/storage/framework/views/**
-            **/storage/framework/cache/**
+            .git/**
+            .github/**
+            node_modules/**
+            vendor/**
+            storage/logs/**
+            storage/framework/sessions/**
+            storage/framework/views/**
+            storage/framework/cache/**
             public/build/**
             public/build.zip
             .env
