@@ -56,7 +56,7 @@ jobs:
           port: ${{ secrets.FTP_PORT != '' && secrets.FTP_PORT || '21' }}
           local-dir: ./public/build/
           server-dir: /public_html/build/
-          dangerous-clean-slate: true
+          dangerous-clean-slate: false
 
       - name: Deploy Aplikasi ke rofc-laravel via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -93,5 +93,5 @@ jobs:
           port: ${{ secrets.FTP_PORT != '' && secrets.FTP_PORT || '21' }}
           local-dir: ./public/build/
           server-dir: /rofc-laravel/public/build/
-          dangerous-clean-slate: true
+          dangerous-clean-slate: false
 
