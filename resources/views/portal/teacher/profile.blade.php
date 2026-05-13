@@ -15,6 +15,7 @@
 @extends('portal.layouts.app')
 
 @section('title', 'Profil Saya')
+{{-- Deployment trigger: update secrets --}}
 @section('page-title', 'Profil Saya')
 @section('page-subtitle', 'Kelola informasi akun dan pengaturan keamanan Anda')
 
