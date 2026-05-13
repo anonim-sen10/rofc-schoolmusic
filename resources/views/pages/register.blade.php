@@ -752,7 +752,7 @@
 
                                 <label class="register-field">
                                     <span>Tanggal Mulai Belajar</span>
-                                    <input class="register-input" type="date" name="start_date" value="{{ old('start_date', date('Y-m-d')) }}" required>
+                                    <input class="register-input" type="date" name="start_date" value="{{ old('start_date') }}" required>
                                 </label>
 
                                 <label class="register-field">
