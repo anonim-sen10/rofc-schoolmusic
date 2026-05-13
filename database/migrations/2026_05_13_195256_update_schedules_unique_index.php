@@ -12,6 +12,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::disableForeignKeyConstraints();
+
         Schema::table('schedules', function (Blueprint $table) {
             // Drop old unique indexes if they exist
             try {
@@ -29,6 +31,8 @@ return new class extends Migration
             // Add new unique index including teacher_id
             $table->unique(['class_id', 'day', 'time', 'teacher_id'], 'schedules_full_unique');
         });
+
+        Schema::enableForeignKeyConstraints();
     }
 
     /**
