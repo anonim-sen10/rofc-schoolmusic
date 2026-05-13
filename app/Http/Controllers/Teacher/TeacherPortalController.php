@@ -26,7 +26,9 @@ class TeacherPortalController extends Controller
 
     private function teacherAcceptedClassesQuery(int $teacherId)
     {
-        return MusicClass::query()->where('teacher_id', $teacherId);
+        return MusicClass::query()->whereHas('teachers', function ($q) use ($teacherId) {
+            $q->where('teachers.id', $teacherId);
+        })->orWhere('teacher_id', $teacherId); // Keep orWhere for backward compatibility during migration
     }
 
     private function teacherFromUser(int $userId): Teacher
@@ -449,8 +451,7 @@ public function schedule(Request $request): View
     {
         $teacher = $this->teacherFromUser($request->user()->id);
 
-        $classes = MusicClass::query()
-            ->where('teacher_id', $teacher->id)
+        $classes = $this->teacherAcceptedClassesQuery($teacher->id)
             ->with([
                 'schedules.student:id,name,is_active,end_date'
             ])
