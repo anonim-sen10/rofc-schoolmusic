@@ -12,7 +12,9 @@ use App\Models\Teacher;
 use App\Models\TeacherAttendance;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class TeacherPortalController extends Controller
@@ -526,5 +528,57 @@ public function schedule(Request $request): View
         Material::create($data);
 
         return back()->with('success', 'Materi berhasil diupload.');
+    }
+    public function profile(Request $request): View
+    {
+        $teacher = $this->teacherFromUser($request->user()->id);
+        
+        return view('portal.teacher.profile', [
+            'teacher' => $teacher,
+            'user' => $request->user(),
+        ]);
+    }
+
+    public function updateProfile(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        $teacher = $this->teacherFromUser($user->id);
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'current_password' => ['nullable', 'required_with:new_password', 'current_password'],
+            'new_password' => ['nullable', 'min:8', 'confirmed'],
+            'photo' => ['nullable', 'image', 'max:2048'],
+        ]);
+
+        // Update User info
+        $user->update([
+            'name' => $data['name'],
+        ]);
+
+        // Update Teacher info
+        $teacherData = [
+            'name' => $data['name'],
+            'phone' => $data['phone'],
+        ];
+
+        if ($request->hasFile('photo')) {
+            if ($teacher->photo_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($teacher->photo_path);
+            }
+            $teacherData['photo_path'] = $request->file('photo')->store('teachers/photos', 'public');
+        }
+
+        $teacher->update($teacherData);
+
+        // Update Password if provided
+        if (!empty($data['new_password'])) {
+            $user->update([
+                'password' => \Illuminate\Support\Facades\Hash::make($data['new_password']),
+            ]);
+        }
+
+        return back()->with('success', 'Profil berhasil diperbarui.');
     }
 }

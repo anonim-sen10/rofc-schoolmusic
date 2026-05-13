@@ -102,6 +102,10 @@
                 </summary>
                 <div class="profile-menu">
                     <span class="profile-menu-role">{{ $roleLabel }}</span>
+                    <a href="{{ route('teacher.profile.index') }}" class="profile-menu-item">
+                        <i data-lucide="user-round"></i>
+                        <span>Profile</span>
+                    </a>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="profile-menu-logout">Logout</button>

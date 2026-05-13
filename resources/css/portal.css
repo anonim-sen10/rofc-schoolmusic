@@ -2671,6 +2671,17 @@ body.portal-body {
     box-shadow: 0 20px 36px rgba(15, 23, 42, 0.13);
     padding: 0.7rem;
     z-index: 60;
+    display: none;
+}
+
+.profile-dropdown[open] .profile-menu {
+    display: block !important;
+    animation: profileAppear 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes profileAppear {
+    from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .profile-menu-role {
@@ -2696,6 +2707,35 @@ body.portal-body {
     border-color: #bfdbfe;
     background: #eff6ff;
     color: #1d4ed8;
+}
+
+.profile-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.65rem;
+    color: #475569;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 0.65rem;
+    transition: all 0.2s ease;
+    margin-bottom: 0.35rem;
+}
+
+.profile-menu-item:hover {
+    background: #f1f5f9;
+    color: #2563eb;
+}
+
+.profile-menu-item i {
+    width: 1rem;
+    height: 1rem;
+    color: #94a3b8;
+}
+
+.profile-menu-item:hover i {
+    color: #2563eb;
 }
 
 .portal-content {
@@ -3752,4 +3792,62 @@ html.sidebar-collapsed .brand-logo-content {
     margin: 0 !important;
     font-size: 0.75rem;
     color: var(--muted);
+}
+
+/* Toast Notifications */
+.toast-container {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    pointer-events: none;
+}
+
+.toast {
+    pointer-events: auto;
+    min-width: 320px;
+    max-width: 400px;
+    background: #ffffff;
+    border-radius: 1rem;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transform: translateX(120%);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.toast.show {
+    transform: translateX(0);
+}
+
+.toast-success {
+    border-left: 4px solid #10b981;
+}
+
+.toast-error {
+    border-left: 4px solid #ef4444;
+}
+
+.toast-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.toast-success .toast-icon { background: #ecfdf5; color: #10b981; }
+.toast-error .toast-icon { background: #fef2f2; color: #ef4444; }
+
+.toast-content p {
+    margin: 0 !important;
+    line-height: 1.4;
 }

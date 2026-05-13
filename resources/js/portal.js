@@ -367,4 +367,42 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape" && !lightbox.hidden) closeLightbox();
     });
+
+    // --- Toast Notification System ---
+    window.showToast = (message, type = 'success') => {
+        let container = document.querySelector('.toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        
+        const iconName = type === 'success' ? 'check-circle' : 'alert-circle';
+        
+        toast.innerHTML = `
+            <div class="toast-icon">
+                <i data-lucide="${iconName}"></i>
+            </div>
+            <div class="toast-content">
+                <p style="font-weight: 700; font-size: 0.875rem; color: #1e293b;">${type === 'success' ? 'Success' : 'Attention'}</p>
+                <p style="font-size: 0.75rem; color: #64748b;">${message}</p>
+            </div>
+        `;
+
+        container.appendChild(toast);
+        if (window.lucide) window.lucide.createIcons();
+
+        // Animate in
+        setTimeout(() => toast.classList.add('show'), 10);
+
+        // Auto remove
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        }, 5000);
+    };
 });
+

@@ -6,6 +6,7 @@
         ['label' => 'Student Progress', 'url' => route('teacher.student-progress.index')],
         ['label' => 'My Students', 'url' => route('teacher.my-students.index')],
         ['label' => 'Materials', 'url' => route('teacher.materials.index')],
+        ['label' => 'Profile', 'url' => route('teacher.profile.index')],
     ];
     $panelTitle = 'Teacher Portal';
     $homeRoute = route('teacher.dashboard');
