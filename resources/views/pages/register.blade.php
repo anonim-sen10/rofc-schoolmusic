@@ -1131,6 +1131,12 @@
                 return;
             }
 
+            // If Date is not selected yet, show a prompt
+            if (!filterDay) {
+                scheduleContainer.innerHTML = '<p class="text-primary" style="padding: 1rem; font-size: 0.85rem; font-style: italic; display: flex; align-items: center; gap: 0.5rem;"><svg style="width:18px;height:18px" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Silakan pilih tanggal mulai belajar untuk melihat jadwal yang tersedia.</p>';
+                return;
+            }
+
             let html = '';
             let index = 0;
             let foundAny = false;
