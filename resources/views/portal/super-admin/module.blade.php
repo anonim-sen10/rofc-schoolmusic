@@ -790,12 +790,7 @@
 
 <div class="premium-toast" id="toast-container"></div>
 
-@if ($moduleKey === 'users')
-    <button type="button" class="premium-create-card-btn" onclick="const form = document.getElementById('form-create-user'); if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';">
-        <i data-lucide="user-plus"></i>
-        Buat Akun Login Baru
-    </button>
-
+@if ($moduleKey === 'users' || $moduleKey === 'roles')
     <section class="card" id="form-create-user" style="display: none;" data-searchable>
         <h3>Buat Akun Login Baru</h3>
         <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.users.store') }}">
@@ -835,9 +830,15 @@
     </section>
 @endif
 
-@if ($moduleKey === 'roles')
+@if ($moduleKey === 'users' || $moduleKey === 'roles')
     <section class="card" data-searchable>
-        <h3>Data User</h3>
+        <div class="card-header-flex">
+            <h3>Data User</h3>
+            <button type="button" class="btn-add-student" onclick="const form = document.getElementById('form-create-user'); if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';">
+                <i data-lucide="user-plus"></i>
+                Buat Akun Login Baru
+            </button>
+        </div>
         <div class="table-wrap">
             <table>
                 <thead>
@@ -980,12 +981,6 @@
                 </tbody>
             </table>
         </div>
-    </section>
-@endif
-
-@if ($moduleKey === 'users')
-    <section class="card" data-searchable>
-        <p>Data user telah dipindahkan ke menu Roles agar pengelolaan role dan akun berada dalam satu halaman.</p>
     </section>
 @endif
 
@@ -1329,10 +1324,6 @@
 @endif
 
 @if ($moduleKey === 'classes')
-    <button type="button" class="premium-create-card-btn" onclick="const form = document.getElementById('form-create-class'); if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';">
-        <i data-lucide="plus-circle"></i>
-        Tambah Class Baru
-    </button>
 
     <section class="card" id="form-create-class" style="display: @if($errors->any()) block @else none @endif;" data-searchable>
         <h3>Tambah Class Baru</h3>
@@ -1370,7 +1361,13 @@
     </section>
 
     <section class="card" data-searchable>
-        <h3>Daftar Class</h3>
+        <div class="card-header-flex">
+            <h3>Daftar Class</h3>
+            <button type="button" class="btn-add-student" onclick="const form = document.getElementById('form-create-class'); if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';">
+                <i data-lucide="plus-circle"></i>
+                Tambah Class Baru
+            </button>
+        </div>
         <div class="table-wrap">
             <table>
                 <thead>
@@ -1774,10 +1771,8 @@
         }
     </style>
 
-    <section class="card" data-searchable>
-
-        <details class="teacher-create" {{ $openRegistrationCreate ? 'open' : '' }}>
-            <summary>Create Registration</summary>
+    <section class="card" id="form-create-registration" style="display: @if($errors->any() || $openRegistrationCreate) block @else none @endif;" data-searchable>
+        <h3>Tambah Registration Baru</h3>
             <form class="module-form module-form-grid teacher-create-form" method="POST" action="{{ route('super-admin.registrations.store') }}">
                 @csrf
                 <label>Nama Lengkap
@@ -1874,12 +1869,15 @@
                     <button type="reset" class="btn-secondary">Cancel</button>
                 </div>
             </form>
-        </details>
     </section>
 
     <section class="card" data-searchable>
         <div class="card-header-flex">
             <h3>Daftar Registration</h3>
+            <button type="button" class="btn-add-student" onclick="const form = document.getElementById('form-create-registration'); if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';">
+                <i data-lucide="plus-circle"></i>
+                Tambah Registration Baru
+            </button>
         </div>
         <div class="table-wrap">
             <table>
@@ -2206,8 +2204,8 @@
 @endif
 
 @if ($moduleKey === 'blog')
-    <section class="card" data-searchable>
-        <h3>Create Post</h3>
+    <section class="card" id="form-create-blog" style="display: @if($errors->any()) block @else none @endif;" data-searchable>
+        <h3>Tambah Post Baru</h3>
         <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.content.store', 'blog') }}">
             @csrf
             <label>Title<input type="text" name="title" required></label>
@@ -2226,7 +2224,13 @@
         </form>
     </section>
     <section class="card" data-searchable>
-        <h3>Daftar Post</h3>
+        <div class="card-header-flex">
+            <h3>Daftar Post</h3>
+            <button type="button" class="btn-add-student" onclick="const form = document.getElementById('form-create-blog'); if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';">
+                <i data-lucide="plus-circle"></i>
+                Tambah Post Baru
+            </button>
+        </div>
         @foreach($postsForManagement as $post)
             <form class="module-form" method="POST" action="{{ route('super-admin.content.update', ['module' => 'blog', 'id' => $post->id]) }}">
                 @csrf
@@ -2252,8 +2256,8 @@
 @endif
 
 @if ($moduleKey === 'gallery')
-    <section class="card" data-searchable>
-        <h3>Create Gallery</h3>
+    <section class="card" id="form-create-gallery" style="display: @if($errors->any()) block @else none @endif;" data-searchable>
+        <h3>Tambah Gallery Baru</h3>
         <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.content.store', 'gallery') }}">
             @csrf
             <label>Title<input type="text" name="title" required></label>
@@ -2267,7 +2271,13 @@
         </form>
     </section>
     <section class="card" data-searchable>
-        <h3>Daftar Gallery</h3>
+        <div class="card-header-flex">
+            <h3>Daftar Gallery</h3>
+            <button type="button" class="btn-add-student" onclick="const form = document.getElementById('form-create-gallery'); if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';">
+                <i data-lucide="plus-circle"></i>
+                Tambah Gallery Baru
+            </button>
+        </div>
         @foreach($galleriesForManagement as $gallery)
             <form class="module-form" method="POST" action="{{ route('super-admin.content.update', ['module' => 'gallery', 'id' => $gallery->id]) }}">
                 @csrf
@@ -2288,8 +2298,8 @@
 @endif
 
 @if ($moduleKey === 'events')
-    <section class="card" data-searchable>
-        <h3>Create Event</h3>
+    <section class="card" id="form-create-event" style="display: @if($errors->any()) block @else none @endif;" data-searchable>
+        <h3>Tambah Event Baru</h3>
         <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.content.store', 'events') }}">
             @csrf
             <label>Title<input type="text" name="title" required></label>
@@ -2304,7 +2314,13 @@
         </form>
     </section>
     <section class="card" data-searchable>
-        <h3>Daftar Event</h3>
+        <div class="card-header-flex">
+            <h3>Daftar Event</h3>
+            <button type="button" class="btn-add-student" onclick="const form = document.getElementById('form-create-event'); if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';">
+                <i data-lucide="calendar-plus"></i>
+                Tambah Event Baru
+            </button>
+        </div>
         @foreach($eventsForManagement as $event)
             <form class="module-form" method="POST" action="{{ route('super-admin.content.update', ['module' => 'events', 'id' => $event->id]) }}">
                 @csrf
@@ -2326,8 +2342,8 @@
 @endif
 
 @if ($moduleKey === 'testimonials')
-    <section class="card" data-searchable>
-        <h3>Create Testimonial</h3>
+    <section class="card" id="form-create-testimonial" style="display: @if($errors->any()) block @else none @endif;" data-searchable>
+        <h3>Tambah Testimonial Baru</h3>
         <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.content.store', 'testimonials') }}">
             @csrf
             <label>Name<input type="text" name="name" required></label>
@@ -2341,7 +2357,13 @@
         </form>
     </section>
     <section class="card" data-searchable>
-        <h3>Daftar Testimonial</h3>
+        <div class="card-header-flex">
+            <h3>Daftar Testimonial</h3>
+            <button type="button" class="btn-add-student" onclick="const form = document.getElementById('form-create-testimonial'); if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';">
+                <i data-lucide="plus-circle"></i>
+                Tambah Testimonial Baru
+            </button>
+        </div>
         @foreach($testimonialsForManagement as $testimonial)
             <form class="module-form" method="POST" action="{{ route('super-admin.content.update', ['module' => 'testimonials', 'id' => $testimonial->id]) }}">
                 @csrf
@@ -2362,8 +2384,8 @@
 @endif
 
 @if ($moduleKey === 'settings')
-    <section class="card" data-searchable>
-        <h3>Create Setting</h3>
+    <section class="card" id="form-create-setting" style="display: @if($errors->any()) block @else none @endif;" data-searchable>
+        <h3>Tambah Setting Baru</h3>
         <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.content.store', 'settings') }}">
             @csrf
             <label>Key<input type="text" name="key" required></label>
@@ -2375,7 +2397,13 @@
         </form>
     </section>
     <section class="card" data-searchable>
-        <h3>Daftar Setting</h3>
+        <div class="card-header-flex">
+            <h3>Daftar Setting</h3>
+            <button type="button" class="btn-add-student" onclick="const form = document.getElementById('form-create-setting'); if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';">
+                <i data-lucide="plus-circle"></i>
+                Tambah Setting Baru
+            </button>
+        </div>
         @foreach($settingsForManagement as $setting)
             <form class="module-form" method="POST" action="{{ route('super-admin.content.update', ['module' => 'settings', 'id' => $setting->id]) }}">
                 @csrf
@@ -2524,7 +2552,7 @@
         </article>
     </section>
 
-    <section class="card" data-searchable>
+    <section class="card" id="form-create-payment" style="display: @if($errors->any()) block @else none @endif;" data-searchable>
         <h3>Tambah Pembayaran</h3>
         <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.payments.store') }}">
             @csrf
@@ -2561,7 +2589,13 @@
     </section>
 
     <section class="card" data-searchable>
-        <h3>Daftar Pembayaran</h3>
+        <div class="card-header-flex">
+            <h3>Daftar Pembayaran</h3>
+            <button type="button" class="btn-add-student" onclick="const form = document.getElementById('form-create-payment'); if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';">
+                <i data-lucide="plus-circle"></i>
+                Tambah Pembayaran
+            </button>
+        </div>
         <div class="table-wrap">
             <table>
                 <thead>

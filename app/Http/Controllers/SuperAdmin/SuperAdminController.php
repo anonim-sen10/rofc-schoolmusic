@@ -328,7 +328,6 @@ class SuperAdminController extends Controller
             'prefix' => 'super-admin',
             'menu' => [
                 ['key' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'layout-dashboard'],
-                ['key' => 'users', 'label' => 'Users', 'icon' => 'user-round'],
                 ['key' => 'roles', 'label' => 'Manajemen User', 'icon' => 'shield-check'],
                 ['key' => 'classes', 'label' => 'Classes', 'icon' => 'book-open'],
                 ['key' => 'teachers', 'label' => 'Teachers', 'icon' => 'music-2'],
