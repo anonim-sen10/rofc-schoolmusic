@@ -120,6 +120,313 @@
     .tooltip-day { font-weight: 700; color: #1e293b; }
     .tooltip-time { color: #64748b; font-variant-numeric: tabular-nums; }
 
+    /* Premium Modal System */
+    .premium-modal-wrapper {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .premium-modal-wrapper.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .premium-modal-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.5);
+        backdrop-filter: blur(10px);
+        transition: opacity 0.4s ease;
+    }
+
+    .premium-modal-content {
+        background: #ffffff;
+        width: 100%;
+        max-width: 900px;
+        border-radius: 2rem;
+        position: relative;
+        z-index: 10;
+        box-shadow: 
+            0 25px 50px -12px rgba(0, 0, 0, 0.25),
+            0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+        display: flex;
+        flex-direction: column;
+        max-height: 90vh;
+        transform: scale(0.95) translateY(20px);
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        overflow: hidden;
+    }
+
+    .premium-modal-wrapper.active .premium-modal-content {
+        transform: scale(1) translateY(0);
+    }
+
+    .premium-modal-header {
+        padding: 1.75rem 2.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #f1f5f9;
+        background: #ffffff;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+    }
+
+    .premium-modal-header-info {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+    }
+
+    .premium-modal-icon {
+        width: 3.5rem;
+        height: 3.5rem;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+    }
+
+    .premium-modal-header-info h3 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.01em;
+    }
+
+    .premium-modal-header-info p {
+        margin: 0.25rem 0 0 0;
+        font-size: 0.9rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .premium-modal-close {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 0.75rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .premium-modal-close:hover {
+        background: #fee2e2;
+        color: #ef4444;
+        border-color: #fecaca;
+        transform: rotate(90deg);
+    }
+
+    .premium-modal-body {
+        padding: 2.5rem;
+        overflow-y: auto;
+        background: #ffffff;
+        flex: 1;
+        min-height: 0; /* Important for flex child scrolling */
+    }
+
+    #form-create-teacher-modal {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        overflow: hidden;
+    }
+
+    .premium-modal-footer {
+        padding: 1.5rem 2.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 1rem;
+        border-top: 1px solid #f1f5f9;
+        background: #f8fafc;
+        position: sticky;
+        bottom: 0;
+        z-index: 20;
+    }
+
+    /* Form Layout */
+    .premium-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .premium-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .premium-field.full-width {
+        grid-column: span 2;
+    }
+
+    .premium-field label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #475569;
+        padding-left: 0.25rem;
+    }
+
+    .premium-input, .premium-select, .premium-textarea {
+        width: 100%;
+        background: #ffffff;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 0.85rem;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: #1e293b;
+        transition: all 0.2s;
+    }
+
+    .premium-input:focus, .premium-select:focus, .premium-textarea:focus {
+        outline: none;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        background: #ffffff;
+    }
+
+    .premium-input:hover, .premium-select:hover, .premium-textarea:hover {
+        border-color: #cbd5e1;
+    }
+
+    .premium-textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    /* Avatar Preview */
+    .avatar-upload-container {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        background: #f8fafc;
+        padding: 1.25rem;
+        border-radius: 1.25rem;
+        border: 1px dashed #e2e8f0;
+        margin-bottom: 0.5rem;
+    }
+
+    .avatar-preview-box {
+        width: 5rem;
+        height: 5rem;
+        border-radius: 1rem;
+        background: #e2e8f0;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        border: 2px solid #ffffff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .avatar-preview-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-preview-box i {
+        color: #94a3b8;
+        width: 2rem;
+        height: 2rem;
+    }
+
+    .upload-info h4 {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .upload-info p {
+        margin: 0.25rem 0 0.75rem 0;
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+
+    /* Buttons */
+    .btn-premium-primary {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: #ffffff;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 8px 15px rgba(99, 102, 241, 0.2);
+    }
+
+    .btn-premium-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 20px rgba(99, 102, 241, 0.3);
+        filter: brightness(1.05);
+    }
+
+    .btn-premium-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-premium-secondary {
+        background: #ffffff;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+        padding: 0.75rem 2rem;
+        border-radius: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-premium-secondary:hover {
+        background: #f8fafc;
+        color: #1e293b;
+        border-color: #cbd5e1;
+    }
+
+    @media (max-width: 768px) {
+        .premium-modal-content {
+            max-height: 100vh;
+            border-radius: 0;
+        }
+        .premium-form-grid {
+            grid-template-columns: 1fr;
+        }
+        .premium-field.full-width {
+            grid-column: span 1;
+        }
+        .premium-modal-body {
+            padding: 1.5rem;
+        }
+    }
+
     /* Student Creation Modal Styles (Global) */
     .premium-form-card {
         position: fixed;
@@ -415,19 +722,73 @@
         box-shadow: 0 8px 20px rgba(99, 102, 241, 0.15);
     }
 
+    /* Toast Notifications */
+    .premium-toast {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        z-index: 10000;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        pointer-events: none;
+    }
+
+    .toast-item {
+        background: #ffffff;
+        border-radius: 1rem;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        border: 1px solid #f1f5f9;
+        pointer-events: auto;
+        animation: toastSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        max-width: 350px;
+    }
+
+    @keyframes toastSlideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    .toast-item.success { border-left: 4px solid #10b981; }
+    .toast-item.error { border-left: 4px solid #ef4444; }
+
+    .toast-icon {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 0.6rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .success .toast-icon { background: #ecfdf5; color: #10b981; }
+    .error .toast-icon { background: #fef2f2; color: #ef4444; }
+
+    .toast-content h4 { margin: 0; font-size: 0.95rem; font-weight: 700; color: #1e293b; }
+    .toast-content p { margin: 0.15rem 0 0 0; font-size: 0.85rem; color: #64748b; }
+
     @media (max-width: 768px) {
-        .premium-form-container {
-            padding: 2rem;
-            border-radius: 2rem;
+        .premium-modal-content {
+            max-height: 100vh;
+            border-radius: 0;
         }
         .premium-form-grid {
             grid-template-columns: 1fr;
         }
-        .premium-form-grid .full-width {
+        .premium-field.full-width {
             grid-column: span 1;
+        }
+        .premium-modal-body {
+            padding: 1.5rem;
         }
     }
 </style>
+
+<div class="premium-toast" id="toast-container"></div>
 
 @if ($moduleKey === 'users')
     <button type="button" class="premium-create-card-btn" onclick="const form = document.getElementById('form-create-user'); if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';">
@@ -629,58 +990,127 @@
 @endif
 
 @if ($moduleKey === 'teachers')
-    <button type="button" class="premium-create-card-btn" onclick="const form = document.getElementById('form-create-teacher'); if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';">
+    <button type="button" class="premium-create-card-btn" onclick="openTeacherModal()">
         <i data-lucide="user-plus"></i>
         Tambah Teacher Baru
     </button>
     
-    <section class="card" id="form-create-teacher" style="display: @if($errors->any()) block @else none @endif;" data-searchable>
-        <h3>Tambah Teacher Baru</h3>
-        <form class="module-form module-form-grid teacher-create-form" method="POST" enctype="multipart/form-data" action="{{ route('super-admin.teachers.store') }}">
-                @csrf
-                <label>Nama
-                    <input type="text" name="name" value="{{ old('name') }}" required>
-                </label>
-                <label>Email
-                    <input type="email" name="email" value="{{ old('email') }}" required>
-                </label>
-                <label>Nomor HP
-                    <input type="text" name="phone" value="{{ old('phone') }}" required>
-                </label>
-                <label>Alamat
-                    <textarea name="address" rows="3" required>{{ old('address') }}</textarea>
-                </label>
-                <label>Jenis Kelamin
-                    <select name="gender" required>
-                        <option value="laki-laki" @selected(old('gender') === 'laki-laki')>Laki-laki</option>
-                        <option value="perempuan" @selected(old('gender') === 'perempuan')>Perempuan</option>
-                    </select>
-                </label>
-                <label>Agama
-                    <input type="text" name="religion" value="{{ old('religion') }}" required>
-                </label>
-                <label>Bidang / Instrumen
-                    <input type="text" name="instrument" value="{{ old('instrument') }}" placeholder="Drum, Piano, Vocal, dll">
-                </label>
-                <label>Password
-                    <input type="password" name="password" required>
-                </label>
-                <label>Konfirmasi Password
-                    <input type="password" name="password_confirmation" required>
-                </label>
-                <label>Upload Foto Profile
-                    <input type="file" name="photo" accept="image/*">
-                </label>
-                <label>Upload KTP Guru
-                    <input type="file" name="ktp" accept="image/*">
-                </label>
-                <div class="form-actions">
-                    <button type="submit">Simpan Teacher</button>
-                    <button type="reset" class="btn-secondary">Cancel</button>
+    {{-- Teacher Creation Modal --}}
+    <div id="modal-create-teacher" class="premium-modal-wrapper @if($errors->any() && old('_form_type') === 'create_teacher') active @endif">
+        <div class="premium-modal-backdrop" onclick="closeTeacherModal()"></div>
+        <div class="premium-modal-content">
+            <header class="premium-modal-header">
+                <div class="premium-modal-header-info">
+                    <div class="premium-modal-icon">
+                        <i data-lucide="music-2"></i>
+                    </div>
+                    <div>
+                        <h3>Tambah Teacher Baru</h3>
+                        <p>Lengkapi data pengajar profesional ROFC</p>
+                    </div>
                 </div>
-            </form>
+                <button type="button" class="premium-modal-close" onclick="closeTeacherModal()">
+                    <i data-lucide="x"></i>
+                </button>
+            </header>
 
-    </section>
+            <form id="form-create-teacher-modal" action="{{ route('super-admin.teachers.store') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <input type="hidden" name="_form_type" value="create_teacher">
+                
+                <div class="premium-modal-body">
+                    <div class="premium-form-grid">
+                        {{-- Profil Photo Section --}}
+                        <div class="premium-field full-width">
+                            <label>Foto Profil</label>
+                            <div class="avatar-upload-container">
+                                <div class="avatar-preview-box" id="avatar-preview">
+                                    <i data-lucide="user"></i>
+                                </div>
+                                <div class="upload-info">
+                                    <h4>Pilih Foto Terbaik</h4>
+                                    <p>Format JPG, PNG atau WebP (Max 2MB)</p>
+                                    <input type="file" name="photo" id="teacher-photo-input" accept="image/*" class="premium-input" style="padding: 0.5rem;" onchange="previewImage(this, 'avatar-preview')">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="premium-field">
+                            <label for="teacher-name">Nama Lengkap</label>
+                            <input type="text" id="teacher-name" name="name" class="premium-input" value="{{ old('name') }}" placeholder="Contoh: John Doe, M.Mus" required>
+                        </div>
+
+                        <div class="premium-field">
+                            <label for="teacher-email">Email Address</label>
+                            <input type="email" id="teacher-email" name="email" class="premium-input" value="{{ old('email') }}" placeholder="nama@email.com" required>
+                        </div>
+
+                        <div class="premium-field">
+                            <label for="teacher-phone">Nomor HP / WhatsApp</label>
+                            <input type="text" id="teacher-phone" name="phone" class="premium-input" value="{{ old('phone') }}" placeholder="08xxxxxxxxxx" required>
+                        </div>
+
+                        <div class="premium-field">
+                            <label for="teacher-gender">Jenis Kelamin</label>
+                            <select id="teacher-gender" name="gender" class="premium-select" required>
+                                <option value="" disabled selected>Pilih Jenis Kelamin</option>
+                                <option value="laki-laki" @selected(old('gender') === 'laki-laki')>Laki-laki</option>
+                                <option value="perempuan" @selected(old('gender') === 'perempuan')>Perempuan</option>
+                            </select>
+                        </div>
+
+                        <div class="premium-field">
+                            <label for="teacher-religion">Agama</label>
+                            <select id="teacher-religion" name="religion" class="premium-select" required>
+                                <option value="" disabled selected>Pilih Agama</option>
+                                <option value="Islam" @selected(old('religion') === 'Islam')>Islam</option>
+                                <option value="Kristen" @selected(old('religion') === 'Kristen')>Kristen</option>
+                                <option value="Katolik" @selected(old('religion') === 'Katolik')>Katolik</option>
+                                <option value="Hindu" @selected(old('religion') === 'Hindu')>Hindu</option>
+                                <option value="Budha" @selected(old('religion') === 'Budha')>Budha</option>
+                                <option value="Konghucu" @selected(old('religion') === 'Konghucu')>Konghucu</option>
+                            </select>
+                        </div>
+
+                        <div class="premium-field">
+                            <label for="teacher-instrument">Class / Instrumen yang diajar</label>
+                            <input type="text" id="teacher-instrument" name="instrument" class="premium-input" value="{{ old('instrument') }}" placeholder="Contoh: Drum, Piano, Vocal, dll" required>
+                            <small style="color: #64748b; margin-top: 0.25rem;">Ketik manual instrumen atau kelas yang akan diajar.</small>
+                        </div>
+
+                        <div class="premium-field full-width">
+                            <label for="teacher-address">Alamat Domisili</label>
+                            <textarea id="teacher-address" name="address" class="premium-textarea" placeholder="Tuliskan alamat lengkap..." required>{{ old('address') }}</textarea>
+                        </div>
+
+                        <div class="premium-field full-width">
+                            <label>KTP Guru (Opsional)</label>
+                            <input type="file" name="ktp" class="premium-input" accept="image/*" style="padding: 0.5rem;">
+                        </div>
+
+                        <div class="premium-field">
+                            <label for="teacher-password">Password Akses</label>
+                            <input type="text" id="teacher-password" name="password" class="premium-input" value="12345678" readonly required>
+                            <small style="color: #64748b; margin-top: 0.25rem;">Default: <b>12345678</b> (Otomatis)</small>
+                        </div>
+
+                        <div class="premium-field">
+                            <label for="teacher-password-confirm">Konfirmasi Password</label>
+                            <input type="text" id="teacher-password-confirm" name="password_confirmation" class="premium-input" value="12345678" readonly required>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="premium-modal-footer">
+                    <button type="button" class="btn-premium-secondary" onclick="closeTeacherModal()">Batal</button>
+                    <button type="submit" class="btn-premium-primary" id="btn-submit-teacher">
+                        <i data-lucide="check-circle"></i>
+                        Simpan Teacher
+                    </button>
+                </footer>
+            </form>
+        </div>
+    </div>
 
     <section class="card" data-searchable>
         <h3>Daftar Guru</h3>
@@ -2531,6 +2961,53 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Teacher Modal Controls
+    window.openTeacherModal = function() {
+        const modal = document.getElementById('modal-create-teacher');
+        if (modal) {
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+            document.body.style.overflow = 'hidden';
+            if (window.lucide) window.lucide.createIcons();
+        }
+    };
+
+    window.closeTeacherModal = function() {
+        const modal = document.getElementById('modal-create-teacher');
+        if (modal) {
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                document.body.style.overflow = '';
+            }, 400);
+        }
+    };
+
+    // Image Preview Utility
+    window.previewImage = function(input, previewId) {
+        const preview = document.getElementById(previewId);
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    };
+
+    // Form Loading State
+    const teacherForm = document.getElementById('form-create-teacher-modal');
+    if (teacherForm) {
+        teacherForm.addEventListener('submit', function() {
+            const btn = document.getElementById('btn-submit-teacher');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i data-lucide="loader-2" class="animate-spin"></i> Mohon Tunggu...';
+                if (window.lucide) window.lucide.createIcons();
+            }
+        });
+    }
+
     // Close action-popover when clicking the backdrop (the ::before pseudo-element area)
     document.addEventListener('click', e => {
         // If the click target is a summary inside an open action-popover, do nothing (native toggle)
@@ -2633,6 +3110,43 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // Toast Notification System
+    window.showToast = function(type, title, message) {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast-item ${type}`;
+        toast.innerHTML = `
+            <div class="toast-icon">
+                <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}"></i>
+            </div>
+            <div class="toast-content">
+                <h4>${title}</h4>
+                <p>${message}</p>
+            </div>
+        `;
+        container.appendChild(toast);
+        if (window.lucide) window.lucide.createIcons();
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            setTimeout(() => toast.remove(), 400);
+        }, 5000);
+    };
+
+    // Trigger toasts from session
+    @if(session('success'))
+        showToast('success', 'Berhasil!', '{{ session('success') }}');
+    @endif
+    @if(session('error'))
+        showToast('error', 'Gagal!', '{{ session('error') }}');
+    @endif
+    @if($errors->any())
+        showToast('error', 'Validasi Gagal', 'Silakan periksa kembali inputan Anda.');
+    @endif
 });
 
 // Dynamic Schedule Loader for Admin Create Student Modal

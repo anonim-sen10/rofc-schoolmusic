@@ -47,7 +47,11 @@ trait ManagesTeachers
             $payload['ktp_path'] = $request->file('ktp')->store('teachers/ktp', 'public');
         }
 
-        Teacher::query()->create($payload);
+        $teacher = Teacher::query()->create($payload);
+
+        if (!empty($data['class_id'])) {
+            $teacher->musicClasses()->sync($data['class_id']);
+        }
 
         return back()->with('success', 'Akun teacher dan data guru berhasil dibuat.');
     }
