@@ -108,20 +108,20 @@ $iconMap = [
                 </button>
             </div>
 
-            <nav class="portal-menu mt-4 px-4 space-y-1">
+            <nav class="portal-menu">
                 @foreach ($normalizedMenu as $item)
                     @php $isActive = request()->url() === $item['url']; @endphp
                     <a href="{{ $item['url'] }}" 
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group {{ $isActive ? 'bg-blue-50 text-blue-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700' }}" 
+                        class="transition-all duration-200 group {{ $isActive ? 'active' : '' }}" 
                         data-tooltip="{{ $item['label'] }}">
-                        <i data-lucide="{{ $item['icon'] }}" class="w-5 h-5 {{ $isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600' }}"></i>
-                        <span class="text-sm font-semibold">{{ $item['label'] }}</span>
+                        <i data-lucide="{{ $item['icon'] }}"></i>
+                        <span>{{ $item['label'] }}</span>
                     </a>
                 @endforeach
             </nav>
         </aside>
 
-        <div class="portal-main bg-slate-50/50 flex flex-col min-h-screen">
+        <div class="portal-main bg-slate-50/50 flex flex-col justify-start items-stretch">
             <x-portal.dashboard-header
                 :title="trim($__env->yieldContent('page-title')) ?: 'Dashboard'"
                 :subtitle="trim($__env->yieldContent('page-subtitle')) ?: 'ROFC Private Music Management Information System'"
@@ -133,7 +133,7 @@ $iconMap = [
                 :brand-logo-url="$brandLogoUrl"
             />
 
-            <main class="portal-content portal-content--saas pt-[100px] px-6 pb-8 lg:px-10 flex-1">
+            <main class="portal-content portal-content--saas pt-4 px-6 pb-8 lg:px-10 flex-1">
                 @if (session('success'))
                     <section class="card" data-searchable>
                         <x-ui.badge type="success">SUCCESS</x-ui.badge>

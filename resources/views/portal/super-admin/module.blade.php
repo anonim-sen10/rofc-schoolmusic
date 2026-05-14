@@ -990,10 +990,6 @@
 @endif
 
 @if ($moduleKey === 'teachers')
-    <button type="button" class="premium-create-card-btn" onclick="openTeacherModal()">
-        <i data-lucide="user-plus"></i>
-        Tambah Teacher Baru
-    </button>
     
     {{-- Teacher Creation Modal --}}
     <div id="modal-create-teacher" class="premium-modal-wrapper @if($errors->any() && old('_form_type') === 'create_teacher') active @endif">
@@ -1113,7 +1109,13 @@
     </div>
 
     <section class="card" data-searchable>
-        <h3>Daftar Guru</h3>
+        <div class="card-header-flex">
+            <h3>Daftar Guru</h3>
+            <button type="button" class="btn-add-student" onclick="openTeacherModal()">
+                <i data-lucide="user-plus"></i>
+                Tambah Teacher Baru
+            </button>
+        </div>
         <div class="table-wrap">
             <table>
                 <thead>
@@ -1121,7 +1123,7 @@
                         <th>Nama</th>
                         <th>Email</th>
                         <th>Nomor HP</th>
-                        <th>Alamat</th>
+                        <th class="col-address">Alamat</th>
                         <th>Jenis Kelamin</th>
                         <th>Agama</th>
                         <th>Class</th>
@@ -1134,7 +1136,7 @@
                             <td>{{ $teacher->name }}</td>
                             <td>{{ $teacher->user?->email ?? '-' }}</td>
                             <td>{{ $teacher->phone ?? '-' }}</td>
-                            <td>{{ $teacher->address ?? '-' }}</td>
+                            <td class="col-address">{{ $teacher->address ?? '-' }}</td>
                             <td>{{ $teacher->gender ?? '-' }}</td>
                             <td>{{ $teacher->religion ?? '-' }}</td>
                             <td>{{ $teacher->classes->pluck('name')->implode(', ') ?: '-' }}</td>
@@ -1552,16 +1554,13 @@
 @endif
 
 @if ($moduleKey === 'students')
-
-    <button type="button" class="premium-create-card-btn" onclick="const modal = document.getElementById('modal-create-student'); if(modal) modal.style.display = 'flex';">
-        <i data-lucide="user-plus"></i>
-        Tambah Siswa Baru
-    </button>
-
-
     <section class="card" data-searchable>
-        <div class="student-list-header">
+        <div class="card-header-flex">
             <h3>Daftar Seluruh Siswa</h3>
+            <button type="button" class="btn-add-student" onclick="const modal = document.getElementById('modal-create-student'); if(modal) modal.style.display = 'flex';">
+                <i data-lucide="user-plus"></i>
+                Tambah Siswa Baru
+            </button>
         </div>
         <div class="table-wrap">
             <table>
@@ -1637,7 +1636,7 @@
                                                     <article><p>Umur</p><p>{{ $student->age ? $student->age . ' Tahun' : '-' }}</p></article>
                                                     <article><p>Email Siswa</p><p>{{ $student->email ?: '-' }}</p></article>
                                                     <article><p>No. HP Siswa</p><p>{{ $student->phone ?: '-' }}</p></article>
-                                                    <article class="registration-modal-item-full"><p>Alamat Domisili</p><p>{{ $student->address ?: '-' }}</p></article>
+                                                    <article class="registration-modal-item-full"><p>Alamat Domisili</p><p class="text-wrap-normal">{{ $student->address ?: '-' }}</p></article>
                                                     
                                                     <article><p>Nama Orang Tua</p><p>{{ $student->nama_ortu ?: '-' }}</p></article>
                                                     <article><p>Pekerjaan Ortu</p><p>{{ $student->pekerjaan_ortu ?: '-' }}</p></article>
@@ -1879,7 +1878,9 @@
     </section>
 
     <section class="card" data-searchable>
-        <h3>Daftar Registration</h3>
+        <div class="card-header-flex">
+            <h3>Daftar Registration</h3>
+        </div>
         <div class="table-wrap">
             <table>
                 <thead>
@@ -2099,7 +2100,7 @@
                                                     <article><p>Kewarganegaraan</p><p>{{ $kewarganegaraan }}</p></article>
                                                     <article><p>No HP Siswa</p><p>{{ $teleponSiswa }}</p></article>
                                                     <article class="registration-modal-item-full"><p>Email Siswa</p><p>{{ $registrationItem->email }}</p></article>
-                                                    <article class="registration-modal-item-full"><p>Alamat</p><p>{{ $alamat }}</p></article>
+                                                    <article class="registration-modal-item-full"><p>Alamat</p><p class="text-wrap-normal">{{ $alamat }}</p></article>
                                                     <article><p>Nama Orang Tua</p><p>{{ $namaOrtu }}</p></article>
                                                     <article><p>Pekerjaan Orang Tua</p><p>{{ $pekerjaanOrtu }}</p></article>
                                                     <article><p>No HP Orang Tua</p><p>{{ $noHpOrtu }}</p></article>

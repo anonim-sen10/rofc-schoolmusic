@@ -102,7 +102,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (header) {
-        let lastScrollY = window.scrollY;
+        const scrollContainer = document.querySelector(".portal-main") || window;
+        let lastScrollY = scrollContainer === window ? window.scrollY : scrollContainer.scrollTop;
         let ticking = false;
 
         const setHeaderHeight = () => {
@@ -113,7 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         const syncHeaderVisibility = () => {
-            const currentY = window.scrollY;
+            const currentY = scrollContainer === window ? window.scrollY : scrollContainer.scrollTop;
             const threshold = 10;
             const minDelta = 8;
 
@@ -138,12 +139,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         window.addEventListener("resize", setHeaderHeight);
 
-        window.addEventListener("scroll", () => {
+        scrollContainer.addEventListener("scroll", () => {
             if (!ticking) {
                 window.requestAnimationFrame(syncHeaderVisibility);
                 ticking = true;
             }
-        });
+        }, { passive: true });
     }
 
     if (confirmModal) {
