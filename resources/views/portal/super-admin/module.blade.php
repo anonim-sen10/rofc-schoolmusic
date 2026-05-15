@@ -2228,21 +2228,135 @@
                                                     <label id="reg-edit-favorite-song-{{ $registrationItem->id }}">Lagu Favorite
                                                         <input type="text" name="favorite_song" value="{{ $registrationItem->favorite_song ?: ($legacyNotesMap['Lagu Favorite'] ?? '') }}" placeholder="Contoh: Heal The World">
                                                     </label>
-                                                    <label style="grid-column: span 2;">Pilih Jadwal (Bisa pilih banyak untuk Double Time)
-                                                        <select name="schedule_ids[]" multiple style="height: 120px; font-size: 11px; width: 100%; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 0.5rem;">
+
+                                                    <div style="grid-column: span 2; margin-top: 0.5rem;">
+                                                        <label class="premium-label" style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 0.75rem; display: block;">Pilih Jadwal (Double Time: pilih > 1)</label>
+                                                        
+                                                        <div class="registration-schedule-container">
                                                             @php
                                                                 $currentScheduleIds = $registrationItem->schedules->pluck('id')->toArray();
                                                                 $relevantSchedules = $schedulesForManagement->where('class_id', $registrationItem->class_id);
-                                                                $allSelectable = $relevantSchedules->merge($registrationItem->schedules)->unique('id');
+                                                                $allSelectable = $relevantSchedules->merge($registrationItem->schedules)->unique('id')->sortBy(function($s) {
+                                                                    $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+                                                                    return array_search($s->day, $days);
+                                                                });
+                                                                $groupedByDay = $allSelectable->groupBy('day');
                                                             @endphp
-                                                            @foreach($allSelectable as $sch)
-                                                                <option value="{{ $sch->id }}" @selected(in_array($sch->id, $currentScheduleIds))>
-                                                                    {{ $sch->day }} {{ substr((string)$sch->time, 0, 5) }} ({{ $sch->teacher?->name ?? '-' }}) {{ $sch->status === 'booked' && !in_array($sch->id, $currentScheduleIds) ? '[FULL]' : '' }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                        <p style="font-size: 10px; color: #9ca3af; margin-top: 4px;">Tahan Ctrl/Cmd untuk pilih banyak.</p>
-                                                    </label>
+
+                                                            @forelse($groupedByDay as $day => $slots)
+                                                                <div class="reg-day-group">
+                                                                    <div class="reg-day-header">{{ $day }}</div>
+                                                                    <div class="reg-day-slots">
+                                                                        @foreach($slots as $sch)
+                                                                            @php
+                                                                                $isSelected = in_array($sch->id, $currentScheduleIds);
+                                                                                $isFull = $sch->status === 'booked' && !$isSelected;
+                                                                            @endphp
+                                                                            <label class="reg-slot-card {{ $isSelected ? 'is-selected' : '' }} {{ $isFull ? 'is-disabled' : '' }}">
+                                                                                <input type="checkbox" name="schedule_ids[]" value="{{ $sch->id }}" @checked($isSelected) @disabled($isFull) style="display: none;" onchange="this.parentElement.classList.toggle('is-selected', this.checked)">
+                                                                                <span class="reg-slot-time">{{ substr((string)$sch->time, 0, 5) }}</span>
+                                                                                @if($isFull)
+                                                                                    <span class="reg-slot-badge">FULL</span>
+                                                                                @endif
+                                                                            </label>
+                                                                        @endforeach
+                                                                    </div>
+                                                                </div>
+                                                            @empty
+                                                                <div class="reg-empty-state">
+                                                                    <i data-lucide="calendar-x2"></i>
+                                                                    <span>Tidak ada jadwal tersedia untuk instrumen ini.</span>
+                                                                </div>
+                                                            @endforelse
+                                                        </div>
+                                                    </div>
+
+                                                    <style>
+                                                        .registration-schedule-container {
+                                                            display: flex;
+                                                            flex-direction: column;
+                                                            gap: 1.25rem;
+                                                            padding: 1.25rem;
+                                                            background: #f8fafc;
+                                                            border: 1px solid #e2e8f0;
+                                                            border-radius: 1.25rem;
+                                                            max-height: 320px;
+                                                            overflow-y: auto;
+                                                        }
+                                                        .reg-day-group {
+                                                            display: flex;
+                                                            flex-direction: column;
+                                                            gap: 0.75rem;
+                                                        }
+                                                        .reg-day-header {
+                                                            font-size: 10px;
+                                                            font-weight: 800;
+                                                            text-transform: uppercase;
+                                                            color: #64748b;
+                                                            letter-spacing: 0.05em;
+                                                            display: flex;
+                                                            align-items: center;
+                                                            gap: 0.5rem;
+                                                        }
+                                                        .reg-day-header::after {
+                                                            content: '';
+                                                            flex: 1;
+                                                            height: 1px;
+                                                            background: #e2e8f0;
+                                                        }
+                                                        .reg-day-slots {
+                                                            display: grid;
+                                                            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+                                                            gap: 0.5rem;
+                                                        }
+                                                        .reg-slot-card {
+                                                            display: flex;
+                                                            flex-direction: column;
+                                                            align-items: center;
+                                                            justify-content: center;
+                                                            padding: 0.6rem;
+                                                            background: #ffffff;
+                                                            border: 1.5px solid #edf2f7;
+                                                            border-radius: 12px;
+                                                            cursor: pointer;
+                                                            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                                                        }
+                                                        .reg-slot-card:hover:not(.is-disabled) {
+                                                            border-color: #6366f1;
+                                                            transform: translateY(-2px);
+                                                            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.08);
+                                                        }
+                                                        .reg-slot-card.is-selected {
+                                                            background: #6366f1;
+                                                            border-color: #6366f1;
+                                                            color: #ffffff;
+                                                            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+                                                        }
+                                                        .reg-slot-card.is-disabled {
+                                                            opacity: 0.4;
+                                                            cursor: not-allowed;
+                                                            background: #f1f5f9;
+                                                            border-style: dashed;
+                                                        }
+                                                        .reg-slot-time {
+                                                            font-size: 12px;
+                                                            font-weight: 800;
+                                                        }
+                                                        .reg-slot-badge {
+                                                            font-size: 7px;
+                                                            font-weight: 900;
+                                                            margin-top: 2px;
+                                                            background: rgba(0,0,0,0.1);
+                                                            padding: 1px 4px;
+                                                            border-radius: 4px;
+                                                        }
+                                                        .reg-empty-state {
+                                                            text-align: center;
+                                                            padding: 2rem;
+                                                            color: #94a3b8;
+                                                            font-size: 11px;
+                                                        }
+                                                    </style>
                                                     <label>Status
                                                         <select name="status" required>
                                                             <option value="pending" @selected($registrationStatus === 'pending')>pending</option>
