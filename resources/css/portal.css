@@ -250,9 +250,10 @@ label {
 .portal-shell {
     display: flex;
     width: 100vw;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
+    overflow: visible;
     background: #f8fafc;
+    position: relative;
 }
 
 html.sidebar-collapsed .portal-shell {
@@ -270,6 +271,8 @@ html.sidebar-collapsed .portal-shell {
     z-index: 50;
     transition: width 0.25s ease;
     overflow: hidden;
+    position: sticky;
+    top: 0;
 }
 
 html.sidebar-collapsed .portal-sidebar {
@@ -442,9 +445,8 @@ html.sidebar-collapsed .portal-menu a[data-tooltip]:hover::after {
     flex-direction: column;
     justify-content: flex-start !important;
     align-items: stretch !important;
-    height: 100vh;
-    overflow-y: auto;
-    overflow-x: hidden;
+    min-height: 100vh;
+    overflow: visible;
     position: relative;
     background: #f8fafc;
 }
@@ -706,7 +708,8 @@ html.sidebar-collapsed .portal-topbar {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    min-height: auto;
+    min-height: 100%;
+    overflow: visible;
 }
 
 @media (min-width: 1024px) {

@@ -24,9 +24,17 @@
 
     .table-wrap:has(details.action-popover[open]),
     .portal-content:has(details.action-popover[open]),
-    .portal-main:has(details.action-popover[open]) {
+    .portal-main:has(details.action-popover[open]),
+    .portal-shell:has(details.action-popover[open]) {
         transform: none !important;
         overflow: visible !important;
+        min-height: 100vh !important;
+    }
+
+    .table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        position: relative;
     }
 
     .premium-create-card-btn {
