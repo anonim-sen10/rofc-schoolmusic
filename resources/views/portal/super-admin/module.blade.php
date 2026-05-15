@@ -2142,16 +2142,34 @@
                                                     <article><p>Kewarganegaraan</p><p>{{ $kewarganegaraan }}</p></article>
                                                     <article><p>No HP Siswa</p><p>{{ $teleponSiswa }}</p></article>
                                                     <article><p>Instagram Siswa</p><p>{{ $registrationItem->ig_siswa ?: '-' }}</p></article>
+                                                    <article><p>Instagram Ortu</p><p>{{ $registrationItem->ig_ortu ?: '-' }}</p></article>
                                                     <article class="registration-modal-item-full"><p>Email Siswa</p><p>{{ $registrationItem->email }}</p></article>
                                                     <article class="registration-modal-item-full"><p>Alamat</p><p class="text-wrap-normal">{{ $alamat }}</p></article>
                                                     <article><p>Nama Orang Tua</p><p>{{ $namaOrtu }}</p></article>
                                                     <article><p>Pekerjaan Orang Tua</p><p>{{ $pekerjaanOrtu }}</p></article>
                                                     <article><p>No HP Orang Tua</p><p>{{ $noHpOrtu }}</p></article>
                                                     <article><p>Email Orang Tua</p><p>{{ $emailOrtu }}</p></article>
-                                                    <article><p>Instagram Ortu</p><p>{{ $registrationItem->ig_ortu ?: '-' }}</p></article>
                                                     <article><p>Instrumen</p><p>{{ $instrumenText }}</p></article>
                                                     <article><p>Lagu Favorite</p><p>{{ $favoriteSong }}</p></article>
                                                     <article><p>Program Tambahan</p><p>{{ $programTambahanText }}</p></article>
+                                                    <article><p>Mulai Belajar</p><p>{{ $registrationItem->start_date ? \Carbon\Carbon::parse($registrationItem->start_date)->format('d M Y') : '-' }}</p></article>
+                                                    <article><p>Durasi Paket</p><p>{{ $registrationItem->duration_months ?? '-' }} Bulan</p></article>
+                                                    <article><p>Jadwal Belajar</p>
+                                                        <p>
+                                                            @php
+                                                                $regSchedules = $registrationItem->schedules;
+                                                                $isDouble = $regSchedules->count() > 1;
+                                                            @endphp
+                                                            <span style="display:block; font-weight: bold; color: {{ $isDouble ? '#6366f1' : '#64748b' }}; margin-bottom: 2px;">
+                                                                {{ $isDouble ? 'DOUBLE TIME' : 'SINGLE TIME' }}
+                                                            </span>
+                                                            @forelse($regSchedules as $sch)
+                                                                {{ $sch->day }} {{ substr((string)$sch->time, 0, 5) }}{{ !$loop->last ? ',' : '' }}
+                                                            @empty
+                                                                {{ $registrationItem->preferred_schedule ?: '-' }}
+                                                            @endforelse
+                                                        </p>
+                                                    </article>
                                                     <article><p>Pengalaman Belajar</p><p>{{ $pengalamanText }}</p></article>
                                                     <article class="registration-modal-item-full"><p>Deskripsi Pengalaman</p><p>{{ $deskripsiPengalaman }}</p></article>
                                                     <article><p>Status</p><p>{{ strtoupper($registrationStatus) }}</p></article>
