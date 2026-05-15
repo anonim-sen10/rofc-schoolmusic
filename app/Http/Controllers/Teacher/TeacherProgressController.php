@@ -59,7 +59,7 @@ class TeacherProgressController extends Controller
         return $student;
     }
 
-    public function show(Request $request, int $student_id): View
+    public function show(Request $request, $student_id): View
     {
         $teacher = $this->teacherFromUser($request->user()->id);
         $student = $this->teacherStudentOrAbort($teacher, $student_id);

@@ -311,7 +311,7 @@ public function dashboard(Request $request): View
         ]);
     }
 
-    public function progressForStudent(Request $request, int $student_id): View
+    public function progressForStudent(Request $request, $student_id): View
     {
         $request->merge(['student_id' => $student_id]);
 
