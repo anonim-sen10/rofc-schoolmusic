@@ -39,6 +39,7 @@ $homeRoute = route('admin.dashboard');
             <label>Phone <input type="text" name="phone"></label>
             <label>Email <input type="email" name="email"></label>
             <label>Address <textarea name="address" rows="2"></textarea></label>
+            <label>Lagu Favorite <input type="text" name="favorite_song" placeholder="Contoh: Heal The World"></label>
             <label>Kelas
                 <select multiple name="class_ids[]">@foreach($classList as $classItem)<option value="{{ $classItem->id }}">{{ $classItem->name }}</option>@endforeach</select>
             </label>
@@ -141,6 +142,10 @@ $homeRoute = route('admin.dashboard');
                                                     <p>Status Akun</p>
                                                     <p>{{ $student->is_active ? 'Aktif' : 'Non-aktif' }}</p>
                                                 </article>
+                                                <article class="registration-modal-item-full">
+                                                    <p>Lagu Favorite</p>
+                                                    <p>{{ $student->favorite_song ?: '-' }}</p>
+                                                </article>
                                             </section>
                                         </div>
                                         <footer class="registration-modal-footer">
@@ -187,6 +192,9 @@ $homeRoute = route('admin.dashboard');
                                                 </label>
                                                 <label>Telepon
                                                     <input type="text" name="phone" value="{{ $student->phone }}">
+                                                </label>
+                                                <label style="grid-column: span 2;">Lagu Favorite
+                                                    <input type="text" name="favorite_song" value="{{ $student->favorite_song }}">
                                                 </label>
                                                 <label style="grid-column: span 2;">Alamat
                                                     <textarea name="address" rows="2">{{ $student->address }}</textarea>

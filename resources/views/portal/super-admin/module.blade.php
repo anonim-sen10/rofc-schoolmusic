@@ -1858,14 +1858,14 @@
                     <input type="text" name="ig_ortu" value="{{ old('ig_ortu') }}" placeholder="@username_ortu">
                 </label>
                 <label>Instrumen
-                    <select name="instrumen" id="reg-create-instrumen" required onchange="toggleFavoriteSong(this, 'reg-create-favorite-song-group')">
+                    <select name="instrumen" id="reg-create-instrumen" required>
                         <option value="">Pilih instrumen</option>
                         @foreach($instrumenOptions as $instrumenItem)
                             <option value="{{ $instrumenItem }}" @selected(old('instrumen') === $instrumenItem)>{{ $instrumenItem }}</option>
                         @endforeach
                     </select>
                 </label>
-                <label id="reg-create-favorite-song-group" style="display: {{ old('instrumen') === 'Vocal' ? 'block' : 'none' }};">Lagu Favorite
+                <label id="reg-create-favorite-song-group">Lagu Favorite
                     <input type="text" name="favorite_song" value="{{ old('favorite_song') }}" placeholder="Contoh: Heal The World">
                 </label>
                 <label>Program Tambahan
@@ -2150,9 +2150,7 @@
                                                     <article><p>Email Orang Tua</p><p>{{ $emailOrtu }}</p></article>
                                                     <article><p>Instagram Ortu</p><p>{{ $registrationItem->ig_ortu ?: '-' }}</p></article>
                                                     <article><p>Instrumen</p><p>{{ $instrumenText }}</p></article>
-                                                    @if($favoriteSong !== '-')
-                                                        <article><p>Lagu Favorite</p><p>{{ $favoriteSong }}</p></article>
-                                                    @endif
+                                                    <article><p>Lagu Favorite</p><p>{{ $favoriteSong }}</p></article>
                                                     <article><p>Program Tambahan</p><p>{{ $programTambahanText }}</p></article>
                                                     <article><p>Pengalaman Belajar</p><p>{{ $pengalamanText }}</p></article>
                                                     <article class="registration-modal-item-full"><p>Deskripsi Pengalaman</p><p>{{ $deskripsiPengalaman }}</p></article>
@@ -2203,13 +2201,13 @@
                                                     <label>Email Orang Tua <input type="email" name="email_ortu" value="{{ $emailOrtu }}"></label>
                                                     <label>Instagram Ortu <input type="text" name="ig_ortu" value="{{ $registrationItem->ig_ortu }}" placeholder="@username"></label>
                                                     <label>Instrumen
-                                                        <select name="instrumen" required onchange="toggleFavoriteSong(this, 'reg-edit-favorite-song-{{ $registrationItem->id }}')">
+                                                        <select name="instrumen" required>
                                                             @foreach($instrumenOptions as $instrumenItem)
                                                                 <option value="{{ $instrumenItem }}" @selected($instrumenValue === $instrumenItem)>{{ $instrumenItem }}</option>
                                                             @endforeach
                                                         </select>
                                                     </label>
-                                                    <label id="reg-edit-favorite-song-{{ $registrationItem->id }}" style="display: {{ $instrumenValue === 'Vocal' ? 'block' : 'none' }};">Lagu Favorite
+                                                    <label id="reg-edit-favorite-song-{{ $registrationItem->id }}">Lagu Favorite
                                                         <input type="text" name="favorite_song" value="{{ $registrationItem->favorite_song ?: ($legacyNotesMap['Lagu Favorite'] ?? '') }}" placeholder="Contoh: Heal The World">
                                                     </label>
                                                     <label>Status
@@ -3461,7 +3459,7 @@ window.toggleFavoriteSong = function(select, targetId) {
                 <div class="premium-form-grid">
                     <div class="premium-field">
                         <label for="admin_class_id">Instrumen</label>
-                        <select id="admin_class_id" name="class_id" class="premium-select" required onchange="loadAdminSchedules(this.value); const sel = this.options[this.selectedIndex]; const isVocal = sel.text.toLowerCase().includes('vocal'); document.getElementById('manual-student-favorite-song-group').style.display = isVocal ? 'block' : 'none';">
+                        <select id="admin_class_id" name="class_id" class="premium-select" required onchange="loadAdminSchedules(this.value);">
                             <option value="">Pilih Instrumen</option>
                             @foreach($classesForManagement as $classItem)
                                 <option value="{{ $classItem->id }}" @selected(old('class_id') == $classItem->id)>
@@ -3529,7 +3527,7 @@ window.toggleFavoriteSong = function(select, targetId) {
                         <textarea id="deskripsi_pengalaman" name="deskripsi_pengalaman" class="premium-textarea" placeholder="Ceritakan pengalaman belajar musik sebelumnya (jika ada)">{{ old('deskripsi_pengalaman') }}</textarea>
                     </div>
 
-                    <div class="premium-field" id="manual-student-favorite-song-group" style="display: none;">
+                    <div class="premium-field" id="manual-student-favorite-song-group">
                         <label for="favorite_song">Lagu Favorite</label>
                         <input type="text" id="favorite_song" name="favorite_song" class="premium-input" value="{{ old('favorite_song') }}" placeholder="Contoh: Heal The World">
                     </div>

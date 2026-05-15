@@ -81,6 +81,13 @@
                                 <span id="modal-email" class="truncate">-</span>
                             </div>
                         </div>
+                        <div class="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm col-span-2">
+                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 leading-none">Lagu Favorite</p>
+                            <div class="flex items-center gap-2 text-[11px] font-bold text-blue-600">
+                                <i data-lucide="music" class="w-3 h-3"></i>
+                                <span id="modal-favorite-song">-</span>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Address Section --}}
@@ -164,6 +171,7 @@
                                             status: '{{ $student->is_active ? 'ACTIVE' : 'INACTIVE' }}',
                                             phone: '{{ $student->phone ?? '-' }}',
                                             email: '{{ $student->email ?? '-' }}',
+                                            favorite_song: '{{ addslashes($student->favorite_song ?? '-') }}',
                                             address: '{{ addslashes($student->address ?? '-') }}'
                                         })"
                                         class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 text-white text-[10px] font-bold shadow-sm shadow-blue-100 hover:bg-blue-700 hover:shadow-md transition-all active:scale-95 no-underline">
@@ -209,6 +217,7 @@
             document.getElementById('modal-classes').textContent = data.classes;
             document.getElementById('modal-phone').textContent = data.phone;
             document.getElementById('modal-email').textContent = data.email;
+            document.getElementById('modal-favorite-song').textContent = data.favorite_song;
             document.getElementById('modal-address').textContent = data.address;
             
             // Status Badge Logic
