@@ -32,6 +32,8 @@ trait ManagesRegistrations
             'nama_lengkap' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:120'],
             'status' => ['required', 'in:pending,accepted,rejected'],
+            'favorite_song' => ['nullable', 'string', 'max:120'],
+            'instrumen' => ['nullable', 'string', 'max:80'],
         ]);
 
         $registration->update($data);
@@ -59,6 +61,7 @@ trait ManagesRegistrations
             'program_tambahan' => $data['program_tambahan'] ?? [],
             'pengalaman' => (bool) ($data['pengalaman'] ?? false),
             'deskripsi_pengalaman' => $data['deskripsi_pengalaman'] ?? null,
+            'favorite_song' => $data['favorite_song'] ?? null,
             'status' => $data['status'] ?? 'pending',
         ];
 

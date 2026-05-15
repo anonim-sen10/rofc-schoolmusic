@@ -37,6 +37,7 @@ class StoreStudentRequest extends FormRequest
             'program_tambahan.*' => ['string', 'max:120'],
             'pengalaman' => ['nullable', 'boolean'],
             'deskripsi_pengalaman' => ['nullable', 'string', 'max:1000'],
+            'favorite_song' => ['nullable', 'string', 'max:120'],
         ];
     }
 }

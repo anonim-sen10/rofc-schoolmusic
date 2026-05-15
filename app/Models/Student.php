@@ -40,6 +40,7 @@ class Student extends Model
         'start_date',
         'duration_months',
         'end_date',
+        'favorite_song',
     ];
 
     protected $casts = [

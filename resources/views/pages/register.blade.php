@@ -750,6 +750,11 @@
                                     </select>
                                 </label>
 
+                                <label class="register-field full" id="favorite-song-field" style="display: none;">
+                                    <span>Lagu Favorite</span>
+                                    <input class="register-input" type="text" name="favorite_song" value="{{ old('favorite_song') }}" placeholder="Masukkan judul lagu favorite Anda">
+                                </label>
+
                                 <label class="register-field">
                                     <span>Tanggal Mulai Belajar</span>
                                     <input class="register-input" type="date" name="start_date" value="{{ old('start_date') }}" required>
@@ -869,6 +874,7 @@
                                 <article class="register-confirm-item"><span>Pengalaman Musik</span><p data-confirm="pengalaman">-</p></article>
                                 <article class="register-confirm-item full"><span>Alamat</span><p data-confirm="alamat">-</p></article>
                                 <article class="register-confirm-item full"><span>Program Tambahan</span><p data-confirm="program_tambahan">-</p></article>
+                                <article class="register-confirm-item full" id="confirm-favorite-song-item" style="display: none;"><span>Lagu Favorite</span><p data-confirm="favorite_song">-</p></article>
                                 <article class="register-confirm-item full"><span>Deskripsi Pengalaman</span><p data-confirm="deskripsi_pengalaman">-</p></article>
                             </div>
                         </section>
@@ -1085,6 +1091,9 @@
         const startDateInput = document.querySelector('input[name="start_date"]');
         const teacherSelectField = document.getElementById('teacher-selection-field');
         const teacherSelect = document.getElementById('teacher-select');
+        const favoriteSongField = document.getElementById('favorite-song-field');
+        const favoriteSongInput = favoriteSongField.querySelector('input');
+        const confirmFavoriteSongItem = document.getElementById('confirm-favorite-song-item');
         const scheduleContainer = document.getElementById('schedule-container');
         const selectedPreview = document.getElementById('selected-preview');
         const selectedTags = document.getElementById('selected-tags');
@@ -1227,6 +1236,19 @@
             }
 
             scheduleContainer.innerHTML = '<p class="text-muted" style="padding: 1rem; font-size: 0.85rem;">Memuat jadwal...</p>';
+
+            // Toggle Favorite Song field for Vocal class
+            const selectedClassName = classSelect.options[classSelect.selectedIndex]?.text?.trim() || '';
+            if (selectedClassName.toLowerCase() === 'vocal') {
+                favoriteSongField.style.display = 'block';
+                favoriteSongInput.setAttribute('required', 'required');
+                confirmFavoriteSongItem.style.display = '';
+            } else {
+                favoriteSongField.style.display = 'none';
+                favoriteSongInput.removeAttribute('required');
+                favoriteSongInput.value = '';
+                confirmFavoriteSongItem.style.display = 'none';
+            }
 
             try {
                 const response = await fetch(`/schedules/by-class/${classId}`);

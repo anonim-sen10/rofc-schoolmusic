@@ -13,6 +13,17 @@
         background-color: #f8fbff !important;
         transform: translateX(4px);
     }
+    
+    /* Fix for fixed-position popovers being clipped by transformed rows */
+    .table-wrap table tbody tr:has(details.action-popover[open]) {
+        transform: none !important;
+        z-index: 100 !important;
+        position: relative;
+    }
+
+    .table-wrap:has(details.action-popover[open]) {
+        overflow: visible !important;
+    }
 
     .premium-create-card-btn {
         background: #ffffff;
@@ -1659,6 +1670,7 @@
                                                         <p>Program Tambahan</p>
                                                         <p>{{ is_array($student->program_tambahan) ? implode(', ', $student->program_tambahan) : '-' }}</p>
                                                     </article>
+                                                    <article><p>Lagu Favorite</p><p>{{ $student->favorite_song ?: '-' }}</p></article>
                                                     <article><p>Pengalaman Musik</p><p>{{ $student->pengalaman ? 'Sudah Pernah' : 'Belum Pernah' }}</p></article>
                                                     <article class="registration-modal-item-full"><p>Deskripsi Pengalaman</p><p>{{ $student->deskripsi_pengalaman ?: '-' }}</p></article>
                                                 </section>
@@ -1696,6 +1708,7 @@
                                                     </label>
                                                     <label>Tempat Lahir <input type="text" name="tempat_lahir" value="{{ $student->tempat_lahir }}"></label>
                                                     <label>Tanggal Lahir <input type="date" name="tanggal_lahir" value="{{ $student->tanggal_lahir }}"> </label>
+                                                    <label>Kewarganegaraan <input type="text" name="kewarganegaraan" value="{{ $student->kewarganegaraan }}"></label>
                                                     <label>Umur <input type="number" name="age" value="{{ $student->age }}"></label>
                                                     <label>No. HP Siswa <input type="text" name="phone" value="{{ $student->phone }}"></label>
                                                     <label style="grid-column: span 2;">Email Siswa <input type="email" name="email" value="{{ $student->email }}"></label>
@@ -1715,12 +1728,15 @@
                                                             @endforeach
                                                         </select>
                                                     </label>
+                                                    <label>Mulai Kursus <input type="date" name="start_date" value="{{ $student->start_date }}"></label>
+                                                    <label>Durasi (Bulan) <input type="number" name="duration_months" value="{{ $student->duration_months }}"></label>
                                                     <label>Status
                                                         <select name="is_active" required>
                                                             <option value="1" @selected($student->is_active)>Aktif</option>
                                                             <option value="0" @selected(!$student->is_active)>Tidak Aktif</option>
                                                         </select>
                                                     </label>
+                                                    <label>Lagu Favorite <input type="text" name="favorite_song" value="{{ $student->favorite_song }}"></label>
                                                     <label>Pengalaman Musik
                                                         <select name="pengalaman">
                                                             <option value="0" @selected(!$student->pengalaman)>Belum Ada</option>
@@ -1819,12 +1835,15 @@
                     <input type="email" name="email_ortu" value="{{ old('email_ortu') }}">
                 </label>
                 <label>Instrumen
-                    <select name="instrumen" required>
+                    <select name="instrumen" id="reg-create-instrumen" required onchange="toggleFavoriteSong(this, 'reg-create-favorite-song-group')">
                         <option value="">Pilih instrumen</option>
                         @foreach($instrumenOptions as $instrumenItem)
                             <option value="{{ $instrumenItem }}" @selected(old('instrumen') === $instrumenItem)>{{ $instrumenItem }}</option>
                         @endforeach
                     </select>
+                </label>
+                <label id="reg-create-favorite-song-group" style="display: {{ old('instrumen') === 'Vocal' ? 'block' : 'none' }};">Lagu Favorite
+                    <input type="text" name="favorite_song" value="{{ old('favorite_song') }}" placeholder="Contoh: Heal The World">
                 </label>
                 <label>Program Tambahan
                     <select name="program_tambahan[]" multiple>
@@ -2003,6 +2022,8 @@
                             }
                             $deskripsiPengalaman = $deskripsiPengalaman ?: '-';
 
+                            $favoriteSong = $registrationItem->favorite_song ?: ($legacyNotesMap['Lagu Favorite'] ?? '-');
+
                             $editTriggerId = 'registration-edit-trigger-'.$registrationItem->id;
                             $detailPayload = [
                                 'fullName' => $namaLengkap,
@@ -2104,6 +2125,9 @@
                                                     <article><p>No HP Orang Tua</p><p>{{ $noHpOrtu }}</p></article>
                                                     <article><p>Email Orang Tua</p><p>{{ $emailOrtu }}</p></article>
                                                     <article><p>Instrumen</p><p>{{ $instrumenText }}</p></article>
+                                                    @if($favoriteSong !== '-')
+                                                        <article><p>Lagu Favorite</p><p>{{ $favoriteSong }}</p></article>
+                                                    @endif
                                                     <article><p>Program Tambahan</p><p>{{ $programTambahanText }}</p></article>
                                                     <article><p>Pengalaman Belajar</p><p>{{ $pengalamanText }}</p></article>
                                                     <article class="registration-modal-item-full"><p>Deskripsi Pengalaman</p><p>{{ $deskripsiPengalaman }}</p></article>
@@ -2152,11 +2176,14 @@
                                                     <label>No HP Orang Tua <input type="tel" name="no_hp_ortu" value="{{ $noHpOrtu }}" required></label>
                                                     <label>Email Orang Tua <input type="email" name="email_ortu" value="{{ $emailOrtu }}"></label>
                                                     <label>Instrumen
-                                                        <select name="instrumen" required>
+                                                        <select name="instrumen" required onchange="toggleFavoriteSong(this, 'reg-edit-favorite-song-{{ $registrationItem->id }}')">
                                                             @foreach($instrumenOptions as $instrumenItem)
                                                                 <option value="{{ $instrumenItem }}" @selected($instrumenValue === $instrumenItem)>{{ $instrumenItem }}</option>
                                                             @endforeach
                                                         </select>
+                                                    </label>
+                                                    <label id="reg-edit-favorite-song-{{ $registrationItem->id }}" style="display: {{ $instrumenValue === 'Vocal' ? 'block' : 'none' }};">Lagu Favorite
+                                                        <input type="text" name="favorite_song" value="{{ $registrationItem->favorite_song ?: ($legacyNotesMap['Lagu Favorite'] ?? '') }}" placeholder="Contoh: Heal The World">
                                                     </label>
                                                     <label>Status
                                                         <select name="status" required>
@@ -3273,6 +3300,19 @@ function updateAdminSelectedPreview(radio) {
         tags.innerHTML = '';
     }
 }
+
+window.toggleFavoriteSong = function(select, targetId) {
+    const target = document.getElementById(targetId);
+    if (!target) return;
+    
+    if (select.value === 'Vocal') {
+        target.style.display = 'block';
+    } else {
+        target.style.display = 'none';
+        const input = target.querySelector('input');
+        if (input) input.value = '';
+    }
+}
 </script>
 @endpush
 
@@ -3332,6 +3372,10 @@ function updateAdminSelectedPreview(radio) {
                         <input type="date" id="tanggal_lahir" name="tanggal_lahir" class="premium-input" value="{{ old('tanggal_lahir') }}">
                     </div>
                     <div class="premium-field">
+                        <label for="kewarganegaraan">Kewarganegaraan</label>
+                        <input type="text" id="kewarganegaraan" name="kewarganegaraan" class="premium-input" value="{{ old('kewarganegaraan', 'Indonesia') }}">
+                    </div>
+                    <div class="premium-field">
                         <label for="email">Email Siswa</label>
                         <input type="email" id="email" name="email" class="premium-input" value="{{ old('email') }}" placeholder="siswa@email.com">
                     </div>
@@ -3382,7 +3426,7 @@ function updateAdminSelectedPreview(radio) {
                 <div class="premium-form-grid">
                     <div class="premium-field">
                         <label for="admin_class_id">Instrumen</label>
-                        <select id="admin_class_id" name="class_id" class="premium-select" required onchange="loadAdminSchedules(this.value)">
+                        <select id="admin_class_id" name="class_id" class="premium-select" required onchange="loadAdminSchedules(this.value); const sel = this.options[this.selectedIndex]; const isVocal = sel.text.toLowerCase().includes('vocal'); document.getElementById('manual-student-favorite-song-group').style.display = isVocal ? 'block' : 'none';">
                             <option value="">Pilih Instrumen</option>
                             @foreach($classesForManagement as $classItem)
                                 <option value="{{ $classItem->id }}" @selected(old('class_id') == $classItem->id)>
@@ -3448,6 +3492,11 @@ function updateAdminSelectedPreview(radio) {
                     <div class="premium-field full-width">
                         <label for="deskripsi_pengalaman">Deskripsi Pengalaman</label>
                         <textarea id="deskripsi_pengalaman" name="deskripsi_pengalaman" class="premium-textarea" placeholder="Ceritakan pengalaman belajar musik sebelumnya (jika ada)">{{ old('deskripsi_pengalaman') }}</textarea>
+                    </div>
+
+                    <div class="premium-field" id="manual-student-favorite-song-group" style="display: none;">
+                        <label for="favorite_song">Lagu Favorite</label>
+                        <input type="text" id="favorite_song" name="favorite_song" class="premium-input" value="{{ old('favorite_song') }}" placeholder="Contoh: Heal The World">
                     </div>
 
                     <div class="premium-field">

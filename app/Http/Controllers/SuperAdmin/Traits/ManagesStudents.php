@@ -34,6 +34,7 @@ trait ManagesStudents
             'program_tambahan' => $data['program_tambahan'] ?? [],
             'pengalaman' => (bool) ($data['pengalaman'] ?? false),
             'deskripsi_pengalaman' => $data['deskripsi_pengalaman'] ?? null,
+            'favorite_song' => $data['favorite_song'] ?? null,
             'start_date' => $data['start_date'] ?? null,
             'duration_months' => $data['duration_months'] ?? null,
         ]);
@@ -58,26 +59,50 @@ trait ManagesStudents
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
+            'nama_panggilan' => ['nullable', 'string', 'max:80'],
+            'jenis_kelamin' => ['nullable', 'in:laki-laki,perempuan'],
+            'tempat_lahir' => ['nullable', 'string', 'max:120'],
+            'tanggal_lahir' => ['nullable', 'date'],
+            'kewarganegaraan' => ['nullable', 'string', 'max:120'],
             'age' => ['nullable', 'integer', 'min:4', 'max:80'],
             'phone' => ['nullable', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:120', 'unique:students,email,' . $student->id],
             'address' => ['nullable', 'string', 'max:500'],
+            'nama_ortu' => ['nullable', 'string', 'max:120'],
+            'pekerjaan_ortu' => ['nullable', 'string', 'max:120'],
+            'no_hp_ortu' => ['nullable', 'string', 'max:30'],
+            'email_ortu' => ['nullable', 'email', 'max:120'],
             'is_active' => ['required', 'in:1,0'],
             'class_ids' => ['nullable', 'array'],
             'class_ids.*' => ['integer', 'exists:classes,id'],
             'start_date' => ['nullable', 'date'],
             'duration_months' => ['nullable', 'integer', 'min:1', 'max:12'],
+            'pengalaman' => ['nullable', 'boolean'],
+            'deskripsi_pengalaman' => ['nullable', 'string', 'max:2000'],
+            'favorite_song' => ['nullable', 'string', 'max:120'],
         ]);
 
         $payload = [
             'name' => $data['name'],
+            'nama_panggilan' => $data['nama_panggilan'] ?? null,
+            'jenis_kelamin' => $data['jenis_kelamin'] ?? null,
+            'tempat_lahir' => $data['tempat_lahir'] ?? null,
+            'tanggal_lahir' => $data['tanggal_lahir'] ?? null,
+            'kewarganegaraan' => $data['kewarganegaraan'] ?? 'Indonesia',
             'age' => $data['age'] ?? null,
             'phone' => $data['phone'] ?? null,
             'email' => $data['email'] ?? null,
             'address' => $data['address'] ?? null,
+            'nama_ortu' => $data['nama_ortu'] ?? null,
+            'pekerjaan_ortu' => $data['pekerjaan_ortu'] ?? null,
+            'no_hp_ortu' => $data['no_hp_ortu'] ?? null,
+            'email_ortu' => $data['email_ortu'] ?? null,
             'is_active' => (bool) ($data['is_active'] ?? '1'),
             'start_date' => $data['start_date'] ?? null,
             'duration_months' => $data['duration_months'] ?? null,
+            'pengalaman' => (bool) ($data['pengalaman'] ?? false),
+            'deskripsi_pengalaman' => $data['deskripsi_pengalaman'] ?? null,
+            'favorite_song' => $data['favorite_song'] ?? null,
         ];
 
         if (!empty($payload['start_date']) && !empty($payload['duration_months'])) {

@@ -41,6 +41,7 @@ class Registration extends Model
         'deskripsi_pengalaman',
         'start_date',
         'duration_months',
+        'favorite_song',
     ];
 
     protected $casts = [

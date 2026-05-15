@@ -25,6 +25,7 @@ class StoreRegistrationRequest extends FormRequest
             'jam' => ['nullable', 'string', 'max:80'],
             'pengalaman' => ['nullable', 'boolean'],
             'deskripsi_pengalaman' => ['nullable', 'string'],
+            'favorite_song' => ['nullable', 'string', 'max:120'],
         ];
     }
 }
