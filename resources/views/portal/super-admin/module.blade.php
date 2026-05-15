@@ -1823,6 +1823,9 @@
                 <label>No HP Siswa
                     <input type="text" name="no_hp_siswa" value="{{ old('no_hp_siswa') }}" required>
                 </label>
+                <label>Instagram Siswa
+                    <input type="text" name="ig_siswa" value="{{ old('ig_siswa') }}" placeholder="@username">
+                </label>
                 <label>Email
                     <input type="email" name="email" value="{{ old('email') }}" required>
                 </label>
@@ -1837,6 +1840,9 @@
                 </label>
                 <label>Email Orang Tua
                     <input type="email" name="email_ortu" value="{{ old('email_ortu') }}">
+                </label>
+                <label>Instagram Orang Tua
+                    <input type="text" name="ig_ortu" value="{{ old('ig_ortu') }}" placeholder="@username_ortu">
                 </label>
                 <label>Instrumen
                     <select name="instrumen" id="reg-create-instrumen" required onchange="toggleFavoriteSong(this, 'reg-create-favorite-song-group')">
@@ -2122,12 +2128,14 @@
                                                     <article><p>Tanggal Lahir</p><p>{{ $tanggalLahirText }}</p></article>
                                                     <article><p>Kewarganegaraan</p><p>{{ $kewarganegaraan }}</p></article>
                                                     <article><p>No HP Siswa</p><p>{{ $teleponSiswa }}</p></article>
+                                                    <article><p>Instagram Siswa</p><p>{{ $registrationItem->ig_siswa ?: '-' }}</p></article>
                                                     <article class="registration-modal-item-full"><p>Email Siswa</p><p>{{ $registrationItem->email }}</p></article>
                                                     <article class="registration-modal-item-full"><p>Alamat</p><p class="text-wrap-normal">{{ $alamat }}</p></article>
                                                     <article><p>Nama Orang Tua</p><p>{{ $namaOrtu }}</p></article>
                                                     <article><p>Pekerjaan Orang Tua</p><p>{{ $pekerjaanOrtu }}</p></article>
                                                     <article><p>No HP Orang Tua</p><p>{{ $noHpOrtu }}</p></article>
                                                     <article><p>Email Orang Tua</p><p>{{ $emailOrtu }}</p></article>
+                                                    <article><p>Instagram Ortu</p><p>{{ $registrationItem->ig_ortu ?: '-' }}</p></article>
                                                     <article><p>Instrumen</p><p>{{ $instrumenText }}</p></article>
                                                     @if($favoriteSong !== '-')
                                                         <article><p>Lagu Favorite</p><p>{{ $favoriteSong }}</p></article>
@@ -2174,11 +2182,13 @@
                                                     <label>Kewarganegaraan <input type="text" name="kewarganegaraan" value="{{ $kewarganegaraan }}" required></label>
                                                     <label style="grid-column: span 2;">Alamat <textarea name="alamat" rows="3" required>{{ $alamat }}</textarea></label>
                                                     <label>No HP Siswa <input type="tel" name="no_hp_siswa" value="{{ $teleponSiswa }}" required></label>
+                                                    <label>Instagram Siswa <input type="text" name="ig_siswa" value="{{ $registrationItem->ig_siswa }}" placeholder="@username"></label>
                                                     <label>Email Siswa <input type="email" name="email" value="{{ $registrationItem->email }}" required></label>
                                                     <label>Nama Orang Tua <input type="text" name="nama_ortu" value="{{ $namaOrtu }}" required></label>
                                                     <label>Pekerjaan Orang Tua <input type="text" name="pekerjaan_ortu" value="{{ $pekerjaanOrtu }}"></label>
                                                     <label>No HP Orang Tua <input type="tel" name="no_hp_ortu" value="{{ $noHpOrtu }}" required></label>
                                                     <label>Email Orang Tua <input type="email" name="email_ortu" value="{{ $emailOrtu }}"></label>
+                                                    <label>Instagram Ortu <input type="text" name="ig_ortu" value="{{ $registrationItem->ig_ortu }}" placeholder="@username"></label>
                                                     <label>Instrumen
                                                         <select name="instrumen" required onchange="toggleFavoriteSong(this, 'reg-edit-favorite-song-{{ $registrationItem->id }}')">
                                                             @foreach($instrumenOptions as $instrumenItem)
