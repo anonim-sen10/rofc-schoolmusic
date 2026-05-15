@@ -286,6 +286,7 @@ class SuperAdminController extends Controller
             case 'registrations':
                 $data['registrationsForManagement'] = Registration::query()->with(['class', 'schedules'])->latest()->get();
                 $data['classesForManagement'] = MusicClass::query()->orderBy('name')->get(['id', 'name']);
+                $data['schedulesForManagement'] = $scheduleFeatureReady ? Schedule::where('status', 'available')->get() : collect();
                 break;
             case 'finance':
                 $data['studentsForFinance'] = Student::query()->orderBy('name')->get(['id', 'name']);

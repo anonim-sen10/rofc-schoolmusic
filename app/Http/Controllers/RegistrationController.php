@@ -126,7 +126,8 @@ class RegistrationController extends Controller
                 'required',
                 Rule::exists('classes', 'id')->where(fn ($query) => $query->where('status', 'active')),
             ],
-            'schedule_id' => ['required', 'integer', 'exists:schedules,id'],
+            'schedule_ids' => ['required', 'array', 'min:1'],
+            'schedule_ids.*' => ['integer', 'exists:schedules,id'],
             'program_tambahan' => ['nullable', 'array'],
             'program_tambahan.*' => ['string', 'max:120'],
             'favorite_song' => ['nullable', 'string', 'max:120'],
@@ -148,20 +149,21 @@ class RegistrationController extends Controller
                 ->withInput();
         }
 
-        $schedule = Schedule::query()
-            ->where('id', $validated['schedule_id'])
+        $schedules = Schedule::query()
+            ->whereIn('id', $validated['schedule_ids'])
             ->where('class_id', (int) $validated['class_id'])
             ->where('status', 'available')
-            ->first(['id', 'day', 'time']);
+            ->get(['id', 'day', 'time']);
 
-        if (! $schedule) {
+        if ($schedules->count() !== count($validated['schedule_ids'])) {
             return back()
-                ->withErrors(['schedule_id' => 'Slot jadwal sudah tidak tersedia atau tidak valid. Silakan pilih slot lain.'])
+                ->withErrors(['schedule_ids' => 'Satu atau lebih slot jadwal sudah tidak tersedia atau tidak valid. Silakan pilih slot lain.'])
                 ->withInput();
         }
 
         $instrumentName = (string) $selectedClass->name;
-        $scheduleText = $schedule->day.' - '.substr((string) $schedule->time, 0, 5);
+        $scheduleTexts = $schedules->map(fn($s) => $s->day . ' - ' . substr((string)$s->time, 0, 5))->implode(', ');
+        $days = $schedules->pluck('day')->unique()->toArray();
 
         $tanggalLahir = Carbon::parse($validated['tanggal_lahir']);
 
@@ -182,11 +184,11 @@ class RegistrationController extends Controller
             'email_ortu' => $validated['email_ortu'] ?? null,
 
             'class_id' => $validated['class_id'],
-            'schedule_id' => $validated['schedule_id'],
+            'schedule_id' => $validated['schedule_ids'][0], // Legacy first one
             'instrumen' => $instrumentName,
             'program_tambahan' => $validated['program_tambahan'] ?? [],
             'favorite_song' => $validated['favorite_song'] ?? null,
-            'hari_pilihan' => [$schedule->day],
+            'hari_pilihan' => $days,
 
             'pengalaman' => (bool) $validated['pengalaman'],
             'deskripsi_pengalaman' => $validated['deskripsi_pengalaman'] ?? null,
@@ -197,7 +199,7 @@ class RegistrationController extends Controller
             'full_name' => $validated['nama_lengkap'],
             'age' => $tanggalLahir->age,
             'phone' => $validated['no_hp_siswa'],
-            'preferred_schedule' => $scheduleText,
+            'preferred_schedule' => $scheduleTexts,
             'notes' => $validated['deskripsi_pengalaman'] ?? null,
             'status' => 'pending',
         ];
@@ -235,7 +237,7 @@ class RegistrationController extends Controller
         $registration = Registration::create($filteredPayload);
         
         if (method_exists($registration, 'schedules')) {
-            $registration->schedules()->sync([$validated['schedule_id']]);
+            $registration->schedules()->sync($validated['schedule_ids']);
         }
 
         return back()->with('success', 'Pendaftaran Anda berhasil dikirim. Kami akan menghubungi Anda untuk proses berikutnya.');

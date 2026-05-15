@@ -1119,16 +1119,14 @@
         };
 
         const resetSelection = () => {
-            const checked = document.querySelector('input[name="schedule_id"]:checked');
-            if (checked) {
-                checked.checked = false;
-            }
+            document.querySelectorAll('input[name="schedule_ids[]"]:checked').forEach(i => i.checked = false);
             updateSelectedPreview();
         };
 
         const updateSelectedPreview = () => {
-            const checked = document.querySelector('input[name="schedule_id"]:checked');
-            if (!checked) {
+            const checkedItems = Array.from(document.querySelectorAll('input[name="schedule_ids[]"]:checked'));
+            
+            if (checkedItems.length === 0) {
                 if (selectedPreview) selectedPreview.style.display = 'none';
                 if (selectedTags) selectedTags.innerHTML = '';
                 return;
@@ -1136,16 +1134,20 @@
 
             if (selectedPreview) selectedPreview.style.display = 'block';
             if (selectedTags) {
-                selectedTags.innerHTML = `
+                selectedTags.innerHTML = checkedItems.map(item => `
                     <span class="selected-tag">
-                        ${checked.dataset.label}
-                        <svg onclick="const target = document.querySelector('input[name=\\'schedule_id\\'][value=\\'${checked.value}\\']'); if(target){target.checked = false; target.dispatchEvent(new Event(\\'change\\'));}" style="cursor:pointer; width:14px; height:14px" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        ${item.dataset.label}
+                        <svg onclick="const target = document.querySelector('input[name=\\'schedule_ids[]\\'][value=\\'${item.value}\\']'); if(target){target.checked = false; target.dispatchEvent(new Event(\\'change\\'));}" style="cursor:pointer; width:14px; height:14px" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </span>
-                `;
+                `).join('');
             }
             
+            // Update confirmation text
+            const confirmElem = document.querySelector('[data-confirm="schedule_id"]');
+            if (confirmElem) confirmElem.textContent = checkedItems.map(i => i.dataset.label).join(', ');
+
             if (scheduleError) scheduleError.style.display = 'none';
         };
 
@@ -1192,7 +1194,7 @@
                                     const isBooked = String(s.status).toLowerCase() === 'booked';
                                     return `
                                         <label class="schedule-opt ${isBooked ? 'is-booked' : ''}">
-                                            <input type="radio" name="schedule_id" value="${s.id}" data-label="${day} ${s.time} (${s.teacher_name})" ${isBooked ? 'disabled' : ''}>
+                                            <input type="checkbox" name="schedule_ids[]" value="${s.id}" data-label="${day} ${s.time} (${s.teacher_name})" ${isBooked ? 'disabled' : ''}>
                                             <div class="schedule-time">${s.time}</div>
                                             ${isBooked ? '<div class="schedule-status">(Full)</div>' : ''}
                                         </label>
@@ -1221,11 +1223,13 @@
                     });
                 });
 
-                scheduleContainer.querySelectorAll('input[type="radio"]').forEach(radio => {
-                    radio.addEventListener('change', () => {
-                        scheduleContainer.querySelectorAll('.schedule-opt').forEach(opt => opt.classList.remove('is-selected'));
-                        if (radio.checked) {
-                            radio.closest('.schedule-opt').classList.add('is-selected');
+                scheduleContainer.querySelectorAll('input[name="schedule_ids[]"]').forEach(checkbox => {
+                    checkbox.addEventListener('change', () => {
+                        const opt = checkbox.closest('.schedule-opt');
+                        if (checkbox.checked) {
+                            opt.classList.add('is-selected');
+                        } else {
+                            opt.classList.remove('is-selected');
                         }
                         updateSelectedPreview();
                     });
@@ -1297,8 +1301,8 @@
         const originalValidateStep = validateStep;
         window.validateStep = (stepNumber) => {
             if (stepNumber === 2) {
-                const checked = document.querySelector('input[name="schedule_id"]:checked');
-                if (!checked) {
+                const checked = document.querySelectorAll('input[name="schedule_ids[]"]:checked');
+                if (checked.length === 0) {
                     if (scheduleError) {
                         scheduleError.style.display = 'block';
                         scheduleError.scrollIntoView({ behavior: 'smooth', block: 'center' });

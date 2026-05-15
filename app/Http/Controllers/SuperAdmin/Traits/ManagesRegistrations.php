@@ -46,9 +46,15 @@ trait ManagesRegistrations
             'status' => ['required', 'in:pending,accepted,rejected'],
             'favorite_song' => ['nullable', 'string', 'max:120'],
             'instrumen' => ['nullable', 'string', 'max:80'],
+            'schedule_ids' => ['nullable', 'array'],
+            'schedule_ids.*' => ['integer', 'exists:schedules,id'],
         ]);
 
         $registration->update($data);
+
+        if (isset($data['schedule_ids'])) {
+            $registration->schedules()->sync($data['schedule_ids']);
+        }
 
         $this->syncStudentFromRegistration($registration);
 

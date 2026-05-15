@@ -2210,6 +2210,21 @@
                                                     <label id="reg-edit-favorite-song-{{ $registrationItem->id }}">Lagu Favorite
                                                         <input type="text" name="favorite_song" value="{{ $registrationItem->favorite_song ?: ($legacyNotesMap['Lagu Favorite'] ?? '') }}" placeholder="Contoh: Heal The World">
                                                     </label>
+                                                    <label style="grid-column: span 2;">Pilih Jadwal (Bisa pilih banyak untuk Double Time)
+                                                        <select name="schedule_ids[]" multiple style="height: 120px; font-size: 11px; width: 100%; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 0.5rem;">
+                                                            @php
+                                                                $currentScheduleIds = $registrationItem->schedules->pluck('id')->toArray();
+                                                                $relevantSchedules = $schedulesForManagement->where('class_id', $registrationItem->class_id);
+                                                                $allSelectable = $relevantSchedules->merge($registrationItem->schedules)->unique('id');
+                                                            @endphp
+                                                            @foreach($allSelectable as $sch)
+                                                                <option value="{{ $sch->id }}" @selected(in_array($sch->id, $currentScheduleIds))>
+                                                                    {{ $sch->day }} {{ substr((string)$sch->time, 0, 5) }} ({{ $sch->teacher?->name ?? '-' }}) {{ $sch->status === 'booked' && !in_array($sch->id, $currentScheduleIds) ? '[FULL]' : '' }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                        <p style="font-size: 10px; color: #9ca3af; margin-top: 4px;">Tahan Ctrl/Cmd untuk pilih banyak.</p>
+                                                    </label>
                                                     <label>Status
                                                         <select name="status" required>
                                                             <option value="pending" @selected($registrationStatus === 'pending')>pending</option>
