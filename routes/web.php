@@ -108,6 +108,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('/portal', [PortalController::class, 'redirectByRole'])->name('portal.redirect');
     Route::get('/portal/custom', [PortalController::class, 'customDashboard'])->name('portal.custom.dashboard');
+    Route::get('/stop-impersonate', [SuperAdminController::class, 'stopImpersonate'])->name('stop-impersonate');
 });
 
 Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'role:super_admin'])->group(function () {
@@ -138,6 +139,7 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'role:su
     Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
     Route::get('/users/{user}/detail', [SuperAdminController::class, 'showUser'])->name('users.show');
     Route::get('/users/{user}/edit', [SuperAdminController::class, 'editUser'])->name('users.edit');
+    Route::get('/users/{user}/impersonate', [SuperAdminController::class, 'impersonate'])->name('users.impersonate');
     Route::put('/users/{user}', [SuperAdminController::class, 'updateUser'])->name('users.update');
     Route::delete('/users/{user}', [SuperAdminController::class, 'destroyUser'])->name('users.destroy');
     Route::post('/roles', [SuperAdminController::class, 'storeRole'])->name('roles.store');
@@ -162,6 +164,7 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'role:su
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_admin'])->group(function () {
     Route::get('/', fn () => app(PortalController::class)->dashboard('admin'))->name('dashboard');
+    Route::get('/users/{user}/impersonate', [SuperAdminController::class, 'impersonate'])->name('users.impersonate');
 
     Route::get('/classes', [AcademicManagementController::class, 'classes'])->name('classes.index');
     Route::post('/classes', [AcademicManagementController::class, 'storeClass'])->name('classes.store');

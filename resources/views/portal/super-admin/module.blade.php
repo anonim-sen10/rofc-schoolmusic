@@ -925,9 +925,12 @@
                                                 </section>
                                             </div>
                                             <footer class="registration-modal-footer">
-                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x"></i> Tutup</button>
-                                                <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(2)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');"><i data-lucide="user-cog"></i> Edit Akses</button>
-                                                <button type="button" class="registration-modal-btn registration-modal-btn-danger" onclick="if(confirm('Hapus user ini?')) this.closest('.action-icons').querySelector('form.delete-form').submit();"><i data-lucide="trash-2"></i> Hapus</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x" class="w-4 h-4"></i> Tutup</button>
+                                                <a href="{{ route('super-admin.users.impersonate', $userRow->id) }}" class="registration-modal-btn" style="background: #0f172a !important; color: #fff !important; border: none !important;">
+                                                    <i data-lucide="user-plus" class="w-4 h-4"></i> Login As
+                                                </a>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(2)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');"><i data-lucide="user-cog" class="w-4 h-4"></i> Edit Akses</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-danger" onclick="if(confirm('Hapus user ini?')) this.closest('.action-icons').querySelector('form.delete-form').submit();"><i data-lucide="trash-2" class="w-4 h-4"></i> Hapus</button>
                                             </footer>
                                         </div>
                                     </details>
@@ -1228,9 +1231,14 @@
                                                 </section>
                                             </div>
                                             <footer class="registration-modal-footer">
-                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x"></i> Tutup</button>
-                                                <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(2)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');"><i data-lucide="pencil"></i> Edit Data</button>
-                                                <button type="button" class="registration-modal-btn registration-modal-btn-danger" onclick="if(confirm('Hapus teacher ini?')) this.closest('.action-icons').querySelector('form.delete-form').submit();"><i data-lucide="trash-2"></i> Hapus</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x" class="w-4 h-4"></i> Tutup</button>
+                                                @if($teacher->user)
+                                                    <a href="{{ route('super-admin.users.impersonate', $teacher->user->id) }}" class="registration-modal-btn" style="background: #0f172a !important; color: #fff !important; border: none !important;">
+                                                        <i data-lucide="user-plus" class="w-4 h-4"></i> Login As
+                                                    </a>
+                                                @endif
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(2)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');"><i data-lucide="pencil" class="w-4 h-4"></i> Edit Data</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-danger" onclick="if(confirm('Hapus teacher ini?')) this.closest('.action-icons').querySelector('form.delete-form').submit();"><i data-lucide="trash-2" class="w-4 h-4"></i> Hapus</button>
                                             </footer>
                                         </div>
                                     </details>
@@ -1678,9 +1686,14 @@
                                                 </section>
                                             </div>
                                             <footer class="registration-modal-footer">
-                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x"></i> Tutup</button>
-                                                <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(2)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');"><i data-lucide="pencil"></i> Edit Data</button>
-                                                <button type="button" class="registration-modal-btn registration-modal-btn-danger" onclick="if(confirm('Hapus siswa ini?')) this.closest('.action-icons').querySelector('form.delete-form').submit();"><i data-lucide="trash-2"></i> Hapus</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x" class="w-4 h-4"></i> Tutup</button>
+                                                @if($student->user_id)
+                                                    <a href="{{ route('super-admin.users.impersonate', $student->user_id) }}" class="registration-modal-btn" style="background: #0f172a !important; color: #fff !important; border: none !important;">
+                                                        <i data-lucide="user-plus" class="w-4 h-4"></i> Login As
+                                                    </a>
+                                                @endif
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(2)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');"><i data-lucide="pencil" class="w-4 h-4"></i> Edit Data</button>
+                                                <button type="button" class="registration-modal-btn registration-modal-btn-danger" onclick="if(confirm('Hapus siswa ini?')) this.closest('.action-icons').querySelector('form.delete-form').submit();"><i data-lucide="trash-2" class="w-4 h-4"></i> Hapus</button>
                                             </footer>
                                         </div>
                                     </details>

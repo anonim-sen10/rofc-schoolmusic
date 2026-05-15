@@ -202,12 +202,13 @@ tbody tr:hover td {
 .btn-secondary {
     background: rgba(255, 255, 255, 0.05);
     color: var(--text);
-    border: 1px solid var(--line);
+    border: none;
     border-radius: var(--radius-md);
     padding: 0.75rem 1.5rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
+    box-shadow: var(--shadow-sm);
 }
 
 .btn-secondary:hover {
@@ -653,10 +654,11 @@ html.sidebar-collapsed .portal-topbar {
     justify-content: center !important;
     border-radius: 0.5rem !important;
     background: #f8fafc !important;
-    border: 1px solid #e2e8f0 !important;
+    border: none !important;
     color: #64748b !important;
     transition: all 0.2s !important;
     cursor: pointer;
+    box-shadow: var(--shadow-sm) !important;
 }
 
 .btn-icon:hover {
@@ -1166,13 +1168,14 @@ th {
 }
 
 .module-form .btn-secondary {
-    border: 1px solid rgba(148, 163, 184, 0.35);
+    border: none;
     border-radius: 0.65rem;
     padding: 0.65rem 1rem;
     font-weight: 600;
     cursor: pointer;
     color: var(--text);
     background: rgba(15, 23, 42, 0.7);
+    box-shadow: var(--shadow-sm);
 }
 
 .module-form .btn-secondary:hover {
@@ -1559,7 +1562,7 @@ details.action-popover[open]::before {
 .te-btn--secondary {
     background: #ffffff;
     color: #374151;
-    border-color: #d1d5db;
+    border-color: transparent;
 }
 .te-btn--secondary:hover {
     background: #f3f4f6;
@@ -1568,7 +1571,7 @@ details.action-popover[open]::before {
 .te-btn--primary {
     background: #2563eb;
     color: #ffffff;
-    border-color: #1d4ed8;
+    border-color: transparent;
     box-shadow: 0 1px 2px rgba(37, 99, 235, 0.25);
 }
 .te-btn--primary:hover {
@@ -1738,9 +1741,11 @@ details.action-popover[open]::before {
     justify-content: space-between;
     gap: 0.75rem;
     align-items: flex-start;
-    padding: 1.1rem 1.25rem;
-    border-bottom: 1px solid #e2e8f0;
+    padding: 1.5rem 1.75rem 1rem;
+    border-bottom: none;
     flex-shrink: 0;
+    position: relative;
+    z-index: 1;
 }
 
 .registration-modal-header-left {
@@ -1750,20 +1755,24 @@ details.action-popover[open]::before {
 }
 
 .registration-modal-icon {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 0.75rem;
+    width: 3.2rem;
+    height: 3.2rem;
+    border-radius: 1rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     color: #1d4ed8;
-    background: #eff6ff;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border: 1px solid #f1f5f9;
 }
 
 .registration-modal-header h3 {
     margin: 0;
     color: #0f172a;
-    font-size: 1.02rem;
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
 }
 
 .registration-modal-header p {
@@ -1773,16 +1782,18 @@ details.action-popover[open]::before {
 }
 
 .registration-modal-close-btn {
-    width: 2.1rem;
-    height: 2.1rem;
-    border-radius: 0.6rem;
-    border: 1px solid #dbe3ef;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    border: 1px solid #f1f5f9;
     background: #fff;
-    color: #64748b;
+    color: #94a3b8;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: all 0.2s;
 }
 
 .registration-modal-close-btn:hover {
@@ -1798,15 +1809,16 @@ details.action-popover[open]::before {
 }
 
 .registration-modal-summary {
-    margin-bottom: 0.9rem;
-    border-radius: 0.9rem;
-    border: 1px solid #dbe3ef;
-    background: #f8fafc;
-    padding: 0.8rem;
+    margin-bottom: 1.2rem;
+    border-radius: 1.2rem;
+    border: 1px solid #f1f5f9;
+    background: #ffffff;
+    padding: 1rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.8rem;
+    gap: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
 }
 
 .registration-modal-summary-left {
@@ -1816,15 +1828,17 @@ details.action-popover[open]::before {
 }
 
 .registration-modal-avatar {
-    width: 2.7rem;
-    height: 2.7rem;
-    border-radius: 999px;
-    background: #dbeafe;
-    color: #1e40af;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 1.1rem;
+    background: #2563eb;
+    color: #ffffff;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
+    font-weight: 900;
+    font-size: 1.4rem;
+    box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
 }
 
 .registration-modal-summary p {
@@ -1847,10 +1861,11 @@ details.action-popover[open]::before {
 }
 
 .registration-modal-grid > article {
-    border: 1px solid #dbe3ef;
-    border-radius: 0.75rem;
-    padding: 0.7rem;
+    border: 1px solid #f1f5f9;
+    border-radius: 1rem;
+    padding: 0.9rem;
     background: #fff;
+    transition: all 0.2s;
 }
 
 .registration-modal-grid > article > p:first-child {
@@ -1905,10 +1920,10 @@ details.action-popover[open]::before {
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
-    gap: 0.55rem;
-    padding: 0.9rem 1.25rem 1.1rem;
-    border-top: 1px solid #e2e8f0;
-    background: #fff;
+    gap: 0.65rem;
+    padding: 1.25rem 1.75rem 1.75rem;
+    border-top: none;
+    background: transparent;
     flex-shrink: 0;
 }
 
@@ -1916,8 +1931,9 @@ details.action-popover[open]::before {
 
 .registration-modal-btn-secondary {
     background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
+    border: none !important;
     color: #475569 !important;
+    box-shadow: var(--shadow-sm) !important;
 }
 .registration-modal-btn-secondary:hover {
     background: #f8fafc !important;
@@ -1927,7 +1943,7 @@ details.action-popover[open]::before {
 }
 .registration-modal-btn-primary {
     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
-    border: 1px solid #1d4ed8 !important;
+    border: none !important;
     color: #ffffff !important;
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
 }
@@ -1938,7 +1954,7 @@ details.action-popover[open]::before {
 }
 .registration-modal-btn-danger {
     background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%) !important;
-    border: 1px solid #be123c !important;
+    border: none !important;
     color: #ffffff !important;
     box-shadow: 0 4px 12px rgba(225, 29, 72, 0.2) !important;
 }
@@ -2371,7 +2387,7 @@ details.action-popover[open]::before {
 /* Premium Primary Button */
 .registration-modal-btn-primary, .te-btn--primary {
     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
-    border: 1px solid #1d4ed8 !important;
+    border: none !important;
     color: #ffffff !important;
 }
 
@@ -2383,7 +2399,7 @@ details.action-popover[open]::before {
 /* Premium Secondary/Tutup Button */
 .registration-modal-btn-secondary, .te-btn--secondary {
     background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
+    border: none !important;
     color: #475569 !important;
 }
 
@@ -2396,7 +2412,7 @@ details.action-popover[open]::before {
 /* Premium Danger Button */
 .registration-modal-btn-danger {
     background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%) !important;
-    border: 1px solid #be123c !important;
+    border: none !important;
     color: #ffffff !important;
 }
 
@@ -3375,13 +3391,27 @@ details.registration-style-popover[open] .action-popover-form.registration-edit-
     max-height: 85vh !important;
     display: flex !important;
     flex-direction: column;
-    border: 1px solid #d5deeb;
-    border-radius: 1rem;
+    border: 1px solid #f1f5f9;
+    border-radius: 1.75rem;
     background: #ffffff;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 30px 100px -20px rgba(0, 0, 0, 0.2);
     overflow: hidden;
     padding: 0 !important;
     animation: popoverReveal 0.2s ease forwards;
+    position: relative;
+}
+
+/* Decorative Header Background for Popovers */
+.action-popover-form.registration-edit-form::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 7rem;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+    pointer-events: none;
+    z-index: 0;
 }
 
 details.registration-style-popover[open] .action-popover-form.registration-edit-form .registration-modal-body {
@@ -3451,7 +3481,7 @@ details.registration-style-popover[open] .registration-modal-btn i {
 }
 
 details.registration-style-popover[open] .registration-modal-btn-secondary {
-    border-color: #e2e8f0 !important;
+    border-color: transparent !important;
     background: #ffffff !important;
     color: #475569 !important;
 }
@@ -3462,7 +3492,7 @@ details.registration-style-popover[open] .registration-modal-btn-secondary:hover
 }
 details.registration-style-popover[open] .registration-modal-btn-primary {
     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
-    border: 1px solid #1d4ed8 !important;
+    border: none !important;
     color: #ffffff !important;
 }
 details.registration-style-popover[open] .registration-modal-btn-primary:hover {
@@ -3471,7 +3501,7 @@ details.registration-style-popover[open] .registration-modal-btn-primary:hover {
 }
 details.registration-style-popover[open] .registration-modal-btn-danger {
     background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%) !important;
-    border: 1px solid #be123c !important;
+    border: none !important;
     color: #ffffff !important;
 }
 details.registration-style-popover[open] .registration-modal-btn-danger:hover {
@@ -3704,7 +3734,7 @@ html.sidebar-collapsed .brand-logo-content {
 }
 
 .confirm-modal-btn-secondary {
-    border-color: #cbd5e1;
+    border-color: transparent;
     color: #334155;
     background: #fff;
 }
@@ -3714,7 +3744,7 @@ html.sidebar-collapsed .brand-logo-content {
 }
 
 .confirm-modal-btn-primary {
-    border-color: #1d4ed8;
+    border-color: transparent;
     color: #fff;
     background: linear-gradient(135deg, #2563eb, #1d4ed8);
 }
@@ -4068,4 +4098,50 @@ html.sidebar-collapsed .brand-logo-content {
 .toast-content p {
     margin: 0 !important;
     line-height: 1.4;
+}
+
+/* --- GLOBAL UI MODERNIZATION --- */
+/* Remove harsh borders and strokes from all buttons and interactive elements */
+button, 
+.btn, 
+[class*='te-btn'], 
+[class*='registration-modal-btn'],
+.action-icons > a, 
+.action-icons > button,
+.action-icons > form > button {
+    border: none !important;
+    outline: none !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Soft hover effect for all buttons */
+button:hover, 
+.btn:hover, 
+[class*='te-btn']:hover, 
+[class*='registration-modal-btn']:hover,
+.action-icons > a:hover, 
+.action-icons > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Subtle depth for buttons that have color shadow utilities */
+[class*='shadow-blue-'], [class*='shadow-slate-'], [class*='shadow-red-'] {
+    --tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);
+    box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow) !important;
+}
+
+/* Specific fix for white/secondary buttons to have a very soft, non-black border */
+.bg-white.border-slate-200, 
+.bg-white.border-slate-100,
+.te-btn--secondary,
+.registration-modal-btn-secondary {
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    background-color: #ffffff !important;
+}
+
+/* Remove all harsh shadows from cards */
+.shadow-lg, .shadow-xl, .shadow-2xl {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
 }

@@ -11,53 +11,79 @@
     $panelTitle = 'Teacher Portal';
     $homeRoute = route('teacher.dashboard');
 @endphp
+
 @extends('portal.layouts.app')
+
 @section('title', 'My Schedule')
-@section('page-title', 'My Schedule')
+@section('page-title', 'Teaching Schedule')
+@section('page-subtitle', 'Pantau dan kelola seluruh jadwal sesi mengajar Anda dengan sistem absensi GPS terintegrasi.')
+
 @section('content')
 
-<section class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-8 mt-2">
-    <div class="px-6 py-4 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+<section class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden mb-8 mt-2">
+    <div class="px-8 py-5 border-b border-slate-50 flex items-center justify-between bg-slate-50/20">
         <div>
-            <h3 class="text-base font-bold text-slate-900 leading-none">Jadwal Mengajar Saya</h3>
-            <p class="text-[11px] font-medium text-slate-400 mt-1">Daftar seluruh sesi mengajar Anda.</p>
+            <h3 class="text-lg font-extrabold text-slate-900 tracking-tight">Jadwal Mengajar Saya</h3>
+            <p class="text-[10px] font-semibold text-slate-400 mt-1 flex items-center gap-2">
+                <i data-lucide="info" class="w-3 h-3 text-blue-400"></i>
+                Daftar seluruh sesi mengajar aktif dan riwayat pertemuan Anda.
+            </p>
         </div>
-        <i data-lucide="calendar-days" class="w-4 h-4 text-slate-300"></i>
+        <div class="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100/50">
+            <i data-lucide="calendar-check-2" class="w-5 h-5"></i>
+        </div>
     </div>
 
     <div class="overflow-x-auto">
-        <table class="w-full">
+        <table class="w-full border-separate border-spacing-0">
             <thead>
-                <tr class="bg-slate-50/50">
-                    <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Jadwal</th>
-                    <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nama Siswa</th>
-                    <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kelas</th>
-                    <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Alamat</th>
-                    <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
-                    <th class="px-8 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Action</th>
+                <tr class="bg-slate-50/60">
+                    <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-100">Jadwal Sesi</th>
+                    <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-100">Informasi Siswa</th>
+                    <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-100">Materi Kelas</th>
+                    <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-100">Lokasi</th>
+                    <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-100">Status</th>
+                    <th class="px-8 py-4 text-right text-[10px] font-bold text-slate-500 uppercase tracking-widest border-b border-slate-100">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-50">
+            <tbody class="divide-y divide-slate-50/80">
                 @forelse($schedules as $schedule)
-                    <tr class="hover:bg-slate-50 transition-colors group">
+                    <tr class="hover:bg-blue-50/20 transition-all duration-300 group">
                         <td class="px-8 py-5 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-lg bg-blue-50 text-blue-600 text-[10px] font-bold border border-blue-100">
-                                {{ $schedule->session_date->translatedFormat('l, d M Y') }} - {{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}
-                            </span>
+                            <div class="flex flex-col gap-1">
+                                <span class="inline-flex items-center w-fit px-2.5 py-1 rounded-lg bg-blue-600 text-white text-[10px] font-extrabold shadow-sm tracking-tight">
+                                    {{ $schedule->session_date->translatedFormat('l, d M Y') }}
+                                </span>
+                                <span class="inline-flex items-center gap-1.5 px-0.5 text-[11px] font-bold text-slate-600">
+                                    <i data-lucide="clock" class="w-3 h-3 text-blue-500"></i>
+                                    {{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }} WIB
+                                </span>
+                            </div>
                         </td>
                         <td class="px-8 py-5">
                             <div class="flex items-center gap-3">
-                                <div class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-[10px] uppercase border border-slate-200">
-                                    {{ substr($schedule->student->user->name ?? ($schedule->student->name ?? '-'), 0, 2) }}
+                                <div class="h-10 w-10 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-700 font-extrabold text-xs uppercase group-hover:scale-105 transition-transform duration-300">
+                                    @php
+                                        $initials = substr($schedule->student->user->name ?? ($schedule->student->name ?? '-'), 0, 2);
+                                    @endphp
+                                    <span class="bg-gradient-to-br from-slate-700 to-slate-900 bg-clip-text text-transparent">{{ $initials }}</span>
                                 </div>
-                                <span class="text-sm font-bold text-slate-700">{{ $schedule->student->user->name ?? ($schedule->student->name ?? '-') }}</span>
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-extrabold text-slate-800 leading-none">{{ $schedule->student->user->name ?? ($schedule->student->name ?? '-') }}</span>
+                                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">ID: {{ str_pad($schedule->student_id, 4, '0', STR_PAD_LEFT) }}</span>
+                                </div>
                             </div>
                         </td>
-                        <td class="px-8 py-5 text-xs font-medium text-slate-500">{{ $schedule->musicClass->name ?? '-' }}</td>
                         <td class="px-8 py-5">
-                            <div class="flex items-center gap-1.5 text-[11px] text-slate-400">
-                                <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
-                                <span class="max-w-[150px] truncate">{{ $schedule->student->address ?? '-' }}</span>
+                            <div class="flex flex-col gap-0.5">
+                                <span class="text-xs font-bold text-slate-700">{{ $schedule->musicClass->name ?? '-' }}</span>
+                                <span class="text-[9px] font-medium text-slate-400 uppercase tracking-wider">Private Session</span>
+                            </div>
+                        </td>
+                        <td class="px-8 py-5">
+                            <div class="flex items-start gap-1.5 text-[11px] font-semibold text-slate-500 max-w-[160px]">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-300 mt-0.5 shrink-0"></i>
+                                <span class="leading-snug">{{ $schedule->student->address ?? 'Alamat belum tersedia' }}</span>
                             </div>
                         </td>
                         <td class="px-8 py-5">
@@ -66,27 +92,33 @@
                             @endphp
 
                             @if($schedule->status === 'rescheduled')
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-50 text-slate-600 text-[10px] font-bold border border-slate-200">RESCHEDULED</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-[9px] font-extrabold border border-slate-200 tracking-wider">RESCHEDULED</span>
                             @elseif($pendingRequest)
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 text-[10px] font-bold border border-amber-100 uppercase tracking-tight">RESCHEDULE REQ</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-[9px] font-extrabold border border-amber-200 tracking-wider animate-pulse">RESCHEDULE REQ</span>
                             @else
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-green-50 text-green-700 text-[10px] font-bold border border-green-100">ACTIVE</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-[9px] font-extrabold border border-green-200 tracking-wider">ACTIVE</span>
                             @endif
                         </td>
                         <td class="px-8 py-5">
-                            <div class="flex items-center justify-end gap-2">
+                            <div class="flex items-center justify-end">
                                 @if($schedule->status === 'completed')
-                                    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-green-600"><i data-lucide="check-circle" class="w-4 h-4"></i> SELESAI</span>
+                                    <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-green-50 text-green-700 border border-green-100">
+                                        <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+                                        <span class="text-[9px] font-extrabold tracking-widest uppercase">Finished</span>
+                                    </div>
                                 @elseif($schedule->attendance)
-                                    @php $status = strtolower($schedule->attendance->status); @endphp
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg {{ $status === 'present' ? 'bg-green-50 text-green-700 border-green-100' : ($status === 'absent' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-amber-50 text-amber-700 border-amber-100') }} text-[10px] font-bold border uppercase">
-                                        {{ $status }}
-                                    </span>
+                                    @php 
+                                        $status = strtolower($schedule->attendance->status);
+                                        $class = $status === 'present' ? 'bg-blue-50 text-blue-700 border-blue-100' : ($status === 'absent' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-amber-50 text-amber-700 border-amber-100');
+                                    @endphp
+                                    <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl {{ $class }} border">
+                                        <span class="text-[9px] font-extrabold tracking-widest uppercase">{{ $status }}</span>
+                                    </div>
                                 @elseif($schedule->session_date->isFuture())
-                                    <span class="text-[10px] font-medium text-slate-400 italic">Upcoming</span>
+                                    <span class="text-[10px] font-bold text-slate-300 tracking-widest uppercase italic opacity-60">Upcoming</span>
                                 @else
                                     <button type="button" 
-                                        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 text-white text-[10px] font-bold shadow-sm hover:bg-blue-700 transition-all active:scale-95"
+                                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-[10px] font-extrabold shadow-lg shadow-blue-100 hover:bg-blue-700 active:scale-95 transition-all duration-300"
                                         onclick="openAttendanceModal('{{ $schedule->id }}', '{{ $schedule->student->name }}', '{{ $schedule->musicClass->name }}', '{{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}')">
                                         <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
                                         <span>ATTENDANCE</span>
@@ -97,13 +129,13 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="py-12 text-center">
+                        <td colspan="6" class="py-16 text-center">
                             <div class="flex flex-col items-center justify-center">
-                                <div class="h-16 w-16 rounded-3xl bg-slate-50 flex items-center justify-center text-slate-300 mb-4">
+                                <div class="h-16 w-16 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-200 mb-4 border border-slate-100">
                                     <i data-lucide="calendar-off" class="w-8 h-8"></i>
                                 </div>
-                                <h4 class="text-slate-900 font-bold text-sm">Belum ada jadwal</h4>
-                                <p class="text-slate-400 text-xs">Belum ada jadwal yang di-booking untuk saat ini.</p>
+                                <h4 class="text-slate-900 font-extrabold text-base">Belum ada jadwal mengajar</h4>
+                                <p class="text-slate-400 text-xs max-w-sm mx-auto mt-1 font-medium">Anda belum memiliki jadwal sesi musik yang terdaftar untuk periode ini.</p>
                             </div>
                         </td>
                     </tr>
@@ -113,60 +145,67 @@
     </div>
 </section>
 
+@push('modals')
 {{-- Premium Attendance Modal (TailwindCSS) --}}
-<div id="attendanceModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4 sm:p-6">
+<div id="attendanceModal" class="hidden items-center justify-center overflow-hidden px-4 transition-all duration-300" style="position: fixed !important; inset: 0 !important; z-index: 999999 !important;">
     {{-- Glassmorphism Overlay --}}
-    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeAttendanceModal()"></div>
+    <div class="absolute inset-0 bg-slate-900/5 backdrop-blur-[2px] transition-opacity" onclick="closeAttendanceModal()" style="position: absolute !important; inset: 0 !important;"></div>
     
-    {{-- Modal Container --}}
-    <div class="relative w-full max-w-lg transform overflow-hidden rounded-3xl bg-white shadow-2xl transition-all animate-in fade-in zoom-in duration-300">
+    {{-- Modal Container (Compact & Floating) --}}
+    <div class="relative w-full max-w-lg transform overflow-hidden rounded-[28px] bg-white shadow-[0_25px_80px_-15px_rgba(0,0,0,0.3)] transition-all animate-in fade-in zoom-in slide-in-from-bottom-8 duration-500 border border-slate-100">
         
+        {{-- Decorative Background --}}
+        <div class="absolute top-0 left-0 right-0 h-32 bg-gradient-to-br from-blue-600/5 via-blue-50/10 to-transparent"></div>
+
         {{-- Header Section --}}
-        <header class="relative border-b border-slate-100 bg-white px-6 py-5">
+        <header class="relative px-8 pt-8 pb-6">
             <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-                        <i data-lucide="user-check" class="h-6 w-6"></i>
+                <div class="flex items-center gap-5">
+                    <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-100 uppercase transition-transform duration-300">
+                        <i data-lucide="user-check" class="h-7 w-7"></i>
                     </div>
                     <div>
-                        <h3 class="text-lg font-bold text-slate-900">Mark Attendance</h3>
-                        <div class="flex items-center gap-2 text-xs font-medium text-slate-500">
-                            <i data-lucide="clock" class="h-3 w-3"></i>
-                            <span id="realtime-clock">Loading...</span>
+                        <h3 class="text-xl font-black text-slate-900 tracking-tight leading-tight">Mark Attendance</h3>
+                        <div class="flex items-center gap-2 mt-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            <i data-lucide="clock" class="h-3 w-3 text-blue-500"></i>
+                            <span id="realtime-clock" class="text-slate-600">Loading...</span>
                             <span class="text-slate-300">•</span>
-                            <span id="modal-current-date">{{ now()->format('D, d M Y') }}</span>
+                            <span id="modal-current-date">{{ now()->format('d M Y') }}</span>
                         </div>
                     </div>
                 </div>
-                <button type="button" onclick="closeAttendanceModal()" class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-slate-400 transition-all hover:bg-red-50 hover:text-red-500">
-                    <i data-lucide="x" class="h-5 w-5"></i>
+                <button type="button" onclick="closeAttendanceModal()" class="flex h-8 w-8 items-center justify-center rounded-full bg-white border border-slate-100 text-slate-400 shadow-sm transition-all hover:bg-red-50 hover:text-red-500 hover:rotate-90">
+                    <i data-lucide="x" class="h-4 w-4"></i>
                 </button>
             </div>
         </header>
 
-        <div class="max-h-[calc(100vh-12rem)] overflow-y-auto">
-            <div class="p-6">
+        <div class="max-h-[calc(100vh-10rem)] overflow-y-auto custom-scrollbar px-8 pb-8">
                 {{-- Stepper Progress --}}
                 <div class="mb-8 flex items-center justify-between px-2">
                     <div id="step-1-indicator" class="flex flex-col items-center gap-2">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white ring-4 ring-blue-100">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-600 text-white shadow-md shadow-blue-100 ring-2 ring-blue-50">
                             <i data-lucide="camera" class="h-4 w-4"></i>
                         </div>
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-blue-600">Photo</span>
+                        <span class="text-[9px] font-extrabold uppercase tracking-widest text-blue-600">Photo Proof</span>
                     </div>
-                    <div class="h-[2px] flex-1 bg-slate-100 mx-2 mb-6" id="line-1"></div>
-                    <div id="step-2-indicator" class="flex flex-col items-center gap-2 opacity-40">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-slate-500">
+                    <div class="h-[2px] flex-1 bg-slate-100 mx-2 mb-5 rounded-full overflow-hidden" id="line-1-container">
+                        <div class="h-full w-0 bg-blue-600 transition-all duration-700" id="line-1"></div>
+                    </div>
+                    <div id="step-2-indicator" class="flex flex-col items-center gap-2 opacity-30">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
                             <i data-lucide="map-pin" class="h-4 w-4"></i>
                         </div>
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">GPS Lock</span>
+                        <span class="text-[9px] font-extrabold uppercase tracking-widest text-slate-400">GPS Lock</span>
                     </div>
-                    <div class="h-[2px] flex-1 bg-slate-100 mx-2 mb-6" id="line-2"></div>
-                    <div id="step-3-indicator" class="flex flex-col items-center gap-2 opacity-40">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-slate-500">
+                    <div class="h-[2px] flex-1 bg-slate-100 mx-2 mb-5 rounded-full overflow-hidden" id="line-2-container">
+                        <div class="h-full w-0 bg-blue-600 transition-all duration-700" id="line-2"></div>
+                    </div>
+                    <div id="step-3-indicator" class="flex flex-col items-center gap-2 opacity-30">
+                        <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
                             <i data-lucide="check-circle" class="h-4 w-4"></i>
                         </div>
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Status</span>
+                        <span class="text-[9px] font-extrabold uppercase tracking-widest text-slate-400">Finalize</span>
                     </div>
                 </div>
 
@@ -177,121 +216,120 @@
                     <input type="hidden" name="longitude" id="modal_lng">
                     <input type="hidden" name="attendance_image" id="modal_image">
 
-                    {{-- Session Details Pill --}}
-                    <div class="mb-6 rounded-2xl bg-slate-50 p-4 border border-slate-100">
+                    {{-- Session Information Card --}}
+                    <div class="mb-6 rounded-2xl bg-slate-50/50 p-4 border border-slate-100 flex flex-col gap-3">
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Student</p>
-                                <p id="modal_student_name" class="font-bold text-slate-800"></p>
+                                <p class="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Siswa</p>
+                                <p id="modal_student_name" class="text-xs font-extrabold text-slate-800 leading-tight"></p>
                             </div>
                             <div>
-                                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Class</p>
-                                <p id="modal_class_name" class="font-bold text-slate-800"></p>
+                                <p class="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Kelas</p>
+                                <p id="modal_class_name" class="text-xs font-extrabold text-slate-800 leading-tight"></p>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Camera Section --}}
-                    <div class="group relative mb-8 overflow-hidden rounded-3xl border-4 border-slate-100 bg-slate-900 shadow-inner">
+                    {{-- Camera/Image Capture Section --}}
+                    <div class="group relative mb-8 overflow-hidden rounded-2xl border-[4px] border-slate-50 bg-slate-900 shadow-xl">
                         <div class="aspect-[4/3] relative w-full overflow-hidden">
-                            <video id="webcam" autoplay playsinline class="h-full w-full object-cover"></video>
+                            <video id="webcam" autoplay playsinline class="h-full w-full object-cover grayscale-[0.2]"></video>
                             <canvas id="canvas" class="hidden"></canvas>
                             <img id="captured_image" class="hidden h-full w-full object-cover">
                             
-                            {{-- Scanner Effect --}}
-                            <div id="scanner-line" class="absolute left-0 top-0 hidden h-1 w-full bg-gradient-to-r from-transparent via-blue-400 to-transparent shadow-[0_0_15px_rgba(96,165,250,0.8)] animate-scan"></div>
+                            {{-- Scanner Animation Effect --}}
+                            <div id="scanner-line" class="absolute left-0 top-0 hidden h-1 w-full bg-gradient-to-r from-transparent via-blue-400 to-transparent shadow-[0_0_20px_rgba(96,165,250,1)] animate-scan z-10"></div>
                             
-                            {{-- Camera Overlay --}}
-                            <div id="camera-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/40 backdrop-blur-[2px]">
-                                <div class="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md animate-pulse">
+                            {{-- Initial Camera Overlay --}}
+                            <div id="camera-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/40 backdrop-blur-[2px] z-20">
+                                <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-white backdrop-blur-xl border border-white/20 animate-pulse">
                                     <i data-lucide="camera" class="h-8 w-8"></i>
                                 </div>
-                                <p class="mt-4 text-sm font-medium text-white">Camera Ready</p>
+                                <p class="mt-4 text-[10px] font-extrabold tracking-[0.2em] text-white uppercase">System Ready</p>
                             </div>
 
-                            {{-- Badges --}}
-                            <div class="absolute left-4 top-4 flex flex-col gap-2">
-                                <div id="badge-gps" class="flex items-center gap-1.5 rounded-full bg-slate-900/60 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-md border border-white/10">
-                                    <div class="h-1.5 w-1.5 rounded-full bg-slate-400" id="gps-dot"></div>
+                            {{-- Floating Badges --}}
+                            <div class="absolute left-4 top-4 flex flex-col gap-2 z-30">
+                                <div id="badge-gps" class="flex items-center gap-1.5 rounded-full bg-slate-900/60 px-2.5 py-1 text-[9px] font-extrabold text-white backdrop-blur-md border border-white/10 shadow-lg">
+                                    <div class="h-1.5 w-1.5 rounded-full bg-slate-400 animate-pulse" id="gps-dot"></div>
                                     GPS STANDBY
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Camera Action Bar --}}
-                        <div class="absolute bottom-4 left-0 right-0 flex justify-center px-4">
-                            <button type="button" onclick="startCamera()" id="btn_start_camera" class="flex items-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold text-slate-900 shadow-xl transition-all hover:scale-105 active:scale-95">
-                                <i data-lucide="play" class="h-4 w-4"></i> START CAMERA
+                        {{-- Dynamic Action Controls --}}
+                        <div class="absolute bottom-4 left-0 right-0 flex justify-center px-4 z-30">
+                            <button type="button" onclick="startCamera()" id="btn_start_camera" class="flex items-center gap-2.5 rounded-xl bg-white px-6 py-3 text-xs font-extrabold text-slate-900 shadow-2xl transition-all hover:scale-105 hover:bg-slate-50 active:scale-95 group">
+                                <i data-lucide="play" class="h-4 w-4 text-blue-600 group-hover:rotate-12 transition-transform"></i> 
+                                <span class="tracking-tight uppercase">Aktifkan Kamera</span>
                             </button>
-                            <button type="button" onclick="capturePhoto()" id="btn_capture" class="hidden h-14 w-14 items-center justify-center rounded-full bg-white text-blue-600 shadow-xl transition-all hover:scale-110 active:scale-90">
-                                <div class="h-10 w-10 rounded-full border-4 border-blue-100 flex items-center justify-center">
-                                    <div class="h-6 w-6 rounded-full bg-blue-600"></div>
-                                </div>
+                            <button type="button" onclick="capturePhoto()" id="btn_capture" class="hidden h-14 w-14 items-center justify-center rounded-full bg-white text-blue-600 shadow-2xl transition-all hover:scale-110 active:scale-90 border-[4px] border-blue-50">
+                                <div class="h-6 w-6 rounded-full bg-blue-600 shadow-inner"></div>
                             </button>
-                            <button type="button" onclick="retakePhoto()" id="btn_retake" class="hidden flex items-center gap-2 rounded-2xl bg-white/20 px-6 py-3 text-sm font-bold text-white shadow-xl backdrop-blur-md transition-all hover:bg-white/30">
-                                <i data-lucide="refresh-cw" class="h-4 w-4"></i> RETAKE
+                            <button type="button" onclick="retakePhoto()" id="btn_retake" class="hidden flex items-center gap-2.5 rounded-xl bg-white/10 px-6 py-3 text-xs font-extrabold text-white shadow-2xl backdrop-blur-xl border border-white/20 transition-all hover:bg-white/20 active:scale-95">
+                                <i data-lucide="refresh-cw" class="h-4 w-4"></i> 
+                                <span class="tracking-tight uppercase">Ambil Ulang</span>
                             </button>
                         </div>
                     </div>
 
-                    {{-- Attendance Status Cards --}}
+                    {{-- Status Selection Grid --}}
                     <div class="mb-8">
-                        <label class="mb-3 block text-xs font-bold uppercase tracking-widest text-slate-400">Attendance Status</label>
+                        <label class="mb-3 block text-[9px] font-extrabold uppercase tracking-widest text-slate-400">Konfirmasi Kehadiran</label>
                         <div class="grid grid-cols-3 gap-3">
                             <label class="relative cursor-pointer group">
                                 <input type="radio" name="status" value="present" required class="peer sr-only">
-                                <div class="flex flex-col items-center gap-2 rounded-2xl border-2 border-slate-50 bg-slate-50 p-4 transition-all group-hover:bg-slate-100 peer-checked:border-green-500 peer-checked:bg-green-50 peer-checked:text-green-600 peer-checked:shadow-md">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-400 peer-checked:bg-green-100 peer-checked:text-green-600 shadow-sm">
-                                        <i data-lucide="check" class="h-6 w-6"></i>
+                                <div class="flex flex-col items-center gap-2 rounded-2xl border-2 border-slate-50 bg-slate-50/50 p-4 transition-all duration-300 group-hover:bg-slate-100 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 peer-checked:shadow-lg peer-checked:shadow-blue-100/50">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-300 peer-checked:bg-blue-600 peer-checked:text-white shadow-sm transition-all duration-300">
+                                        <i data-lucide="check" class="h-5 w-5"></i>
                                     </div>
-                                    <span class="text-xs font-bold">PRESENT</span>
+                                    <span class="text-[9px] font-extrabold tracking-widest uppercase">HADIR</span>
                                 </div>
                             </label>
                             
                             <label class="relative cursor-pointer group">
                                 <input type="radio" name="status" value="absent" required class="peer sr-only">
-                                <div class="flex flex-col items-center gap-2 rounded-2xl border-2 border-slate-50 bg-slate-50 p-4 transition-all group-hover:bg-slate-100 peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:text-red-600 peer-checked:shadow-md">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-400 peer-checked:bg-red-100 peer-checked:text-red-600 shadow-sm">
-                                        <i data-lucide="x" class="h-6 w-6"></i>
+                                <div class="flex flex-col items-center gap-2 rounded-2xl border-2 border-slate-50 bg-slate-50/50 p-4 transition-all duration-300 group-hover:bg-slate-100 peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:text-red-700 peer-checked:shadow-lg peer-checked:shadow-red-100/50">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-300 peer-checked:bg-red-600 peer-checked:text-white shadow-sm transition-all duration-300">
+                                        <i data-lucide="x" class="h-5 w-5"></i>
                                     </div>
-                                    <span class="text-xs font-bold">ABSENT</span>
+                                    <span class="text-[9px] font-extrabold tracking-widest uppercase">ABSEN</span>
                                 </div>
                             </label>
 
                             <label class="relative cursor-pointer group">
                                 <input type="radio" name="status" value="reschedule" required class="peer sr-only">
-                                <div class="flex flex-col items-center gap-2 rounded-2xl border-2 border-slate-50 bg-slate-50 p-4 transition-all group-hover:bg-slate-100 peer-checked:border-amber-500 peer-checked:bg-amber-50 peer-checked:text-amber-600 peer-checked:shadow-md">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-400 peer-checked:bg-amber-100 peer-checked:text-amber-600 shadow-sm">
-                                        <i data-lucide="calendar-range" class="h-6 w-6"></i>
+                                <div class="flex flex-col items-center gap-2 rounded-2xl border-2 border-slate-50 bg-slate-50/50 p-4 transition-all duration-300 group-hover:bg-slate-100 peer-checked:border-amber-500 peer-checked:bg-amber-50 peer-checked:text-amber-700 peer-checked:shadow-lg peer-checked:shadow-amber-100/50">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-300 peer-checked:bg-amber-600 peer-checked:text-white shadow-sm transition-all duration-300">
+                                        <i data-lucide="calendar-range" class="h-5 w-5"></i>
                                     </div>
-                                    <span class="text-xs font-bold">RESCHEDULE</span>
+                                    <span class="text-[9px] font-extrabold tracking-widest uppercase">ULANG</span>
                                 </div>
                             </label>
                         </div>
                     </div>
 
-                    {{-- Notes --}}
-                    <div class="mb-4">
-                        <label class="mb-3 block text-xs font-bold uppercase tracking-widest text-slate-400">Notes (Optional)</label>
-                        <textarea name="note" rows="3" class="w-full rounded-2xl border-2 border-slate-50 bg-slate-50 p-4 text-sm font-medium text-slate-900 placeholder-slate-400 transition-all focus:border-blue-500 focus:bg-white focus:outline-none" placeholder="Add any session notes here..."></textarea>
+                    {{-- Interaction Feedback Section --}}
+                    <div class="mb-2">
+                        <label class="mb-3 block text-[9px] font-extrabold uppercase tracking-widest text-slate-400">Catatan Pembelajaran (Opsional)</label>
+                        <textarea name="note" rows="2" class="w-full rounded-2xl border-2 border-slate-50 bg-slate-50/50 p-4 text-xs font-bold text-slate-700 placeholder-slate-400 transition-all focus:border-blue-500 focus:bg-white focus:outline-none" placeholder="Tulis catatan perkembangan siswa..."></textarea>
                     </div>
                 </form>
+
+
+                {{-- Enhanced Footer Actions --}}
+                <div class="pt-6 flex gap-3">
+                    <button type="button" onclick="closeAttendanceModal()" class="flex-1 rounded-2xl bg-slate-50 py-4 text-[10px] font-extrabold text-slate-500 tracking-widest uppercase transition-all hover:bg-slate-100 active:scale-95">
+                        BATALKAN
+                    </button>
+                    <button type="submit" form="attendance-form" id="btn_submit_attendance" disabled class="flex-[2] rounded-2xl bg-blue-600 py-4 text-[10px] font-extrabold text-white tracking-[0.1em] shadow-xl shadow-blue-100 transition-all hover:bg-blue-700 disabled:bg-slate-100 disabled:text-slate-300 disabled:shadow-none active:scale-95 uppercase">
+                        SIMPAN KEHADIRAN
+                    </button>
+                </div>
             </div>
         </div>
-
-        {{-- Footer Section --}}
-        <footer class="border-t border-slate-100 bg-slate-50/50 px-6 py-5 backdrop-blur-md">
-            <div class="flex gap-3">
-                <button type="button" onclick="closeAttendanceModal()" class="flex-1 rounded-2xl border border-slate-200 bg-white py-3.5 text-sm font-bold text-slate-600 transition-all hover:bg-slate-50 active:scale-95">
-                    CANCEL
-                </button>
-                <button type="submit" form="attendance-form" id="btn_submit_attendance" disabled class="flex-[2] rounded-2xl bg-blue-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-200 transition-all hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none active:scale-95">
-                    SUBMIT ATTENDANCE
-                </button>
-            </div>
-        </footer>
     </div>
-</div>
+@endpush
 
 <style>
     @keyframes scan {
@@ -302,19 +340,32 @@
         animation: scan 2.5s linear infinite;
     }
     #attendanceModal.active {
-        display: flex;
+        display: flex !important;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #cbd5e1;
     }
 </style>
 
 <script>
     let stream = null;
 
-    // Realtime Clock
+    // Enhanced Realtime Clock
     function updateClock() {
         const now = new Date();
         const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         const clockEl = document.getElementById('realtime-clock');
-        if (clockEl) clockEl.textContent = timeStr;
+        if (clockEl) clockEl.textContent = timeStr + ' WIB';
     }
     setInterval(updateClock, 1000);
     updateClock();
@@ -333,11 +384,13 @@
         retakePhoto();
         modal.classList.add('active');
         if (window.lucide) window.lucide.createIcons();
+        document.body.style.overflow = 'hidden';
     }
 
     function closeAttendanceModal() {
         stopCamera();
         document.getElementById('attendanceModal').classList.remove('active');
+        document.body.style.overflow = 'auto';
     }
 
     async function startCamera() {
@@ -360,7 +413,7 @@
             
             // Update Stepper
             const step1 = document.getElementById('step-1-indicator');
-            if (step1) step1.classList.remove('opacity-40');
+            if (step1) step1.classList.remove('opacity-30');
         } catch (err) {
             alert('Gagal mengakses kamera: ' + err.message);
         }
@@ -388,9 +441,9 @@
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        // GPS Lock logic
+        // GPS Lock logic with visual feedback
         if (badgeGps) {
-            badgeGps.innerHTML = '<i data-lucide="loader-2" class="h-3 w-3 animate-spin"></i> LOCKING GPS...';
+            badgeGps.innerHTML = '<i data-lucide="loader-2" class="h-3 w-3 animate-spin text-blue-400"></i> SECURING GPS...';
             if (window.lucide) window.lucide.createIcons();
         }
         
@@ -405,28 +458,36 @@
                 if (latInput) latInput.value = lat;
                 if (lngInput) lngInput.value = lng;
 
-                // DRAW OVERLAY ON PHOTO
-                const boxHeight = canvas.height * 0.22;
-                ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+                // PREMIUM PHOTO WATERMARK
+                const boxHeight = canvas.height * 0.25;
+                const gradient = ctx.createLinearGradient(0, canvas.height - boxHeight, 0, canvas.height);
+                gradient.addColorStop(0, 'transparent');
+                gradient.addColorStop(1, 'rgba(15, 23, 42, 0.9)');
+                ctx.fillStyle = gradient;
                 ctx.fillRect(0, canvas.height - boxHeight, canvas.width, boxHeight);
 
                 ctx.fillStyle = 'white';
-                const fontSize = Math.floor(canvas.height * 0.035);
+                const fontSize = Math.floor(canvas.height * 0.04);
                 ctx.font = `bold ${fontSize}px Inter, sans-serif`;
                 
-                const padding = 24;
+                const paddingX = 40;
+                const paddingY = 40;
                 const nowText = new Date().toLocaleString('id-ID', { 
                     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
                     hour: '2-digit', minute: '2-digit'
                 });
 
-                ctx.fillText(`ROFC ATTENDANCE SYSTEM`, padding, canvas.height - boxHeight + padding + fontSize);
-                ctx.font = `${fontSize * 0.8}px Inter, sans-serif`;
-                ctx.fillStyle = 'rgba(255,255,255,0.7)';
-                ctx.fillText(`Coord: ${lat.toFixed(6)}, ${lng.toFixed(6)}`, padding, canvas.height - boxHeight + padding + (fontSize * 2.5));
-                ctx.fillText(nowText, padding, canvas.height - boxHeight + padding + (fontSize * 3.7));
+                ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+                ctx.shadowBlur = 10;
+                ctx.fillText(`ROFC ATTENDANCE VERIFIED`, paddingX, canvas.height - paddingY - (fontSize * 2));
+                
+                ctx.shadowBlur = 0;
+                ctx.font = `${fontSize * 0.75}px Inter, sans-serif`;
+                ctx.fillStyle = 'rgba(255,255,255,0.85)';
+                ctx.fillText(`Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`, paddingX, canvas.height - paddingY - fontSize);
+                ctx.fillText(`Timestamp: ${nowText} WIB`, paddingX, canvas.height - paddingY);
 
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
                 if (imgInput) imgInput.value = dataUrl;
                 img.src = dataUrl;
                 
@@ -436,33 +497,36 @@
                 btnRetake.classList.remove('hidden');
                 if (scanner) scanner.classList.add('hidden');
                 
-                // Update Badge
+                // Update GPS Badge to success
                 if (badgeGps) {
-                    badgeGps.innerHTML = '<div class="h-1.5 w-1.5 rounded-full bg-green-500"></div> GPS LOCKED';
+                    badgeGps.innerHTML = '<div class="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div> LOCATION VERIFIED';
                     badgeGps.classList.remove('bg-slate-900/60');
-                    badgeGps.classList.add('bg-green-600/80');
+                    badgeGps.classList.add('bg-green-600/90');
                     if (window.lucide) window.lucide.createIcons();
                 }
 
-                // Update Stepper
+                // Smoothly update Stepper progress
                 const step2 = document.getElementById('step-2-indicator');
                 const step3 = document.getElementById('step-3-indicator');
                 const line1 = document.getElementById('line-1');
                 const line2 = document.getElementById('line-2');
 
-                if (step2) step2.classList.remove('opacity-40');
-                if (step3) step3.classList.remove('opacity-40');
-                if (line1) line1.classList.add('bg-blue-600');
-                if (line2) line2.classList.add('bg-blue-600');
+                if (step2) step2.classList.remove('opacity-30');
+                if (step3) step3.classList.remove('opacity-30');
+                if (line1) line1.style.width = '100%';
+                if (line2) line2.style.width = '100%';
 
                 if (submitBtn) submitBtn.disabled = false;
                 stopCamera();
             },
             (err) => {
-                alert('GPS Error: ' + err.message);
-                if (badgeGps) badgeGps.innerHTML = '<div class="h-1.5 w-1.5 rounded-full bg-red-500"></div> GPS FAILED';
+                alert('GPS Error: Mohon aktifkan lokasi browser Anda. ' + err.message);
+                if (badgeGps) {
+                    badgeGps.innerHTML = '<div class="h-2 w-2 rounded-full bg-red-500"></div> GPS FAILED';
+                    badgeGps.classList.add('bg-red-600/90');
+                }
             },
-            { enableHighAccuracy: true, timeout: 8000 }
+            { enableHighAccuracy: true, timeout: 10000 }
         );
     }
 
@@ -490,9 +554,9 @@
         if (overlay) overlay.classList.remove('hidden');
         
         if (badgeGps) {
-            badgeGps.innerHTML = '<div class="h-1.5 w-1.5 rounded-full bg-slate-400"></div> GPS STANDBY';
+            badgeGps.innerHTML = '<div class="h-2 w-2 rounded-full bg-slate-400"></div> GPS STANDBY';
             badgeGps.classList.add('bg-slate-900/60');
-            badgeGps.classList.remove('bg-green-600/80');
+            badgeGps.classList.remove('bg-green-600/90', 'bg-red-600/90');
         }
         
         // Reset Stepper
@@ -501,10 +565,10 @@
         const line1 = document.getElementById('line-1');
         const line2 = document.getElementById('line-2');
 
-        if (step2) step2.classList.add('opacity-40');
-        if (step3) step3.classList.add('opacity-40');
-        if (line1) line1.classList.remove('bg-blue-600');
-        if (line2) line2.classList.remove('bg-blue-600');
+        if (step2) step2.classList.add('opacity-30');
+        if (step3) step3.classList.add('opacity-30');
+        if (line1) line1.style.width = '0%';
+        if (line2) line2.style.width = '0%';
 
         if (submitBtn) submitBtn.disabled = true;
         if (window.lucide) window.lucide.createIcons();

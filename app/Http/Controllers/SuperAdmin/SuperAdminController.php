@@ -570,4 +570,43 @@ class SuperAdminController extends Controller
             ]
         );
     }
+
+    public function impersonate(User $user)
+    {
+        if (auth()->id() === $user->id) {
+            return back()->with('error', 'Anda tidak bisa menyamar sebagai diri sendiri.');
+        }
+
+        session(['impersonator_id' => auth()->id()]);
+        auth()->login($user);
+
+        // Redirect based on role
+        if ($user->hasRole('teacher')) {
+            return redirect()->route('teacher.dashboard')->with('success', 'Anda sekarang login sebagai ' . $user->name);
+        } elseif ($user->hasRole('student')) {
+            return redirect()->route('student.dashboard')->with('success', 'Anda sekarang login sebagai ' . $user->name);
+        } elseif ($user->hasRole('finance')) {
+            return redirect()->route('finance.dashboard')->with('success', 'Anda sekarang login sebagai ' . $user->name);
+        }
+
+        return redirect()->route('portal.redirect')->with('success', 'Anda sekarang login sebagai ' . $user->name);
+    }
+
+    public function stopImpersonate()
+    {
+        $adminId = session('impersonator_id');
+
+        if ($adminId) {
+            $admin = User::find($adminId);
+            if ($admin) {
+                auth()->login($admin);
+                session()->forget('impersonator_id');
+
+                $route = $admin->hasRole('super_admin') ? 'super-admin.dashboard' : 'admin.dashboard';
+                return redirect()->route($route)->with('success', 'Kembali ke panel Admin');
+            }
+        }
+
+        return redirect('/login');
+    }
 }

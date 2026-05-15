@@ -27,7 +27,7 @@ $homeRoute = route('admin.dashboard');
 
 <x-ui.card title="Daftar Guru" subtitle="Data pengajar aktif dan profil dasar" data-searchable>
     @if ($teachers->isNotEmpty())
-        <x-ui.table :headers="['Nama', 'Email', 'Nomor HP', 'Jenis Kelamin', 'Agama', 'Instrument', 'Status']">
+        <x-ui.table :headers="['Nama', 'Email', 'Nomor HP', 'Instrument', 'Status', 'Action']">
             @foreach($teachers as $teacher)
                 <tr>
                     <td>{{ $teacher->name }}</td>
@@ -40,6 +40,17 @@ $homeRoute = route('admin.dashboard');
                         <x-ui.badge :type="$teacher->is_active ? 'success' : 'warning'">
                             {{ $teacher->is_active ? 'ACTIVE' : 'INACTIVE' }}
                         </x-ui.badge>
+                    </td>
+                    <td>
+                        @if($teacher->user)
+                            <div class="action-icons">
+                                <a href="{{ route('admin.users.impersonate', $teacher->user->id) }}" class="btn-icon" title="Login As" aria-label="Login As" style="background: #0f172a !important; color: #fff !important; border: none !important;">
+                                    <i data-lucide="user-plus"></i>
+                                </a>
+                            </div>
+                        @else
+                            <span class="text-slate-300">-</span>
+                        @endif
                     </td>
                 </tr>
             @endforeach

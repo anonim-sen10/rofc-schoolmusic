@@ -266,8 +266,6 @@
     .bg-blue-600 { background-color: rgb(37 99 235); }
     .text-white { color: rgb(255 255 255); }
     .cursor-pointer { cursor: pointer; }
-    .shadow-lg { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
-    .border-4 { border-width: 4px; }
     .border-white { border-color: rgb(255 255 255); }
     .w-4 { width: 1rem; }
     .h-4 { height: 1rem; }

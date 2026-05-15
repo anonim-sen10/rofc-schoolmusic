@@ -190,38 +190,42 @@
     }
 </script>
 
-<div id="attendanceModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4 sm:p-6">
+<div id="attendanceModal" class="hidden items-center justify-center overflow-hidden px-4 transition-all duration-300" style="position: fixed !important; inset: 0 !important; z-index: 999999 !important;">
     {{-- Glassmorphism Overlay --}}
-    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeAttendanceModal()"></div>
+    <div class="absolute inset-0 bg-slate-900/5 backdrop-blur-[2px] transition-opacity" onclick="closeAttendanceModal()" style="position: absolute !important; inset: 0 !important;"></div>
     
-    {{-- Modal Container --}}
-    <div class="relative w-full max-w-lg transform overflow-hidden rounded-3xl bg-white shadow-2xl transition-all animate-in fade-in zoom-in duration-300">
+    {{-- Modal Container (Compact & Floating) --}}
+    <div class="relative w-full max-w-lg transform overflow-hidden rounded-[28px] bg-white shadow-[0_25px_80px_-15px_rgba(0,0,0,0.3)] transition-all animate-in fade-in zoom-in slide-in-from-bottom-8 duration-500 border border-slate-100">
         
+        {{-- Decorative Background --}}
+        <div class="absolute top-0 left-0 right-0 h-32 bg-gradient-to-br from-blue-600/5 via-blue-50/10 to-transparent"></div>
+
         {{-- Header Section --}}
-        <header class="relative border-b border-slate-100 bg-white px-6 py-5">
+        <header class="relative px-8 pt-8 pb-6">
             <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-                        <i data-lucide="user-check" class="h-6 w-6"></i>
+                <div class="flex items-center gap-5">
+                    <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-100 uppercase transition-transform duration-300">
+                        <i data-lucide="user-check" class="h-7 w-7"></i>
                     </div>
                     <div>
-                        <h3 class="text-lg font-bold text-slate-900">Mark Attendance</h3>
-                        <div class="flex items-center gap-2 text-xs font-medium text-slate-500">
-                            <i data-lucide="clock" class="h-3 w-3"></i>
-                            <span id="realtime-clock">Loading...</span>
+                        <h3 class="text-xl font-black text-slate-900 tracking-tight leading-tight">Mark Attendance</h3>
+                        <div class="flex items-center gap-2 mt-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            <i data-lucide="clock" class="h-3 w-3 text-blue-500"></i>
+                            <span id="realtime-clock" class="text-slate-600">Loading...</span>
                             <span class="text-slate-300">•</span>
-                            <span id="modal-current-date">{{ now()->format('D, d M Y') }}</span>
+                            <span id="modal-current-date">{{ now()->format('d M Y') }}</span>
                         </div>
                     </div>
                 </div>
-                <button type="button" onclick="closeAttendanceModal()" class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-slate-400 transition-all hover:bg-red-50 hover:text-red-500">
-                    <i data-lucide="x" class="h-5 w-5"></i>
+                <button type="button" onclick="closeAttendanceModal()" class="flex h-8 w-8 items-center justify-center rounded-full bg-white border border-slate-100 text-slate-400 shadow-sm transition-all hover:bg-red-50 hover:text-red-500 hover:rotate-90">
+                    <i data-lucide="x" class="h-4 w-4"></i>
                 </button>
             </div>
         </header>
 
-        <div class="max-h-[calc(100vh-12rem)] overflow-y-auto">
-            <div class="p-6">
+        <div class="max-h-[calc(100vh-10rem)] overflow-y-auto custom-scrollbar px-8 pb-8">
+
+
                 {{-- Stepper Progress --}}
                 <div class="mb-8 flex items-center justify-between px-2">
                     <div id="step-1-indicator" class="flex flex-col items-center gap-2">
@@ -352,22 +356,20 @@
                         <textarea name="note" rows="3" class="w-full rounded-2xl border-2 border-slate-50 bg-slate-50 p-4 text-sm font-medium text-slate-900 placeholder-slate-400 transition-all focus:border-blue-500 focus:bg-white focus:outline-none" placeholder="Add any session notes here..."></textarea>
                     </div>
                 </form>
+
+
+                {{-- Enhanced Footer Actions --}}
+                <div class="pt-6 flex gap-3">
+                    <button type="button" onclick="closeAttendanceModal()" class="flex-1 rounded-2xl bg-slate-50 py-4 text-[10px] font-extrabold text-slate-500 tracking-widest uppercase transition-all hover:bg-slate-100 active:scale-95">
+                        BATALKAN
+                    </button>
+                    <button type="submit" form="attendance-form" id="btn_submit_attendance" disabled class="flex-[2] rounded-2xl bg-blue-600 py-4 text-[10px] font-extrabold text-white tracking-[0.1em] shadow-xl shadow-blue-100 transition-all hover:bg-blue-700 disabled:bg-slate-100 disabled:text-slate-300 disabled:shadow-none active:scale-95 uppercase">
+                        SIMPAN KEHADIRAN
+                    </button>
+                </div>
             </div>
         </div>
-
-        {{-- Footer Section --}}
-        <footer class="border-t border-slate-100 bg-slate-50/50 px-6 py-5 backdrop-blur-md">
-            <div class="flex gap-3">
-                <button type="button" onclick="closeAttendanceModal()" class="flex-1 rounded-2xl border border-slate-200 bg-white py-3.5 text-sm font-bold text-slate-600 transition-all hover:bg-slate-50 active:scale-95">
-                    CANCEL
-                </button>
-                <button type="submit" form="attendance-form" id="btn_submit_attendance" disabled class="flex-[2] rounded-2xl bg-blue-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-200 transition-all hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-500 disabled:shadow-none active:scale-95">
-                    SUBMIT ATTENDANCE
-                </button>
-            </div>
-        </footer>
     </div>
-</div>
 
 <style>
     @keyframes scan {

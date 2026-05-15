@@ -91,30 +91,45 @@
         </div>
     </section>
 
-    {{-- Student List Modal --}}
-    <div id="premiumStudentModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4">
-        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="hideStudentModal()"></div>
-        <div class="relative w-full max-w-md transform overflow-hidden rounded-3xl bg-white shadow-2xl transition-all animate-in fade-in zoom-in duration-300">
-            <header class="border-b border-slate-100 bg-white px-6 py-4 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                        <i data-lucide="users" class="w-5 h-5"></i>
+    {{-- Modern Student List Modal (Consistent with Student Detail) --}}
+    <div id="premiumStudentModal" class="hidden items-center justify-center overflow-hidden px-4 transition-all duration-300" style="position: fixed !important; inset: 0 !important; z-index: 999999 !important;">
+        {{-- Fullscreen Overlay --}}
+        <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-[2px] transition-opacity" onclick="hideStudentModal()" style="position: absolute !important; inset: 0 !important;"></div>
+        
+        {{-- Modal Container (Compact) --}}
+        <div class="relative w-full max-w-md transform overflow-hidden rounded-[28px] bg-white shadow-[0_25px_80px_-15px_rgba(0,0,0,0.4)] transition-all animate-in fade-in zoom-in slide-in-from-bottom-8 duration-500 ease-out">
+            {{-- Decorative Background --}}
+            <div class="absolute top-0 left-0 right-0 h-24 bg-gradient-to-br from-blue-600/5 via-blue-50/20 to-transparent"></div>
+
+            <header class="relative px-8 pt-8 pb-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-white font-black text-lg shadow-lg shadow-blue-100 uppercase transition-transform duration-300">
+                            <i data-lucide="users" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h3 id="modalClassName" class="text-lg font-black text-slate-900 tracking-tight leading-tight">Student List</h3>
+                            <p class="text-[10px] text-slate-400 mt-1 font-bold uppercase tracking-widest">Daftar siswa dalam kelas ini</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 id="modalClassName" class="text-sm font-bold text-slate-900 leading-none">Student List</h3>
-                        <p class="text-[10px] text-slate-400 mt-1">Daftar siswa dalam kelas ini</p>
-                    </div>
+                    <button type="button" onclick="hideStudentModal()" class="flex h-8 w-8 items-center justify-center rounded-full bg-white border border-slate-100 text-slate-400 shadow-sm transition-all hover:bg-red-50 hover:text-red-500 hover:rotate-90">
+                        <i data-lucide="x" class="h-4 w-4"></i>
+                    </button>
                 </div>
-                <button type="button" onclick="hideStudentModal()" class="text-slate-400 hover:text-red-500 transition-colors">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
             </header>
-            <div class="p-6 max-h-[60vh] overflow-y-auto" id="modalStudentList">
-                <!-- Students injected here -->
+
+            <div class="px-8 pb-8">
+                <div class="max-h-[50vh] overflow-y-auto pr-1 -mr-1 custom-scrollbar" id="modalStudentList">
+                    <!-- Students injected here -->
+                </div>
+
+                {{-- Footer Actions --}}
+                <div class="pt-6 flex justify-end">
+                    <button type="button" onclick="hideStudentModal()" class="px-8 py-3.5 rounded-2xl bg-slate-50 text-slate-500 text-[11px] font-bold transition-all hover:bg-slate-100 uppercase tracking-widest">
+                        CLOSE
+                    </button>
+                </div>
             </div>
-            <footer class="bg-slate-50 px-6 py-4 flex justify-end">
-                <button type="button" onclick="hideStudentModal()" class="px-4 py-2 rounded-xl bg-white border border-slate-200 text-[11px] font-bold text-slate-600 hover:bg-slate-50">TUTUP</button>
-            </footer>
         </div>
     </div>
 
@@ -150,17 +165,20 @@
                 listContainer.innerHTML = '<div class="text-center py-8 text-slate-400 text-xs font-medium">No students in this class</div>';
             } else {
                 studentList.forEach(student => {
-                    const initial = student.name.charAt(0).toUpperCase();
+                    const initial = student.name.substring(0, 2).toUpperCase();
                     listContainer.innerHTML += `
-                        <div class="flex items-center justify-between p-3 rounded-2xl border border-slate-50 bg-slate-50/50 mb-2 last:mb-0 hover:bg-white hover:border-blue-100 transition-all">
-                            <div class="flex items-center gap-3">
-                                <div class="h-9 w-9 rounded-full bg-white border border-slate-100 flex items-center justify-center text-[11px] font-bold text-slate-500 uppercase">${initial}</div>
+                        <div class="flex items-center justify-between p-4 rounded-2xl bg-white border border-slate-100 mb-3 last:mb-0 hover:shadow-md hover:border-blue-100 transition-all group">
+                            <div class="flex items-center gap-4">
+                                <div class="h-10 w-10 shrink-0 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-[11px] font-black text-slate-400 uppercase group-hover:bg-blue-600 group-hover:text-white transition-all">${initial}</div>
                                 <div>
-                                    <p class="text-xs font-bold text-slate-900 leading-none">${student.name}</p>
-                                    <p class="text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-wider">${student.day || '-'} ${student.time ? student.time.substring(0, 5) : '-'}</p>
+                                    <p class="text-sm font-black text-slate-800 leading-none mb-1.5">${student.name}</p>
+                                    <div class="flex items-center gap-2">
+                                        <div class="h-1.5 w-1.5 rounded-full bg-blue-400"></div>
+                                        <p class="text-[10px] text-slate-400 uppercase font-black tracking-widest">${student.day || '-'} • ${student.time ? student.time.substring(0, 5) : '-'}</p>
+                                    </div>
                                 </div>
                             </div>
-                            <a href="/teacher/student-progress/input?student_id=${student.id}" class="h-8 w-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-100 transition-all">
+                            <a href="/teacher/student-progress/input?student_id=${student.id}" class="h-9 w-9 shrink-0 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center transition-all hover:bg-slate-900 hover:text-white">
                                 <i data-lucide="pencil-line" class="w-4 h-4"></i>
                             </a>
                         </div>
