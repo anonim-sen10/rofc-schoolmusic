@@ -180,6 +180,246 @@
         transform: scale(1) translateY(0);
     }
 
+    /* ─── GLOBAL FIRM MODAL SYSTEM (REPLACES POPOVERS) ─── */
+    details.action-popover {
+        position: static;
+    }
+
+    details.action-popover[open]::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 10000;
+        cursor: pointer;
+    }
+
+    details.action-popover[open] .action-popover-form {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: min(900px, 95vw);
+        max-height: 92vh;
+        background: #ffffff;
+        border-radius: 2.5rem;
+        z-index: 10001 !important;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 
+            0 25px 50px -12px rgba(0, 0, 0, 0.25),
+            0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+        animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        overflow: hidden;
+    }
+
+    @keyframes modalFadeIn {
+        from { opacity: 0; transform: translate(-50%, -48%) scale(0.96); }
+        to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    .registration-modal-header {
+        padding: 1.75rem 2.5rem;
+        background: #ffffff;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .registration-modal-header-left {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+    }
+
+    .registration-modal-icon {
+        width: 3.5rem;
+        height: 3.5rem;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        border-radius: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+    }
+
+    .registration-modal-header h3 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.02em;
+    }
+
+    .registration-modal-header p {
+        margin: 0.25rem 0 0 0;
+        font-size: 0.9rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .registration-modal-close-btn {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 0.75rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .registration-modal-close-btn:hover {
+        background: #fee2e2;
+        color: #ef4444;
+        border-color: #fecaca;
+        transform: rotate(90deg);
+    }
+
+    .registration-modal-body {
+        padding: 2.5rem;
+        overflow-y: auto;
+        flex: 1;
+        background: #ffffff;
+    }
+
+    .registration-modal-summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.5rem;
+        background: #f8fafc;
+        border-radius: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid #f1f5f9;
+    }
+
+    .registration-modal-summary-left {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+    }
+
+    .registration-modal-avatar {
+        width: 3.5rem;
+        height: 3.5rem;
+        background: #6366f1;
+        color: #fff;
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        font-weight: 800;
+    }
+
+    .registration-modal-summary-name {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .registration-modal-summary-left p:first-child {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.25rem;
+    }
+
+    .registration-modal-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+
+    .registration-modal-grid article {
+        background: #ffffff;
+        padding: 1.25rem;
+        border-radius: 1.25rem;
+        border: 1px solid #f1f5f9;
+        transition: all 0.2s;
+    }
+
+    .registration-modal-grid article:hover {
+        border-color: #6366f1;
+        box-shadow: 0 10px 15px rgba(99, 102, 241, 0.05);
+        transform: translateY(-2px);
+    }
+
+    .registration-modal-grid article p:first-child {
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #94a3b8;
+        margin-bottom: 0.6rem;
+        letter-spacing: 0.05em;
+    }
+
+    .registration-modal-grid article p:last-child {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    .registration-modal-item-full {
+        grid-column: span 3;
+    }
+
+    .registration-modal-footer {
+        padding: 1.5rem 2.5rem;
+        background: #f8fafc;
+        border-top: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+
+    .registration-modal-btn {
+        padding: 0.75rem 2rem;
+        border-radius: 1rem;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .registration-modal-btn-primary {
+        background: #6366f1;
+        color: #fff !important;
+        box-shadow: 0 10px 15px rgba(99, 102, 241, 0.2);
+    }
+
+    .registration-modal-btn-secondary {
+        background: #ffffff;
+        border: 1px solid #e2e8f0 !important;
+        color: #64748b !important;
+    }
+
+    .registration-modal-btn-danger {
+        background: #ef4444;
+        color: #fff !important;
+        box-shadow: 0 10px 15px rgba(239, 68, 68, 0.2);
+    }
+
     .premium-modal-header {
         padding: 1.75rem 2.5rem;
         display: flex;
