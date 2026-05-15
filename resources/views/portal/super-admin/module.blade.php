@@ -1644,12 +1644,14 @@
                                                     <article><p>Umur</p><p>{{ $student->age ? $student->age . ' Tahun' : '-' }}</p></article>
                                                     <article><p>Email Siswa</p><p>{{ $student->email ?: '-' }}</p></article>
                                                     <article><p>No. HP Siswa</p><p>{{ $student->phone ?: '-' }}</p></article>
+                                                    <article><p>Instagram Siswa</p><p>{{ $student->ig_siswa ?: '-' }}</p></article>
                                                     <article class="registration-modal-item-full"><p>Alamat Domisili</p><p class="text-wrap-normal">{{ $student->address ?: '-' }}</p></article>
                                                     
                                                     <article><p>Nama Orang Tua</p><p>{{ $student->nama_ortu ?: '-' }}</p></article>
                                                     <article><p>Pekerjaan Ortu</p><p>{{ $student->pekerjaan_ortu ?: '-' }}</p></article>
                                                     <article><p>No. HP Orang Tua</p><p>{{ $student->no_hp_ortu ?: '-' }}</p></article>
                                                     <article><p>Email Orang Tua</p><p>{{ $student->email_ortu ?: '-' }}</p></article>
+                                                    <article><p>Instagram Ortu</p><p>{{ $student->ig_ortu ?: '-' }}</p></article>
 
                                                     <article class="registration-modal-item-full">
                                                         <p>Kelas Terdaftar</p>
@@ -1711,6 +1713,7 @@
                                                     <label>Kewarganegaraan <input type="text" name="kewarganegaraan" value="{{ $student->kewarganegaraan }}"></label>
                                                     <label>Umur <input type="number" name="age" value="{{ $student->age }}"></label>
                                                     <label>No. HP Siswa <input type="text" name="phone" value="{{ $student->phone }}"></label>
+                                                    <label>Instagram Siswa <input type="text" name="ig_siswa" value="{{ $student->ig_siswa }}" placeholder="@username"></label>
                                                     <label style="grid-column: span 2;">Email Siswa <input type="email" name="email" value="{{ $student->email }}"></label>
                                                     <label style="grid-column: span 2;">Alamat <textarea name="address" rows="2">{{ $student->address }}</textarea></label>
                                                     
@@ -1719,6 +1722,7 @@
                                                     <label>Pekerjaan Ortu <input type="text" name="pekerjaan_ortu" value="{{ $student->pekerjaan_ortu }}"></label>
                                                     <label>No. HP Ortu <input type="text" name="no_hp_ortu" value="{{ $student->no_hp_ortu }}"></label>
                                                     <label>Email Ortu <input type="email" name="email_ortu" value="{{ $student->email_ortu }}"></label>
+                                                    <label>Instagram Ortu <input type="text" name="ig_ortu" value="{{ $student->ig_ortu }}" placeholder="@username"></label>
                                                     
                                                     <div style="grid-column: span 2; margin-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.5rem;"><h4 style="font-size: 0.85rem; color: #818cf8;">Akademik & Status</h4></div>
                                                     <label style="grid-column: span 2;">Kelas Terdaftar
@@ -3383,6 +3387,10 @@ window.toggleFavoriteSong = function(select, targetId) {
                         <label for="phone">No. HP Siswa</label>
                         <input type="text" id="phone" name="phone" class="premium-input" value="{{ old('phone') }}" placeholder="08xxxxxxxxxx">
                     </div>
+                    <div class="premium-field">
+                        <label for="ig_siswa">Instagram Siswa</label>
+                        <input type="text" id="ig_siswa" name="ig_siswa" class="premium-input" value="{{ old('ig_siswa') }}" placeholder="@username">
+                    </div>
                     <div class="premium-field full-width">
                         <label for="address">Alamat Domisili</label>
                         <textarea id="address" name="address" class="premium-textarea" placeholder="Alamat lengkap tempat tinggal">{{ old('address') }}</textarea>
@@ -3412,6 +3420,10 @@ window.toggleFavoriteSong = function(select, targetId) {
                     <div class="premium-field">
                         <label for="email_ortu">Email Orang Tua</label>
                         <input type="email" id="email_ortu" name="email_ortu" class="premium-input" value="{{ old('email_ortu') }}" placeholder="ortu@email.com">
+                    </div>
+                    <div class="premium-field">
+                        <label for="ig_ortu">Instagram Orang Tua</label>
+                        <input type="text" id="ig_ortu" name="ig_ortu" class="premium-input" value="{{ old('ig_ortu') }}" placeholder="@username_ortu">
                     </div>
                 </div>
             </div>

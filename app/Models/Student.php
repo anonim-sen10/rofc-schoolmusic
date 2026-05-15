@@ -41,6 +41,8 @@ class Student extends Model
         'duration_months',
         'end_date',
         'favorite_song',
+        'ig_siswa',
+        'ig_ortu',
     ];
 
     protected $casts = [

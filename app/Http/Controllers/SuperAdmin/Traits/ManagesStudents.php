@@ -35,6 +35,8 @@ trait ManagesStudents
             'pengalaman' => (bool) ($data['pengalaman'] ?? false),
             'deskripsi_pengalaman' => $data['deskripsi_pengalaman'] ?? null,
             'favorite_song' => $data['favorite_song'] ?? null,
+            'ig_siswa' => $data['ig_siswa'] ?? null,
+            'ig_ortu' => $data['ig_ortu'] ?? null,
             'start_date' => $data['start_date'] ?? null,
             'duration_months' => $data['duration_months'] ?? null,
         ]);
@@ -80,6 +82,8 @@ trait ManagesStudents
             'pengalaman' => ['nullable', 'boolean'],
             'deskripsi_pengalaman' => ['nullable', 'string', 'max:2000'],
             'favorite_song' => ['nullable', 'string', 'max:120'],
+            'ig_siswa' => ['nullable', 'string', 'max:100'],
+            'ig_ortu' => ['nullable', 'string', 'max:100'],
         ]);
 
         $payload = [
@@ -103,6 +107,8 @@ trait ManagesStudents
             'pengalaman' => (bool) ($data['pengalaman'] ?? false),
             'deskripsi_pengalaman' => $data['deskripsi_pengalaman'] ?? null,
             'favorite_song' => $data['favorite_song'] ?? null,
+            'ig_siswa' => $data['ig_siswa'] ?? null,
+            'ig_ortu' => $data['ig_ortu'] ?? null,
         ];
 
         if (!empty($payload['start_date']) && !empty($payload['duration_months'])) {

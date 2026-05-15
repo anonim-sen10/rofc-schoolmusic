@@ -26,6 +26,8 @@ class StoreRegistrationRequest extends FormRequest
             'pengalaman' => ['nullable', 'boolean'],
             'deskripsi_pengalaman' => ['nullable', 'string'],
             'favorite_song' => ['nullable', 'string', 'max:120'],
+            'ig_siswa' => ['nullable', 'string', 'max:100'],
+            'ig_ortu' => ['nullable', 'string', 'max:100'],
         ];
     }
 }

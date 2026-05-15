@@ -657,7 +657,12 @@
 
                                 <label class="register-field">
                                     <span>No HP Siswa</span>
-                                    <input class="register-input" type="text" name="no_hp_siswa" value="{{ old('no_hp_siswa') }}" placeholder="08xxxxxxxxxx" required>
+                                    <input class="register-input" type="text" id="no_hp_siswa" name="no_hp_siswa" value="{{ old('no_hp_siswa') }}" placeholder="08xxxxxxxxxx" required>
+                                </label>
+
+                                <label class="register-field">
+                                    <span>Instagram Siswa (Opsional)</span>
+                                    <input class="register-input" type="text" id="ig_siswa" name="ig_siswa" value="{{ old('ig_siswa') }}" placeholder="@username">
                                 </label>
 
                                 <label class="register-field full">
@@ -704,7 +709,12 @@
 
                                 <label class="register-field">
                                     <span>Email Orang Tua</span>
-                                    <input class="register-input" type="email" name="email_ortu" value="{{ old('email_ortu') }}">
+                                    <input class="register-input" type="email" id="email_ortu" name="email_ortu" value="{{ old('email_ortu') }}">
+                                </label>
+
+                                <label class="register-field">
+                                    <span>Instagram Orang Tua (Opsional)</span>
+                                    <input class="register-input" type="text" id="ig_ortu" name="ig_ortu" value="{{ old('ig_ortu') }}" placeholder="@username_ortu">
                                 </label>
                             </div>
                         </section>

@@ -344,6 +344,8 @@ class RegistrationController extends Controller
                     'pengalaman' => $registration->pengalaman,
                     'deskripsi_pengalaman' => $registration->deskripsi_pengalaman,
                     'favorite_song' => $registration->favorite_song,
+                    'ig_siswa' => $registration->ig_siswa,
+                    'ig_ortu' => $registration->ig_ortu,
                     'is_active' => true,
                     'class_id' => $registration->class_id ?: $requestedSchedules->first()->class_id,
                     'start_date' => $startDate,

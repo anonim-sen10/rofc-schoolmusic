@@ -39,6 +39,8 @@ class Registration extends Model
         'hari_pilihan',
         'pengalaman',
         'deskripsi_pengalaman',
+        'ig_siswa',
+        'ig_ortu',
         'start_date',
         'duration_months',
         'favorite_song',
