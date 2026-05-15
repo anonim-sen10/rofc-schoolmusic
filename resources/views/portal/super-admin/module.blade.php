@@ -2091,8 +2091,13 @@
                             <td data-label="Instrumen">{{ $instrumenText }}</td>
                             <td data-label="Jadwal">
                                 @if($registrationItem->schedules->isNotEmpty())
-                                    @php $sch = $registrationItem->schedules->first(); @endphp
-                                    <span class="registration-schedule-count">{{ $sch->day }} {{ substr((string)$sch->time, 0, 5) }}</span>
+                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                        @foreach($registrationItem->schedules as $sch)
+                                            <span class="registration-schedule-count" style="display: block; font-size: 10px; white-space: nowrap;">
+                                                {{ $sch->day }} {{ substr((string)$sch->time, 0, 5) }}
+                                            </span>
+                                        @endforeach
+                                    </div>
                                 @elseif($registrationItem->schedule_id)
                                     @php $sch = \App\Models\Schedule::find($registrationItem->schedule_id); @endphp
                                     <span class="registration-schedule-count">{{ $sch ? $sch->day . ' ' . substr((string)$sch->time, 0, 5) : '-' }}</span>
