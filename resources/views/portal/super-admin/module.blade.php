@@ -225,7 +225,7 @@
     }
 
     .registration-modal-header {
-        padding: 1.75rem 2.5rem;
+        padding: 1.25rem 2rem;
         background: #ffffff;
         border-bottom: 1px solid #f1f5f9;
         display: flex;
@@ -239,40 +239,40 @@
     .registration-modal-header-left {
         display: flex;
         align-items: center;
-        gap: 1.25rem;
+        gap: 1rem;
     }
 
     .registration-modal-icon {
-        width: 3.5rem;
-        height: 3.5rem;
+        width: 3rem;
+        height: 3rem;
         background: linear-gradient(135deg, #6366f1, #8b5cf6);
-        border-radius: 1.1rem;
+        border-radius: 0.85rem;
         display: flex;
         align-items: center;
         justify-content: center;
         color: #ffffff;
-        box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+        box-shadow: 0 8px 16px rgba(99, 102, 241, 0.15);
     }
 
     .registration-modal-header h3 {
         margin: 0;
-        font-size: 1.5rem;
+        font-size: 1.25rem;
         font-weight: 800;
         color: #0f172a;
         letter-spacing: -0.02em;
     }
 
     .registration-modal-header p {
-        margin: 0.25rem 0 0 0;
-        font-size: 0.9rem;
+        margin: 0.15rem 0 0 0;
+        font-size: 0.85rem;
         color: #64748b;
         font-weight: 500;
     }
 
     .registration-modal-close-btn {
-        width: 2.5rem;
-        height: 2.5rem;
-        border-radius: 0.75rem;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 0.65rem;
         background: #f8fafc;
         border: 1px solid #e2e8f0;
         color: #64748b;
@@ -291,7 +291,7 @@
     }
 
     .registration-modal-body {
-        padding: 2.5rem;
+        padding: 1.75rem 2rem;
         overflow-y: auto;
         flex: 1;
         background: #ffffff;
@@ -301,109 +301,122 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 1.5rem;
+        padding: 1.15rem 1.5rem;
         background: #f8fafc;
-        border-radius: 1.5rem;
-        margin-bottom: 2rem;
+        border-radius: 1.25rem;
+        margin-bottom: 1.5rem;
         border: 1px solid #f1f5f9;
     }
 
     .registration-modal-summary-left {
         display: flex;
         align-items: center;
-        gap: 1.25rem;
+        gap: 1rem;
     }
 
     .registration-modal-avatar {
-        width: 3.5rem;
-        height: 3.5rem;
+        width: 3rem;
+        height: 3rem;
         background: #6366f1;
         color: #fff;
-        border-radius: 1rem;
+        border-radius: 0.85rem;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.25rem;
+        font-size: 1.15rem;
         font-weight: 800;
     }
 
     .registration-modal-summary-name {
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: 800;
         color: #1e293b;
         margin: 0;
     }
 
     .registration-modal-summary-left p:first-child {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         font-weight: 700;
         color: #94a3b8;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.15rem;
     }
 
     .registration-modal-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 1.5rem;
+        gap: 1.25rem;
+    }
+
+    @media (max-width: 1024px) {
+        .registration-modal-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 640px) {
+        .registration-modal-grid {
+            grid-template-columns: 1fr;
+        }
     }
 
     .registration-modal-grid article {
         background: #ffffff;
-        padding: 1.25rem;
-        border-radius: 1.25rem;
+        padding: 1rem;
+        border-radius: 1rem;
         border: 1px solid #f1f5f9;
         transition: all 0.2s;
     }
 
     .registration-modal-grid article:hover {
         border-color: #6366f1;
-        box-shadow: 0 10px 15px rgba(99, 102, 241, 0.05);
-        transform: translateY(-2px);
+        background: #fcfdff;
+        transform: translateY(-1px);
     }
 
     .registration-modal-grid article p:first-child {
-        font-size: 0.75rem;
+        font-size: 0.65rem;
         font-weight: 800;
         text-transform: uppercase;
         color: #94a3b8;
-        margin-bottom: 0.6rem;
+        margin-bottom: 0.4rem;
         letter-spacing: 0.05em;
     }
 
     .registration-modal-grid article p:last-child {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         font-weight: 700;
         color: #1e293b;
         margin: 0;
-        line-height: 1.5;
+        line-height: 1.4;
+        word-break: break-word;
     }
 
     .registration-modal-item-full {
-        grid-column: span 3;
+        grid-column: 1 / -1;
     }
 
     .registration-modal-footer {
-        padding: 1.5rem 2.5rem;
+        padding: 1.25rem 2rem;
         background: #f8fafc;
         border-top: 1px solid #f1f5f9;
         display: flex;
         align-items: center;
         justify-content: flex-end;
-        gap: 1rem;
+        gap: 0.75rem;
     }
 
     .registration-modal-btn {
-        padding: 0.75rem 2rem;
-        border-radius: 1rem;
+        padding: 0.65rem 1.5rem;
+        border-radius: 0.85rem;
         font-weight: 700;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         cursor: pointer;
         transition: all 0.2s;
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.4rem;
     }
 
     .registration-modal-btn-primary {
