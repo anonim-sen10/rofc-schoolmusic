@@ -30,6 +30,51 @@ Route::get('/run-migration', function () {
     }
 });
 
+// TEMPORARY: Clear cache from browser
+Route::get('/clear-cache', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('view:clear');
+        \Illuminate\Support\Facades\Artisan::call('cache:clear');
+        \Illuminate\Support\Facades\Artisan::call('config:clear');
+        return "Cache cleared successfully!";
+    } catch (\Exception $e) {
+        return "Failed to clear cache: " . $e->getMessage();
+    }
+});
+
+// TEMPORARY: Sync existing students with registration data
+Route::get('/sync-students', function () {
+    try {
+        $students = \App\Models\Student::all();
+        $count = 0;
+        foreach ($students as $student) {
+            $registration = \App\Models\Registration::where('email', $student->email)->first();
+            if ($registration) {
+                $student->update([
+                    'nama_panggilan' => $student->nama_panggilan ?: $registration->nama_panggilan,
+                    'jenis_kelamin' => $student->jenis_kelamin ?: $registration->jenis_kelamin,
+                    'tempat_lahir' => $student->tempat_lahir ?: $registration->tempat_lahir,
+                    'tanggal_lahir' => $student->tanggal_lahir ?: $registration->tanggal_lahir,
+                    'kewarganegaraan' => $student->kewarganegaraan ?: $registration->kewarganegaraan,
+                    'address' => $student->address ?: ($registration->alamat ?: $registration->address),
+                    'nama_ortu' => $student->nama_ortu ?: $registration->nama_ortu,
+                    'pekerjaan_ortu' => $student->pekerjaan_ortu ?: $registration->pekerjaan_ortu,
+                    'no_hp_ortu' => $student->no_hp_ortu ?: $registration->no_hp_ortu,
+                    'email_ortu' => $student->email_ortu ?: $registration->email_ortu,
+                    'program_tambahan' => $student->program_tambahan ?: $registration->program_tambahan,
+                    'pengalaman' => $student->pengalaman ?? $registration->pengalaman,
+                    'deskripsi_pengalaman' => $student->deskripsi_pengalaman ?: $registration->deskripsi_pengalaman,
+                    'favorite_song' => $student->favorite_song ?: $registration->favorite_song,
+                ]);
+                $count++;
+            }
+        }
+        return "Successfully synced $count students.";
+    } catch (\Exception $e) {
+        return "Sync failed: " . $e->getMessage();
+    }
+});
+
 Route::view('/about', 'pages.about')->name('about');
 Route::view('/programs', 'pages.programs')->name('programs');
 Route::view('/teachers', 'pages.teachers')->name('teachers');
