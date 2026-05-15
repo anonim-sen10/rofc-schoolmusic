@@ -187,6 +187,25 @@
     /* ─── GLOBAL FIRM MODAL SYSTEM (REPLACES POPOVERS) ─── */
     details.action-popover {
         position: static;
+        display: inline-block;
+    }
+
+    /* Force reset all potential parent transforms that break 'position: fixed' */
+    .table-wrap:has(details.action-popover[open]),
+    .portal-content:has(details.action-popover[open]),
+    .portal-main:has(details.action-popover[open]),
+    .portal-shell:has(details.action-popover[open]),
+    table:has(details.action-popover[open]),
+    tbody:has(details.action-popover[open]),
+    tr:has(details.action-popover[open]),
+    td:has(details.action-popover[open]) {
+        transform: none !important;
+        perspective: none !important;
+        filter: none !important;
+        contain: none !important;
+        backdrop-filter: none !important;
+        /* Ensure the modal is visible */
+        overflow: visible !important;
     }
 
     details.action-popover[open]::before {
@@ -196,36 +215,34 @@
         background: rgba(15, 23, 42, 0.4);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
-        z-index: 10000;
+        z-index: 100000;
         cursor: pointer;
     }
 
     details.action-popover[open] .action-popover-form {
         position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        margin: auto !important;
-        width: min(850px, 90vw) !important;
-        height: fit-content !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 90vw !important;
+        max-width: 800px !important;
+        height: auto !important;
         max-height: 85vh !important;
         background: #ffffff !important;
         border-radius: 2rem !important;
-        z-index: 99999 !important;
+        z-index: 100001 !important;
         display: flex !important;
         flex-direction: column !important;
         box-shadow: 0 40px 120px rgba(0, 0, 0, 0.5) !important;
         animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
         overflow: hidden !important;
         border: 1px solid rgba(0, 0, 0, 0.1) !important;
-        opacity: 1 !important;
-        visibility: visible !important;
+        margin: 0 !important;
     }
 
     @keyframes modalFadeIn {
-        from { opacity: 0; transform: scale(0.95) translateY(10px); }
-        to { opacity: 1; transform: scale(1) translateY(0); }
+        from { opacity: 0; transform: translate(-50%, -45%) scale(0.95); }
+        to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     }
 
     .registration-modal-header {
