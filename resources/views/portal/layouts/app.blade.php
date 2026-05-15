@@ -133,7 +133,7 @@ $iconMap = [
                 :brand-logo-url="$brandLogoUrl"
             />
 
-            <main class="portal-content portal-content--saas pt-4 px-6 pb-8 lg:px-10 flex-1">
+            <main class="portal-content portal-content--saas px-6 pb-8 lg:px-10 flex-1">
                 @if (session('success'))
                     <section class="card" data-searchable>
                         <x-ui.badge type="success">SUCCESS</x-ui.badge>
@@ -164,13 +164,6 @@ $iconMap = [
 
             <footer class="portal-footer border-t border-slate-200 bg-white/50 px-8 py-4 flex items-center justify-between">
                 <p class="text-slate-400 text-xs font-medium uppercase tracking-widest">&copy; {{ date('Y') }} SchoolMusic Platform</p>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="text-xs font-bold text-red-500 hover:text-red-600 transition-colors flex items-center gap-2">
-                        <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-                        LOGOUT
-                    </button>
-                </form>
             </footer>
         </div>
     </div>

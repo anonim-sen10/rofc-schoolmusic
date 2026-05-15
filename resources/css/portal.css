@@ -349,15 +349,13 @@ html.sidebar-collapsed .brand-logo-sidebar {
 .portal-menu {
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
+    justify-content: space-evenly;
     flex: 1;
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
-    padding-top: 1rem;
-    padding-right: 0.35rem;
-    margin-right: -0.2rem;
+    padding: 1rem;
     scrollbar-width: thin;
     scrollbar-color: rgba(148, 163, 184, 0.38) transparent;
 }
@@ -381,30 +379,31 @@ html.sidebar-collapsed .brand-logo-sidebar {
 
 .portal-menu a {
     color: #94a3b8;
-    padding: 0.55rem 0.75rem;
-    border-radius: 0.75rem;
+    padding: 1.1rem 1.25rem;
+    border-radius: 1.25rem;
     border: 1px solid transparent;
     text-decoration: none;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    transition: all 0.2s ease;
-    font-size: 0.875rem;
+    gap: 1rem;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    font-size: 1.05rem;
     font-weight: 600;
 }
 
 .portal-menu a i {
-    width: 1rem;
-    height: 1rem;
+    width: 1.4rem;
+    height: 1.4rem;
     flex: 0 0 auto;
 }
 
 .portal-menu a.active,
 .portal-menu a:hover {
-    border-color: rgba(99, 102, 241, 0.35);
-    background: rgba(99, 102, 241, 0.2);
+    border-color: rgba(99, 102, 241, 0.25);
+    background: rgba(99, 102, 241, 0.1);
     color: var(--text);
-    transform: translateX(2px);
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.08);
 }
 
 html.sidebar-collapsed .portal-menu a {

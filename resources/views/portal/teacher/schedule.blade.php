@@ -6,6 +6,7 @@
         ['label' => 'Student Progress', 'url' => route('teacher.student-progress.index')],
         ['label' => 'My Students', 'url' => route('teacher.my-students.index')],
         ['label' => 'Materials', 'url' => route('teacher.materials.index')],
+        ['label' => 'Profile', 'url' => route('teacher.profile.index')],
     ];
     $panelTitle = 'Teacher Portal';
     $homeRoute = route('teacher.dashboard');
@@ -15,190 +16,104 @@
 @section('page-title', 'My Schedule')
 @section('content')
 
-<style>
-    .badge {
-        display: inline-block;
-        padding: 0.25rem 0.6rem;
-        border-radius: 0.25rem;
-        font-size: 0.85rem;
-        font-weight: 600;
-        text-transform: capitalize;
-    }
-    .badge-present { background-color: #dcfce7; color: #166534; }
-    .badge-absent { background-color: #fee2e2; color: #991b1b; }
-    .badge-reschedule { background-color: #ffedd5; color: #9a3412; }
-    
-    .btn-action {
-        background: #3b82f6;
-        color: white;
-        border: none;
-        padding: 0.4rem 0.8rem;
-        border-radius: 0.3rem;
-        cursor: pointer;
-        font-size: 0.85rem;
-    }
-    .btn-action:hover { background: #2563eb; }
-
-    /* Modal Styles */
-    .modal-overlay {
-        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0,0,0,0.6);
-        display: none; justify-content: center; align-items: center;
-        z-index: 1000; padding: 1rem;
-    }
-    .modal-content {
-        background: white; border-radius: 1rem;
-        width: 100%; max-width: 450px; 
-        max-height: 90vh; overflow-y: auto;
-        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
-        position: relative;
-    }
-    .modal-body { padding: 1.5rem; }
-    .modal-header { 
-        padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9;
-        font-size: 1.1rem; font-weight: 700; color: #1e293b;
-        display: flex; justify-content: space-between; align-items: center;
-        position: sticky; top: 0; background: white; z-index: 10;
-    }
-    .form-group { margin-bottom: 1.25rem; }
-    .form-label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.025em; }
-    .form-input { width: 100%; padding: 0.625rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.9rem; }
-    .form-input:focus { outline: none; border-color: #3b82f6; ring: 2px #3b82f6; }
-    
-    .camera-box {
-        position: relative; width: 100%; border-radius: 0.75rem; 
-        overflow: hidden; background: #0f172a; 
-        aspect-ratio: 4/3; /* Changed to more horizontal */
-        display: flex; align-items: center; justify-content: center;
-        border: 2px solid #e2e8f0;
-    }
-    
-    .location-btn {
-        display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-        background: #3b82f6; color: white; border: none; padding: 0.625rem; width: 100%;
-        border-radius: 0.5rem; cursor: pointer; font-weight: 600; font-size: 0.9rem;
-        transition: all 0.2s;
-    }
-    .location-btn:hover { background: #2563eb; transform: translateY(-1px); }
-    .status-group { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.5rem; }
-    .status-item { 
-        display: flex; align-items: center; gap: 0.4rem; cursor: pointer;
-        padding: 0.4rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem;
-        font-size: 0.85rem; font-weight: 500;
-    }
-    .status-item input { margin: 0; }
-    
-    .btn-submit { 
-        background: #0f172a; color: white; padding: 0.75rem; border: none; 
-        border-radius: 0.5rem; cursor: pointer; width: 100%; font-weight: 700;
-        margin-top: 0.5rem; transition: all 0.2s;
-    }
-    .btn-submit:hover:not(:disabled) { background: #1e293b; transform: translateY(-1px); }
-    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
-    
-    .btn-cancel { 
-        background: transparent; color: #94a3b8; padding: 0.5rem; border: none; 
-        cursor: pointer; width: 100%; font-size: 0.85rem; font-weight: 600;
-    }
-    .location-status { font-size: 0.75rem; color: #64748b; margin-top: 0.5rem; display: flex; align-items: center; gap: 0.25rem; }
-</style>
-
-<section class="card">
-    <h3>Jadwal Mengajar Saya</h3>
-    
-    @if(session('success'))
-        <div style="background: #dcfce7; color: #166534; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-            {{ session('success') }}
+<section class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-8 mt-2">
+    <div class="px-6 py-4 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+        <div>
+            <h3 class="text-base font-bold text-slate-900 leading-none">Jadwal Mengajar Saya</h3>
+            <p class="text-[11px] font-medium text-slate-400 mt-1">Daftar seluruh sesi mengajar Anda.</p>
         </div>
-    @endif
-    @if(session('error'))
-        <div style="background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-            {{ session('error') }}
-        </div>
-    @endif
+        <i data-lucide="calendar-days" class="w-4 h-4 text-slate-300"></i>
+    </div>
 
-    <div class="table-wrap">
-        <table>
+    <div class="overflow-x-auto">
+        <table class="w-full">
             <thead>
-                <tr>
-                    <th>Jadwal</th>
-                    <th>Nama Siswa</th>
-                    <th>Kelas</th>
-                    <th>Alamat</th>
-                    <th>Status</th>
-                    <th>Action</th>
+                <tr class="bg-slate-50/50">
+                    <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Jadwal</th>
+                    <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nama Siswa</th>
+                    <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kelas</th>
+                    <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Alamat</th>
+                    <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
+                    <th class="px-8 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Action</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-slate-50">
                 @forelse($schedules as $schedule)
-                    <tr>
-                        <td><strong>{{ $schedule->session_date->translatedFormat('l, d M Y') }} - {{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}</strong></td>
-                        <td>{{ $schedule->student->user->name ?? ($schedule->student->name ?? '-') }}</td>
-                        <td>{{ $schedule->musicClass->name ?? '-' }}</td>
-                        <td>{{ $schedule->student->address ?? '-' }}</td>
-                        <td>
+                    <tr class="hover:bg-slate-50 transition-colors group">
+                        <td class="px-8 py-5 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-lg bg-blue-50 text-blue-600 text-[10px] font-bold border border-blue-100">
+                                {{ $schedule->session_date->translatedFormat('l, d M Y') }} - {{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}
+                            </span>
+                        </td>
+                        <td class="px-8 py-5">
+                            <div class="flex items-center gap-3">
+                                <div class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-[10px] uppercase border border-slate-200">
+                                    {{ substr($schedule->student->user->name ?? ($schedule->student->name ?? '-'), 0, 2) }}
+                                </div>
+                                <span class="text-sm font-bold text-slate-700">{{ $schedule->student->user->name ?? ($schedule->student->name ?? '-') }}</span>
+                            </div>
+                        </td>
+                        <td class="px-8 py-5 text-xs font-medium text-slate-500">{{ $schedule->musicClass->name ?? '-' }}</td>
+                        <td class="px-8 py-5">
+                            <div class="flex items-center gap-1.5 text-[11px] text-slate-400">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+                                <span class="max-w-[150px] truncate">{{ $schedule->student->address ?? '-' }}</span>
+                            </div>
+                        </td>
+                        <td class="px-8 py-5">
                             @php
                                 $pendingRequest = $schedule->rescheduleRequests->where('status', 'pending')->first();
                             @endphp
 
                             @if($schedule->status === 'rescheduled')
-                                <span class="badge" style="background-color: #f3f4f6; color: #4b5563;">Rescheduled</span>
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-50 text-slate-600 text-[10px] font-bold border border-slate-200">RESCHEDULED</span>
                             @elseif($pendingRequest)
-                                <span class="badge" style="background-color: #fef9c3; color: #a16207;">Reschedule Requested</span>
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 text-[10px] font-bold border border-amber-100 uppercase tracking-tight">RESCHEDULE REQ</span>
                             @else
-                                <span class="badge" style="background-color: #dcfce7; color: #15803d;">Active</span>
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-green-50 text-green-700 text-[10px] font-bold border border-green-100">ACTIVE</span>
                             @endif
                         </td>
-                        <td>
-                            @if($schedule->status === 'completed')
-                                <span style="font-size: 0.8rem; color: #10b981; font-weight: 600;">Selesai</span>
-                            @elseif($schedule->attendance)
-                                @php $status = strtolower($schedule->attendance->status); @endphp
-                                <span class="badge badge-{{ $status }}">
-                                    @if($status === 'present') ✔
-                                    @elseif($status === 'absent') ✖
-                                    @elseif($status === 'reschedule') ↻
-                                    @endif
-                                    {{ $status }}
-                                </span>
-                            @elseif($schedule->session_date->isFuture())
-                                <span style="font-size: 0.8rem; color: #94a3b8; font-style: italic;">Upcoming</span>
-                            @else
-                                <button type="button" class="btn-action" 
-                                    onclick="openAttendanceModal('{{ $schedule->id }}', '{{ $schedule->student->name }}', '{{ $schedule->musicClass->name }}', '{{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}')">
-                                    Mark Attendance
-                                </button>
-                            @endif
+                        <td class="px-8 py-5">
+                            <div class="flex items-center justify-end gap-2">
+                                @if($schedule->status === 'completed')
+                                    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-green-600"><i data-lucide="check-circle" class="w-4 h-4"></i> SELESAI</span>
+                                @elseif($schedule->attendance)
+                                    @php $status = strtolower($schedule->attendance->status); @endphp
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg {{ $status === 'present' ? 'bg-green-50 text-green-700 border-green-100' : ($status === 'absent' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-amber-50 text-amber-700 border-amber-100') }} text-[10px] font-bold border uppercase">
+                                        {{ $status }}
+                                    </span>
+                                @elseif($schedule->session_date->isFuture())
+                                    <span class="text-[10px] font-medium text-slate-400 italic">Upcoming</span>
+                                @else
+                                    <button type="button" 
+                                        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 text-white text-[10px] font-bold shadow-sm hover:bg-blue-700 transition-all active:scale-95"
+                                        onclick="openAttendanceModal('{{ $schedule->id }}', '{{ $schedule->student->name }}', '{{ $schedule->musicClass->name }}', '{{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}')">
+                                        <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
+                                        <span>ATTENDANCE</span>
+                                    </button>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" style="text-align: center;">Belum ada jadwal yang di-booking.</td>
+                        <td colspan="6" class="py-12 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <div class="h-16 w-16 rounded-3xl bg-slate-50 flex items-center justify-center text-slate-300 mb-4">
+                                    <i data-lucide="calendar-off" class="w-8 h-8"></i>
+                                </div>
+                                <h4 class="text-slate-900 font-bold text-sm">Belum ada jadwal</h4>
+                                <p class="text-slate-400 text-xs">Belum ada jadwal yang di-booking untuk saat ini.</p>
+                            </div>
+                        </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-</section>{{-- Premium Attendance Modal (TailwindCSS) --}}
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-    tailwind.config = {
-        theme: {
-            extend: {
-                colors: {
-                    primary: '#2563eb',
-                    secondary: '#3b82f6',
-                    dark: '#0f172a',
-                },
-                borderRadius: {
-                    '3xl': '1.5rem',
-                    '4xl': '2rem',
-                }
-            }
-        }
-    }
-</script>
+</section>
 
+{{-- Premium Attendance Modal (TailwindCSS) --}}
 <div id="attendanceModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4 sm:p-6">
     {{-- Glassmorphism Overlay --}}
     <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeAttendanceModal()"></div>

@@ -115,12 +115,12 @@
             </table>
         </div>
     @else
-        <div class="py-16 flex flex-col items-center justify-center text-center">
-            <div class="h-16 w-16 rounded-3xl bg-slate-50 flex items-center justify-center text-slate-300 mb-4">
-                <i data-lucide="calendar-x" class="w-8 h-8"></i>
+        <div class="py-10 flex flex-col items-center justify-center text-center">
+            <div class="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300 mb-3">
+                <i data-lucide="calendar-x" class="w-6 h-6"></i>
             </div>
-            <h4 class="text-slate-900 font-bold">No schedule for today</h4>
-            <p class="text-slate-400 text-sm max-w-xs mx-auto">You don't have any scheduled lessons for today. Take some rest!</p>
+            <h4 class="text-slate-900 font-bold text-sm">No schedule for today</h4>
+            <p class="text-slate-400 text-xs max-w-xs mx-auto">You don't have any scheduled lessons for today. Take some rest!</p>
         </div>
     @endif
 </section>

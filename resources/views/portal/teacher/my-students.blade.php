@@ -6,6 +6,7 @@
         ['label' => 'Student Progress', 'url' => route('teacher.student-progress.index')],
         ['label' => 'My Students', 'url' => route('teacher.my-students.index')],
         ['label' => 'Materials', 'url' => route('teacher.materials.index')],
+        ['label' => 'Profile', 'url' => route('teacher.profile.index')],
     ];
     $panelTitle = 'Teacher Portal';
     $homeRoute = route('teacher.dashboard');
@@ -106,8 +107,7 @@
         </div>
     </div>
 
-    {{-- Students Table Card --}}
-    <section class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden mb-8">
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-8 mt-2">
         <div class="px-8 py-6 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
             <div>
                 <h3 class="text-lg font-bold text-slate-900 leading-none">Daftar Seluruh Siswa</h3>
@@ -180,10 +180,10 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-8 py-12 text-center">
+                            <td colspan="4" class="px-8 py-10 text-center">
                                 <div class="flex flex-col items-center justify-center">
-                                    <div class="h-16 w-16 rounded-3xl bg-slate-50 flex items-center justify-center text-slate-300 mb-4">
-                                        <i data-lucide="user-x" class="w-8 h-8"></i>
+                                    <div class="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300 mb-3">
+                                        <i data-lucide="user-x" class="w-6 h-6"></i>
                                     </div>
                                     <h4 class="text-slate-900 font-bold text-sm">Belum ada siswa</h4>
                                     <p class="text-slate-400 text-xs mt-1">Siswa akan muncul di sini setelah mereka terdaftar di kelas Anda.</p>
