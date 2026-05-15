@@ -11,17 +11,21 @@
     }
     .table-wrap table tbody tr:hover {
         background-color: #f8fbff !important;
-        transform: translateX(4px);
+        /* Removed transform to prevent breaking fixed-position modals */
     }
     
     /* Fix for fixed-position popovers being clipped by transformed rows */
-    .table-wrap table tbody tr:has(details.action-popover[open]) {
+    .table-wrap table tbody tr:has(details.action-popover[open]),
+    .table-wrap table tbody tr:hover:has(details.action-popover[open]) {
         transform: none !important;
         z-index: 100 !important;
         position: relative;
     }
 
-    .table-wrap:has(details.action-popover[open]) {
+    .table-wrap:has(details.action-popover[open]),
+    .portal-content:has(details.action-popover[open]),
+    .portal-main:has(details.action-popover[open]) {
+        transform: none !important;
         overflow: visible !important;
     }
 
