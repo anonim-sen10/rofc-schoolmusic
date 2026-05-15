@@ -198,21 +198,21 @@
 
     details.action-popover[open] .action-popover-form {
         position: fixed !important;
-        top: 50% !important;
-        left: 50% !important;
+        top: 50vh !important;
+        left: 50vw !important;
         transform: translate(-50%, -50%) !important;
         width: min(900px, 95vw);
-        max-height: 92vh;
+        max-height: 90vh;
         background: #ffffff;
         border-radius: 2.5rem;
         z-index: 10001 !important;
         display: flex;
         flex-direction: column;
-        box-shadow: 
-            0 25px 50px -12px rgba(0, 0, 0, 0.25),
-            0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-        animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 30px 100px rgba(0, 0, 0, 0.4);
+        animation: modalFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         overflow: hidden;
+        margin: 0 !important;
+        border: 1px solid rgba(0, 0, 0, 0.05);
     }
 
     @keyframes modalFadeIn {
