@@ -18,7 +18,7 @@ class TeacherProgressController extends Controller
         return Schema::hasColumn('classes', 'assignment_status');
     }
 
-    private function teacherFromUser(int $userId): Teacher
+    private function teacherFromUser($userId): Teacher
     {
         return Teacher::firstOrCreate(
             ['user_id' => $userId],
@@ -26,7 +26,7 @@ class TeacherProgressController extends Controller
         );
     }
 
-    private function teacherStudentOrAbort(Teacher $teacher, int $studentId): Student
+    private function teacherStudentOrAbort(Teacher $teacher, $studentId): Student
     {
         $student = Student::query()
             ->where('id', $studentId)

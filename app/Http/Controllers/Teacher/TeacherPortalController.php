@@ -24,14 +24,14 @@ class TeacherPortalController extends Controller
         return Schema::hasColumn('classes', 'assignment_status');
     }
 
-    private function teacherAcceptedClassesQuery(int $teacherId)
+    private function teacherAcceptedClassesQuery($teacherId)
     {
         return MusicClass::query()->whereHas('teachers', function ($q) use ($teacherId) {
             $q->where('teachers.id', $teacherId);
         })->orWhere('teacher_id', $teacherId); // Keep orWhere for backward compatibility during migration
     }
 
-    private function teacherFromUser(int $userId): Teacher
+    private function teacherFromUser($userId): Teacher
     {
         return Teacher::firstOrCreate(
             ['user_id' => $userId],
