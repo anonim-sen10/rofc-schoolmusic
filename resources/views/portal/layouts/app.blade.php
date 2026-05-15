@@ -85,6 +85,10 @@ $iconMap = [
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/css/portal.css', 'resources/js/portal.js'])
 </head>
 <body class="portal-body">
@@ -202,6 +206,39 @@ $iconMap = [
         if (window.lucide) {
             window.lucide.createIcons();
         }
+
+        // Session Heartbeat & Keep-Alive
+        (function() {
+            const keepAliveInterval = 5 * 60 * 1000; // 5 minutes
+            const keepAliveUrl = "{{ route('session.keep-alive') }}";
+            
+            function doKeepAlive() {
+                fetch(keepAliveUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('[Portal] Session heartbeat:', data.time);
+                        // Optional: If token refresh logic is needed here
+                    })
+                    .catch(err => console.error('[Portal] Heartbeat failed:', err));
+            }
+
+            // Start heartbeat
+            setInterval(doKeepAlive, keepAliveInterval);
+            
+            // Also trigger on user activity if it's been a while
+            let lastActivity = Date.now();
+            const activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+            
+            activityEvents.forEach(event => {
+                window.addEventListener(event, () => {
+                    const now = Date.now();
+                    if (now - lastActivity > 60000) { // Only ping if last activity was > 1 min ago
+                        lastActivity = now;
+                        doKeepAlive();
+                    }
+                }, { passive: true });
+            });
+        })();
     </script>
     @stack('scripts')
 </body>

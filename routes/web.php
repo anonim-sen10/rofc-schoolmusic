@@ -109,6 +109,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/portal', [PortalController::class, 'redirectByRole'])->name('portal.redirect');
     Route::get('/portal/custom', [PortalController::class, 'customDashboard'])->name('portal.custom.dashboard');
     Route::get('/stop-impersonate', [SuperAdminController::class, 'stopImpersonate'])->name('stop-impersonate');
+    Route::get('/session-keep-alive', function () {
+        return response()->json(['status' => 'alive', 'time' => now()->toDateTimeString()]);
+    })->name('session.keep-alive');
 });
 
 Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'role:super_admin'])->group(function () {
