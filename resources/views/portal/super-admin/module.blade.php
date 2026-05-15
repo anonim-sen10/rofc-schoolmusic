@@ -202,26 +202,30 @@
 
     details.action-popover[open] .action-popover-form {
         position: fixed !important;
-        top: 50vh !important;
-        left: 50vw !important;
-        transform: translate(-50%, -50%) !important;
-        width: min(900px, 95vw);
-        max-height: 90vh;
-        background: #ffffff;
-        border-radius: 2.5rem;
-        z-index: 10001 !important;
-        display: flex;
-        flex-direction: column;
-        box-shadow: 0 30px 100px rgba(0, 0, 0, 0.4);
-        animation: modalFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        overflow: hidden;
-        margin: 0 !important;
-        border: 1px solid rgba(0, 0, 0, 0.05);
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        margin: auto !important;
+        width: min(850px, 90vw) !important;
+        height: fit-content !important;
+        max-height: 85vh !important;
+        background: #ffffff !important;
+        border-radius: 2rem !important;
+        z-index: 99999 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        box-shadow: 0 40px 120px rgba(0, 0, 0, 0.5) !important;
+        animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        overflow: hidden !important;
+        border: 1px solid rgba(0, 0, 0, 0.1) !important;
+        opacity: 1 !important;
+        visibility: visible !important;
     }
 
     @keyframes modalFadeIn {
-        from { opacity: 0; transform: translate(-50%, -48%) scale(0.96); }
-        to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        from { opacity: 0; transform: scale(0.95) translateY(10px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
     }
 
     .registration-modal-header {
