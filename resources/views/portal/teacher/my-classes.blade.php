@@ -28,7 +28,7 @@
             <i data-lucide="book-open" class="w-4 h-4 text-slate-300"></i>
         </div>
 
-        <div class="overflow-x-auto">
+        <div class="table-wrap">
             <table class="w-full">
                 <thead>
                     <tr class="bg-slate-50/50">
@@ -42,7 +42,7 @@
                 <tbody class="divide-y divide-slate-50">
                     @forelse($classes as $class)
                         <tr class="hover:bg-slate-50 transition-colors group">
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-4" data-label="Class Name">
                                 <div class="flex items-center gap-3">
                                     <div class="h-8 w-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
                                         <i data-lucide="music-2" class="w-4 h-4"></i>
@@ -50,10 +50,10 @@
                                     <span class="text-sm font-bold text-slate-700">{{ $class->name }}</span>
                                 </div>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-4" data-label="Description">
                                 <span class="text-xs text-slate-500 truncate block max-w-[200px]">{{ $class->description ?: '-' }}</span>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-4" data-label="Students">
                                 <button type="button" 
                                     onclick="showStudentModal('{{ $class->id }}', '{{ $class->name }}')"
                                     class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 text-[10px] font-bold hover:bg-white hover:border-blue-400 hover:text-blue-600 transition-all">
@@ -61,13 +61,13 @@
                                     <span>{{ $class->students_count ?? 0 }} Student</span>
                                 </button>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-4" data-label="Schedule">
                                 <div class="flex items-center gap-1.5 text-[11px] text-slate-400">
                                     <i data-lucide="calendar" class="w-3 h-3"></i>
                                     <span>{{ $class->schedules_count ?? 0 }} Slot</span>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-right">
+                            <td class="px-6 py-4 text-right" data-label="Status">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full {{ $class->status === 'active' ? 'bg-green-50 text-green-600' : 'bg-slate-50 text-slate-400' }} text-[9px] font-bold border border-current opacity-80">
                                     {{ strtoupper($class->status ?: 'inactive') }}
                                 </span>

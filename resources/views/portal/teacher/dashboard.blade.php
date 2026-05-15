@@ -59,41 +59,41 @@
     </div>
 
     @if($todaySchedules->isNotEmpty())
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead>
-                    <tr class="bg-slate-50/50">
-                        <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Time</th>
-                        <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Student</th>
-                        <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Class</th>
-                        <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Address</th>
-                        <th class="px-8 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Action</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-50">
-                    @foreach($todaySchedules as $schedule)
-                        <tr class="hover:bg-slate-50 transition-colors group">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-lg bg-blue-50 text-blue-600 text-[10px] font-bold border border-blue-100">
-                                    {{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="h-7 w-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-[9px] uppercase border border-slate-200">
-                                        {{ substr($schedule->student?->name, 0, 2) }}
-                                    </div>
-                                    <span class="text-sm font-semibold text-slate-700">{{ $schedule->student?->name ?: 'N/A' }}</span>
+        <div class="table-wrap">
+        <table class="w-full">
+            <thead>
+                <tr class="bg-slate-50/50">
+                    <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Time</th>
+                    <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Student</th>
+                    <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Class</th>
+                    <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Address</th>
+                    <th class="px-8 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+                @foreach($todaySchedules as $schedule)
+                    <tr class="hover:bg-slate-50 transition-colors group">
+                        <td class="px-6 py-4 whitespace-nowrap" data-label="Time">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-lg bg-blue-50 text-blue-600 text-[10px] font-bold border border-blue-100">
+                                {{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4" data-label="Student">
+                            <div class="flex items-center gap-3">
+                                <div class="h-7 w-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-[9px] uppercase border border-slate-200">
+                                    {{ substr($schedule->student?->name, 0, 2) }}
                                 </div>
-                            </td>
-                            <td class="px-6 py-4 text-xs font-medium text-slate-500">{{ $schedule->musicClass?->name ?: 'N/A' }}</td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-1.5 text-[11px] text-slate-400">
-                                    <i data-lucide="map-pin" class="w-3 h-3"></i>
-                                    <span class="max-w-[120px] truncate">{{ $schedule->student?->address ?: '-' }}</span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
+                                <span class="text-sm font-semibold text-slate-700">{{ $schedule->student?->name ?: 'N/A' }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-xs font-medium text-slate-500" data-label="Class">{{ $schedule->musicClass?->name ?: 'N/A' }}</td>
+                        <td class="px-6 py-4" data-label="Address">
+                            <div class="flex items-center gap-1.5 text-[11px] text-slate-400">
+                                <i data-lucide="map-pin" class="w-3 h-3"></i>
+                                <span class="max-w-[120px] truncate">{{ $schedule->student?->address ?: '-' }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4" data-label="Action">
                                 <div class="flex items-center justify-end gap-2">
 
                                     <button type="button" 
@@ -135,7 +135,7 @@
         </div>
         <p class="text-xs font-medium text-slate-500">Permintaan pindah jadwal dari siswa Anda yang menunggu persetujuan.</p>
     </div>
-    <div class="overflow-x-auto">
+    <div class="table-wrap">
         <table class="w-full">
             <thead>
                 <tr class="bg-slate-50/50">
@@ -148,16 +148,16 @@
             <tbody class="divide-y divide-slate-50">
                 @foreach($pendingRescheduleRequests as $request)
                     <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="px-8 py-4 text-sm font-bold text-slate-700">{{ $request->student->name }}</td>
-                        <td class="px-8 py-4 text-xs font-medium text-slate-500">
+                        <td class="px-8 py-4 text-sm font-bold text-slate-700" data-label="Student">{{ $request->student->name }}</td>
+                        <td class="px-8 py-4 text-xs font-medium text-slate-500" data-label="Old Slot">
                             @if($request->oldSession)
                                 {{ $request->oldSession->session_date->translatedFormat('l, d M Y') }} - {{ substr($request->oldSession->time, 0, 5) }}
                             @else
                                 {{ ucfirst($request->oldSchedule->day) }} {{ substr($request->oldSchedule->time, 0, 5) }}
                             @endif
                         </td>
-                        <td class="px-8 py-4 text-xs font-medium text-slate-500">{{ ucfirst($request->newSchedule->day) }} {{ substr($request->newSchedule->time, 0, 5) }}</td>
-                        <td class="px-8 py-4 text-right">
+                        <td class="px-8 py-4 text-xs font-medium text-slate-500" data-label="New Slot">{{ ucfirst($request->newSchedule->day) }} {{ substr($request->newSchedule->time, 0, 5) }}</td>
+                        <td class="px-8 py-4 text-right" data-label="Status">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">
                                 PENDING ADMIN
                             </span>

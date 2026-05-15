@@ -864,11 +864,11 @@
                 <tbody>
                     @forelse ($usersForRoles as $userRow)
                         <tr>
-                            <td>{{ $userRow->name }}</td>
-                            <td>{{ $userRow->email }}</td>
-                            <td>{{ $userRow->roles->pluck('slug')->implode(', ') }}</td>
-                            <td>{{ optional($userRow->created_at)->format('Y-m-d H:i') }}</td>
-                            <td>
+                            <td data-label="Nama">{{ $userRow->name }}</td>
+                            <td data-label="Email">{{ $userRow->email }}</td>
+                            <td data-label="Role">{{ $userRow->roles->pluck('slug')->implode(', ') }}</td>
+                            <td data-label="Created">{{ optional($userRow->created_at)->format('Y-m-d H:i') }}</td>
+                            <td data-label="Aksi">
                                 <div class="action-icons">
                                     {{-- Detail Button --}}
                                     <details class="action-popover registration-style-popover">
@@ -1142,14 +1142,14 @@
                 <tbody>
                     @forelse ($teachersForManagement as $teacher)
                         <tr>
-                            <td>{{ $teacher->name }}</td>
-                            <td>{{ $teacher->user?->email ?? '-' }}</td>
-                            <td>{{ $teacher->phone ?? '-' }}</td>
-                            <td class="col-address">{{ $teacher->address ?? '-' }}</td>
-                            <td>{{ $teacher->gender ?? '-' }}</td>
-                            <td>{{ $teacher->religion ?? '-' }}</td>
-                            <td>{{ $teacher->classes->pluck('name')->implode(', ') ?: '-' }}</td>
-                            <td>
+                            <td data-label="Nama">{{ $teacher->name }}</td>
+                            <td data-label="Email">{{ $teacher->user?->email ?? '-' }}</td>
+                            <td data-label="Nomor HP">{{ $teacher->phone ?? '-' }}</td>
+                            <td data-label="Alamat" class="col-address">{{ $teacher->address ?? '-' }}</td>
+                            <td data-label="Jenis Kelamin">{{ $teacher->gender ?? '-' }}</td>
+                            <td data-label="Agama">{{ $teacher->religion ?? '-' }}</td>
+                            <td data-label="Class">{{ $teacher->classes->pluck('name')->implode(', ') ?: '-' }}</td>
+                            <td data-label="Aksi">
                                 <div class="action-icons">
                                     {{-- Detail Button --}}
                                     <details class="action-popover registration-style-popover">
@@ -1593,10 +1593,10 @@
                 <tbody>
                     @forelse($studentsForManagement as $student)
                         <tr>
-                            <td>{{ $student->name }}</td>
-                            <td>{{ $student->email ?: '-' }}</td>
-                            <td>{{ $student->phone ?: '-' }}</td>
-                            <td>
+                            <td data-label="Nama">{{ $student->name }}</td>
+                            <td data-label="Email">{{ $student->email ?: '-' }}</td>
+                            <td data-label="Telepon">{{ $student->phone ?: '-' }}</td>
+                            <td data-label="Kelas">
                                 @if($student->class)
                                     {{ $student->class->name }}
                                 @elseif($student->classes->isNotEmpty())
@@ -1605,12 +1605,12 @@
                                     -
                                 @endif
                             </td>
-                            <td>
+                            <td data-label="Status">
                                 <x-ui.badge :type="$student->is_active ? 'success' : 'warning'">
                                     {{ $student->is_active ? 'ACTIVE' : 'INACTIVE' }}
                                 </x-ui.badge>
                             </td>
-                            <td>
+                            <td data-label="Aksi">
                                 <div class="action-icons">
                                     {{-- Detail Button --}}
                                     <details class="action-popover registration-style-popover">
@@ -2085,11 +2085,11 @@
                             ];
                         @endphp
                         <tr>
-                            <td>{{ $namaLengkap }}</td>
-                            <td>{{ $registrationItem->email }}</td>
-                            <td>{{ $teleponSiswa }}</td>
-                            <td>{{ $instrumenText }}</td>
-                            <td>
+                            <td data-label="Nama">{{ $namaLengkap }}</td>
+                            <td data-label="Email">{{ $registrationItem->email }}</td>
+                            <td data-label="Telepon">{{ $teleponSiswa }}</td>
+                            <td data-label="Instrumen">{{ $instrumenText }}</td>
+                            <td data-label="Jadwal">
                                 @if($registrationItem->schedules->isNotEmpty())
                                     @php $sch = $registrationItem->schedules->first(); @endphp
                                     <span class="registration-schedule-count">{{ $sch->day }} {{ substr((string)$sch->time, 0, 5) }}</span>
@@ -2100,8 +2100,8 @@
                                     <span class="registration-schedule-count">-</span>
                                 @endif
                             </td>
-                            <td><x-ui.badge :type="$registrationBadge">{{ strtoupper($registrationStatus) }}</x-ui.badge></td>
-                            <td>
+                            <td data-label="Status"><x-ui.badge :type="$registrationBadge">{{ strtoupper($registrationStatus) }}</x-ui.badge></td>
+                            <td data-label="Aksi">
                                 <div class="action-icons class-action-icons">
                                     @if ($registrationStatus !== 'accepted')
                                         <form method="POST" action="{{ route('super-admin.registrations.approve', $registrationItem->id) }}" onsubmit="return confirm('Approve registration ini dan buat akun siswa?');">

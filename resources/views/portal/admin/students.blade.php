@@ -66,16 +66,16 @@ $homeRoute = route('admin.dashboard');
             <x-ui.table :headers="['Nama', 'Kelas', 'Mulai', 'Selesai', 'Status', 'Action']">
                 @foreach($students as $student)
                     <tr>
-                        <td>{{ $student->name }}</td>
-                        <td>{{ $student->classes->pluck('name')->join(', ') ?: '-' }}</td>
-                        <td>{{ $student->start_date ? \Carbon\Carbon::parse($student->start_date)->format('d M Y') : '-' }}</td>
-                        <td>{{ $student->end_date ? \Carbon\Carbon::parse($student->end_date)->format('d M Y') : '-' }}</td>
-                        <td>
+                        <td data-label="Nama">{{ $student->name }}</td>
+                        <td data-label="Kelas">{{ $student->classes->pluck('name')->join(', ') ?: '-' }}</td>
+                        <td data-label="Mulai">{{ $student->start_date ? \Carbon\Carbon::parse($student->start_date)->format('d M Y') : '-' }}</td>
+                        <td data-label="Selesai">{{ $student->end_date ? \Carbon\Carbon::parse($student->end_date)->format('d M Y') : '-' }}</td>
+                        <td data-label="Status">
                             <x-ui.badge :type="$student->is_active ? 'success' : 'warning'">
                                 {{ $student->is_active ? 'ACTIVE' : 'INACTIVE' }}
                             </x-ui.badge>
                         </td>
-                        <td>
+                        <td data-label="Action">
                             <div class="action-icons">
                                 {{-- Detail Button --}}
                                 <details class="action-popover registration-style-popover">

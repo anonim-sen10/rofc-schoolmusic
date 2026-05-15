@@ -4145,3 +4145,241 @@ button:hover,
 .shadow-lg, .shadow-xl, .shadow-2xl {
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS OVERRIDES (ONLY FOR MAX-WIDTH 768px)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    /* Core Layout Layout Adjustments */
+    .portal-shell {
+        flex-direction: column !important;
+        display: flex !important;
+    }
+
+    .portal-main {
+        margin-left: 0 !important;
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+
+    .portal-content {
+        padding: 0.75rem !important;
+        width: 100% !important;
+    }
+
+    /* Compact Cards & Grids */
+    .card {
+        padding: 1.15rem !important;
+        margin-bottom: 0.85rem !important;
+        border-radius: 1rem !important;
+    }
+
+    .split-grid, 
+    .split-grid-sa, 
+    .registration-modal-grid,
+    .module-form-grid,
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.85rem !important;
+    }
+
+    /* Table to Card Transformation */
+    /* This requires data-label attributes on td elements */
+    .table-wrap {
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+        padding: 0 !important;
+    }
+
+    .table-wrap table {
+        display: block !important;
+        border: none !important;
+    }
+
+    .table-wrap thead {
+        display: none !important;
+    }
+
+    .table-wrap tbody {
+        display: block !important;
+    }
+
+    .table-wrap tr {
+        display: block !important;
+        background: #ffffff !important;
+        border-radius: 1.15rem !important;
+        padding: 1rem !important;
+        margin-bottom: 1rem !important;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05) !important;
+        border: 1px solid #f1f5f9 !important;
+        position: relative !important;
+    }
+
+    .table-wrap td {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: flex-start !important;
+        text-align: right !important;
+        padding: 0.65rem 0 !important;
+        border-bottom: 1px solid #f8fafc !important;
+        font-size: 0.875rem !important;
+        min-height: auto !important;
+        width: 100% !important;
+    }
+
+    .table-wrap td:last-child {
+        border-bottom: none !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        padding-top: 1rem !important;
+        background: #f8fafc !important;
+        margin-top: 0.5rem !important;
+        border-radius: 0.75rem !important;
+    }
+
+    .table-wrap td::before {
+        content: attr(data-label);
+        font-weight: 700 !important;
+        text-align: left !important;
+        color: #64748b !important;
+        margin-right: 1rem !important;
+        font-size: 0.75rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.025em !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* Hide label for the action column if it exists */
+    .table-wrap td:last-child::before {
+        display: none !important;
+    }
+
+    /* Action Icons in Table Cards */
+    .action-icons {
+        justify-content: center !important;
+        gap: 0.75rem !important;
+        width: 100% !important;
+    }
+
+    .btn-icon {
+        width: 2.75rem !important;
+        height: 2.75rem !important;
+        border-radius: 0.75rem !important;
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+    }
+
+    /* Modal & Popover Fixes for Mobile */
+    details.registration-style-popover[open] .action-popover-form.registration-edit-form {
+        width: calc(100vw - 1.25rem) !important;
+        max-height: 92vh !important;
+        border-radius: 1.5rem !important;
+    }
+
+    .registration-modal-header {
+        padding: 1rem !important;
+    }
+
+    .registration-modal-body {
+        padding: 1rem !important;
+    }
+
+    .registration-modal-summary {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 1rem !important;
+        padding: 1.25rem !important;
+    }
+
+    /* Buttons */
+    .registration-modal-footer {
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 0.5rem !important;
+        padding: 1rem !important;
+    }
+
+    .registration-modal-btn {
+        flex: 1 1 45% !important;
+        min-width: 0 !important;
+        padding: 0.6rem 0.5rem !important;
+        font-size: 0.75rem !important;
+    }
+
+    /* Prevent overflow */
+    body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+    }
+
+    /* Dashboard Header Compaction */
+    .portal-topbar {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 50 !important;
+        height: auto !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(10px) !important;
+        border-bottom: 1px solid #f1f5f9 !important;
+    }
+
+    .portal-topbar-inner {
+        padding: 0.75rem !important;
+    }
+
+    .topbar-left h1 {
+        font-size: 1rem !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: 150px !important;
+    }
+
+    .topbar-left p.muted {
+        font-size: 0.65rem !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: 150px !important;
+    }
+
+    .topbar-tools {
+        gap: 0.5rem !important;
+    }
+
+    .user-box strong, .user-box small {
+        display: none !important; /* Hide name/role text on very small screens to save space */
+    }
+
+    .user-box {
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+    }
+
+    .user-box .avatar {
+        margin: 0 !important;
+    }
+
+    .user-box i {
+        display: none !important;
+    }
+
+    /* Impersonation Banner Compaction */
+    .bg-slate-900.sticky {
+        padding: 0.5rem 0.75rem !important;
+    }
+
+    .bg-slate-900.sticky p {
+        font-size: 0.7rem !important;
+    }
+
+    .bg-slate-900.sticky a {
+        padding: 0.4rem 0.75rem !important;
+        font-size: 0.6rem !important;
+    }
+}
+

@@ -30,18 +30,16 @@ $homeRoute = route('admin.dashboard');
         <x-ui.table :headers="['Nama', 'Email', 'Nomor HP', 'Instrument', 'Status', 'Action']">
             @foreach($teachers as $teacher)
                 <tr>
-                    <td>{{ $teacher->name }}</td>
-                    <td>{{ $teacher->user?->email ?? '-' }}</td>
-                    <td>{{ $teacher->phone ?? '-' }}</td>
-                    <td>{{ $teacher->gender ?? '-' }}</td>
-                    <td>{{ $teacher->religion ?? '-' }}</td>
-                    <td>{{ $teacher->instrument ?? '-' }}</td>
-                    <td>
+                    <td data-label="Nama">{{ $teacher->name }}</td>
+                    <td data-label="Email">{{ $teacher->user?->email ?? '-' }}</td>
+                    <td data-label="Nomor HP">{{ $teacher->phone ?? '-' }}</td>
+                    <td data-label="Instrument">{{ $teacher->instrument ?? '-' }}</td>
+                    <td data-label="Status">
                         <x-ui.badge :type="$teacher->is_active ? 'success' : 'warning'">
                             {{ $teacher->is_active ? 'ACTIVE' : 'INACTIVE' }}
                         </x-ui.badge>
                     </td>
-                    <td>
+                    <td data-label="Action">
                         @if($teacher->user)
                             <div class="action-icons">
                                 <a href="{{ route('admin.users.impersonate', $teacher->user->id) }}" class="btn-icon" title="Login As" aria-label="Login As" style="background: #0f172a !important; color: #fff !important; border: none !important;">

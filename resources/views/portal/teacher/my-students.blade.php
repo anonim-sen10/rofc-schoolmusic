@@ -118,7 +118,7 @@
             </div>
         </div>
 
-        <div class="overflow-x-auto">
+        <div class="table-wrap">
             <table class="w-full">
                 <thead>
                     <tr class="bg-slate-50/50">
@@ -131,7 +131,7 @@
                 <tbody class="divide-y divide-slate-50">
                     @forelse ($students as $student)
                         <tr class="hover:bg-slate-50 transition-colors group">
-                            <td class="px-8 py-5 whitespace-nowrap">
+                            <td class="px-8 py-5 whitespace-nowrap" data-label="Nama Student">
                                 <div class="flex items-center gap-3">
                                     <div class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-[10px] uppercase border border-slate-200">
                                         {{ substr($student->name, 0, 2) }}
@@ -139,7 +139,7 @@
                                     <span class="text-sm font-bold text-slate-700">{{ $student->name }}</span>
                                 </div>
                             </td>
-                            <td class="px-8 py-5">
+                            <td class="px-8 py-5" data-label="Class">
                                 @php
                                     $classNames = $student->classes->pluck('name')->toArray();
                                     if (empty($classNames)) {
@@ -149,12 +149,12 @@
                                 @endphp
                                 <span class="text-xs font-medium text-slate-500">{{ $displayClass }}</span>
                             </td>
-                            <td class="px-8 py-5">
+                            <td class="px-8 py-5" data-label="Status">
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-lg {{ $student->is_active ? 'bg-green-50 text-green-700 border-green-100' : 'bg-amber-50 text-amber-700 border-amber-100' }} text-[10px] font-bold border">
                                     {{ $student->is_active ? 'ACTIVE' : 'INACTIVE' }}
                                 </span>
                             </td>
-                            <td class="px-8 py-5">
+                            <td class="px-8 py-5" data-label="Aksi">
                                 <div class="flex items-center justify-end gap-2 transition-opacity">
                                     <button type="button" 
                                         onclick="showStudentDetailModal({
