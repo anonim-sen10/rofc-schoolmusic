@@ -2549,12 +2549,23 @@
                                                         </select>
                                                         <small style="color: #64748b; font-size: 10px;">Ganti kelas untuk melihat jadwal yang berbeda.</small>
                                                     </label>
+                                                    @php
+                                                        // Define relevant schedules early for the filter dropdown
+                                                        if (!$registrationItem->class_id) {
+                                                            $relevantSchedules = $schedulesForManagement;
+                                                        } else {
+                                                            $relevantSchedules = $schedulesForManagement->where('class_id', $registrationItem->class_id);
+                                                        }
+                                                    @endphp
                                                     
                                                     @if($registrationItem->class_id && $registrationItem->class)
                                                         <label>Filter Guru (Lihat Jadwal Guru Tertentu)
                                                             <select onchange="filterRegSchedules(this, '{{ $registrationItem->id }}')" class="premium-select-filter">
                                                                 <option value="">Semua Guru</option>
-                                                                @foreach($registrationItem->class->teachers as $t)
+                                                                @php
+                                                                    $teachersInSchedules = $relevantSchedules->pluck('teacher')->unique('id')->filter();
+                                                                @endphp
+                                                                @foreach($teachersInSchedules as $t)
                                                                     <option value="{{ $t->id }}">{{ $t->name }}</option>
                                                                 @endforeach
                                                             </select>
@@ -2571,12 +2582,6 @@
                                                         <div class="registration-schedule-container">
                                                             @php
                                                                 $currentScheduleIds = $registrationItem->schedules->pluck('id')->toArray();
-                                                                // If class_id is not set, show all available schedules as options
-                                                                if (!$registrationItem->class_id) {
-                                                                    $relevantSchedules = $schedulesForManagement;
-                                                                } else {
-                                                                    $relevantSchedules = $schedulesForManagement->where('class_id', $registrationItem->class_id);
-                                                                }
                                                                 
                                                                 $allSelectable = $relevantSchedules->merge($registrationItem->schedules)->unique('id')->sortBy(function($s) {
                                                                     $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
