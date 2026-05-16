@@ -2400,7 +2400,8 @@
                                     <div style="display: flex; flex-direction: column; gap: 4px;">
                                         @foreach($registrationItem->schedules as $sch)
                                             <span class="registration-schedule-count" style="display: block; font-size: 10px; white-space: nowrap;">
-                                                {{ $sch->day }} {{ substr((string)$sch->time, 0, 5) }}
+                                                {{ $sch->day }} {{ substr((string)$sch->time, 0, 5) }} 
+                                                <span style="color: #6366f1; font-weight: bold;">({{ $sch->teacher->name ?? '-' }})</span>
                                             </span>
                                         @endforeach
                                     </div>
@@ -2475,7 +2476,10 @@
                                                                 {{ $isDouble ? 'DOUBLE TIME' : 'SINGLE TIME' }}
                                                             </span>
                                                             @forelse($regSchedules as $sch)
-                                                                {{ $sch->day }} {{ substr((string)$sch->time, 0, 5) }}{{ !$loop->last ? ',' : '' }}
+                                                                <div style="margin-bottom: 2px;">
+                                                                    {{ $sch->day }} {{ substr((string)$sch->time, 0, 5) }} 
+                                                                    <span style="color: #6366f1; font-weight: 600;">({{ $sch->teacher->name ?? '-' }})</span>
+                                                                </div>
                                                             @empty
                                                                 {{ $registrationItem->preferred_schedule ?: '-' }}
                                                             @endforelse
@@ -2581,6 +2585,7 @@
                                                                             <label class="reg-slot-card {{ $isSelected ? 'is-selected' : '' }} {{ $isFull ? 'is-disabled' : '' }}">
                                                                                 <input type="checkbox" name="schedule_ids[]" value="{{ $sch->id }}" @checked($isSelected) @disabled($isFull) style="display: none;" onchange="this.parentElement.classList.toggle('is-selected', this.checked)">
                                                                                 <span class="reg-slot-time">{{ substr((string)$sch->time, 0, 5) }}</span>
+                                                                                <span class="reg-slot-teacher" style="font-size: 8px; color: #64748b; display: block; line-height: 1; margin-top: 2px; font-weight: 600;">{{ $sch->teacher->name ?? '-' }}</span>
                                                                                 @if($isFull)
                                                                                     <span class="reg-slot-badge">FULL</span>
                                                                                 @endif
