@@ -947,8 +947,8 @@
             if (!registerForm) return '-';
             
             if (fieldName === 'schedule_id') {
-                const checked = document.querySelector('input[name="schedule_id"]:checked');
-                return checked ? checked.dataset.label : '-';
+                const checkedItems = Array.from(document.querySelectorAll('input[name="schedule_ids[]"]:checked'));
+                return checkedItems.length ? checkedItems.map(i => i.dataset.label).join(', ') : '-';
             }
 
             const field = registerForm.elements[fieldName];
@@ -988,8 +988,8 @@
                 
                 let val = '-';
                 if (key === 'schedule_id') {
-                    const checked = document.querySelector('input[name="schedule_id"]:checked');
-                    val = checked ? checked.dataset.label : '-';
+                    const checkedItems = Array.from(document.querySelectorAll('input[name="schedule_ids[]"]:checked'));
+                    val = checkedItems.length ? checkedItems.map(i => i.dataset.label).join(', ') : '-';
                 } else if (key === 'day') {
                     target.closest('article').style.display = 'none';
                     return;

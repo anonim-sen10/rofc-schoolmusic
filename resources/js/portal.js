@@ -102,8 +102,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (header) {
-        const scrollContainer = document.querySelector(".portal-main") || window;
-        let lastScrollY = scrollContainer === window ? window.scrollY : scrollContainer.scrollTop;
+        const scrollContainer = window;
+        let lastScrollY = window.scrollY;
         let ticking = false;
 
         const setHeaderHeight = () => {
@@ -114,9 +114,16 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         const syncHeaderVisibility = () => {
-            const currentY = scrollContainer === window ? window.scrollY : scrollContainer.scrollTop;
+            const currentY = window.scrollY;
             const threshold = 10;
             const minDelta = 8;
+
+            // Add/remove a class for styling when scrolled
+            if (currentY > 20) {
+                header.classList.add("portal-topbar--scrolled");
+            } else {
+                header.classList.remove("portal-topbar--scrolled");
+            }
 
             if (currentY <= threshold) {
                 header.classList.remove("portal-topbar--hidden");
@@ -139,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         window.addEventListener("resize", setHeaderHeight);
 
-        scrollContainer.addEventListener("scroll", () => {
+        window.addEventListener("scroll", () => {
             if (!ticking) {
                 window.requestAnimationFrame(syncHeaderVisibility);
                 ticking = true;

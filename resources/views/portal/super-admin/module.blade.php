@@ -2536,6 +2536,15 @@
                                                             @endforeach
                                                         </select>
                                                     </label>
+                                                    <label>Pilih Kelas (Untuk filter jadwal)
+                                                        <select name="class_id" onchange="this.form.submit()">
+                                                            <option value="">-- Pilih Kelas --</option>
+                                                            @foreach($classesForManagement as $classItem)
+                                                                <option value="{{ $classItem->id }}" @selected((string)$registrationItem->class_id === (string)$classItem->id)>{{ $classItem->name }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        <small style="color: #64748b; font-size: 10px;">Ganti kelas untuk melihat jadwal yang berbeda.</small>
+                                                    </label>
                                                     <label id="reg-edit-favorite-song-{{ $registrationItem->id }}">Lagu Favorite
                                                         <input type="text" name="favorite_song" value="{{ $registrationItem->favorite_song ?: ($legacyNotesMap['Lagu Favorite'] ?? '') }}" placeholder="Contoh: Heal The World">
                                                     </label>
@@ -2546,7 +2555,13 @@
                                                         <div class="registration-schedule-container">
                                                             @php
                                                                 $currentScheduleIds = $registrationItem->schedules->pluck('id')->toArray();
-                                                                $relevantSchedules = $schedulesForManagement->where('class_id', $registrationItem->class_id);
+                                                                // If class_id is not set, show all available schedules as options
+                                                                if (!$registrationItem->class_id) {
+                                                                    $relevantSchedules = $schedulesForManagement;
+                                                                } else {
+                                                                    $relevantSchedules = $schedulesForManagement->where('class_id', $registrationItem->class_id);
+                                                                }
+                                                                
                                                                 $allSelectable = $relevantSchedules->merge($registrationItem->schedules)->unique('id')->sortBy(function($s) {
                                                                     $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
                                                                     return array_search($s->day, $days);
