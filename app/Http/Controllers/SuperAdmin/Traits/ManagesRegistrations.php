@@ -48,6 +48,7 @@ trait ManagesRegistrations
             'instrumen' => ['nullable', 'string', 'max:80'],
             'schedule_ids' => ['nullable', 'array'],
             'schedule_ids.*' => ['integer', 'exists:schedules,id'],
+            'class_id' => ['nullable', 'integer', 'exists:classes,id'],
         ]);
 
         $registration->update($data);

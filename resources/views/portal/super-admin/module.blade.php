@@ -2568,7 +2568,9 @@
                                                                 
                                                                 $allSelectable = $relevantSchedules->merge($registrationItem->schedules)->unique('id')->sortBy(function($s) {
                                                                     $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-                                                                    return array_search($s->day, $days);
+                                                                    $dayScore = array_search($s->day, $days) * 10000;
+                                                                    $timeScore = (int) str_replace(':', '', substr((string)$s->time, 0, 5));
+                                                                    return $dayScore + $timeScore;
                                                                 });
                                                                 $groupedByDay = $allSelectable->groupBy('day');
                                                             @endphp
