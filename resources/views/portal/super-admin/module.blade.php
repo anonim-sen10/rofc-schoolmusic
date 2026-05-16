@@ -2549,6 +2549,18 @@
                                                         </select>
                                                         <small style="color: #64748b; font-size: 10px;">Ganti kelas untuk melihat jadwal yang berbeda.</small>
                                                     </label>
+                                                    
+                                                    @if($registrationItem->class_id && $registrationItem->class)
+                                                        <label>Filter Guru (Lihat Jadwal Guru Tertentu)
+                                                            <select onchange="filterRegSchedules(this, '{{ $registrationItem->id }}')" class="premium-select-filter">
+                                                                <option value="">Semua Guru</option>
+                                                                @foreach($registrationItem->class->teachers as $t)
+                                                                    <option value="{{ $t->id }}">{{ $t->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                            <small style="color: #64748b; font-size: 10px;">Filter ini hanya untuk membantu pencarian jam.</small>
+                                                        </label>
+                                                    @endif
                                                     <label id="reg-edit-favorite-song-{{ $registrationItem->id }}">Lagu Favorite
                                                         <input type="text" name="favorite_song" value="{{ $registrationItem->favorite_song ?: ($legacyNotesMap['Lagu Favorite'] ?? '') }}" placeholder="Contoh: Heal The World">
                                                     </label>
@@ -2584,7 +2596,7 @@
                                                                                 $isSelected = in_array($sch->id, $currentScheduleIds);
                                                                                 $isFull = $sch->status === 'booked' && !$isSelected;
                                                                             @endphp
-                                                                            <label class="reg-slot-card {{ $isSelected ? 'is-selected' : '' }} {{ $isFull ? 'is-disabled' : '' }}">
+                                                                            <label class="reg-slot-card {{ $isSelected ? 'is-selected' : '' }} {{ $isFull ? 'is-disabled' : '' }}" data-teacher-id="{{ $sch->teacher_id }}">
                                                                                 <input type="checkbox" name="schedule_ids[]" value="{{ $sch->id }}" @checked($isSelected) @disabled($isFull) style="display: none;" onchange="this.parentElement.classList.toggle('is-selected', this.checked)">
                                                                                 <span class="reg-slot-time">{{ substr((string)$sch->time, 0, 5) }}</span>
                                                                                 <span class="reg-slot-teacher" style="font-size: 8px; color: #64748b; display: block; line-height: 1; margin-top: 2px; font-weight: 600;">{{ $sch->teacher->name ?? '-' }}</span>
@@ -3817,6 +3829,33 @@ window.toggleFavoriteSong = function(select, targetId) {
         const input = target.querySelector('input');
         if (input) input.value = '';
     }
+}
+
+window.filterRegSchedules = function(select, regId) {
+    const teacherId = select.value;
+    const modal = select.closest('.registration-edit-form');
+    if (!modal) return;
+    
+    const slots = modal.querySelectorAll('.reg-slot-card');
+    const dayGroups = modal.querySelectorAll('.reg-day-group');
+    
+    slots.forEach(slot => {
+        if (!teacherId || slot.dataset.teacherId === teacherId) {
+            slot.style.display = 'flex';
+        } else {
+            slot.style.display = 'none';
+        }
+    });
+    
+    // Hide day groups if all slots inside are hidden
+    dayGroups.forEach(group => {
+        const visibleSlots = Array.from(group.querySelectorAll('.reg-slot-card')).filter(s => s.style.display !== 'none');
+        if (visibleSlots.length === 0) {
+            group.style.display = 'none';
+        } else {
+            group.style.display = 'block';
+        }
+    });
 }
 </script>
 @endpush
