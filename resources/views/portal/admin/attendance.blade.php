@@ -125,101 +125,120 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
     .att-badge {
         display: inline-flex;
         align-items: center;
-        gap: 0.3rem;
-        padding: 0.25rem 0.65rem;
-        border-radius: 9999px;
-        font-size: 0.8rem;
+        gap: 0.2rem;
+        padding: 0.15rem 0.45rem;
+        border-radius: 6px;
+        font-size: 0.725rem;
         font-weight: 600;
         text-transform: capitalize;
+        white-space: nowrap;
     }
-    .att-badge-present { background: #dcfce7; color: #166534; }
-    .att-badge-absent  { background: #fee2e2; color: #991b1b; }
-    .att-badge-reschedule { background: #ffedd5; color: #9a3412; }
+    .att-badge-present { background: #dcfce7; color: #15803d; }
+    .att-badge-absent  { background: #fee2e2; color: #b91c1c; }
+    .att-badge-reschedule { background: #ffedd5; color: #c2410c; }
 
     /* Map button */
     .btn-map {
         display: inline-flex;
         align-items: center;
-        gap: 0.3rem;
-        background: #3b82f6;
-        color: white;
+        gap: 0.25rem;
+        background: #eff6ff;
+        color: #2563eb;
         border: none;
-        padding: 0.3rem 0.7rem;
+        padding: 0.2rem 0.5rem;
         border-radius: 0.25rem;
-        font-size: 0.8rem;
+        font-size: 0.725rem;
+        font-weight: 600;
         text-decoration: none;
         cursor: pointer;
-        transition: background 0.15s;
+        transition: all 0.15s ease;
+        white-space: nowrap;
     }
-    .btn-map:hover { background: #2563eb; }
+    .btn-map:hover { background: #dbeafe; color: #1d4ed8; }
 
     /* Table improvements */
-    .att-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .att-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; table-layout: fixed; }
     .att-table th {
         text-align: left;
-        padding: 0.75rem;
-        background: #f1f5f9;
+        padding: 0.45rem 0.5rem;
+        background: #f8fafc;
         border-bottom: 2px solid #e2e8f0;
         color: #475569;
         font-weight: 600;
-        font-size: 0.8rem;
+        font-size: 0.725rem;
         text-transform: uppercase;
         letter-spacing: 0.04em;
         white-space: nowrap;
     }
     .att-table td {
-        padding: 0.75rem;
+        padding: 0.45rem 0.5rem;
         border-bottom: 1px solid #f1f5f9;
         color: #334155;
         vertical-align: middle;
     }
     .att-table tr:hover td { background: #f8fafc; }
 
-    /* Empty state */
-    .att-empty {
-        text-align: center;
-        padding: 3rem;
-        color: #94a3b8;
-    }
-    .att-empty i { margin-bottom: 0.75rem; }
-    .att-empty p { font-size: 0.95rem; }
-
-    /* Summary cards */
-    .att-summary {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-    }
-    .att-summary-card {
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.5rem;
-        padding: 1rem 1.25rem;
-        text-align: center;
-    }
-    .att-summary-card .count {
-        font-size: 1.5rem;
-        font-weight: 700;
+    /* Name text truncation to prevent row height bloating */
+    .att-name-text {
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: block;
+        font-weight: 500;
         color: #0f172a;
     }
-    .att-summary-card .label {
-        font-size: 0.8rem;
-        color: #64748b;
-        margin-top: 0.25rem;
-    }
-    .att-summary-card.present  .count { color: #166534; }
-    .att-summary-card.absent   .count { color: #991b1b; }
-    .att-summary-card.resc     .count { color: #9a3412; }
 
     /* Note tooltip */
     .note-preview {
-        max-width: 200px;
+        max-width: 180px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         cursor: help;
+        display: inline-block;
+        color: #64748b;
+        font-size: 0.775rem;
     }
+
+    /* Empty state */
+    .att-empty {
+        text-align: center;
+        padding: 2.5rem;
+        color: #94a3b8;
+    }
+    .att-empty i { margin-bottom: 0.5rem; }
+    .att-empty p { font-size: 0.85rem; }
+
+    /* Summary cards */
+    .att-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+    }
+    .att-summary-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.375rem;
+        padding: 0.75rem 1rem;
+        text-align: center;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    }
+    .att-summary-card .count {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .att-summary-card .label {
+        font-size: 0.75rem;
+        color: #64748b;
+        margin-top: 0.15rem;
+        font-weight: 500;
+    }
+    .att-summary-card.present  .count { color: #15803d; }
+    .att-summary-card.absent   .count { color: #b91c1c; }
+    .att-summary-card.resc     .count { color: #c2410c; }
 
     /* Pagination */
     .att-pagination {
@@ -309,15 +328,15 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
             <table class="att-table">
                 <thead>
                     <tr>
-                        <th>Date</th>
-                        <th>Time (Sch)</th>
-                        <th>Recorded At</th>
-                        <th>Teacher</th>
-                        <th>Student</th>
-                        <th>Class</th>
-                        <th>Status</th>
-                        <th>Proof</th>
-                        <th>Location</th>
+                        <th style="width: 85px;">Date</th>
+                        <th style="width: 75px;">Time (Sch)</th>
+                        <th style="width: 80px;">Recorded At</th>
+                        <th style="width: 120px;">Teacher</th>
+                        <th style="width: 120px;">Student</th>
+                        <th style="width: 75px;">Class</th>
+                        <th style="width: 85px;">Status</th>
+                        <th style="width: 48px;">Proof</th>
+                        <th style="width: 90px;">Location</th>
                         <th>Notes</th>
                     </tr>
                 </thead>
@@ -325,11 +344,19 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
                     @foreach($attendances as $att)
                         <tr>
                             <td>{{ $att->created_at->format('d M Y') }}</td>
-                            <td>{{ $att->schedule ? \Carbon\Carbon::parse($att->schedule->time)->format('H:i') : '-' }}</td>
-                            <td><small class="text-slate-500">{{ $att->created_at->format('H:i:s') }}</small></td>
-                            <td>{{ $att->teacher->name ?? '-' }}</td>
-                            <td>{{ $att->student->name ?? '-' }}</td>
-                            <td>{{ $att->class->name ?? '-' }}</td>
+                            <td style="white-space: nowrap;">{{ $att->schedule ? \Carbon\Carbon::parse($att->schedule->time)->format('H:i') : '-' }}</td>
+                            <td style="white-space: nowrap;"><small class="text-slate-500">{{ $att->created_at->format('H:i:s') }}</small></td>
+                            <td>
+                                <span class="att-name-text" title="{{ $att->teacher->name ?? '' }}">
+                                    {{ $att->teacher->name ?? '-' }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="att-name-text" title="{{ $att->student->name ?? '' }}">
+                                    {{ $att->student->name ?? '-' }}
+                                </span>
+                            </td>
+                            <td style="white-space: nowrap; font-weight: 500; color: #475569;">{{ $att->class->name ?? '-' }}</td>
                             <td>
                                 @php $status = strtolower($att->status); @endphp
                                 <span class="att-badge att-badge-{{ $status }}">
@@ -342,9 +369,10 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
                             </td>
                             <td>
                                 @if($att->image_path)
-                                    <a href="{{ asset('storage/' . $att->image_path) }}" target="_blank" class="att-proof-thumb">
+                                    <a href="{{ asset('storage/' . $att->image_path) }}" target="_blank" class="att-proof-thumb" style="display: inline-flex;">
                                         <img src="{{ asset('storage/' . $att->image_path) }}" alt="Proof" 
-                                             style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid #e2e8f0;">
+                                             style="width: 26px; height: 26px; border-radius: 6px; object-fit: cover; border: 1px solid #e2e8f0; transition: transform 0.15s ease;"
+                                             onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
                                     </a>
                                 @else
                                     <span class="text-slate-300 text-[10px]">No Photo</span>
@@ -354,7 +382,7 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
                                 @if($att->latitude && $att->longitude)
                                     <a href="https://www.google.com/maps?q={{ $att->latitude }},{{ $att->longitude }}"
                                        target="_blank" rel="noopener" class="btn-map">
-                                        <i data-lucide="map-pin" style="width:14px;height:14px;"></i> View Map
+                                        <i data-lucide="map-pin" style="width:12px;height:12px;"></i> Map
                                     </a>
                                 @else
                                     -
