@@ -25,7 +25,8 @@ class UpdateTeacherRequest extends FormRequest
             'gender' => ['required', 'in:laki-laki,perempuan'],
             'religion' => ['required', 'string', 'max:30'],
             'instrument' => ['nullable', 'string', 'max:80'],
-            'class_id' => ['nullable', 'integer', 'exists:classes,id'],
+            'class_ids' => ['nullable', 'array'],
+            'class_ids.*' => ['exists:classes,id'],
             'photo' => ['nullable', 'image', 'max:2048'],
             'ktp' => ['nullable', 'image', 'max:2048'],
         ];

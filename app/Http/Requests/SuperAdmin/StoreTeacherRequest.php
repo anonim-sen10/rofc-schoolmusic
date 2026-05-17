@@ -24,8 +24,8 @@ class StoreTeacherRequest extends FormRequest
             'instrument' => ['nullable', 'string', 'max:80'],
             'photo' => ['nullable', 'image', 'max:2048'],
             'ktp' => ['nullable', 'image', 'max:2048'],
-            'class_id' => ['nullable', 'array'],
-            'class_id.*' => ['exists:music_classes,id'],
+            'class_ids' => ['nullable', 'array'],
+            'class_ids.*' => ['exists:classes,id'],
         ];
     }
 

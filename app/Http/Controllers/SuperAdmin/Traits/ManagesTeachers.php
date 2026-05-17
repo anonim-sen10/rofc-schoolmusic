@@ -49,8 +49,9 @@ trait ManagesTeachers
 
         $teacher = Teacher::query()->create($payload);
 
-        if (!empty($data['class_id'])) {
-            $teacher->musicClasses()->sync($data['class_id']);
+        if (!empty($data['class_ids'])) {
+            $teacher->musicClasses()->sync($data['class_ids']);
+            MusicClass::query()->whereIn('id', $data['class_ids'])->update(['teacher_id' => $teacher->id]);
         }
 
         return back()->with('success', 'Akun teacher dan data guru berhasil dibuat.');
@@ -114,10 +115,16 @@ trait ManagesTeachers
 
         $teacher->update($payload);
 
-        if (!empty($data['class_id'])) {
-            MusicClass::query()->whereKey($data['class_id'])->update([
-                'teacher_id' => $teacher->id,
-            ]);
+        $classIds = $data['class_ids'] ?? [];
+        $teacher->musicClasses()->sync($classIds);
+
+        // Sync old one-to-many column: clear for old classes, set for new classes
+        MusicClass::query()->where('teacher_id', $teacher->id)
+            ->whereNotIn('id', $classIds)
+            ->update(['teacher_id' => null]);
+
+        if (!empty($classIds)) {
+            MusicClass::query()->whereIn('id', $classIds)->update(['teacher_id' => $teacher->id]);
         }
 
         return redirect()->route('super-admin.module', ['module' => 'teachers'])->with('success', 'Data teacher berhasil diperbarui.');

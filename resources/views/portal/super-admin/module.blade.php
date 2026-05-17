@@ -1496,6 +1496,16 @@
                             <small style="color: #64748b; margin-top: 0.25rem;">Ketik manual instrumen atau kelas yang akan diajar.</small>
                         </div>
 
+                        <div class="premium-field">
+                            <label for="teacher-classes">Assign Class (Pilih satu atau lebih)</label>
+                            <select id="teacher-classes" name="class_ids[]" class="premium-select" multiple style="height: 100px;">
+                                @foreach ($classesForManagement as $classOption)
+                                    <option value="{{ $classOption->id }}" @selected(is_array(old('class_ids')) && in_array((string)$classOption->id, old('class_ids')))>{{ $classOption->name }}</option>
+                                @endforeach
+                            </select>
+                            <small style="color: #64748b; margin-top: 0.25rem;">Tahan Ctrl/Cmd untuk memilih lebih dari satu.</small>
+                        </div>
+
                         <div class="premium-field full-width">
                             <label for="teacher-address">Alamat Domisili</label>
                             <textarea id="teacher-address" name="address" class="premium-textarea" placeholder="Tuliskan alamat lengkap..." required>{{ old('address') }}</textarea>
@@ -1701,13 +1711,13 @@
                                                     <label>Bidang / Instrumen
                                                         <input type="text" name="instrument" value="{{ $teacher->instrument }}" placeholder="Drum, Piano, Vocal, dll">
                                                     </label>
-                                                    <label>Assign Class
-                                                        <select name="class_id">
-                                                            <option value="">Pilih class (opsional)</option>
+                                                    <label>Assign Class (Pilih satu atau lebih)
+                                                        <select name="class_ids[]" multiple style="height: 100px;">
                                                             @foreach ($classesForManagement as $classOption)
-                                                                <option value="{{ $classOption->id }}" @selected($teacher->classes->contains($classOption->id))>{{ $classOption->name }}</option>
+                                                                <option value="{{ $classOption->id }}" @selected($teacher->musicClasses->contains($classOption->id) || $teacher->classes->contains($classOption->id))>{{ $classOption->name }}</option>
                                                             @endforeach
                                                         </select>
+                                                        <small style="color: #64748b; font-size: 0.75rem;">Tahan Ctrl/Cmd untuk memilih lebih dari satu.</small>
                                                     </label>
                                                     <label>Password Baru (opsional)
                                                         <input type="password" name="password" placeholder="Kosongkan jika tidak diganti">
