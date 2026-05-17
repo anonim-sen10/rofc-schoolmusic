@@ -189,16 +189,68 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
         color: #0f172a;
     }
 
-    /* Note tooltip */
+    /* Note interactive tooltip container */
+    .note-container {
+        position: relative;
+        display: inline-block;
+    }
+    
     .note-preview {
         max-width: 180px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        cursor: help;
+        cursor: pointer;
         display: inline-block;
         color: #64748b;
         font-size: 0.775rem;
+        transition: color 0.15s ease;
+    }
+    
+    .note-container:hover .note-preview {
+        color: #0f172a;
+    }
+
+    /* Premium SaaS CSS Tooltip */
+    .note-tooltip {
+        visibility: hidden;
+        width: 260px;
+        background-color: #0f172a;
+        color: #ffffff;
+        text-align: left;
+        border-radius: 8px;
+        padding: 0.65rem 0.85rem;
+        position: absolute;
+        z-index: 100;
+        bottom: 130%;
+        right: 0;
+        opacity: 0;
+        transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+        transform: translateY(4px);
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+        font-size: 0.725rem;
+        line-height: 1.4;
+        white-space: normal;
+        word-wrap: break-word;
+        pointer-events: none;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    /* Arrow pointing to right edge of note cell */
+    .note-tooltip::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        right: 15px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: #0f172a transparent transparent transparent;
+    }
+    
+    .note-container:hover .note-tooltip {
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0);
     }
 
     /* Empty state */
@@ -390,7 +442,10 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
                             </td>
                             <td>
                                 @if($att->note)
-                                    <span class="note-preview" title="{{ $att->note }}">{{ $att->note }}</span>
+                                    <div class="note-container">
+                                        <span class="note-preview">{{ $att->note }}</span>
+                                        <div class="note-tooltip">{{ $att->note }}</div>
+                                    </div>
                                 @else
                                     -
                                 @endif
