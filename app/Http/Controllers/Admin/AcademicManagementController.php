@@ -229,10 +229,23 @@ class AcademicManagementController extends Controller
             $student = Student::query()->updateOrCreate(
                 ['email' => $registration->email],
                 [
-                    'name' => $registration->full_name,
+                    'name' => $registration->full_name ?: $registration->nama_lengkap,
                     'age' => $registration->age,
-                    'phone' => $registration->phone,
+                    'phone' => $registration->phone ?: $registration->no_hp_siswa,
                     'email' => $registration->email,
+                    'nama_panggilan' => $registration->nama_panggilan,
+                    'jenis_kelamin' => $registration->jenis_kelamin,
+                    'tempat_lahir' => $registration->tempat_lahir,
+                    'tanggal_lahir' => $registration->tanggal_lahir,
+                    'kewarganegaraan' => $registration->kewarganegaraan,
+                    'address' => $registration->alamat ?: $registration->address,
+                    'nama_ortu' => $registration->nama_ortu,
+                    'pekerjaan_ortu' => $registration->pekerjaan_ortu,
+                    'no_hp_ortu' => $registration->no_hp_ortu,
+                    'email_ortu' => $registration->email_ortu,
+                    'ig_siswa' => $registration->ig_siswa,
+                    'ig_ortu' => $registration->ig_ortu,
+                    'favorite_song' => $registration->favorite_song,
                     'is_active' => true,
                 ]
             );

@@ -131,6 +131,8 @@ class RegistrationController extends Controller
             'program_tambahan' => ['nullable', 'array'],
             'program_tambahan.*' => ['string', 'max:120'],
             'favorite_song' => ['nullable', 'string', 'max:120'],
+            'ig_siswa' => ['nullable', 'string', 'max:100'],
+            'ig_ortu' => ['nullable', 'string', 'max:100'],
 
             'pengalaman' => ['required', 'boolean'],
             'deskripsi_pengalaman' => ['nullable', 'string', 'max:2000'],
@@ -188,6 +190,8 @@ class RegistrationController extends Controller
             'instrumen' => $instrumentName,
             'program_tambahan' => $validated['program_tambahan'] ?? [],
             'favorite_song' => $validated['favorite_song'] ?? null,
+            'ig_siswa' => $validated['ig_siswa'] ?? null,
+            'ig_ortu' => $validated['ig_ortu'] ?? null,
             'hari_pilihan' => $days,
 
             'pengalaman' => (bool) $validated['pengalaman'],
