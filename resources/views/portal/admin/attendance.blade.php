@@ -585,153 +585,6 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
                                 </div>
                             </td>
                         </tr>
-
-                        <!-- DETAIL MODAL -->
-                        <div id="modal-detail-{{ $att->id }}" class="att-modal">
-                            <div class="att-modal-content" style="text-align: left;">
-                                <header class="registration-modal-header">
-                                    <div class="registration-modal-header-left">
-                                        <span class="registration-modal-icon"><i data-lucide="clipboard-list"></i></span>
-                                        <div>
-                                            <h3>Detail Kehadiran</h3>
-                                            <p>Informasi lengkap data presensi kelas</p>
-                                        </div>
-                                    </div>
-                                    <button type="button" class="registration-modal-close-btn" aria-label="Tutup" onclick="closeModal('modal-detail-{{ $att->id }}')">
-                                        <i data-lucide="x"></i>
-                                    </button>
-                                </header>
-                                <div class="registration-modal-body" style="padding: 1.25rem;">
-                                    <div class="registration-modal-summary" style="margin-bottom: 1.25rem;">
-                                        <div class="registration-modal-summary-left">
-                                            <div class="registration-modal-avatar" style="background: #eff6ff; color: #2563eb; font-weight: 700; display: flex; align-items: center; justify-content: center;">
-                                                {{ strtoupper(substr($att->student->name ?? 'S', 0, 1)) }}
-                                            </div>
-                                            <div>
-                                                <p>Siswa</p>
-                                                <p class="registration-modal-summary-name" style="font-weight: 600; color: #0f172a; margin: 0;">{{ $att->student->name ?? '-' }}</p>
-                                            </div>
-                                        </div>
-                                        <span class="att-badge att-badge-{{ $status }}">
-                                            @if($status === 'present') ✔
-                                            @elseif($status === 'absent') ✖
-                                            @elseif($status === 'reschedule') ↻
-                                            @endif
-                                            {{ strtoupper($status) }}
-                                        </span>
-                                    </div>
-                                    
-                                    <section class="registration-modal-grid">
-                                        <article>
-                                            <p>Tanggal</p>
-                                            <p>{{ $att->created_at->format('d M Y') }}</p>
-                                        </article>
-                                        <article>
-                                            <p>Waktu (Jadwal)</p>
-                                            <p>{{ $att->schedule ? \Carbon\Carbon::parse($att->schedule->time)->format('H:i') : '-' }}</p>
-                                        </article>
-                                        <article>
-                                            <p>Tercatat Pada</p>
-                                            <p>{{ $att->created_at->format('H:i:s') }}</p>
-                                        </article>
-                                        <article>
-                                            <p>Kelas</p>
-                                            <p>{{ $att->class->name ?? '-' }}</p>
-                                        </article>
-                                        <article class="registration-modal-item-full">
-                                            <p>Guru Pengajar</p>
-                                            <p style="font-weight: 600; color: #0f172a;">{{ $att->teacher->name ?? '-' }}</p>
-                                        </article>
-                                        
-                                        <article class="registration-modal-item-full">
-                                            <p>Bukti Foto</p>
-                                            <p>
-                                                @if($att->image_path)
-                                                    <div style="margin-top: 0.35rem;">
-                                                        <a href="{{ asset('storage/' . $att->image_path) }}" target="_blank" style="display: inline-block;">
-                                                            <img src="{{ asset('storage/' . $att->image_path) }}" alt="Proof" 
-                                                                 style="width: 140px; height: 95px; border-radius: 8px; object-fit: cover; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                                                        </a>
-                                                        <div style="margin-top: 0.25rem;">
-                                                            <a href="{{ asset('storage/' . $att->image_path) }}" target="_blank" style="color: #2563eb; text-decoration: none; font-size: 0.75rem; font-weight: 500;">
-                                                                Buka Foto Ukuran Penuh &rarr;
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                @else
-                                                    <span style="color:#94a3b8; font-style:italic;">Tidak ada bukti foto</span>
-                                                @endif
-                                            </p>
-                                        </article>
-
-                                        <article class="registration-modal-item-full">
-                                            <p>Lokasi Presensi</p>
-                                            <p>
-                                                @if($att->latitude && $att->longitude)
-                                                    <div style="margin-top: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
-                                                        <a href="https://www.google.com/maps?q={{ $att->latitude }},{{ $att->longitude }}"
-                                                           target="_blank" rel="noopener" class="btn-map" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; border-radius: 6px;">
-                                                            <i data-lucide="map-pin" style="width:13px;height:13px;"></i> Lihat di Google Maps
-                                                        </a>
-                                                        <span style="font-size:0.75rem; color:#64748b;">({{ $att->latitude }}, {{ $att->longitude }})</span>
-                                                    </div>
-                                                @else
-                                                    <span style="color:#94a3b8; font-style:italic;">Tidak ada data lokasi GPS</span>
-                                                @endif
-                                            </p>
-                                        </article>
-
-                                        <article class="registration-modal-item-full">
-                                            <p>Catatan</p>
-                                            <p class="text-wrap-normal" style="margin-top: 0.25rem; font-size:0.8rem; line-height: 1.4; background:#f8fafc; padding:0.55rem 0.75rem; border-radius:6px; border:1px solid #e2e8f0; color:#334155;">
-                                                {{ $att->note ?: '-' }}
-                                            </p>
-                                        </article>
-                                    </section>
-                                </div>
-                                <footer class="registration-modal-footer">
-                                    <button type="button" class="registration-modal-btn registration-modal-btn-secondary" onclick="closeModal('modal-detail-{{ $att->id }}')">Tutup</button>
-                                </footer>
-                            </div>
-                        </div>
-
-                        <!-- EDIT MODAL -->
-                        <div id="modal-edit-{{ $att->id }}" class="att-modal">
-                            <div class="att-modal-content" style="text-align: left;">
-                                <form action="{{ $prefix === 'super-admin' ? route('super-admin.attendance.update', $att->id) : route('admin.attendance.update', $att->id) }}" method="POST">
-                                    @csrf
-                                    @method('PUT')
-                                    
-                                    <div class="att-modal-header">
-                                        <h4>Edit Absensi</h4>
-                                        <button type="button" onclick="closeModal('modal-edit-{{ $att->id }}')" class="btn-close">&times;</button>
-                                    </div>
-                                    <div class="att-modal-body">
-                                        <div style="margin-bottom: 1rem; background: #eff6ff; padding: 0.6rem 0.8rem; border-radius: 6px; border: 1px solid #bfdbfe; font-size: 0.775rem; color: #1e40af; line-height: 1.4;">
-                                            Mengubah presensi kelas <strong>{{ $att->class->name ?? '-' }}</strong> untuk siswa <strong>{{ $att->student->name ?? '-' }}</strong>.
-                                        </div>
-
-                                        <div style="margin-bottom: 1rem;">
-                                            <label style="display:block; font-weight:600; font-size:0.7rem; text-transform:uppercase; color:#475569; margin-bottom:0.35rem;">Status Kehadiran</label>
-                                            <select name="status" style="width:100%; padding:0.45rem 0.6rem; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem; color:#0f172a; outline:none; transition:border-color 0.15s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#cbd5e1'">
-                                                <option value="present" @selected($status === 'present')>Present (Hadir)</option>
-                                                <option value="absent" @selected($status === 'absent')>Absent (Alpa)</option>
-                                                <option value="reschedule" @selected($status === 'reschedule')>Reschedule</option>
-                                            </select>
-                                        </div>
-
-                                        <div>
-                                            <label style="display:block; font-weight:600; font-size:0.7rem; text-transform:uppercase; color:#475569; margin-bottom:0.35rem;">Catatan</label>
-                                            <textarea name="note" rows="3" style="width:100%; padding:0.5rem; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem; color:#0f172a; outline:none; font-family:inherit; resize:vertical; transition:border-color 0.15s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#cbd5e1'">{{ $att->note }}</textarea>
-                                        </div>
-                                    </div>
-                                    <div class="att-modal-footer">
-                                        <button type="button" onclick="closeModal('modal-edit-{{ $att->id }}')" class="btn-reset" style="padding: 0.4rem 1rem; font-size: 0.8rem; border-radius: 6px;">Batal</button>
-                                        <button type="submit" class="btn-filter" style="padding: 0.4rem 1rem; font-size: 0.8rem; border-radius: 6px; background:#0f172a; color:white; border:none; cursor:pointer;">Simpan</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
                     @endforeach
                 </tbody>
             </table>
@@ -749,6 +602,157 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
         @endif
     </div>
 </section>
+
+<!-- MODALS OUTSIDE CARD & TABLE WRAP TO PREVENT STACKING CONTEXT ISSUES -->
+@foreach($attendances as $att)
+    @php $status = strtolower($att->status); @endphp
+    <!-- DETAIL MODAL -->
+    <div id="modal-detail-{{ $att->id }}" class="att-modal">
+        <div class="att-modal-content" style="text-align: left;">
+            <header class="registration-modal-header">
+                <div class="registration-modal-header-left">
+                    <span class="registration-modal-icon"><i data-lucide="clipboard-list"></i></span>
+                    <div>
+                        <h3>Detail Kehadiran</h3>
+                        <p>Informasi lengkap data presensi kelas</p>
+                    </div>
+                </div>
+                <button type="button" class="registration-modal-close-btn" aria-label="Tutup" onclick="closeModal('modal-detail-{{ $att->id }}')">
+                    <i data-lucide="x"></i>
+                </button>
+            </header>
+            <div class="registration-modal-body" style="padding: 1.25rem;">
+                <div class="registration-modal-summary" style="margin-bottom: 1.25rem;">
+                    <div class="registration-modal-summary-left">
+                        <div class="registration-modal-avatar" style="background: #eff6ff; color: #2563eb; font-weight: 700; display: flex; align-items: center; justify-content: center;">
+                            {{ strtoupper(substr($att->student->name ?? 'S', 0, 1)) }}
+                        </div>
+                        <div>
+                            <p>Siswa</p>
+                            <p class="registration-modal-summary-name" style="font-weight: 600; color: #0f172a; margin: 0;">{{ $att->student->name ?? '-' }}</p>
+                        </div>
+                    </div>
+                    <span class="att-badge att-badge-{{ $status }}">
+                        @if($status === 'present') ✔
+                        @elseif($status === 'absent') ✖
+                        @elseif($status === 'reschedule') ↻
+                        @endif
+                        {{ strtoupper($status) }}
+                    </span>
+                </div>
+                
+                <section class="registration-modal-grid">
+                    <article>
+                        <p>Tanggal</p>
+                        <p>{{ $att->created_at->format('d M Y') }}</p>
+                    </article>
+                    <article>
+                        <p>Waktu (Jadwal)</p>
+                        <p>{{ $att->schedule ? \Carbon\Carbon::parse($att->schedule->time)->format('H:i') : '-' }}</p>
+                    </article>
+                    <article>
+                        <p>Tercatat Pada</p>
+                        <p>{{ $att->created_at->format('H:i:s') }}</p>
+                    </article>
+                    <article>
+                        <p>Kelas</p>
+                        <p>{{ $att->class->name ?? '-' }}</p>
+                    </article>
+                    <article class="registration-modal-item-full">
+                        <p>Guru Pengajar</p>
+                        <p style="font-weight: 600; color: #0f172a;">{{ $att->teacher->name ?? '-' }}</p>
+                    </article>
+                    
+                    <article class="registration-modal-item-full">
+                        <p>Bukti Foto</p>
+                        <p>
+                            @if($att->image_path)
+                                <div style="margin-top: 0.35rem;">
+                                    <a href="{{ asset('storage/' . $att->image_path) }}" target="_blank" style="display: inline-block;">
+                                        <img src="{{ asset('storage/' . $att->image_path) }}" alt="Proof" 
+                                             style="width: 140px; height: 95px; border-radius: 8px; object-fit: cover; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                    </a>
+                                    <div style="margin-top: 0.25rem;">
+                                        <a href="{{ asset('storage/' . $att->image_path) }}" target="_blank" style="color: #2563eb; text-decoration: none; font-size: 0.75rem; font-weight: 500;">
+                                            Buka Foto Ukuran Penuh &rarr;
+                                        </a>
+                                    </div>
+                                </div>
+                            @else
+                                <span style="color:#94a3b8; font-style:italic;">Tidak ada bukti foto</span>
+                            @endif
+                        </p>
+                    </article>
+
+                    <article class="registration-modal-item-full">
+                        <p>Lokasi Presensi</p>
+                        <p>
+                            @if($att->latitude && $att->longitude)
+                                <div style="margin-top: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <a href="https://www.google.com/maps?q={{ $att->latitude }},{{ $att->longitude }}"
+                                       target="_blank" rel="noopener" class="btn-map" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; border-radius: 6px;">
+                                        <i data-lucide="map-pin" style="width:13px;height:13px;"></i> Lihat di Google Maps
+                                    </a>
+                                    <span style="font-size:0.75rem; color:#64748b;">({{ $att->latitude }}, {{ $att->longitude }})</span>
+                                </div>
+                            @else
+                                <span style="color:#94a3b8; font-style:italic;">Tidak ada data lokasi GPS</span>
+                            @endif
+                        </p>
+                    </article>
+
+                    <article class="registration-modal-item-full">
+                        <p>Catatan</p>
+                        <p class="text-wrap-normal" style="margin-top: 0.25rem; font-size:0.8rem; line-height: 1.4; background:#f8fafc; padding:0.55rem 0.75rem; border-radius:6px; border:1px solid #e2e8f0; color:#334155;">
+                            {{ $att->note ?: '-' }}
+                        </p>
+                    </article>
+                </section>
+            </div>
+            <footer class="registration-modal-footer">
+                <button type="button" class="registration-modal-btn registration-modal-btn-secondary" onclick="closeModal('modal-detail-{{ $att->id }}')">Tutup</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- EDIT MODAL -->
+    <div id="modal-edit-{{ $att->id }}" class="att-modal">
+        <div class="att-modal-content" style="text-align: left;">
+            <form action="{{ $prefix === 'super-admin' ? route('super-admin.attendance.update', $att->id) : route('admin.attendance.update', $att->id) }}" method="POST">
+                @csrf
+                @method('PUT')
+                
+                <div class="att-modal-header">
+                    <h4>Edit Absensi</h4>
+                    <button type="button" onclick="closeModal('modal-edit-{{ $att->id }}')" class="btn-close">&times;</button>
+                </div>
+                <div class="att-modal-body">
+                    <div style="margin-bottom: 1rem; background: #eff6ff; padding: 0.6rem 0.8rem; border-radius: 6px; border: 1px solid #bfdbfe; font-size: 0.775rem; color: #1e40af; line-height: 1.4;">
+                        Mengubah presensi kelas <strong>{{ $att->class->name ?? '-' }}</strong> untuk siswa <strong>{{ $att->student->name ?? '-' }}</strong>.
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display:block; font-weight:600; font-size:0.7rem; text-transform:uppercase; color:#475569; margin-bottom:0.35rem;">Status Kehadiran</label>
+                        <select name="status" style="width:100%; padding:0.45rem 0.6rem; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem; color:#0f172a; outline:none; transition:border-color 0.15s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#cbd5e1'">
+                            <option value="present" @selected($status === 'present')>Present (Hadir)</option>
+                            <option value="absent" @selected($status === 'absent')>Absent (Alpa)</option>
+                            <option value="reschedule" @selected($status === 'reschedule')>Reschedule</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="display:block; font-weight:600; font-size:0.7rem; text-transform:uppercase; color:#475569; margin-bottom:0.35rem;">Catatan</label>
+                        <textarea name="note" rows="3" style="width:100%; padding:0.5rem; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem; color:#0f172a; outline:none; font-family:inherit; resize:vertical; transition:border-color 0.15s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#cbd5e1'">{{ $att->note }}</textarea>
+                    </div>
+                </div>
+                <div class="att-modal-footer">
+                    <button type="button" onclick="closeModal('modal-edit-{{ $att->id }}')" class="btn-reset" style="padding: 0.4rem 1rem; font-size: 0.8rem; border-radius: 6px;">Batal</button>
+                    <button type="submit" class="btn-filter" style="padding: 0.4rem 1rem; font-size: 0.8rem; border-radius: 6px; background:#0f172a; color:white; border:none; cursor:pointer;">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+@endforeach
 
 <script>
     function openModal(id) {
