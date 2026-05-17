@@ -256,21 +256,26 @@
     .registration-schedule-count {
         background: #f8fafc;
         color: #475569;
-        padding: 0.2rem 0.5rem;
+        padding: 0.25rem 0.5rem;
         border-radius: 6px;
         font-weight: 600;
         font-size: 0.7rem !important;
         display: inline-flex !important;
-        align-items: center;
-        gap: 4px;
+        flex-direction: column; /* Stack teacher name under day and time */
+        align-items: flex-start;
+        gap: 2px;
         margin-bottom: 2px;
         border: 1px solid #e2e8f0;
         white-space: nowrap;
+        width: fit-content;
     }
 
     .registration-schedule-count span {
         color: #6366f1;
         font-weight: 700;
+        font-size: 0.65rem;
+        display: block;
+        margin-top: 1px;
     }
 
     .registration-schedule-list {
@@ -278,7 +283,13 @@
         flex-direction: column;
         gap: 4px;
         align-items: flex-start;
-        max-width: 220px;
+        width: 100%;
+    }
+
+    .table-wrap table td[data-label="Jadwal"] {
+        white-space: normal !important;
+        min-width: 150px;
+        padding-right: 0.5rem;
     }
 
     /* Premium Modal System */
