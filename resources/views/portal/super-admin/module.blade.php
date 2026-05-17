@@ -35,6 +35,115 @@
         width: 100%;
         overflow-x: auto;
         position: relative;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f1f5f9;
+        margin-top: 1rem;
+    }
+
+    @media (max-width: 1400px) {
+        .table-wrap {
+            overflow-x: auto;
+        }
+    }
+
+    .table-wrap table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: auto;
+    }
+
+    .table-wrap table th {
+        padding: 0.75rem 0.85rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        color: #475569;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+        white-space: nowrap;
+    }
+    
+    .table-wrap table th:last-child,
+    .table-wrap table td:last-child {
+        width: 110px;
+        min-width: 110px;
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .table-wrap table td {
+        padding: 0.65rem 0.85rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.8rem;
+        color: #334155;
+        line-height: 1.5;
+        white-space: nowrap;
+    }
+
+    .table-wrap table td.col-address {
+        white-space: normal;
+        max-width: 250px;
+        word-break: break-word;
+    }
+
+    .table-wrap table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .table-wrap table tbody tr:hover {
+        background-color: #fcfdfe !important;
+    }
+
+    /* Action Icons & Buttons */
+    .action-icons {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        justify-content: flex-end;
+        flex-wrap: nowrap;
+        width: 100%;
+    }
+
+    .btn-icon {
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        justify-content: center;
+        border-radius: 6px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        transition: all 0.15s ease;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .btn-icon:hover {
+        background: #ffffff;
+        color: #6366f1;
+        border-color: #6366f1;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-icon i {
+        width: 14px;
+        height: 14px;
+    }
+
+    .action-icons form {
+        display: inline-flex;
+        margin: 0;
+        padding: 0;
     }
 
     .premium-create-card-btn {
@@ -143,6 +252,35 @@
     .tooltip-day { font-weight: 700; color: #1e293b; }
     .tooltip-time { color: #64748b; font-variant-numeric: tabular-nums; }
 
+    /* Compact Schedule Count */
+    .registration-schedule-count {
+        background: #f8fafc;
+        color: #475569;
+        padding: 0.2rem 0.5rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.7rem !important;
+        display: inline-flex !important;
+        align-items: center;
+        gap: 4px;
+        margin-bottom: 2px;
+        border: 1px solid #e2e8f0;
+        white-space: nowrap;
+    }
+
+    .registration-schedule-count span {
+        color: #6366f1;
+        font-weight: 700;
+    }
+
+    .registration-schedule-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-start;
+        max-width: 220px;
+    }
+
     /* Premium Modal System */
     .premium-modal-wrapper {
         position: fixed;
@@ -196,23 +334,13 @@
     details.action-popover {
         position: static;
         display: inline-block;
+        vertical-align: middle;
     }
 
-    /* Force reset all potential parent transforms that break 'position: fixed' */
-    .table-wrap:has(details.action-popover[open]),
-    .portal-content:has(details.action-popover[open]),
-    .portal-main:has(details.action-popover[open]),
-    .portal-shell:has(details.action-popover[open]),
-    table:has(details.action-popover[open]),
-    tbody:has(details.action-popover[open]),
-    tr:has(details.action-popover[open]),
-    td:has(details.action-popover[open]) {
+    /* ─── MODAL POSITIONING FIX ─── */
+    /* Only reset transform on the absolute necessary parent to keep fixed positioning working */
+    .table-wrap:has(details.action-popover[open]) {
         transform: none !important;
-        perspective: none !important;
-        filter: none !important;
-        contain: none !important;
-        backdrop-filter: none !important;
-        /* Ensure the modal is visible */
         overflow: visible !important;
     }
 
@@ -229,12 +357,12 @@
 
     details.action-popover[open] .action-popover-form {
         position: fixed !important;
-        top: 50% !important;
+        top: 2vh !important;
         left: 50% !important;
-        transform: translate(-50%, -50%) !important;
+        transform: translateX(-50%) !important;
         width: min(850px, 95vw) !important;
         height: auto !important;
-        max-height: 90vh !important;
+        max-height: 82vh !important;
         background: #ffffff !important;
         border-radius: 1.5rem !important;
         z-index: 100001 !important;
@@ -248,8 +376,8 @@
     }
 
     @keyframes modalFadeIn {
-        from { opacity: 0; transform: translate(-50%, -45%) scale(0.95); }
-        to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        from { opacity: 0; transform: translate(-50%, 10px) scale(0.98); }
+        to { opacity: 1; transform: translate(-50%, 0) scale(1); }
     }
 
     .registration-modal-header {
@@ -317,12 +445,11 @@
     }
 
     .registration-modal-body {
-        flex: 1 1 auto !important;
+        flex: 1 !important;
         overflow-y: auto !important;
-        padding: 1.5rem 1.75rem;
-        background: #ffffff;
-        scrollbar-width: thin;
-        scrollbar-color: #cbd5e1 transparent;
+        padding: 1.5rem 1.75rem !important;
+        background: #ffffff !important;
+        min-height: 0 !important;
     }
 
     .registration-modal-summary {
@@ -2078,37 +2205,6 @@
 
 @if ($moduleKey === 'registrations')
 
-    <style>
-        /* Modern Firm Modal for Details/Popovers */
-        details.action-popover {
-            position: static;
-        }
-
-        details.action-popover[open] .action-popover-form {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: min(900px, 95vw);
-            max-height: 90vh;
-            background: #ffffff;
-            border-radius: 2rem;
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4);
-            animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        @keyframes modalPop {
-            from { opacity: 0; transform: translate(-50%, -45%) scale(0.95); }
-            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-        }
-
-
-    </style>
 
     <section class="card" id="form-create-registration" style="display: @if($errors->any() || $openRegistrationCreate) block @else none @endif;" data-searchable>
         <h3>Tambah Registration Baru</h3>
@@ -2396,18 +2492,23 @@
                             <td data-label="Telepon">{{ $teleponSiswa }}</td>
                             <td data-label="Instrumen">{{ $instrumenText }}</td>
                             <td data-label="Jadwal">
-                                @if($registrationItem->schedules->isNotEmpty())
-                                    <div style="display: flex; flex-direction: column; gap: 4px;">
-                                        @foreach($registrationItem->schedules as $sch)
-                                            <span class="registration-schedule-count" style="display: block; font-size: 10px; white-space: nowrap;">
+                                @php
+                                    $regSchedules = $registrationItem->schedules;
+                                @endphp
+                                @if($regSchedules->isNotEmpty())
+                                    <div class="registration-schedule-list">
+                                        @foreach($regSchedules as $sch)
+                                            <span class="registration-schedule-count">
                                                 {{ $sch->day }} {{ substr((string)$sch->time, 0, 5) }} 
-                                                <span style="color: #6366f1; font-weight: bold;">({{ $sch->teacher->name ?? '-' }})</span>
+                                                <span>({{ $sch->teacher->name ?? '-' }})</span>
                                             </span>
                                         @endforeach
                                     </div>
                                 @elseif($registrationItem->schedule_id)
                                     @php $sch = \App\Models\Schedule::find($registrationItem->schedule_id); @endphp
-                                    <span class="registration-schedule-count">{{ $sch ? $sch->day . ' ' . substr((string)$sch->time, 0, 5) : '-' }}</span>
+                                    <span class="registration-schedule-count">
+                                        {{ $sch ? $sch->day . ' ' . substr((string)$sch->time, 0, 5) : '-' }}
+                                    </span>
                                 @else
                                     <span class="registration-schedule-count">-</span>
                                 @endif

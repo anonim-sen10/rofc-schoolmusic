@@ -3403,12 +3403,12 @@ details.registration-style-popover[open]
 
 details.registration-style-popover[open] .action-popover-form.registration-edit-form {
     position: fixed !important;
-    top: 50% !important;
+    top: 2vh !important;
     left: 50% !important;
-    transform: translate(-50%, -50%) !important;
+    transform: translateX(-50%) !important;
     z-index: 1001 !important;
-    width: min(700px, calc(100vw - 2rem)) !important;
-    max-height: 85vh !important;
+    width: min(850px, 95vw) !important;
+    max-height: 82vh !important;
     display: flex !important;
     flex-direction: column;
     border: 1px solid #f1f5f9;
