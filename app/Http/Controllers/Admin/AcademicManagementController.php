@@ -153,7 +153,7 @@ class AcademicManagementController extends Controller
 
     public function attendance(Request $request): View
     {
-        $date = $request->input('date', now()->toDateString());
+        $date = $request->input('date');
         $teacherId = $request->input('teacher_id');
         $classId = $request->input('class_id');
 
