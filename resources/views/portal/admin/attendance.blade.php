@@ -357,12 +357,11 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(15, 23, 42, 0.4);
-        backdrop-filter: blur(4px);
+        background: transparent;
         display: none;
         align-items: center;
         justify-content: center;
-        z-index: 1000;
+        z-index: 999999;
         opacity: 0;
         transition: opacity 0.2s ease;
     }
@@ -374,8 +373,8 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
         background: white;
         border-radius: 0.75rem;
         width: 90%;
-        max-width: 480px;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        max-width: 440px;
+        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(15, 23, 42, 0.08);
         overflow: hidden;
         transform: scale(0.95);
         transition: transform 0.2s ease;
@@ -589,7 +588,7 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
 
                         <!-- DETAIL MODAL -->
                         <div id="modal-detail-{{ $att->id }}" class="att-modal">
-                            <div class="att-modal-content" style="text-align: left; max-width: 540px;">
+                            <div class="att-modal-content" style="text-align: left;">
                                 <header class="registration-modal-header">
                                     <div class="registration-modal-header-left">
                                         <span class="registration-modal-icon"><i data-lucide="clipboard-list"></i></span>
