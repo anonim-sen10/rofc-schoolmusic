@@ -1571,7 +1571,7 @@
                             <td data-label="Alamat" class="col-address">{{ $teacher->address ?? '-' }}</td>
                             <td data-label="Jenis Kelamin">{{ $teacher->gender ?? '-' }}</td>
                             <td data-label="Agama">{{ $teacher->religion ?? '-' }}</td>
-                            <td data-label="Class">{{ $teacher->classes->pluck('name')->implode(', ') ?: '-' }}</td>
+                            <td data-label="Class">{{ $teacher->musicClasses->pluck('name')->merge($teacher->classes->pluck('name'))->unique()->implode(', ') ?: '-' }}</td>
                             <td data-label="Aksi">
                                 <div class="action-icons">
                                     {{-- Detail Button --}}
@@ -1636,7 +1636,7 @@
                                                     </article>
                                                     <article class="registration-modal-item-full">
                                                         <p>Kelas Diampu</p>
-                                                        <p>{{ $teacher->classes->pluck('name')->join(', ') ?: '-' }}</p>
+                                                        <p>{{ $teacher->musicClasses->pluck('name')->merge($teacher->classes->pluck('name'))->unique()->join(', ') ?: '-' }}</p>
                                                     </article>
                                                     <article class="registration-modal-item-full">
                                                          <p>KTP Guru</p>
@@ -1826,7 +1826,7 @@
                     @forelse($classesForManagement as $classItem)
                         <tr>
                             <td>{{ $classItem->name }}</td>
-                            <td>{{ $classItem->teacher?->name ?? '-' }}</td>
+                            <td>{{ $classItem->teachers->isNotEmpty() ? $classItem->teachers->pluck('name')->join(', ') : ($classItem->teacher?->name ?? '-') }}</td>
                             <td>Rp{{ number_format((int) ($classItem->price ?? 0), 0, ',', '.') }}</td>
                             <td class="class-schedule-cell">
                                 @php

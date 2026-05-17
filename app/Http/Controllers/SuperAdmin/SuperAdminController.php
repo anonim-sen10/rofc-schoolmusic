@@ -252,11 +252,11 @@ class SuperAdminController extends Controller
                 $data['usersForRoles'] = User::with('roles')->latest()->take(100)->get();
                 break;
             case 'classes':
-                $data['classesForManagement'] = MusicClass::with(['teacher', 'schedules'])->orderBy('name')->get();
+                $data['classesForManagement'] = MusicClass::with(['teacher', 'teachers', 'schedules'])->orderBy('name')->get();
                 $data['teachersForClassOptions'] = Teacher::query()->orderBy('name')->get(['id', 'name']);
                 break;
             case 'teachers':
-                $data['teachersForManagement'] = Teacher::query()->with(['user', 'classes'])->latest()->get();
+                $data['teachersForManagement'] = Teacher::query()->with(['user', 'classes', 'musicClasses'])->latest()->get();
                 $data['classesForManagement'] = MusicClass::query()->orderBy('name')->get(['id', 'name']);
                 break;
             case 'schedule':
