@@ -155,31 +155,6 @@ $iconMap = [
             />
 
             <main class="portal-content portal-content--saas px-6 pb-8 lg:px-10 flex-1">
-                @if (session('success'))
-                    <section class="card" data-searchable>
-                        <x-ui.badge type="success">SUCCESS</x-ui.badge>
-                        <p style="margin-top: 0.5rem;">{{ session('success') }}</p>
-                    </section>
-                @endif
-
-                @if (session('error'))
-                    <section class="card" data-searchable>
-                        <x-ui.badge type="danger">ERROR</x-ui.badge>
-                        <p style="margin-top: 0.5rem;">{{ session('error') }}</p>
-                    </section>
-                @endif
-
-                @if ($errors->any())
-                    <section class="card" data-searchable>
-                        <x-ui.badge type="danger">ERROR</x-ui.badge>
-                        <ul class="list">
-                            @foreach ($errors->all() as $error)
-                                <li><span>{{ $error }}</span></li>
-                            @endforeach
-                        </ul>
-                    </section>
-                @endif
-
                 @yield('content')
             </main>
 
@@ -239,6 +214,19 @@ $iconMap = [
                 }, { passive: true });
             });
         })();
+
+        // Global Session Toast Trigger
+        document.addEventListener('DOMContentLoaded', () => {
+            @if(session('success'))
+                showToast("{{ session('success') }}", 'success');
+            @endif
+            @if(session('error'))
+                showToast("{{ session('error') }}", 'error');
+            @endif
+            @if($errors->any())
+                showToast("{{ $errors->first() }}", 'error');
+            @endif
+        });
     </script>
     @stack('scripts')
 </body>

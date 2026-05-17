@@ -219,21 +219,7 @@
     }
 </script>
 
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        @if(session('success'))
-            if (window.showToast) window.showToast("{{ session('success') }}", 'success');
-        @endif
-        @if(session('error'))
-            if (window.showToast) window.showToast("{{ session('error') }}", 'error');
-        @endif
-        @if($errors->any())
-            if (window.showToast) window.showToast("Ada kesalahan pada input Anda. Silakan periksa kembali.", 'error');
-        @endif
-    });
-</script>
-@endpush
+
 
 <style>
     /* Utility Overrides */

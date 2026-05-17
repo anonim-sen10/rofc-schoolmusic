@@ -1157,54 +1157,7 @@
         box-shadow: 0 8px 20px rgba(99, 102, 241, 0.15);
     }
 
-    /* Toast Notifications */
-    .premium-toast {
-        position: fixed;
-        top: 2rem;
-        right: 2rem;
-        z-index: 10000;
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        pointer-events: none;
-    }
 
-    .toast-item {
-        background: #ffffff;
-        border-radius: 1rem;
-        padding: 1rem 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        border: 1px solid #f1f5f9;
-        pointer-events: auto;
-        animation: toastSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        max-width: 350px;
-    }
-
-    @keyframes toastSlideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-
-    .toast-item.success { border-left: 4px solid #10b981; }
-    .toast-item.error { border-left: 4px solid #ef4444; }
-
-    .toast-icon {
-        width: 2rem;
-        height: 2rem;
-        border-radius: 0.6rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .success .toast-icon { background: #ecfdf5; color: #10b981; }
-    .error .toast-icon { background: #fef2f2; color: #ef4444; }
-
-    .toast-content h4 { margin: 0; font-size: 0.95rem; font-weight: 700; color: #1e293b; }
-    .toast-content p { margin: 0.15rem 0 0 0; font-size: 0.85rem; color: #64748b; }
 
     @media (max-width: 768px) {
         .premium-modal-content {
@@ -1222,8 +1175,6 @@
         }
     }
 </style>
-
-<div class="premium-toast" id="toast-container"></div>
 
 @if ($moduleKey === 'users' || $moduleKey === 'roles')
     <section class="card" id="form-create-user" style="display: none;" data-searchable>
@@ -3817,42 +3768,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Toast Notification System
-    window.showToast = function(type, title, message) {
-        const container = document.getElementById('toast-container');
-        if (!container) return;
 
-        const toast = document.createElement('div');
-        toast.className = `toast-item ${type}`;
-        toast.innerHTML = `
-            <div class="toast-icon">
-                <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}"></i>
-            </div>
-            <div class="toast-content">
-                <h4>${title}</h4>
-                <p>${message}</p>
-            </div>
-        `;
-        container.appendChild(toast);
-        if (window.lucide) window.lucide.createIcons();
-
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateX(100%)';
-            setTimeout(() => toast.remove(), 400);
-        }, 5000);
-    };
-
-    // Trigger toasts from session
-    @if(session('success'))
-        showToast('success', 'Berhasil!', '{{ session('success') }}');
-    @endif
-    @if(session('error'))
-        showToast('error', 'Gagal!', '{{ session('error') }}');
-    @endif
-    @if($errors->any())
-        showToast('error', 'Validasi Gagal', 'Silakan periksa kembali inputan Anda.');
-    @endif
 });
 
 // Dynamic Schedule Loader for Admin Create Student Modal

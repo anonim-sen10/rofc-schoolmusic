@@ -377,7 +377,25 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // --- Toast Notification System ---
-    window.showToast = (message, type = 'success') => {
+    window.showToast = (arg1, arg2, arg3) => {
+        let message = '';
+        let type = 'success';
+        
+        // Handle showToast(type, title, message) -> 3 arguments (legacy style)
+        if (arg3 !== undefined) {
+            message = arg3;
+            type = arg1;
+        } 
+        // Handle showToast(message, type) -> 2 arguments
+        else if (arg2 !== undefined) {
+            message = arg1;
+            type = arg2;
+        } 
+        // Handle showToast(message) -> 1 argument
+        else {
+            message = arg1;
+        }
+
         let container = document.querySelector('.toast-container');
         if (!container) {
             container = document.createElement('div');
@@ -395,10 +413,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 <i data-lucide="${iconName}"></i>
             </div>
             <div class="toast-content">
-                <p style="font-weight: 700; font-size: 0.875rem; color: #1e293b;">${type === 'success' ? 'Success' : 'Attention'}</p>
-                <p style="font-size: 0.75rem; color: #64748b;">${message}</p>
+                <span class="toast-message">${message}</span>
             </div>
+            <button class="toast-close-btn" aria-label="Close toast">
+                <i data-lucide="x"></i>
+            </button>
         `;
+
+        // Click close handler
+        const closeBtn = toast.querySelector('.toast-close-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 250);
+            });
+        }
 
         container.appendChild(toast);
         if (window.lucide) window.lucide.createIcons();
@@ -406,11 +435,13 @@ document.addEventListener("DOMContentLoaded", () => {
         // Animate in
         setTimeout(() => toast.classList.add('show'), 10);
 
-        // Auto remove
+        // Auto remove after 4.5 seconds
         setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 400);
-        }, 5000);
+            if (toast.parentNode) {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 250);
+            }
+        }, 4500);
     };
 });
 
