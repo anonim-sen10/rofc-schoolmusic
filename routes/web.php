@@ -147,6 +147,8 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'role:su
     Route::delete('/users/{user}', [SuperAdminController::class, 'destroyUser'])->name('users.destroy');
     Route::post('/roles', [SuperAdminController::class, 'storeRole'])->name('roles.store');
     Route::get('/attendance', [AcademicManagementController::class, 'attendance'])->name('attendance.index');
+    Route::put('/attendance/{id}', [AcademicManagementController::class, 'updateAttendance'])->name('attendance.update');
+    Route::delete('/attendance/{id}', [AcademicManagementController::class, 'destroyAttendance'])->name('attendance.destroy');
     Route::get('/{module}', function (string $module) {
         if ($module === 'schedule') {
             return app(SuperAdminScheduleController::class)->index();
@@ -188,6 +190,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::post('/schedule/teacher', [AcademicManagementController::class, 'assignScheduleTeacher'])->name('schedule.teacher');
     Route::post('/schedule/students', [AcademicManagementController::class, 'assignScheduleStudents'])->name('schedule.students');
     Route::get('/attendance', [AcademicManagementController::class, 'attendance'])->name('attendance.index');
+    Route::put('/attendance/{id}', [AcademicManagementController::class, 'updateAttendance'])->name('attendance.update');
+    Route::delete('/attendance/{id}', [AcademicManagementController::class, 'destroyAttendance'])->name('attendance.destroy');
 
     Route::get('/{module}', fn (string $module) => app(PortalController::class)->module('admin', $module))
         ->whereIn('module', ['gallery', 'blog', 'events', 'testimonials', 'attendance', 'reschedule'])

@@ -313,6 +313,115 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
     .att-pagination nav a:hover { background: #f1f5f9; }
     .att-pagination nav span[aria-current] { background: #0f172a; color: white; border-color: #0f172a; }
     .att-pagination nav span.disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Premium Action Buttons */
+    .btn-action-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        background: white;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        padding: 0;
+    }
+    .btn-action-icon:hover {
+        background: #f8fafc;
+        color: #0f172a;
+        border-color: #cbd5e1;
+    }
+    .btn-action-icon.detail:hover {
+        background: #eff6ff;
+        color: #2563eb;
+        border-color: #bfdbfe;
+    }
+    .btn-action-icon.edit:hover {
+        background: #f0fdf4;
+        color: #16a34a;
+        border-color: #bbf7d0;
+    }
+    .btn-action-icon.delete:hover {
+        background: #fef2f2;
+        color: #dc2626;
+        border-color: #fecaca;
+    }
+
+    /* Premium Modal Styles */
+    .att-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(4px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+    .att-modal.show {
+        display: flex;
+        opacity: 1;
+    }
+    .att-modal-content {
+        background: white;
+        border-radius: 0.75rem;
+        width: 90%;
+        max-width: 480px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        overflow: hidden;
+        transform: scale(0.95);
+        transition: transform 0.2s ease;
+    }
+    .att-modal.show .att-modal-content {
+        transform: scale(1);
+    }
+    .att-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.85rem 1.25rem;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+    }
+    .att-modal-header h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #0f172a;
+        margin: 0;
+    }
+    .att-modal-header .btn-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #64748b;
+        cursor: pointer;
+        line-height: 1;
+        padding: 0;
+        transition: color 0.15s;
+    }
+    .att-modal-header .btn-close:hover {
+        color: #0f172a;
+    }
+    .att-modal-body {
+        padding: 1.25rem;
+        font-size: 0.825rem;
+    }
+    .att-modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        border-top: 1px solid #e2e8f0;
+        background: #f8fafc;
+    }
 </style>
 
 <section class="card">
@@ -380,20 +489,22 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
             <table class="att-table">
                 <thead>
                     <tr>
-                        <th style="width: 85px;">Date</th>
-                        <th style="width: 75px;">Time (Sch)</th>
-                        <th style="width: 80px;">Recorded At</th>
-                        <th style="width: 120px;">Teacher</th>
-                        <th style="width: 120px;">Student</th>
-                        <th style="width: 75px;">Class</th>
-                        <th style="width: 85px;">Status</th>
-                        <th style="width: 48px;">Proof</th>
-                        <th style="width: 90px;">Location</th>
+                        <th style="width: 80px;">Date</th>
+                        <th style="width: 70px;">Time (Sch)</th>
+                        <th style="width: 75px;">Recorded At</th>
+                        <th style="width: 105px;">Teacher</th>
+                        <th style="width: 105px;">Student</th>
+                        <th style="width: 65px;">Class</th>
+                        <th style="width: 80px;">Status</th>
+                        <th style="width: 44px;">Proof</th>
+                        <th style="width: 70px;">Location</th>
                         <th>Notes</th>
+                        <th style="width: 90px; text-align: center;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($attendances as $att)
+                        @php $status = strtolower($att->status); @endphp
                         <tr>
                             <td>{{ $att->created_at->format('d M Y') }}</td>
                             <td style="white-space: nowrap;">{{ $att->schedule ? \Carbon\Carbon::parse($att->schedule->time)->format('H:i') : '-' }}</td>
@@ -410,7 +521,6 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
                             </td>
                             <td style="white-space: nowrap; font-weight: 500; color: #475569;">{{ $att->class->name ?? '-' }}</td>
                             <td>
-                                @php $status = strtolower($att->status); @endphp
                                 <span class="att-badge att-badge-{{ $status }}">
                                     @if($status === 'present') ✔
                                     @elseif($status === 'absent') ✖
@@ -450,7 +560,167 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
                                     -
                                 @endif
                             </td>
+                            <td style="text-align: center; white-space: nowrap;">
+                                <div style="display: inline-flex; gap: 0.25rem; align-items: center; justify-content: center;">
+                                    <!-- Detail Button -->
+                                    <button type="button" onclick="openModal('modal-detail-{{ $att->id }}')" class="btn-action-icon detail" title="Detail Kehadiran">
+                                        <i data-lucide="eye" style="width:13px;height:13px;"></i>
+                                    </button>
+                                    
+                                    <!-- Edit Button -->
+                                    <button type="button" onclick="openModal('modal-edit-{{ $att->id }}')" class="btn-action-icon edit" title="Edit Absensi">
+                                        <i data-lucide="edit-2" style="width:13px;height:13px;"></i>
+                                    </button>
+
+                                    <!-- Delete Button -->
+                                    <form action="{{ $prefix === 'super-admin' ? route('super-admin.attendance.destroy', $att->id) : route('admin.attendance.destroy', $att->id) }}" 
+                                          method="POST" 
+                                          onsubmit="return confirm('Apakah Anda yakin ingin menghapus catatan absensi ini? Tindakan ini tidak dapat dibatalkan.')" 
+                                          style="display: inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn-action-icon delete" title="Hapus Catatan">
+                                            <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
                         </tr>
+
+                        <!-- DETAIL MODAL -->
+                        <div id="modal-detail-{{ $att->id }}" class="att-modal">
+                            <div class="att-modal-content" style="text-align: left;">
+                                <div class="att-modal-header">
+                                    <h4>Detail Kehadiran</h4>
+                                    <button type="button" onclick="closeModal('modal-detail-{{ $att->id }}')" class="btn-close">&times;</button>
+                                </div>
+                                <div class="att-modal-body">
+                                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.25rem;">
+                                        <div>
+                                            <label style="display:block; font-weight:600; font-size:0.7rem; text-transform:uppercase; color:#64748b; margin-bottom:0.15rem;">Tanggal</label>
+                                            <span style="font-weight:500; color:#0f172a;">{{ $att->created_at->format('d M Y') }}</span>
+                                        </div>
+                                        <div>
+                                            <label style="display:block; font-weight:600; font-size:0.7rem; text-transform:uppercase; color:#64748b; margin-bottom:0.15rem;">Waktu (Jadwal)</label>
+                                            <span style="font-weight:500; color:#0f172a;">{{ $att->schedule ? \Carbon\Carbon::parse($att->schedule->time)->format('H:i') : '-' }}</span>
+                                        </div>
+                                        <div>
+                                            <label style="display:block; font-weight:600; font-size:0.7rem; text-transform:uppercase; color:#64748b; margin-bottom:0.15rem;">Tercatat Pada</label>
+                                            <span style="color:#475569;">{{ $att->created_at->format('H:i:s') }}</span>
+                                        </div>
+                                        <div>
+                                            <label style="display:block; font-weight:600; font-size:0.7rem; text-transform:uppercase; color:#64748b; margin-bottom:0.15rem;">Status</label>
+                                            <span class="att-badge att-badge-{{ $status }}">
+                                                @if($status === 'present') ✔
+                                                @elseif($status === 'absent') ✖
+                                                @elseif($status === 'reschedule') ↻
+                                                @endif
+                                                {{ $status }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="border-top: 1px solid #e2e8f0; padding-top: 1rem; margin-bottom: 1rem;">
+                                        <div style="margin-bottom: 0.75rem;">
+                                            <label style="display:block; font-weight:600; font-size:0.7rem; text-transform:uppercase; color:#64748b; margin-bottom:0.15rem;">Guru Pengajar</label>
+                                            <span style="font-weight:500; color:#0f172a;">{{ $att->teacher->name ?? '-' }}</span>
+                                        </div>
+                                        <div style="margin-bottom: 0.75rem;">
+                                            <label style="display:block; font-weight:600; font-size:0.7rem; text-transform:uppercase; color:#64748b; margin-bottom:0.15rem;">Siswa</label>
+                                            <span style="font-weight:500; color:#0f172a;">{{ $att->student->name ?? '-' }}</span>
+                                        </div>
+                                        <div style="margin-bottom: 0.75rem;">
+                                            <label style="display:block; font-weight:600; font-size:0.7rem; text-transform:uppercase; color:#64748b; margin-bottom:0.15rem;">Kelas</label>
+                                            <span style="font-weight:500; color:#475569;">{{ $att->class->name ?? '-' }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div style="border-top: 1px solid #e2e8f0; padding-top: 1rem;">
+                                        <div style="margin-bottom: 0.75rem;">
+                                            <label style="display:block; font-weight:600; font-size:0.7rem; text-transform:uppercase; color:#64748b; margin-bottom:0.15rem;">Bukti Foto</label>
+                                            @if($att->image_path)
+                                                <div style="margin-top: 0.35rem;">
+                                                    <a href="{{ asset('storage/' . $att->image_path) }}" target="_blank" style="display: inline-block;">
+                                                        <img src="{{ asset('storage/' . $att->image_path) }}" alt="Proof" 
+                                                             style="width: 140px; height: 100px; border-radius: 8px; object-fit: cover; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                                    </a>
+                                                    <div style="margin-top: 0.25rem;">
+                                                        <a href="{{ asset('storage/' . $att->image_path) }}" target="_blank" style="color: #2563eb; text-decoration: none; font-size: 0.75rem; font-weight: 500;">
+                                                            Buka Foto Ukuran Penuh &rarr;
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <span style="color:#94a3b8; font-style:italic;">Tidak ada bukti foto</span>
+                                            @endif
+                                        </div>
+
+                                        <div style="margin-bottom: 0.75rem;">
+                                            <label style="display:block; font-weight:600; font-size:0.7rem; text-transform:uppercase; color:#64748b; margin-bottom:0.15rem;">Lokasi Presensi</label>
+                                            @if($att->latitude && $att->longitude)
+                                                <div style="margin-top: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
+                                                    <a href="https://www.google.com/maps?q={{ $att->latitude }},{{ $att->longitude }}"
+                                                       target="_blank" rel="noopener" class="btn-map" style="padding: 0.3rem 0.6rem;">
+                                                        <i data-lucide="map-pin" style="width:13px;height:13px;"></i> Lihat di Google Maps
+                                                    </a>
+                                                    <span style="font-size:0.75rem; color:#64748b;">({{ $att->latitude }}, {{ $att->longitude }})</span>
+                                                </div>
+                                            @else
+                                                <span style="color:#94a3b8; font-style:italic;">Tidak ada data lokasi GPS</span>
+                                            @endif
+                                        </div>
+
+                                        <div>
+                                            <label style="display:block; font-weight:600; font-size:0.7rem; text-transform:uppercase; color:#64748b; margin-bottom:0.15rem;">Catatan</label>
+                                            <p style="margin: 0.25rem 0 0 0; color:#334155; line-height: 1.4; background:#f8fafc; padding:0.5rem 0.75rem; border-radius:6px; border:1px solid #e2e8f0; font-size:0.8rem;">
+                                                {{ $att->note ?: '-' }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="att-modal-footer">
+                                    <button type="button" onclick="closeModal('modal-detail-{{ $att->id }}')" class="btn-reset" style="padding: 0.4rem 1rem; font-size: 0.8rem; border-radius: 6px;">Tutup</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- EDIT MODAL -->
+                        <div id="modal-edit-{{ $att->id }}" class="att-modal">
+                            <div class="att-modal-content" style="text-align: left;">
+                                <form action="{{ $prefix === 'super-admin' ? route('super-admin.attendance.update', $att->id) : route('admin.attendance.update', $att->id) }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    
+                                    <div class="att-modal-header">
+                                        <h4>Edit Absensi</h4>
+                                        <button type="button" onclick="closeModal('modal-edit-{{ $att->id }}')" class="btn-close">&times;</button>
+                                    </div>
+                                    <div class="att-modal-body">
+                                        <div style="margin-bottom: 1rem; background: #eff6ff; padding: 0.6rem 0.8rem; border-radius: 6px; border: 1px solid #bfdbfe; font-size: 0.775rem; color: #1e40af; line-height: 1.4;">
+                                            Mengubah presensi kelas <strong>{{ $att->class->name ?? '-' }}</strong> untuk siswa <strong>{{ $att->student->name ?? '-' }}</strong>.
+                                        </div>
+
+                                        <div style="margin-bottom: 1rem;">
+                                            <label style="display:block; font-weight:600; font-size:0.7rem; text-transform:uppercase; color:#475569; margin-bottom:0.35rem;">Status Kehadiran</label>
+                                            <select name="status" style="width:100%; padding:0.45rem 0.6rem; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem; color:#0f172a; outline:none; transition:border-color 0.15s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#cbd5e1'">
+                                                <option value="present" @selected($status === 'present')>Present (Hadir)</option>
+                                                <option value="absent" @selected($status === 'absent')>Absent (Alpa)</option>
+                                                <option value="reschedule" @selected($status === 'reschedule')>Reschedule</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label style="display:block; font-weight:600; font-size:0.7rem; text-transform:uppercase; color:#475569; margin-bottom:0.35rem;">Catatan</label>
+                                            <textarea name="note" rows="3" style="width:100%; padding:0.5rem; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem; color:#0f172a; outline:none; font-family:inherit; resize:vertical; transition:border-color 0.15s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#cbd5e1'">{{ $att->note }}</textarea>
+                                        </div>
+                                    </div>
+                                    <div class="att-modal-footer">
+                                        <button type="button" onclick="closeModal('modal-edit-{{ $att->id }}')" class="btn-reset" style="padding: 0.4rem 1rem; font-size: 0.8rem; border-radius: 6px;">Batal</button>
+                                        <button type="submit" class="btn-filter" style="padding: 0.4rem 1rem; font-size: 0.8rem; border-radius: 6px; background:#0f172a; color:white; border:none; cursor:pointer;">Simpan</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     @endforeach
                 </tbody>
             </table>
@@ -468,4 +738,43 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
         @endif
     </div>
 </section>
+
+<script>
+    function openModal(id) {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.style.display = 'flex';
+            // Trigger reflow to start transition
+            modal.offsetHeight;
+            modal.classList.add('show');
+        }
+    }
+
+    function closeModal(id) {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 200);
+        }
+    }
+
+    // Close modal on escape key
+    window.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const modals = document.querySelectorAll('.att-modal.show');
+            modals.forEach(m => closeModal(m.id));
+        }
+    });
+
+    // Close modal on clicking outside the modal content box
+    document.querySelectorAll('.att-modal').forEach(modal => {
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                closeModal(modal.id);
+            }
+        });
+    });
+</script>
 @endsection

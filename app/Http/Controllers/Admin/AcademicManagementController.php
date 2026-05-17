@@ -189,6 +189,27 @@ class AcademicManagementController extends Controller
         return view('portal.admin.attendance', compact('attendances', 'teachers', 'classes', 'date', 'teacherId', 'classId', 'routePrefix'));
     }
 
+    public function updateAttendance(Request $request, $id): RedirectResponse
+    {
+        $attendance = \App\Models\Attendance::findOrFail($id);
+        $data = $request->validate([
+            'status' => ['required', 'string', 'in:present,absent,reschedule'],
+            'note' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $attendance->update($data);
+
+        return back()->with('success', 'Data absensi berhasil diperbarui.');
+    }
+
+    public function destroyAttendance($id): RedirectResponse
+    {
+        $attendance = \App\Models\Attendance::findOrFail($id);
+        $attendance->delete();
+
+        return back()->with('success', 'Data absensi berhasil dihapus.');
+    }
+
     public function assignScheduleTeacher(Request $request): RedirectResponse
     {
         $data = $request->validate([
