@@ -260,7 +260,7 @@ class SuperAdminController extends Controller
                 $data['classesForManagement'] = MusicClass::query()->orderBy('name')->get(['id', 'name']);
                 break;
             case 'schedule':
-                $data['classesForSchedule'] = MusicClass::query()->with(['teacher', 'schedules'])->orderBy('name')->get();
+                $data['classesForSchedule'] = MusicClass::query()->with(['teacher', 'teachers', 'schedules'])->orderBy('name')->get();
                 $data['teachersForClassOptions'] = Teacher::query()->orderBy('name')->get(['id', 'name']);
                 $data['schedulesForManagement'] = $scheduleFeatureReady
                     ? Schedule::query()

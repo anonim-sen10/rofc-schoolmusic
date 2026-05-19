@@ -3447,7 +3447,7 @@
                                 <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Class</label>
                                 <select name="class_id" class="w-full h-10 px-3 bg-white border border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-[12px] font-bold text-gray-700 transition-all">
                                     @foreach($classesForSchedule as $class)
-                                        <option value="{{ $class->id }}">{{ $class->name }} ({{ $class->teacher?->name ?? 'No Primary Teacher' }})</option>
+                                        <option value="{{ $class->id }}">{{ $class->name }} ({{ $class->teachers->isNotEmpty() ? $class->teachers->pluck('name')->join(', ') : ($class->teacher?->name ?? 'No Teacher Assigned') }})</option>
                                     @endforeach
                                 </select>
                             </div>
