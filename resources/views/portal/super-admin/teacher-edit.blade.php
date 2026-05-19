@@ -47,11 +47,14 @@
         <label>Bidang / Instrumen
             <input type="text" name="instrument" value="{{ old('instrument', $teacher->instrument) }}">
         </label>
-        <label>Class
-            <select name="class_id">
-                <option value="">Pilih class (opsional)</option>
+        <label>Class (Pilih satu atau lebih, tahan Ctrl/Cmd)
+            <select name="class_ids[]" multiple style="height: 100px;">
                 @foreach ($classesForTeachers as $class)
-                    <option value="{{ $class->id }}" @selected((string) old('class_id') === (string) $class->id)>{{ $class->name }}</option>
+                    <option value="{{ $class->id }}" @selected(
+                        is_array(old('class_ids')) 
+                        ? in_array((string)$class->id, old('class_ids')) 
+                        : ($teacher->musicClasses->contains($class->id) || $teacher->classes->contains($class->id))
+                    )>{{ $class->name }}</option>
                 @endforeach
             </select>
         </label>

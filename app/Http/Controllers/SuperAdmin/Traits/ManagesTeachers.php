@@ -70,7 +70,7 @@ trait ManagesTeachers
 
     public function editTeacher(Teacher $teacher): View
     {
-        $teacher->load('user', 'classes');
+        $teacher->load('user', 'classes', 'musicClasses');
 
         return view('portal.super-admin.teacher-edit', [
             'roleKey' => 'super_admin',

@@ -154,13 +154,17 @@ public function dashboard(Request $request): View
 
         $class = MusicClass::query()
             ->where('id', $data['class_id'])
-            ->where('teacher_id', $teacher->id)
+            ->where(fn($q) => $q->where('teacher_id', $teacher->id)
+                ->orWhereHas('teachers', fn($t) => $t->where('teachers.id', $teacher->id))
+            )
             ->first();
 
         if ($this->hasAssignmentStatusColumn()) {
             $class = MusicClass::query()
                 ->where('id', $data['class_id'])
-                ->where('teacher_id', $teacher->id)
+                ->where(fn($q) => $q->where('teacher_id', $teacher->id)
+                    ->orWhereHas('teachers', fn($t) => $t->where('teachers.id', $teacher->id))
+                )
                 ->where('assignment_status', 'accepted')
                 ->first();
         }
@@ -495,7 +499,7 @@ public function schedule(Request $request): View
             ]);
         }
 
-        if ((int) $class->teacher_id !== (int) $teacher->id) {
+        if ((int) $class->teacher_id !== (int) $teacher->id && !$class->teachers->contains($teacher->id)) {
             abort(403, 'Jadwal ini bukan untuk teacher yang sedang login.');
         }
 

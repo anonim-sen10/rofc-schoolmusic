@@ -33,7 +33,9 @@ class TeacherProgressController extends Controller
             ->where(function($query) use ($teacher) {
                 // Cek lewat Kelas
                 $query->whereHas('classes', function ($q) use ($teacher) {
-                    $q->where('classes.teacher_id', $teacher->id);
+                    $q->where(fn($sq) => $sq->where('classes.teacher_id', $teacher->id)
+                        ->orWhereHas('teachers', fn($t) => $t->where('teachers.id', $teacher->id))
+                    );
                 })
                 // ATAU Cek lewat Jadwal
                 ->orWhereHas('scheduleSessions', function ($q) use ($teacher) {
@@ -42,8 +44,9 @@ class TeacherProgressController extends Controller
             })
             ->with([
                 'classes' => function ($query) use ($teacher) {
-                    $query->where('classes.teacher_id', $teacher->id)
-                        ->orderBy('classes.name');
+                    $query->where(fn($sq) => $sq->where('classes.teacher_id', $teacher->id)
+                        ->orWhereHas('teachers', fn($t) => $t->where('teachers.id', $teacher->id))
+                    )->orderBy('classes.name');
                 },
                 'scheduleSessions' => function ($query) use ($teacher) {
                     $query->where('teacher_id', $teacher->id)

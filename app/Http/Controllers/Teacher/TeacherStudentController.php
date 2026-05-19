@@ -26,8 +26,10 @@ class TeacherStudentController extends Controller
             ['name' => 'Teacher User '.$user->id, 'instrument' => 'General', 'is_active' => true]
         );
 
-        // 1. Ambil ID Kelas dari tabel Classes
-        $classIds = $teacher->classes()->pluck('id');
+        // 1. Ambil ID Kelas dari tabel Classes dan pivot table class_teacher
+        $classIds = $teacher->musicClasses()->pluck('classes.id')
+            ->merge($teacher->classes()->pluck('id'))
+            ->unique();
         
         // 2. Ambil ID Siswa dari tabel ScheduleSession
         $studentIdsFromSchedule = \App\Models\ScheduleSession::where('teacher_id', $teacher->id)
@@ -41,7 +43,10 @@ class TeacherStudentController extends Controller
                       ->orWhereIn('students.id', $studentIdsFromSchedule);
             })
             ->with([
-                'classes' => fn($q) => $q->select(['classes.id', 'classes.name'])->where('teacher_id', $teacher->id),
+                'classes' => fn($q) => $q->select(['classes.id', 'classes.name'])
+                    ->where(fn($sq) => $sq->where('classes.teacher_id', $teacher->id)
+                        ->orWhereHas('teachers', fn($t) => $t->where('teachers.id', $teacher->id))
+                    ),
                 'scheduleSessions' => fn($q) => $q->where('teacher_id', $teacher->id)->with('musicClass:id,name')
             ])
             ->orderBy('students.name')
