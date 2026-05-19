@@ -75,6 +75,19 @@ Route::get('/sync-students', function () {
     }
 });
 
+Route::get('/debug-db', function () {
+    try {
+        $student = \App\Models\Student::first();
+        return [
+            'columns' => \Illuminate\Support\Facades\Schema::getColumnListing('students'),
+            'student' => $student ? $student->toArray() : null,
+            'is_active_type' => $student ? gettype($student->is_active) : null,
+        ];
+    } catch (\Exception $e) {
+        return ['error' => $e->getMessage()];
+    }
+});
+
 Route::view('/about', 'pages.about')->name('about');
 Route::view('/programs', 'pages.programs')->name('programs');
 Route::view('/teachers', 'pages.teachers')->name('teachers');
