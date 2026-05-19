@@ -14,6 +14,25 @@ class Student extends Model
 {
     use HasFactory, LogsActivity;
 
+    protected static function booted()
+    {
+        static::updated(function ($student) {
+            if ($student->wasChanged('is_active') && !$student->is_active) {
+                // Release schedules booked by this student in schedules table
+                Schedule::where('student_id', $student->id)->update([
+                    'student_id' => null,
+                    'status' => 'available'
+                ]);
+
+                // Delete future booked sessions
+                ScheduleSession::where('student_id', $student->id)
+                    ->where('status', 'booked')
+                    ->where('session_date', '>=', now()->toDateString())
+                    ->delete();
+            }
+        });
+    }
+
     protected $fillable = [
         'user_id',
         'name',
