@@ -101,7 +101,7 @@ trait ManagesStudents
             'pekerjaan_ortu' => $data['pekerjaan_ortu'] ?? null,
             'no_hp_ortu' => $data['no_hp_ortu'] ?? null,
             'email_ortu' => $data['email_ortu'] ?? null,
-            'is_active' => (bool) ($data['is_active'] ?? '1'),
+            'is_active' => $request->boolean('is_active'),
             'start_date' => $data['start_date'] ?? null,
             'duration_months' => $data['duration_months'] ?? null,
             'pengalaman' => (bool) ($data['pengalaman'] ?? false),
@@ -110,6 +110,8 @@ trait ManagesStudents
             'ig_siswa' => $data['ig_siswa'] ?? null,
             'ig_ortu' => $data['ig_ortu'] ?? null,
         ];
+
+        \Illuminate\Support\Facades\Log::info("Updating Student ID: {$student->id} is_active to: " . ($payload['is_active'] ? '1' : '0'));
 
         if (!empty($payload['start_date']) && !empty($payload['duration_months'])) {
             $payload['end_date'] = \Carbon\Carbon::parse($payload['start_date'])->addMonths((int)$payload['duration_months'])->toDateString();
@@ -131,6 +133,7 @@ trait ManagesStudents
             $student->user->update([
                 'name' => $data['name'],
                 'email' => $data['email'] ?? $student->user->email,
+                'is_active' => $payload['is_active'],
             ]);
         }
 
