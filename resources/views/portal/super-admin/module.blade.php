@@ -1218,8 +1218,21 @@
 
 @if ($moduleKey === 'users' || $moduleKey === 'roles')
     <section class="card" data-searchable>
-        <div class="card-header-flex">
-            <h3>Data User</h3>
+        <div class="card-header-flex" style="flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+                <h3 style="margin: 0;">Data User</h3>
+                <div class="filter-group" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <label for="filter-role" style="font-size: 0.8rem; font-weight: 600; color: #64748b;">Filter Role:</label>
+                    <select id="filter-role" onchange="filterUserRows()" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; font-weight: 500; color: #1e293b; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; outline: none; transition: border-color 0.2s;">
+                        <option value="all">Semua Role</option>
+                        <option value="super_admin">Super Admin</option>
+                        <option value="admin">Admin</option>
+                        <option value="finance">Finance</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="student">Student</option>
+                    </select>
+                </div>
+            </div>
             <button type="button" class="btn-add-student" onclick="const form = document.getElementById('form-create-user'); if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';">
                 <i data-lucide="user-plus"></i>
                 Buat Akun Login Baru
@@ -1239,7 +1252,7 @@
                 </thead>
                 <tbody>
                     @forelse ($usersForRoles as $userRow)
-                        <tr>
+                        <tr class="user-row" data-roles="{{ $userRow->roles->pluck('slug')->implode(',') }}">
                             <td data-label="Nama">{{ $userRow->name }}</td>
                             <td data-label="Email">{{ $userRow->email }}</td>
                             <td data-label="Role">{{ $userRow->roles->pluck('slug')->implode(', ') }}</td>
@@ -3612,6 +3625,24 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    window.filterUserRows = function() {
+        const filterVal = document.getElementById('filter-role').value;
+        const rows = document.querySelectorAll('.user-row');
+        
+        rows.forEach(row => {
+            if (filterVal === 'all') {
+                row.style.display = '';
+            } else {
+                const roles = row.getAttribute('data-roles').split(',');
+                if (roles.includes(filterVal)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
+    };
+
     const syncBodyModalState = () => {
         const hasOpenPopover = document.querySelector('details.action-popover[open]') !== null;
         document.body.classList.toggle('modal-open', hasOpenPopover);
