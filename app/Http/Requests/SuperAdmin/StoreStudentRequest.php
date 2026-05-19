@@ -20,7 +20,7 @@ class StoreStudentRequest extends FormRequest
             'tempat_lahir' => ['nullable', 'string', 'max:120'],
             'tanggal_lahir' => ['nullable', 'date'],
             'kewarganegaraan' => ['nullable', 'string', 'max:120'],
-            'age' => ['nullable', 'integer', 'min:4', 'max:80'],
+            'age' => ['nullable', 'integer', 'min:0', 'max:120'],
             'phone' => ['nullable', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:120', 'unique:students,email'],
             'address' => ['nullable', 'string', 'max:500'],
