@@ -36,6 +36,22 @@ class User extends Authenticatable
         return $this->hasOne(Teacher::class);
     }
 
+    public function student(): HasOne
+    {
+        return $this->hasOne(Student::class);
+    }
+
+    public function isActive(): bool
+    {
+        if ($this->hasRole('student')) {
+            return $this->student ? (bool) $this->student->is_active : true;
+        }
+        if ($this->hasRole('teacher')) {
+            return $this->teacher ? (bool) $this->teacher->is_active : true;
+        }
+        return true;
+    }
+
     public function hasRole(string $role): bool
     {
         return $this->roles()->where('slug', $role)->exists();

@@ -249,7 +249,7 @@ class SuperAdminController extends Controller
         switch ($module) {
             case 'users':
             case 'roles':
-                $data['usersForRoles'] = User::with('roles')->latest()->take(100)->get();
+                $data['usersForRoles'] = User::with(['roles', 'student', 'teacher'])->latest()->take(100)->get();
                 break;
             case 'classes':
                 $data['classesForManagement'] = MusicClass::with(['teacher', 'teachers', 'schedules'])->orderBy('name')->get();
@@ -355,11 +355,12 @@ class SuperAdminController extends Controller
             'users' => [
                 'title' => 'User Accounts',
                 'description' => 'Data user lintas semua role.',
-                'columns' => ['Nama', 'Email', 'Role', 'Created'],
-                'rows' => User::with('roles')->latest()->take(30)->get()->map(fn (User $user) => [
+                'columns' => ['Nama', 'Email', 'Role', 'Status', 'Created'],
+                'rows' => User::with(['roles', 'student', 'teacher'])->latest()->take(30)->get()->map(fn (User $user) => [
                     $user->name,
                     $user->email,
                     $user->roles->pluck('slug')->implode(', '),
+                    $user->isActive() ? 'ACTIVE' : 'INACTIVE',
                     optional($user->created_at)->format('Y-m-d H:i'),
                 ])->all(),
             ],

@@ -1232,6 +1232,7 @@
                         <th>Nama</th>
                         <th>Email</th>
                         <th>Role</th>
+                        <th>Status</th>
                         <th>Created</th>
                         <th>Aksi</th>
                     </tr>
@@ -1242,6 +1243,14 @@
                             <td data-label="Nama">{{ $userRow->name }}</td>
                             <td data-label="Email">{{ $userRow->email }}</td>
                             <td data-label="Role">{{ $userRow->roles->pluck('slug')->implode(', ') }}</td>
+                            <td data-label="Status">
+                                @php
+                                    $isActive = $userRow->isActive();
+                                @endphp
+                                <x-ui.badge :type="$isActive ? 'success' : 'warning'">
+                                    {{ $isActive ? 'ACTIVE' : 'INACTIVE' }}
+                                </x-ui.badge>
+                            </td>
                             <td data-label="Created">{{ optional($userRow->created_at)->format('Y-m-d H:i') }}</td>
                             <td data-label="Aksi">
                                 <div class="action-icons">
