@@ -59,32 +59,39 @@ trait ManagesStudents
 
     public function updateStudent(Request $request, Student $student): RedirectResponse
     {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:120'],
-            'nama_panggilan' => ['nullable', 'string', 'max:80'],
-            'jenis_kelamin' => ['nullable', 'in:laki-laki,perempuan'],
-            'tempat_lahir' => ['nullable', 'string', 'max:120'],
-            'tanggal_lahir' => ['nullable', 'date'],
-            'kewarganegaraan' => ['nullable', 'string', 'max:120'],
-            'age' => ['nullable', 'integer', 'min:4', 'max:80'],
-            'phone' => ['nullable', 'string', 'max:30'],
-            'email' => ['nullable', 'email', 'max:120', 'unique:students,email,' . $student->id],
-            'address' => ['nullable', 'string', 'max:500'],
-            'nama_ortu' => ['nullable', 'string', 'max:120'],
-            'pekerjaan_ortu' => ['nullable', 'string', 'max:120'],
-            'no_hp_ortu' => ['nullable', 'string', 'max:30'],
-            'email_ortu' => ['nullable', 'email', 'max:120'],
-            'is_active' => ['required', 'in:1,0'],
-            'class_ids' => ['nullable', 'array'],
-            'class_ids.*' => ['integer', 'exists:classes,id'],
-            'start_date' => ['nullable', 'date'],
-            'duration_months' => ['nullable', 'integer', 'min:1', 'max:12'],
-            'pengalaman' => ['nullable', 'boolean'],
-            'deskripsi_pengalaman' => ['nullable', 'string', 'max:2000'],
-            'favorite_song' => ['nullable', 'string', 'max:120'],
-            'ig_siswa' => ['nullable', 'string', 'max:100'],
-            'ig_ortu' => ['nullable', 'string', 'max:100'],
-        ]);
+        \Illuminate\Support\Facades\Log::info("Request Data to update student ID {$student->id}:", $request->all());
+
+        try {
+            $data = $request->validate([
+                'name' => ['required', 'string', 'max:120'],
+                'nama_panggilan' => ['nullable', 'string', 'max:80'],
+                'jenis_kelamin' => ['nullable', 'in:laki-laki,perempuan'],
+                'tempat_lahir' => ['nullable', 'string', 'max:120'],
+                'tanggal_lahir' => ['nullable', 'date'],
+                'kewarganegaraan' => ['nullable', 'string', 'max:120'],
+                'age' => ['nullable', 'integer', 'min:4', 'max:80'],
+                'phone' => ['nullable', 'string', 'max:30'],
+                'email' => ['nullable', 'email', 'max:120', 'unique:students,email,' . $student->id],
+                'address' => ['nullable', 'string', 'max:500'],
+                'nama_ortu' => ['nullable', 'string', 'max:120'],
+                'pekerjaan_ortu' => ['nullable', 'string', 'max:120'],
+                'no_hp_ortu' => ['nullable', 'string', 'max:30'],
+                'email_ortu' => ['nullable', 'email', 'max:120'],
+                'is_active' => ['required', 'in:1,0'],
+                'class_ids' => ['nullable', 'array'],
+                'class_ids.*' => ['integer', 'exists:classes,id'],
+                'start_date' => ['nullable', 'date'],
+                'duration_months' => ['nullable', 'integer', 'min:1', 'max:12'],
+                'pengalaman' => ['nullable', 'boolean'],
+                'deskripsi_pengalaman' => ['nullable', 'string', 'max:2000'],
+                'favorite_song' => ['nullable', 'string', 'max:120'],
+                'ig_siswa' => ['nullable', 'string', 'max:100'],
+                'ig_ortu' => ['nullable', 'string', 'max:100'],
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Illuminate\Support\Facades\Log::error("Validation failed for student update ID {$student->id}:", $e->errors());
+            throw $e;
+        }
 
         $payload = [
             'name' => $data['name'],
