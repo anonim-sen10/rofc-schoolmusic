@@ -94,7 +94,7 @@ Route::get('/view-logs', function () {
         return "Log file does not exist.";
     }
     $lines = file($path);
-    $lastLines = array_slice($lines, -150);
+    $lastLines = array_slice($lines, -800);
     return response(implode("", $lastLines), 200, ['Content-Type' => 'text/plain']);
 });
 
