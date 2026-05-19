@@ -53,8 +53,8 @@
     </div>
 
     <div style="margin-top: 1.5rem; display: flex; gap: 0.6rem;">
-        <a href="{{ route('super-admin.teachers.edit', $teacher) }}" class="logout-btn">Edit</a>
-        <a href="{{ route('super-admin.module', ['module' => 'teachers']) }}" class="logout-btn">Kembali</a>
+        <a href="{{ route($portal['prefix'] . '.teachers.edit', $teacher) }}" class="logout-btn">Edit</a>
+        <a href="{{ route($portal['prefix'] . '.module', ['module' => 'teachers']) }}" class="logout-btn">Kembali</a>
     </div>
 </section>
 @endsection

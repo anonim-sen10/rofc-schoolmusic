@@ -191,34 +191,51 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'role:su
 });
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_admin'])->group(function () {
-    Route::get('/', fn () => app(PortalController::class)->dashboard('admin'))->name('dashboard');
-    Route::get('/users/{user}/impersonate', [SuperAdminController::class, 'impersonate'])->name('users.impersonate');
-
-    Route::get('/classes', [AcademicManagementController::class, 'classes'])->name('classes.index');
-    Route::post('/classes', [AcademicManagementController::class, 'storeClass'])->name('classes.store');
-    Route::put('/classes/{class}', [AcademicManagementController::class, 'updateClass'])->name('classes.update');
-    Route::delete('/classes/{class}', [AcademicManagementController::class, 'destroyClass'])->name('classes.destroy');
-
-    Route::get('/teachers', [AcademicManagementController::class, 'teachers'])->name('teachers.index');
-
-    Route::get('/students', [AcademicManagementController::class, 'students'])->name('students.index');
-    Route::post('/students', [AcademicManagementController::class, 'storeStudent'])->name('students.store');
-    Route::put('/students/{student}', [AcademicManagementController::class, 'updateStudent'])->name('students.update');
-    Route::delete('/students/{student}', [AcademicManagementController::class, 'destroyStudent'])->name('students.destroy');
-
-    Route::get('/registrations', [AcademicManagementController::class, 'registrations'])->name('registrations.index');
+    Route::get('/', [SuperAdminController::class, 'dashboard'])->name('dashboard');
+    Route::post('/classes', [SuperAdminController::class, 'storeClass'])->name('classes.store');
+    Route::put('/classes/{class}', [SuperAdminController::class, 'updateClass'])->name('classes.update');
+    Route::delete('/classes/{class}', [SuperAdminController::class, 'destroyClass'])->name('classes.destroy');
+    Route::post('/students', [SuperAdminController::class, 'storeStudent'])->name('students.store');
+    Route::put('/students/{student}', [SuperAdminController::class, 'updateStudent'])->name('students.update');
+    Route::delete('/students/{student}', [SuperAdminController::class, 'destroyStudent'])->name('students.destroy');
+    Route::post('/registrations', [SuperAdminController::class, 'storeRegistration'])->name('registrations.store');
     Route::post('/registrations/{id}/approve', [RegistrationController::class, 'approve'])->name('registrations.approve');
-    Route::patch('/registrations/{registration}/status', [AcademicManagementController::class, 'updateRegistrationStatus'])->name('registrations.status');
-    Route::get('/schedule', [AcademicManagementController::class, 'schedule'])->name('schedule.index');
-    Route::post('/schedule/teacher', [AcademicManagementController::class, 'assignScheduleTeacher'])->name('schedule.teacher');
-    Route::post('/schedule/students', [AcademicManagementController::class, 'assignScheduleStudents'])->name('schedule.students');
+    Route::put('/registrations/{registration}', [SuperAdminController::class, 'updateRegistration'])->name('registrations.update');
+    Route::delete('/registrations/{registration}', [SuperAdminController::class, 'destroyRegistration'])->name('registrations.destroy');
+    Route::post('/content/{module}', [SuperAdminController::class, 'storeContent'])->whereIn('module', ['blog', 'gallery', 'events', 'testimonials'])->name('content.store');
+    Route::put('/content/{module}/{id}', [SuperAdminController::class, 'updateContent'])->whereIn('module', ['blog', 'gallery', 'events', 'testimonials'])->name('content.update');
+    Route::delete('/content/{module}/{id}', [SuperAdminController::class, 'destroyContent'])->whereIn('module', ['blog', 'gallery', 'events', 'testimonials'])->name('content.destroy');
+    Route::post('/teachers', [SuperAdminController::class, 'storeTeacherAccount'])->name('teachers.store');
+    Route::get('/teachers/{teacher}/detail', [SuperAdminController::class, 'showTeacher'])->name('teachers.show');
+    Route::get('/teachers/{teacher}/edit', [SuperAdminController::class, 'editTeacher'])->name('teachers.edit');
+    Route::put('/teachers/{teacher}', [SuperAdminController::class, 'updateTeacher'])->name('teachers.update');
+    Route::delete('/teachers/{teacher}', [SuperAdminController::class, 'destroyTeacher'])->name('teachers.destroy');
+    Route::post('/schedule', [SuperAdminScheduleController::class, 'store'])->name('schedule.store');
+    Route::put('/schedule/{schedule}', [SuperAdminScheduleController::class, 'update'])->name('schedule.update');
+    Route::delete('/schedule/{schedule}', [SuperAdminScheduleController::class, 'destroy'])->name('schedule.destroy');
+    Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
     Route::get('/attendance', [AcademicManagementController::class, 'attendance'])->name('attendance.index');
     Route::put('/attendance/{id}', [AcademicManagementController::class, 'updateAttendance'])->name('attendance.update');
     Route::delete('/attendance/{id}', [AcademicManagementController::class, 'destroyAttendance'])->name('attendance.destroy');
 
-    Route::get('/{module}', fn (string $module) => app(PortalController::class)->module('admin', $module))
-        ->whereIn('module', ['gallery', 'blog', 'events', 'testimonials', 'attendance', 'reschedule'])
+    Route::get('/{module}', function (string $module) {
+        if ($module === 'schedule') {
+            return app(SuperAdminScheduleController::class)->index();
+        }
+
+        if ($module === 'attendance') {
+            return app(AcademicManagementController::class)->attendance(request());
+        }
+
+        if (in_array($module, ['users', 'roles', 'settings', 'logs'])) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        return app(SuperAdminController::class)->module($module);
+    })
+        ->whereIn('module', ['classes', 'teachers', 'schedule', 'students', 'registrations', 'reschedule', 'finance', 'reports', 'blog', 'gallery', 'events', 'testimonials', 'attendance'])
         ->name('module');
+
     // Reschedule management
     Route::post('/reschedule/{id}/approve', [\App\Http\Controllers\Admin\RescheduleManagementController::class, 'approve'])->name('reschedule.approve');
     Route::post('/reschedule/{id}/reject', [\App\Http\Controllers\Admin\RescheduleManagementController::class, 'reject'])->name('reschedule.reject');

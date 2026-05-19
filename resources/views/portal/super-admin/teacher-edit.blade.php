@@ -20,7 +20,7 @@
 @endif
 
 <section class="card">
-    <form class="module-form" method="POST" enctype="multipart/form-data" action="{{ route('super-admin.teachers.update', $teacher) }}">
+    <form class="module-form" method="POST" enctype="multipart/form-data" action="{{ route($portal['prefix'] . '.teachers.update', $teacher) }}">
         @csrf
         @method('PUT')
         <label>Nama
@@ -77,7 +77,7 @@
     </form>
 
     <div style="margin-top: 1rem;">
-        <a href="{{ route('super-admin.module', ['module' => 'teachers']) }}" class="logout-btn">Kembali</a>
+        <a href="{{ route($portal['prefix'] . '.module', ['module' => 'teachers']) }}" class="logout-btn">Kembali</a>
     </div>
 </section>
 @endsection

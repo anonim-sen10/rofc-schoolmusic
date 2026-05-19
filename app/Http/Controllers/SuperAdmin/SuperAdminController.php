@@ -162,7 +162,7 @@ class SuperAdminController extends Controller
         $topUserName = $topUserRow ? (User::find($topUserRow->user_id)?->name ?? 'System') : '-';
 
         return view('portal.super-admin.dashboard', [
-            'roleKey' => 'super_admin',
+            'roleKey' => auth()->user()->hasRole('super_admin') ? 'super_admin' : 'admin',
             'portal' => $this->portalConfig(),
             'kpis' => $kpis,
             'stats' => [
@@ -204,7 +204,7 @@ class SuperAdminController extends Controller
         $scheduleFeatureReady = $this->hasSchedulesTable();
 
         $data = [
-            'roleKey' => 'super_admin',
+            'roleKey' => auth()->user()->hasRole('super_admin') ? 'super_admin' : 'admin',
             'portal' => $this->portalConfig(),
             'moduleKey' => $module,
             'moduleTitle' => $moduleData['title'],
@@ -324,28 +324,41 @@ class SuperAdminController extends Controller
 
     private function portalConfig(): array
     {
+        $role = auth()->user()->hasRole('super_admin') ? 'super_admin' : 'admin';
+        $prefix = $role === 'super_admin' ? 'super-admin' : 'admin';
+        $title = $role === 'super_admin' ? 'Super Admin Dashboard' : 'Admin Dashboard';
+
+        $allMenu = [
+            ['key' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'layout-dashboard'],
+            ['key' => 'roles', 'label' => 'Manajemen User', 'icon' => 'shield-check'],
+            ['key' => 'classes', 'label' => 'Classes', 'icon' => 'book-open'],
+            ['key' => 'teachers', 'label' => 'Teachers', 'icon' => 'music-2'],
+            ['key' => 'schedule', 'label' => 'Schedule', 'icon' => 'calendar-days'],
+            ['key' => 'students', 'label' => 'Students', 'icon' => 'graduation-cap'],
+            ['key' => 'registrations', 'label' => 'Registrations', 'icon' => 'clipboard-list'],
+            ['key' => 'reschedule', 'label' => 'Reschedule Requests', 'icon' => 'refresh-cw'],
+            ['key' => 'attendance', 'label' => 'Attendance Monitoring', 'icon' => 'check-circle'],
+            ['key' => 'finance', 'label' => 'Finance', 'icon' => 'wallet'],
+            ['key' => 'reports', 'label' => 'Reports', 'icon' => 'bar-chart-3'],
+            ['key' => 'blog', 'label' => 'Blog', 'icon' => 'newspaper'],
+            ['key' => 'gallery', 'label' => 'Gallery', 'icon' => 'image'],
+            ['key' => 'events', 'label' => 'Events', 'icon' => 'calendar'],
+            ['key' => 'testimonials', 'label' => 'Testimonials', 'icon' => 'message-square-quote'],
+            ['key' => 'settings', 'label' => 'Settings', 'icon' => 'settings'],
+            ['key' => 'logs', 'label' => 'Logs', 'icon' => 'scroll-text'],
+        ];
+
+        if ($role === 'admin') {
+            $excludeKeys = ['roles', 'settings', 'logs'];
+            $menu = array_values(array_filter($allMenu, fn($item) => !in_array($item['key'], $excludeKeys)));
+        } else {
+            $menu = $allMenu;
+        }
+
         return [
-            'title' => 'Super Admin Dashboard',
-            'prefix' => 'super-admin',
-            'menu' => [
-                ['key' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'layout-dashboard'],
-                ['key' => 'roles', 'label' => 'Manajemen User', 'icon' => 'shield-check'],
-                ['key' => 'classes', 'label' => 'Classes', 'icon' => 'book-open'],
-                ['key' => 'teachers', 'label' => 'Teachers', 'icon' => 'music-2'],
-                ['key' => 'schedule', 'label' => 'Schedule', 'icon' => 'calendar-days'],
-                ['key' => 'students', 'label' => 'Students', 'icon' => 'graduation-cap'],
-                ['key' => 'registrations', 'label' => 'Registrations', 'icon' => 'clipboard-list'],
-                ['key' => 'reschedule', 'label' => 'Reschedule Requests', 'icon' => 'refresh-cw'],
-                ['key' => 'attendance', 'label' => 'Attendance Monitoring', 'icon' => 'check-circle'],
-                ['key' => 'finance', 'label' => 'Finance', 'icon' => 'wallet'],
-                ['key' => 'reports', 'label' => 'Reports', 'icon' => 'bar-chart-3'],
-                ['key' => 'blog', 'label' => 'Blog', 'icon' => 'newspaper'],
-                ['key' => 'gallery', 'label' => 'Gallery', 'icon' => 'image'],
-                ['key' => 'events', 'label' => 'Events', 'icon' => 'calendar'],
-                ['key' => 'testimonials', 'label' => 'Testimonials', 'icon' => 'message-square-quote'],
-                ['key' => 'settings', 'label' => 'Settings', 'icon' => 'settings'],
-                ['key' => 'logs', 'label' => 'Logs', 'icon' => 'scroll-text'],
-            ],
+            'title' => $title,
+            'prefix' => $prefix,
+            'menu' => $menu,
         ];
     }
 

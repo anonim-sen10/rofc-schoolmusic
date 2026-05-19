@@ -1179,7 +1179,7 @@
 @if ($moduleKey === 'users' || $moduleKey === 'roles')
     <section class="card" id="form-create-user" style="display: none;" data-searchable>
         <h3>Buat Akun Login Baru</h3>
-        <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.users.store') }}">
+        <form class="module-form module-form-grid" method="POST" action="{{ route($portal['prefix'] . '.users.store') }}">
             @csrf
             <label>Nama
                 <input type="text" name="name" value="{{ old('name') }}" required>
@@ -1323,7 +1323,7 @@
                                             </div>
                                             <footer class="registration-modal-footer">
                                                 <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x" class="w-4 h-4"></i> Tutup</button>
-                                                <a href="{{ route('super-admin.users.impersonate', $userRow->id) }}" class="registration-modal-btn" style="background: #0f172a !important; color: #fff !important; border: none !important;">
+                                                <a href="{{ route($portal['prefix'] . '.users.impersonate', $userRow->id) }}" class="registration-modal-btn" style="background: #0f172a !important; color: #fff !important; border: none !important;">
                                                     <i data-lucide="user-plus" class="w-4 h-4"></i> Login As
                                                 </a>
                                                 <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(2)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');"><i data-lucide="user-cog" class="w-4 h-4"></i> Edit Akses</button>
@@ -1333,7 +1333,7 @@
                                     </details>
                                     <details class="action-popover registration-style-popover">
                                         <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
-                                        <form class="action-popover-form registration-edit-form" method="POST" action="{{ route('super-admin.users.update', $userRow) }}">
+                                        <form class="action-popover-form registration-edit-form" method="POST" action="{{ route($portal['prefix'] . '.users.update', $userRow) }}">
                                             @csrf
                                             @method('PUT')
                                             <header class="registration-modal-header">
@@ -1376,7 +1376,7 @@
                                             </footer>
                                         </form>
                                     </details>
-                                    <form class="delete-form" method="POST" action="{{ route('super-admin.users.destroy', $userRow) }}" onsubmit="return confirm('Hapus user ini?');">
+                                    <form class="delete-form" method="POST" action="{{ route($portal['prefix'] . '.users.destroy', $userRow) }}" onsubmit="return confirm('Hapus user ini?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-icon btn-icon-danger" title="Hapus" aria-label="Hapus"><i data-lucide="trash-2"></i></button>
@@ -1416,7 +1416,7 @@
                 </button>
             </header>
 
-            <form id="form-create-teacher-modal" action="{{ route('super-admin.teachers.store') }}" method="POST" enctype="multipart/form-data">
+            <form id="form-create-teacher-modal" action="{{ route($portal['prefix'] . '.teachers.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="_form_type" value="create_teacher">
                 
@@ -1640,7 +1640,7 @@
                                             <footer class="registration-modal-footer">
                                                 <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x" class="w-4 h-4"></i> Tutup</button>
                                                 @if($teacher->user)
-                                                    <a href="{{ route('super-admin.users.impersonate', $teacher->user->id) }}" class="registration-modal-btn" style="background: #0f172a !important; color: #fff !important; border: none !important;">
+                                                    <a href="{{ route($portal['prefix'] . '.users.impersonate', $teacher->user->id) }}" class="registration-modal-btn" style="background: #0f172a !important; color: #fff !important; border: none !important;">
                                                         <i data-lucide="user-plus" class="w-4 h-4"></i> Login As
                                                     </a>
                                                 @endif
@@ -1651,7 +1651,7 @@
                                     </details>
                                     <details class="action-popover" id="teacher-edit-{{ $teacher->id }}">
                                         <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
-                                        <form class="action-popover-form teacher-edit-modal" method="POST" enctype="multipart/form-data" action="{{ route('super-admin.teachers.update', $teacher) }}" id="teacher-edit-form-{{ $teacher->id }}" novalidate>
+                                        <form class="action-popover-form teacher-edit-modal" method="POST" enctype="multipart/form-data" action="{{ route($portal['prefix'] . '.teachers.update', $teacher) }}" id="teacher-edit-form-{{ $teacher->id }}" novalidate>
                                             @csrf
                                             @method('PUT')
                                             {{-- ─── HEADER ─── --}}
@@ -1730,7 +1730,7 @@
                                             </footer>
                                         </form>
                                     </details>
-                                    <form class="delete-form" method="POST" action="{{ route('super-admin.teachers.destroy', $teacher) }}" onsubmit="return confirm('Hapus teacher ini?');">
+                                    <form class="delete-form" method="POST" action="{{ route($portal['prefix'] . '.teachers.destroy', $teacher) }}" onsubmit="return confirm('Hapus teacher ini?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-icon btn-icon-danger" title="Hapus" aria-label="Hapus"><i data-lucide="trash-2"></i></button>
@@ -1753,7 +1753,7 @@
 
     <section class="card" id="form-create-class" style="display: @if($errors->any()) block @else none @endif;" data-searchable>
         <h3>Tambah Class Baru</h3>
-        <form class="module-form module-form-grid teacher-create-form" method="POST" action="{{ route('super-admin.classes.store') }}">
+        <form class="module-form module-form-grid teacher-create-form" method="POST" action="{{ route($portal['prefix'] . '.classes.store') }}">
                 @csrf
                 <label>Nama Kelas
                     <input type="text" name="name" value="{{ old('name') }}" required>
@@ -1909,7 +1909,7 @@
 
                                     <details class="action-popover registration-style-popover">
                                         <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
-                                        <form class="action-popover-form registration-edit-form" method="POST" action="{{ route('super-admin.classes.update', $classItem) }}">
+                                        <form class="action-popover-form registration-edit-form" method="POST" action="{{ route($portal['prefix'] . '.classes.update', $classItem) }}">
                                         @csrf
                                         @method('PUT')
                                         <header class="registration-modal-header">
@@ -1957,7 +1957,7 @@
                                         </footer>
                                         </form>
                                     </details>
-                                    <form class="delete-form" method="POST" action="{{ route('super-admin.classes.destroy', $classItem) }}" onsubmit="return confirm('Hapus class ini?');">
+                                    <form class="delete-form" method="POST" action="{{ route($portal['prefix'] . '.classes.destroy', $classItem) }}" onsubmit="return confirm('Hapus class ini?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-icon btn-icon-danger" title="Hapus" aria-label="Hapus"><i data-lucide="trash-2"></i></button>
@@ -2095,7 +2095,7 @@
                                             <footer class="registration-modal-footer">
                                                 <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x" class="w-4 h-4"></i> Tutup</button>
                                                 @if($student->user_id)
-                                                    <a href="{{ route('super-admin.users.impersonate', $student->user_id) }}" class="registration-modal-btn" style="background: #0f172a !important; color: #fff !important; border: none !important;">
+                                                    <a href="{{ route($portal['prefix'] . '.users.impersonate', $student->user_id) }}" class="registration-modal-btn" style="background: #0f172a !important; color: #fff !important; border: none !important;">
                                                         <i data-lucide="user-plus" class="w-4 h-4"></i> Login As
                                                     </a>
                                                 @endif
@@ -2108,7 +2108,7 @@
                                     {{-- Edit Button --}}
                                     <details class="action-popover registration-style-popover">
                                         <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
-                                        <form class="action-popover-form registration-edit-form" method="POST" action="{{ route('super-admin.students.update', $student) }}">
+                                        <form class="action-popover-form registration-edit-form" method="POST" action="{{ route($portal['prefix'] . '.students.update', $student) }}">
                                             @csrf
                                             @method('PUT')
                                             <header class="registration-modal-header">
@@ -2178,7 +2178,7 @@
                                     </details>
 
                                     {{-- Delete Button --}}
-                                    <form class="delete-form" method="POST" action="{{ route('super-admin.students.destroy', $student) }}" onsubmit="return confirm('Hapus siswa ini?');">
+                                    <form class="delete-form" method="POST" action="{{ route($portal['prefix'] . '.students.destroy', $student) }}" onsubmit="return confirm('Hapus siswa ini?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-icon btn-icon-danger" title="Hapus" aria-label="Hapus"><i data-lucide="trash-2"></i></button>
@@ -2202,7 +2202,7 @@
 
     <section class="card" id="form-create-registration" style="display: @if($errors->any() || $openRegistrationCreate) block @else none @endif;" data-searchable>
         <h3>Tambah Registration Baru</h3>
-            <form class="module-form module-form-grid teacher-create-form" method="POST" action="{{ route('super-admin.registrations.store') }}">
+            <form class="module-form module-form-grid teacher-create-form" method="POST" action="{{ route($portal['prefix'] . '.registrations.store') }}">
                 @csrf
                 <label>Nama Lengkap
                     <input type="text" name="nama_lengkap" value="{{ old('nama_lengkap') }}" required>
@@ -2472,9 +2472,9 @@
                                 'classId' => (string) ($registrationItem->class_id ?? ''),
                                 'instrumentValue' => $instrumenValue,
                                 'additionalProgramRaw' => $programTambahanArray,
-                                'updateAction' => route('super-admin.registrations.update', $registrationItem),
+                                'updateAction' => route($portal['prefix'] . '.registrations.update', $registrationItem),
                                 'editTriggerId' => $editTriggerId,
-                                'deleteAction' => route('super-admin.registrations.destroy', $registrationItem),
+                                'deleteAction' => route($portal['prefix'] . '.registrations.destroy', $registrationItem),
                                 'schedules' => $registrationItem->schedules->map(fn($s) => [
                                     'label' => $s->day . ' ' . substr((string)$s->time, 0, 5)
                                 ])->all(),
@@ -2511,7 +2511,7 @@
                             <td data-label="Aksi">
                                 <div class="action-icons class-action-icons">
                                     @if ($registrationStatus !== 'accepted')
-                                        <form method="POST" action="{{ route('super-admin.registrations.approve', $registrationItem->id) }}" onsubmit="return confirm('Approve registration ini dan buat akun siswa?');">
+                                        <form method="POST" action="{{ route($portal['prefix'] . '.registrations.approve', $registrationItem->id) }}" onsubmit="return confirm('Approve registration ini dan buat akun siswa?');">
                                             @csrf
                                             <button type="submit" class="btn-icon" title="Approve" aria-label="Approve"><i data-lucide="badge-check"></i></button>
                                         </form>
@@ -2596,7 +2596,7 @@
                                     {{-- Edit Popover --}}
                                     <details class="action-popover registration-style-popover">
                                         <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
-                                        <form class="action-popover-form registration-edit-form" method="POST" action="{{ route('super-admin.registrations.update', $registrationItem) }}">
+                                        <form class="action-popover-form registration-edit-form" method="POST" action="{{ route($portal['prefix'] . '.registrations.update', $registrationItem) }}">
                                             @csrf
                                             @method('PUT')
                                             <header class="registration-modal-header">
@@ -2818,7 +2818,7 @@
                                         </form>
                                     </details>
 
-                                    <form method="POST" action="{{ route('super-admin.registrations.destroy', $registrationItem) }}" onsubmit="return confirm('Hapus registration ini?');">
+                                    <form method="POST" action="{{ route($portal['prefix'] . '.registrations.destroy', $registrationItem) }}" onsubmit="return confirm('Hapus registration ini?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-icon btn-icon-danger" title="Hapus" aria-label="Hapus"><i data-lucide="trash-2"></i></button>
@@ -2850,7 +2850,7 @@
 @if ($moduleKey === 'blog')
     <section class="card" id="form-create-blog" style="display: @if($errors->any()) block @else none @endif;" data-searchable>
         <h3>Tambah Post Baru</h3>
-        <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.content.store', 'blog') }}">
+        <form class="module-form module-form-grid" method="POST" action="{{ route($portal['prefix'] . '.content.store', 'blog') }}">
             @csrf
             <label>Title<input type="text" name="title" required></label>
             <label>Slug<input type="text" name="slug" required></label>
@@ -2876,7 +2876,7 @@
             </button>
         </div>
         @foreach($postsForManagement as $post)
-            <form class="module-form" method="POST" action="{{ route('super-admin.content.update', ['module' => 'blog', 'id' => $post->id]) }}">
+            <form class="module-form" method="POST" action="{{ route($portal['prefix'] . '.content.update', ['module' => 'blog', 'id' => $post->id]) }}">
                 @csrf
                 @method('PUT')
                 <label>Title<input type="text" name="title" value="{{ $post->title }}" required></label>
@@ -2890,7 +2890,7 @@
                 <label>Published At<input type="datetime-local" name="published_at" value="{{ $post->published_at ? \Carbon\Carbon::parse($post->published_at)->format('Y-m-d\\TH:i') : '' }}"></label>
                 <button type="submit">Update</button>
             </form>
-            <form method="POST" action="{{ route('super-admin.content.destroy', ['module' => 'blog', 'id' => $post->id]) }}" onsubmit="return confirm('Hapus post ini?');">
+            <form method="POST" action="{{ route($portal['prefix'] . '.content.destroy', ['module' => 'blog', 'id' => $post->id]) }}" onsubmit="return confirm('Hapus post ini?');">
                 @csrf
                 @method('DELETE')
                 <button type="submit">Hapus</button>
@@ -2902,7 +2902,7 @@
 @if ($moduleKey === 'gallery')
     <section class="card" id="form-create-gallery" style="display: @if($errors->any()) block @else none @endif;" data-searchable>
         <h3>Tambah Gallery Baru</h3>
-        <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.content.store', 'gallery') }}">
+        <form class="module-form module-form-grid" method="POST" action="{{ route($portal['prefix'] . '.content.store', 'gallery') }}">
             @csrf
             <label>Title<input type="text" name="title" required></label>
             <label>Category<input type="text" name="category"></label>
@@ -2923,7 +2923,7 @@
             </button>
         </div>
         @foreach($galleriesForManagement as $gallery)
-            <form class="module-form" method="POST" action="{{ route('super-admin.content.update', ['module' => 'gallery', 'id' => $gallery->id]) }}">
+            <form class="module-form" method="POST" action="{{ route($portal['prefix'] . '.content.update', ['module' => 'gallery', 'id' => $gallery->id]) }}">
                 @csrf
                 @method('PUT')
                 <label>Title<input type="text" name="title" value="{{ $gallery->title }}" required></label>
@@ -2932,7 +2932,7 @@
                 <label>File Path<input type="text" name="file_path" value="{{ $gallery->file_path }}" required></label>
                 <button type="submit">Update</button>
             </form>
-            <form method="POST" action="{{ route('super-admin.content.destroy', ['module' => 'gallery', 'id' => $gallery->id]) }}" onsubmit="return confirm('Hapus gallery ini?');">
+            <form method="POST" action="{{ route($portal['prefix'] . '.content.destroy', ['module' => 'gallery', 'id' => $gallery->id]) }}" onsubmit="return confirm('Hapus gallery ini?');">
                 @csrf
                 @method('DELETE')
                 <button type="submit">Hapus</button>
@@ -2944,7 +2944,7 @@
 @if ($moduleKey === 'events')
     <section class="card" id="form-create-event" style="display: @if($errors->any()) block @else none @endif;" data-searchable>
         <h3>Tambah Event Baru</h3>
-        <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.content.store', 'events') }}">
+        <form class="module-form module-form-grid" method="POST" action="{{ route($portal['prefix'] . '.content.store', 'events') }}">
             @csrf
             <label>Title<input type="text" name="title" required></label>
             <label>Description<textarea name="description" rows="3"></textarea></label>
@@ -2966,7 +2966,7 @@
             </button>
         </div>
         @foreach($eventsForManagement as $event)
-            <form class="module-form" method="POST" action="{{ route('super-admin.content.update', ['module' => 'events', 'id' => $event->id]) }}">
+            <form class="module-form" method="POST" action="{{ route($portal['prefix'] . '.content.update', ['module' => 'events', 'id' => $event->id]) }}">
                 @csrf
                 @method('PUT')
                 <label>Title<input type="text" name="title" value="{{ $event->title }}" required></label>
@@ -2976,7 +2976,7 @@
                 <label>Status<select name="status"><option value="draft" @selected($event->status === 'draft')>draft</option><option value="upcoming" @selected($event->status === 'upcoming')>upcoming</option><option value="completed" @selected($event->status === 'completed')>completed</option><option value="cancelled" @selected($event->status === 'cancelled')>cancelled</option></select></label>
                 <button type="submit">Update</button>
             </form>
-            <form method="POST" action="{{ route('super-admin.content.destroy', ['module' => 'events', 'id' => $event->id]) }}" onsubmit="return confirm('Hapus event ini?');">
+            <form method="POST" action="{{ route($portal['prefix'] . '.content.destroy', ['module' => 'events', 'id' => $event->id]) }}" onsubmit="return confirm('Hapus event ini?');">
                 @csrf
                 @method('DELETE')
                 <button type="submit">Hapus</button>
@@ -2988,7 +2988,7 @@
 @if ($moduleKey === 'testimonials')
     <section class="card" id="form-create-testimonial" style="display: @if($errors->any()) block @else none @endif;" data-searchable>
         <h3>Tambah Testimonial Baru</h3>
-        <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.content.store', 'testimonials') }}">
+        <form class="module-form module-form-grid" method="POST" action="{{ route($portal['prefix'] . '.content.store', 'testimonials') }}">
             @csrf
             <label>Name<input type="text" name="name" required></label>
             <label>Role<input type="text" name="role"></label>
@@ -3009,7 +3009,7 @@
             </button>
         </div>
         @foreach($testimonialsForManagement as $testimonial)
-            <form class="module-form" method="POST" action="{{ route('super-admin.content.update', ['module' => 'testimonials', 'id' => $testimonial->id]) }}">
+            <form class="module-form" method="POST" action="{{ route($portal['prefix'] . '.content.update', ['module' => 'testimonials', 'id' => $testimonial->id]) }}">
                 @csrf
                 @method('PUT')
                 <label>Name<input type="text" name="name" value="{{ $testimonial->name }}" required></label>
@@ -3018,7 +3018,7 @@
                 <label>Publish<select name="is_published"><option value="1" @selected($testimonial->is_published)>Ya</option><option value="0" @selected(! $testimonial->is_published)>Tidak</option></select></label>
                 <button type="submit">Update</button>
             </form>
-            <form method="POST" action="{{ route('super-admin.content.destroy', ['module' => 'testimonials', 'id' => $testimonial->id]) }}" onsubmit="return confirm('Hapus testimonial ini?');">
+            <form method="POST" action="{{ route($portal['prefix'] . '.content.destroy', ['module' => 'testimonials', 'id' => $testimonial->id]) }}" onsubmit="return confirm('Hapus testimonial ini?');">
                 @csrf
                 @method('DELETE')
                 <button type="submit">Hapus</button>
@@ -3030,7 +3030,7 @@
 @if ($moduleKey === 'settings')
     <section class="card" id="form-create-setting" style="display: @if($errors->any()) block @else none @endif;" data-searchable>
         <h3>Tambah Setting Baru</h3>
-        <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.content.store', 'settings') }}">
+        <form class="module-form module-form-grid" method="POST" action="{{ route($portal['prefix'] . '.content.store', 'settings') }}">
             @csrf
             <label>Key<input type="text" name="key" required></label>
             <label>Value<textarea name="value" rows="2"></textarea></label>
@@ -3049,14 +3049,14 @@
             </button>
         </div>
         @foreach($settingsForManagement as $setting)
-            <form class="module-form" method="POST" action="{{ route('super-admin.content.update', ['module' => 'settings', 'id' => $setting->id]) }}">
+            <form class="module-form" method="POST" action="{{ route($portal['prefix'] . '.content.update', ['module' => 'settings', 'id' => $setting->id]) }}">
                 @csrf
                 @method('PUT')
                 <label>Key<input type="text" name="key" value="{{ $setting->key }}" required></label>
                 <label>Value<textarea name="value" rows="2">{{ $setting->value }}</textarea></label>
                 <button type="submit">Update</button>
             </form>
-            <form method="POST" action="{{ route('super-admin.content.destroy', ['module' => 'settings', 'id' => $setting->id]) }}" onsubmit="return confirm('Hapus setting ini?');">
+            <form method="POST" action="{{ route($portal['prefix'] . '.content.destroy', ['module' => 'settings', 'id' => $setting->id]) }}" onsubmit="return confirm('Hapus setting ini?');">
                 @csrf
                 @method('DELETE')
                 <button type="submit">Hapus</button>
@@ -3087,7 +3087,7 @@
                             <td>{{ $log->module ?? '-' }}</td>
                             <td>{{ $log->action }}</td>
                             <td>
-                                <form method="POST" action="{{ route('super-admin.logs.destroy', $log->id) }}" onsubmit="return confirm('Hapus log ini?');">
+                                <form method="POST" action="{{ route($portal['prefix'] . '.logs.destroy', $log->id) }}" onsubmit="return confirm('Hapus log ini?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit">Hapus</button>
@@ -3136,13 +3136,13 @@
                             <td>
                                 @if($status === 'pending')
                                     <div style="display:flex; gap:0.5rem;">
-                                        <form action="{{ route('super-admin.reschedule.approve', $requestObj->id) }}" method="POST" onsubmit="return confirm('Approve reschedule ini?')">
+                                        <form action="{{ route($portal['prefix'] . '.reschedule.approve', $requestObj->id) }}" method="POST" onsubmit="return confirm('Approve reschedule ini?')">
                                             @csrf
                                             <button type="submit" class="btn-res-approve" title="Approve">
                                                 <i data-lucide="check"></i>
                                             </button>
                                         </form>
-                                        <form action="{{ route('super-admin.reschedule.reject', $requestObj->id) }}" method="POST" onsubmit="return confirm('Reject reschedule ini?')">
+                                        <form action="{{ route($portal['prefix'] . '.reschedule.reject', $requestObj->id) }}" method="POST" onsubmit="return confirm('Reject reschedule ini?')">
                                             @csrf
                                             <button type="submit" class="btn-res-reject" title="Reject">
                                                 <i data-lucide="x"></i>
@@ -3198,7 +3198,7 @@
 
     <section class="card" id="form-create-payment" style="display: @if($errors->any()) block @else none @endif;" data-searchable>
         <h3>Tambah Pembayaran</h3>
-        <form class="module-form module-form-grid" method="POST" action="{{ route('super-admin.payments.store') }}">
+        <form class="module-form module-form-grid" method="POST" action="{{ route($portal['prefix'] . '.payments.store') }}">
             @csrf
             <label>Student
                 <select name="student_id" required>
@@ -3413,7 +3413,7 @@
 
                                                             @if(!$isBooked)
                                                             <div x-show="showActions" @click.away="showActions = false" x-transition.opacity class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-28 bg-gray-900 rounded-lg shadow-xl z-50 p-1 border border-white/10">
-                                                                <form method="POST" action="{{ route('super-admin.schedule.destroy', $slot) }}" onsubmit="return confirm('Hapus?')">
+                                                                <form method="POST" action="{{ route($portal['prefix'] . '.schedule.destroy', $slot) }}" onsubmit="return confirm('Hapus?')">
                                                                     @csrf
                                                                     @method('DELETE')
                                                                     <button type="submit" class="w-full flex items-center justify-center px-2 py-1.5 text-[9px] font-bold text-white hover:bg-red-500 rounded-md transition-all">
@@ -3455,7 +3455,7 @@
                     @click.away="addModalOpen = false"
                     class="relative bg-white rounded-3xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.15)] w-full max-w-[320px] border border-gray-100/50 overflow-hidden transform -translate-y-5">
                     
-                    <form method="POST" action="{{ route('super-admin.schedule.store') }}" class="p-6">
+                    <form method="POST" action="{{ route($portal['prefix'] . '.schedule.store') }}" class="p-6">
                         @csrf
                         <div class="flex items-center justify-between mb-5">
                             <h3 class="text-[14px] font-bold text-gray-900 tracking-tight">New Schedule</h3>
@@ -3960,7 +3960,7 @@ window.filterRegSchedules = function(select, regId) {
             </div>
         </div>
 
-        <form method="POST" action="{{ route('super-admin.students.store') }}">
+        <form method="POST" action="{{ route($portal['prefix'] . '.students.store') }}">
             @csrf
             
             {{-- STEP 1: DATA SISWA --}}
