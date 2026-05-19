@@ -88,6 +88,16 @@ Route::get('/debug-db', function () {
     }
 });
 
+Route::get('/view-logs', function () {
+    $path = storage_path('logs/laravel.log');
+    if (!file_exists($path)) {
+        return "Log file does not exist.";
+    }
+    $lines = file($path);
+    $lastLines = array_slice($lines, -150);
+    return response(implode("", $lastLines), 200, ['Content-Type' => 'text/plain']);
+});
+
 Route::view('/about', 'pages.about')->name('about');
 Route::view('/programs', 'pages.programs')->name('programs');
 Route::view('/teachers', 'pages.teachers')->name('teachers');
