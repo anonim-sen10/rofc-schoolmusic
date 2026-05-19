@@ -115,6 +115,15 @@ trait ManagesStudents
             $payload['end_date'] = \Carbon\Carbon::parse($payload['start_date'])->addMonths((int)$payload['duration_months'])->toDateString();
         }
 
+        if (!$payload['is_active']) {
+            // Release schedules booked by this student
+            \App\Models\Schedule::where('student_id', $student->id)->update([
+                'student_id' => null,
+                'status' => 'available'
+            ]);
+            $payload['schedule_id'] = null;
+        }
+
         $student->update($payload);
 
         // Sync with Login Account (User) if exists
@@ -133,6 +142,12 @@ trait ManagesStudents
     public function destroyStudent(Student $student): RedirectResponse
     {
         DB::transaction(function () use ($student) {
+            // Release schedules booked by this student
+            \App\Models\Schedule::where('student_id', $student->id)->update([
+                'student_id' => null,
+                'status' => 'available'
+            ]);
+
             $user = $student->user;
             if ($user) {
                 // Cascades will handle student and related data
