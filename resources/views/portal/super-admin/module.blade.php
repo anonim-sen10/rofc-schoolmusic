@@ -1323,9 +1323,11 @@
                                             </div>
                                             <footer class="registration-modal-footer">
                                                 <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x" class="w-4 h-4"></i> Tutup</button>
-                                                <a href="{{ route($portal['prefix'] . '.users.impersonate', $userRow->id) }}" class="registration-modal-btn" style="background: #0f172a !important; color: #fff !important; border: none !important;">
-                                                    <i data-lucide="user-plus" class="w-4 h-4"></i> Login As
-                                                </a>
+                                                @if(auth()->user()->hasRole('super_admin'))
+                                                    <a href="{{ route('super-admin.users.impersonate', $userRow->id) }}" class="registration-modal-btn" style="background: #0f172a !important; color: #fff !important; border: none !important;">
+                                                        <i data-lucide="user-plus" class="w-4 h-4"></i> Login As
+                                                    </a>
+                                                @endif
                                                 <button type="button" class="registration-modal-btn registration-modal-btn-primary" onclick="this.closest('.action-icons').querySelector('details:nth-child(2)').setAttribute('open', 'true'); this.closest('details').removeAttribute('open');"><i data-lucide="user-cog" class="w-4 h-4"></i> Edit Akses</button>
                                                 <button type="button" class="registration-modal-btn registration-modal-btn-danger" onclick="if(confirm('Hapus user ini?')) this.closest('.action-icons').querySelector('form.delete-form').submit();"><i data-lucide="trash-2" class="w-4 h-4"></i> Hapus</button>
                                             </footer>
@@ -1639,8 +1641,8 @@
                                             </div>
                                             <footer class="registration-modal-footer">
                                                 <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x" class="w-4 h-4"></i> Tutup</button>
-                                                @if($teacher->user)
-                                                    <a href="{{ route($portal['prefix'] . '.users.impersonate', $teacher->user->id) }}" class="registration-modal-btn" style="background: #0f172a !important; color: #fff !important; border: none !important;">
+                                                @if(auth()->user()->hasRole('super_admin') && $teacher->user)
+                                                    <a href="{{ route('super-admin.users.impersonate', $teacher->user->id) }}" class="registration-modal-btn" style="background: #0f172a !important; color: #fff !important; border: none !important;">
                                                         <i data-lucide="user-plus" class="w-4 h-4"></i> Login As
                                                     </a>
                                                 @endif
@@ -2094,8 +2096,8 @@
                                             </div>
                                             <footer class="registration-modal-footer">
                                                 <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x" class="w-4 h-4"></i> Tutup</button>
-                                                @if($student->user_id)
-                                                    <a href="{{ route($portal['prefix'] . '.users.impersonate', $student->user_id) }}" class="registration-modal-btn" style="background: #0f172a !important; color: #fff !important; border: none !important;">
+                                                @if(auth()->user()->hasRole('super_admin') && $student->user_id)
+                                                    <a href="{{ route('super-admin.users.impersonate', $student->user_id) }}" class="registration-modal-btn" style="background: #0f172a !important; color: #fff !important; border: none !important;">
                                                         <i data-lucide="user-plus" class="w-4 h-4"></i> Login As
                                                     </a>
                                                 @endif
