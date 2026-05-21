@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\SuperAdmin\Traits;
 
 use App\Http\Requests\SuperAdmin\StoreStudentRequest;
+use App\Models\Schedule;
+use App\Models\ScheduleSession;
 use App\Models\Student;
-use App\Models\MusicClass;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -44,15 +46,7 @@ trait ManagesStudents
         $student->class_id = $data['class_id'];
         $student->save();
         $student->classes()->sync([$data['class_id']]);
-
-        // Link to schedule and mark as booked
-        $schedule = \App\Models\Schedule::find($data['schedule_id']);
-        if ($schedule) {
-            $schedule->update([
-                'student_id' => $student->id,
-                'status' => 'booked'
-            ]);
-        }
+        $this->syncStudentScheduleSlots($student, [$data['schedule_id']]);
 
         return back()->with('success', 'Siswa berhasil ditambahkan.');
     }
@@ -82,6 +76,9 @@ trait ManagesStudents
                 'class_ids.*' => ['integer', 'exists:classes,id'],
                 'start_date' => ['nullable', 'date'],
                 'duration_months' => ['nullable', 'integer', 'min:1', 'max:12'],
+                'schedule_sync' => ['nullable', 'boolean'],
+                'schedule_ids' => ['nullable', 'array'],
+                'schedule_ids.*' => ['integer', 'exists:schedules,id'],
                 'pengalaman' => ['nullable', 'boolean'],
                 'deskripsi_pengalaman' => ['nullable', 'string', 'max:2000'],
                 'favorite_song' => ['nullable', 'string', 'max:120'],
@@ -146,7 +143,125 @@ trait ManagesStudents
 
         $student->classes()->sync($data['class_ids'] ?? []);
 
+        if ($request->boolean('schedule_sync')) {
+            $this->syncStudentScheduleSlots($student->fresh(), $data['schedule_ids'] ?? []);
+        }
+
         return back()->with('success', 'Data siswa berhasil diperbarui.');
+    }
+
+    private function syncStudentScheduleSlots(Student $student, array $scheduleIds): void
+    {
+        $scheduleIds = collect($scheduleIds)
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        DB::transaction(function () use ($student, $scheduleIds): void {
+            $selectedSchedules = Schedule::query()
+                ->whereIn('id', $scheduleIds)
+                ->lockForUpdate()
+                ->get();
+
+            if ($selectedSchedules->count() !== count($scheduleIds)) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'schedule_ids' => 'Ada jadwal yang tidak valid. Silakan pilih ulang jadwal siswa.',
+                ]);
+            }
+
+            $blockedSchedule = $selectedSchedules->first(function (Schedule $schedule) use ($student) {
+                return $schedule->student_id && (int) $schedule->student_id !== (int) $student->id;
+            });
+
+            if ($blockedSchedule) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'schedule_ids' => "Slot {$blockedSchedule->day} ".substr((string) $blockedSchedule->time, 0, 5).' sudah dipakai siswa lain.',
+                ]);
+            }
+
+            Schedule::query()
+                ->where('student_id', $student->id)
+                ->whereNotIn('id', $scheduleIds ?: [0])
+                ->update([
+                    'student_id' => null,
+                    'status' => 'available',
+                ]);
+
+            ScheduleSession::query()
+                ->where('student_id', $student->id)
+                ->whereNotIn('schedule_id', $scheduleIds ?: [0])
+                ->where('status', 'booked')
+                ->where('session_date', '>=', now()->toDateString())
+                ->delete();
+
+            $primarySchedule = $selectedSchedules->first();
+            $student->forceFill([
+                'class_id' => $primarySchedule?->class_id,
+                'schedule_id' => $primarySchedule?->id,
+            ])->save();
+
+            foreach ($selectedSchedules as $schedule) {
+                $schedule->update([
+                    'student_id' => $student->id,
+                    'status' => 'booked',
+                ]);
+
+                $student->classes()->syncWithoutDetaching([$schedule->class_id]);
+
+                $this->generateStudentSessionsForSchedule($student, $schedule);
+            }
+        });
+    }
+
+    private function generateStudentSessionsForSchedule(Student $student, Schedule $schedule): void
+    {
+        $hasFutureSessions = ScheduleSession::query()
+            ->where('student_id', $student->id)
+            ->where('schedule_id', $schedule->id)
+            ->where('session_date', '>=', now()->toDateString())
+            ->exists();
+
+        if ($hasFutureSessions) {
+            return;
+        }
+
+        $currentDate = Carbon::parse($student->start_date ?: now()->toDateString());
+        $dayName = $this->mapScheduleDayToEnglish((string) $schedule->day);
+
+        if (strtolower($currentDate->format('l')) !== $dayName) {
+            $currentDate->modify("next {$dayName}");
+        }
+
+        $totalSessions = (int) (($student->duration_months ?: 1) * 4);
+
+        for ($i = 0; $i < $totalSessions; $i++) {
+            ScheduleSession::query()->create([
+                'schedule_id' => $schedule->id,
+                'student_id' => $student->id,
+                'teacher_id' => $schedule->teacher_id,
+                'class_id' => $schedule->class_id,
+                'session_date' => $currentDate->toDateString(),
+                'time' => $schedule->time,
+                'status' => 'booked',
+            ]);
+
+            $currentDate->addWeek();
+        }
+    }
+
+    private function mapScheduleDayToEnglish(string $day): string
+    {
+        return [
+            'senin' => 'monday',
+            'selasa' => 'tuesday',
+            'rabu' => 'wednesday',
+            'kamis' => 'thursday',
+            'jumat' => 'friday',
+            'sabtu' => 'saturday',
+            'minggu' => 'sunday',
+        ][strtolower($day)] ?? strtolower($day);
     }
 
     public function destroyStudent(Student $student): RedirectResponse

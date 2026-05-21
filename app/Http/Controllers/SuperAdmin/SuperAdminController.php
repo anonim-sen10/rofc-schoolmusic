@@ -252,7 +252,7 @@ class SuperAdminController extends Controller
                 $data['usersForRoles'] = User::with(['roles', 'student', 'teacher'])->latest()->take(100)->get();
                 break;
             case 'classes':
-                $data['classesForManagement'] = MusicClass::with(['teacher', 'teachers', 'schedules'])->orderBy('name')->get();
+                $data['classesForManagement'] = MusicClass::with(['teacher', 'teachers', 'schedules.student'])->orderBy('name')->get();
                 $data['teachersForClassOptions'] = Teacher::query()->orderBy('name')->get(['id', 'name']);
                 break;
             case 'teachers':
@@ -274,14 +274,20 @@ class SuperAdminController extends Controller
                     : collect();
                 break;
             case 'students':
-                $data['studentsForManagement'] = Student::query()->with(['class', 'classes'])->latest()->get();
+                $data['studentsForManagement'] = Student::query()->with(['class', 'classes', 'scheduleSessions.schedule'])->latest()->get();
                 $data['classesForManagement'] = MusicClass::query()->orderBy('name')->get(['id', 'name']);
                 $data['approvedRegistrationsForStudents'] = Registration::query()
                     ->with('class')
                     ->where('status', 'accepted')
                     ->latest('updated_at')
                     ->get();
-                $data['schedulesForManagement'] = $scheduleFeatureReady ? Schedule::where('status', 'available')->get() : collect();
+                $data['schedulesForManagement'] = $scheduleFeatureReady
+                    ? Schedule::query()
+                        ->with(['musicClass', 'teacher'])
+                        ->orderBy('day')
+                        ->orderBy('time')
+                        ->get()
+                    : collect();
                 break;
             case 'registrations':
                 $data['registrationsForManagement'] = Registration::query()->with(['class', 'schedules'])->latest()->get();

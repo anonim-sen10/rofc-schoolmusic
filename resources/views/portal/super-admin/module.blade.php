@@ -185,6 +185,116 @@
         line-height: 1.5;
     }
 
+    .registration-schedule-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        padding: 1.25rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 1.25rem;
+        max-height: 320px;
+        overflow-y: auto;
+    }
+
+    .reg-day-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .reg-day-header {
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #64748b;
+        letter-spacing: 0.05em;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .reg-day-header::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #e2e8f0;
+    }
+
+    .reg-day-slots {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 0.5rem;
+    }
+
+    .reg-slot-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 56px;
+        padding: 0.6rem;
+        background: #ffffff;
+        border: 1.5px solid #edf2f7;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .reg-slot-card:hover:not(.is-disabled) {
+        border-color: #6366f1;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.08);
+    }
+
+    .reg-slot-card.is-selected {
+        background: #6366f1;
+        border-color: #6366f1;
+        color: #ffffff;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    .reg-slot-card.is-disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        background: #f1f5f9;
+        border-style: dashed;
+    }
+
+    .reg-slot-time {
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .reg-slot-teacher {
+        font-size: 8px;
+        color: #64748b;
+        display: block;
+        line-height: 1;
+        margin-top: 2px;
+        font-weight: 600;
+    }
+
+    .reg-slot-card.is-selected .reg-slot-teacher {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .reg-slot-badge {
+        font-size: 7px;
+        font-weight: 900;
+        margin-top: 2px;
+        background: rgba(0,0,0,0.1);
+        padding: 1px 4px;
+        border-radius: 4px;
+    }
+
+    .reg-empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
     .table-wrap table tbody tr:last-child td {
         border-bottom: none;
     }
@@ -1995,7 +2105,11 @@
                             <td>Rp{{ number_format((int) ($classItem->price ?? 0), 0, ',', '.') }}</td>
                             <td class="class-schedule-cell">
                                 @php
-                                    $bookedSchedules = $classItem->schedules->where('status', 'booked');
+                                    $bookedSchedules = $classItem->schedules->filter(function ($schedule) {
+                                        return strtolower((string) $schedule->status) === 'booked'
+                                            && $schedule->student
+                                            && $schedule->student->is_active;
+                                    });
                                     $bookedDays = $bookedSchedules->pluck('day')->unique()->values();
                                     
                                     $dayOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
@@ -2389,6 +2503,67 @@
                                                             @endforeach
                                                         </select>
                                                     </label>
+                                                    @php
+                                                        $studentScheduleIds = $student->scheduleSessions
+                                                            ->pluck('schedule_id')
+                                                            ->filter()
+                                                            ->unique()
+                                                            ->values();
+
+                                                        if ($studentScheduleIds->isEmpty() && $student->schedule_id) {
+                                                            $studentScheduleIds = collect([$student->schedule_id]);
+                                                        }
+
+                                                        $studentScheduleOptions = $schedulesForManagement
+                                                            ->filter(fn($scheduleOption) => strtolower((string) $scheduleOption->status) === 'available'
+                                                                || (int) $scheduleOption->student_id === (int) $student->id
+                                                                || $studentScheduleIds->contains($scheduleOption->id))
+                                                            ->sortBy(function ($scheduleOption) {
+                                                                $dayOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+                                                                $dayIndex = array_search($scheduleOption->day, $dayOrder, true);
+
+                                                                return sprintf('%02d-%s', $dayIndex === false ? 99 : $dayIndex, $scheduleOption->time);
+                                                            });
+                                                    @endphp
+                                                    <div style="grid-column: span 2;">
+                                                        <label class="premium-label" style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 0.75rem; display: block;">Jadwal Siswa (Double Time: pilih lebih dari satu)</label>
+                                                        <input type="hidden" name="schedule_sync" value="1">
+                                                        <div class="registration-schedule-container">
+                                                            @php
+                                                                $studentGroupedSchedules = $studentScheduleOptions->groupBy('day');
+                                                            @endphp
+
+                                                            @forelse($studentGroupedSchedules as $day => $slots)
+                                                                <div class="reg-day-group">
+                                                                    <div class="reg-day-header">{{ $day }}</div>
+                                                                    <div class="reg-day-slots">
+                                                                        @foreach($slots as $scheduleOption)
+                                                                            @php
+                                                                                $isSelected = $studentScheduleIds->contains($scheduleOption->id);
+                                                                                $isFull = strtolower((string) $scheduleOption->status) === 'booked'
+                                                                                    && (int) $scheduleOption->student_id !== (int) $student->id
+                                                                                    && ! $isSelected;
+                                                                            @endphp
+                                                                            <label class="reg-slot-card {{ $isSelected ? 'is-selected' : '' }} {{ $isFull ? 'is-disabled' : '' }}" data-teacher-id="{{ $scheduleOption->teacher_id }}">
+                                                                                <input type="checkbox" name="schedule_ids[]" value="{{ $scheduleOption->id }}" @checked($isSelected) @disabled($isFull) style="display: none;" onchange="this.parentElement.classList.toggle('is-selected', this.checked)">
+                                                                                <span class="reg-slot-time">{{ substr((string) $scheduleOption->time, 0, 5) }}</span>
+                                                                                <span class="reg-slot-teacher">{{ $scheduleOption->teacher->name ?? '-' }}</span>
+                                                                                @if($isFull)
+                                                                                    <span class="reg-slot-badge">FULL</span>
+                                                                                @endif
+                                                                            </label>
+                                                                        @endforeach
+                                                                    </div>
+                                                                </div>
+                                                            @empty
+                                                                <div class="reg-empty-state">
+                                                                    <i data-lucide="calendar-x2"></i>
+                                                                    <span>Tidak ada jadwal tersedia.</span>
+                                                                </div>
+                                                            @endforelse
+                                                        </div>
+                                                        <small style="color: #64748b; display: block; margin-top: 0.5rem;">Klik slot Jumat dan Sabtu untuk membuat double time. Slot yang sudah dipakai siswa lain akan dikunci.</small>
+                                                    </div>
                                                     <label>Mulai Kursus <input type="date" name="start_date" value="{{ $student->start_date }}"></label>
                                                     <label>Durasi (Bulan) <input type="number" name="duration_months" value="{{ $student->duration_months }}"></label>
                                                     <label>Status
