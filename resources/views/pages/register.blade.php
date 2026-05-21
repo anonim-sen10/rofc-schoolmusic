@@ -767,7 +767,8 @@
 
                                 <label class="register-field">
                                     <span>Tanggal Mulai Belajar</span>
-                                    <input class="register-input" type="date" name="start_date" value="{{ old('start_date') }}" required>
+                                    <input class="register-input" type="date" name="start_date" id="start_date_input" value="{{ old('start_date') }}" required>
+                                    <div id="start-date-error" class="validation-error-msg">Hari pada tanggal mulai tidak ada di pilihan jadwal Anda.</div>
                                 </label>
 
                                 <label class="register-field">
@@ -782,7 +783,7 @@
                                 </label>
 
                                 <div class="register-field full">
-                                    <span>Pilih Jadwal</span>
+                                    <span>Pilih Jadwal (boleh lebih dari satu untuk double time)</span>
                                     <div class="multi-schedule-wrapper">
                                         <!-- Selected Preview -->
                                         <div id="selected-preview" class="selected-preview-wrap" style="display: none;">
@@ -795,7 +796,7 @@
                                             <p class="text-muted" style="padding: 1rem; font-size: 0.85rem; font-style: italic;">Silakan pilih instrumen terlebih dahulu.</p>
                                         </div>
                                         
-                                        <div id="schedule-error" class="validation-error-msg">Silakan pilih satu jadwal belajar.</div>
+                                        <div id="schedule-error" class="validation-error-msg">Silakan pilih minimal satu jadwal belajar.</div>
                                     </div>
                                 </div>
 
@@ -927,6 +928,41 @@
         };
 
         const validateStep = (stepNumber) => {
+            if (stepNumber === 2) {
+                const checkedSchedules = document.querySelectorAll('input[name="schedule_ids[]"]:checked');
+                if (checkedSchedules.length === 0) {
+                    if (scheduleError) {
+                        scheduleError.style.display = 'block';
+                        scheduleError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    return false;
+                }
+
+                const startDateInput = document.getElementById('start_date_input');
+                if (startDateInput && startDateInput.value) {
+                    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                    const dateObj = new Date(startDateInput.value);
+                    const startDayName = days[dateObj.getDay()];
+                    
+                    let matchFound = false;
+                    checkedSchedules.forEach(chk => {
+                        if (chk.dataset.label.startsWith(startDayName)) matchFound = true;
+                    });
+                    
+                    const err = document.getElementById('start-date-error');
+                    if (!matchFound) {
+                        if (err) {
+                            err.textContent = `Tanggal mulai Anda adalah hari ${startDayName}, tetapi Anda tidak memilih jadwal di hari ${startDayName}.`;
+                            err.style.display = 'block';
+                            err.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                        return false;
+                    } else {
+                        if (err) err.style.display = 'none';
+                    }
+                }
+            }
+
             const panel = getStepPanel(stepNumber);
             const fields = getPanelInputs(panel).filter((field) => {
                 if (field.disabled || field.type === 'hidden') return false;
@@ -1098,7 +1134,6 @@
         setStep(1);
 
         const classSelect = document.querySelector('select[name="class_id"]');
-        const startDateInput = document.querySelector('input[name="start_date"]');
         const teacherSelectField = document.getElementById('teacher-selection-field');
         const teacherSelect = document.getElementById('teacher-select');
         const favoriteSongField = document.getElementById('favorite-song-field');
@@ -1108,15 +1143,10 @@
         const selectedPreview = document.getElementById('selected-preview');
         const selectedTags = document.getElementById('selected-tags');
         const scheduleError = document.getElementById('schedule-error');
+        const oldScheduleIds = @json(array_map('strval', old('schedule_ids', [])));
 
         let allSchedulesData = {}; // Stores the raw grouped data from server
-
-        const getIndonesianDay = (dateString) => {
-            if (!dateString) return null;
-            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-            const date = new Date(dateString);
-            return days[date.getDay()];
-        };
+        let shouldRestoreOldSchedules = oldScheduleIds.length > 0;
 
         const resetSelection = () => {
             document.querySelectorAll('input[name="schedule_ids[]"]:checked').forEach(i => i.checked = false);
@@ -1126,6 +1156,13 @@
         const updateSelectedPreview = () => {
             const checkedItems = Array.from(document.querySelectorAll('input[name="schedule_ids[]"]:checked'));
             
+            const startDateInput = document.getElementById('start_date_input');
+            let startDayName = '';
+            if (startDateInput && startDateInput.value) {
+                const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                startDayName = days[new Date(startDateInput.value).getDay()];
+            }
+            
             if (checkedItems.length === 0) {
                 if (selectedPreview) selectedPreview.style.display = 'none';
                 if (selectedTags) selectedTags.innerHTML = '';
@@ -1134,14 +1171,30 @@
 
             if (selectedPreview) selectedPreview.style.display = 'block';
             if (selectedTags) {
-                selectedTags.innerHTML = checkedItems.map(item => `
-                    <span class="selected-tag">
-                        ${item.dataset.label}
+                selectedTags.innerHTML = checkedItems.map(item => {
+                    const isFirst = startDayName && item.dataset.label.startsWith(startDayName);
+                    return `
+                    <span class="selected-tag" ${isFirst ? 'style="background: #059669;" title="Jadwal pertemuan pertama"' : ''}>
+                        ${item.dataset.label} ${isFirst ? '⭐ (Start)' : ''}
                         <svg onclick="const target = document.querySelector('input[name=\\'schedule_ids[]\\'][value=\\'${item.value}\\']'); if(target){target.checked = false; target.dispatchEvent(new Event(\\'change\\'));}" style="cursor:pointer; width:14px; height:14px" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </span>
-                `).join('');
+                    `;
+                }).join('');
+            }
+            
+            // Check matching error live
+            const err = document.getElementById('start-date-error');
+            if (startDayName && err) {
+                let matchFound = false;
+                checkedItems.forEach(chk => { if (chk.dataset.label.startsWith(startDayName)) matchFound = true; });
+                if (!matchFound) {
+                    err.textContent = `Peringatan: Tanggal mulai Anda hari ${startDayName}, pastikan Anda memilih setidaknya satu jam di hari ${startDayName}.`;
+                    err.style.display = 'block';
+                } else {
+                    err.style.display = 'none';
+                }
             }
             
             // Update confirmation text
@@ -1151,18 +1204,16 @@
             if (scheduleError) scheduleError.style.display = 'none';
         };
 
+        const startDateInput = document.getElementById('start_date_input');
+        if (startDateInput) {
+            startDateInput.addEventListener('change', updateSelectedPreview);
+        }
+
         const renderSchedules = () => {
             const filterTeacherId = teacherSelect?.value;
-            const filterDay = getIndonesianDay(startDateInput?.value);
 
             if (Object.keys(allSchedulesData).length === 0) {
                 scheduleContainer.innerHTML = '<p class="text-danger" style="padding: 1rem; font-size: 0.85rem;">Tidak ada jadwal tersedia untuk instrumen ini.</p>';
-                return;
-            }
-
-            // If Date is not selected yet, show a prompt
-            if (!filterDay) {
-                scheduleContainer.innerHTML = '<p class="text-primary" style="padding: 1rem; font-size: 0.85rem; font-style: italic; display: flex; align-items: center; gap: 0.5rem;"><svg style="width:18px;height:18px" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Silakan pilih tanggal mulai belajar untuk melihat jadwal yang tersedia.</p>';
                 return;
             }
 
@@ -1171,9 +1222,6 @@
             let foundAny = false;
 
             for (const day in allSchedulesData) {
-                // Filter by Day if selected
-                if (filterDay && day !== filterDay) continue;
-
                 const schedules = allSchedulesData[day].filter(s => !filterTeacherId || String(s.teacher_id) === String(filterTeacherId));
                 
                 if (schedules.length === 0) continue;
@@ -1192,9 +1240,10 @@
                             <div class="schedule-options">
                                 ${schedules.map(s => {
                                     const isBooked = String(s.status).toLowerCase() === 'booked';
+                                    const isOldSelected = shouldRestoreOldSchedules && oldScheduleIds.includes(String(s.id));
                                     return `
                                         <label class="schedule-opt ${isBooked ? 'is-booked' : ''}">
-                                            <input type="checkbox" name="schedule_ids[]" value="${s.id}" data-label="${day} ${s.time} (${s.teacher_name})" ${isBooked ? 'disabled' : ''}>
+                                            <input type="checkbox" name="schedule_ids[]" value="${s.id}" data-label="${day} ${s.time} (${s.teacher_name})" ${isOldSelected ? 'checked' : ''} ${isBooked ? 'disabled' : ''}>
                                             <div class="schedule-time">${s.time}</div>
                                             ${isBooked ? '<div class="schedule-status">(Full)</div>' : ''}
                                         </label>
@@ -1208,8 +1257,7 @@
             }
 
             if (!foundAny) {
-                const dayMsg = filterDay ? ` pada hari ${filterDay}` : '';
-                scheduleContainer.innerHTML = `<p class="text-warning" style="padding: 1rem; font-size: 0.85rem;">Tidak ada jadwal tersedia${dayMsg} untuk kriteria yang dipilih.</p>`;
+                scheduleContainer.innerHTML = '<p class="text-warning" style="padding: 1rem; font-size: 0.85rem;">Tidak ada jadwal tersedia untuk kriteria yang dipilih.</p>';
             } else {
                 scheduleContainer.innerHTML = html;
                 
@@ -1224,6 +1272,7 @@
                 });
 
                 scheduleContainer.querySelectorAll('input[name="schedule_ids[]"]').forEach(checkbox => {
+                    checkbox.closest('.schedule-opt')?.classList.toggle('is-selected', checkbox.checked);
                     checkbox.addEventListener('change', () => {
                         const opt = checkbox.closest('.schedule-opt');
                         if (checkbox.checked) {
@@ -1234,6 +1283,9 @@
                         updateSelectedPreview();
                     });
                 });
+
+                updateSelectedPreview();
+                shouldRestoreOldSchedules = false;
             }
         };
 
@@ -1294,24 +1346,8 @@
             resetSelection();
             renderSchedules();
         });
-        startDateInput?.addEventListener('change', renderSchedules);
         classSelect?.addEventListener('change', loadSchedules);
 
-        // Update validateStep to include schedule check
-        const originalValidateStep = validateStep;
-        window.validateStep = (stepNumber) => {
-            if (stepNumber === 2) {
-                const checked = document.querySelectorAll('input[name="schedule_ids[]"]:checked');
-                if (checked.length === 0) {
-                    if (scheduleError) {
-                        scheduleError.style.display = 'block';
-                        scheduleError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                    return false;
-                }
-            }
-            return originalValidateStep(stepNumber);
-        };
     });
 </script>
 @endsection

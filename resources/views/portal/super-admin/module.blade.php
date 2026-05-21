@@ -2571,7 +2571,7 @@
                                                         </div>
                                                         <small style="color: #64748b; display: block; margin-top: 0.5rem;">Klik slot Jumat dan Sabtu untuk membuat double time. Slot yang sudah dipakai siswa lain akan dikunci.</small>
                                                     </div>
-                                                    <label>Mulai Kursus <input type="date" name="start_date" value="{{ $student->start_date }}"></label>
+                                                    <label>Mulai Kursus <input type="date" name="start_date" class="edit-start-date" value="{{ $student->start_date }}"></label>
                                                     <label>Durasi (Bulan) <input type="number" name="duration_months" value="{{ $student->duration_months }}"></label>
                                                     <label>Status
                                                         <select name="is_active" required>
@@ -4227,6 +4227,76 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Edit Student Start Date vs Schedule Validation
+    document.addEventListener('change', function(e) {
+        if (e.target.matches('.edit-start-date') || e.target.matches('input[name="schedule_ids[]"]')) {
+            const form = e.target.closest('form');
+            if (!form || !form.classList.contains('registration-edit-form')) return;
+            
+            const dateInput = form.querySelector('.edit-start-date');
+            const checkedItems = Array.from(form.querySelectorAll('input[name="schedule_ids[]"]:checked'));
+            
+            let startDayName = '';
+            if (dateInput && dateInput.value) {
+                const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                startDayName = days[new Date(dateInput.value).getDay()];
+            }
+            
+            // Remove old stars and styles
+            form.querySelectorAll('.reg-slot-card').forEach(card => {
+                card.style.borderColor = '';
+                card.style.backgroundColor = '';
+                const existingStar = card.querySelector('.start-star-indicator');
+                if (existingStar) existingStar.remove();
+            });
+            
+            let err = form.querySelector('.edit-start-date-error');
+            if (!err && dateInput) {
+                err = document.createElement('div');
+                err.className = 'edit-start-date-error validation-error-msg';
+                err.style.cssText = 'display:none; color:#ef4444; font-size:0.75rem; margin-top:0.4rem; font-weight:normal; line-height:1.2;';
+                dateInput.parentNode.appendChild(err);
+            }
+
+            if (startDayName && checkedItems.length > 0) {
+                let matchFound = false;
+                checkedItems.forEach(chk => {
+                    const dayHeader = chk.closest('.reg-day-group').querySelector('.reg-day-header').textContent.trim();
+                    if (dayHeader === startDayName) {
+                        matchFound = true;
+                        // Add star
+                        const card = chk.closest('.reg-slot-card');
+                        card.style.borderColor = '#059669';
+                        card.style.backgroundColor = '#ecfdf5';
+                        if (!card.querySelector('.start-star-indicator')) {
+                            const star = document.createElement('div');
+                            star.className = 'start-star-indicator';
+                            star.style.cssText = 'position:absolute; top:-8px; right:-8px; background:#059669; color:#fff; font-size:0.65rem; font-weight:bold; padding:2px 6px; border-radius:9px; z-index:10; box-shadow:0 1px 2px rgba(0,0,0,0.1);';
+                            star.innerHTML = '⭐ Start';
+                            card.style.position = 'relative';
+                            card.appendChild(star);
+                        }
+                    }
+                });
+                
+                if (!matchFound) {
+                    if (err) {
+                        err.textContent = `Peringatan: Tanggal mulai Anda hari ${startDayName}, pastikan Anda memilih jadwal di hari tersebut.`;
+                        err.style.display = 'block';
+                    }
+                } else {
+                    if (err) err.style.display = 'none';
+                }
+            } else {
+                if (err) err.style.display = 'none';
+            }
+        }
+    });
+    
+    // Trigger initial check for all forms
+    document.querySelectorAll('.edit-start-date').forEach(input => {
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
 
 });
 
@@ -4270,7 +4340,7 @@ async function loadAdminSchedules(classId) {
                                 const isBooked = String(s.status).toLowerCase() === 'booked';
                                 return `
                                     <label style="position: relative; display: flex; flex-direction: column; align-items: center; padding: 0.75rem 0.5rem; border: 1.5px solid ${isBooked ? '#e2e8f0' : '#e2e8f0'}; border-radius: 0.75rem; background: ${isBooked ? '#f1f5f9' : '#fff'}; cursor: ${isBooked ? 'not-allowed' : 'pointer'}; transition: all 0.2s; opacity: ${isBooked ? '0.6' : '1'};">
-                                        <input type="radio" name="schedule_id" value="${s.id}" data-label="${day} ${s.time}" ${isBooked ? 'disabled' : ''} onchange="updateAdminSelectedPreview(this)" style="position: absolute; opacity: 0; inset: 0;">
+                                        <input type="checkbox" name="schedule_ids[]" value="${s.id}" data-label="${day} ${s.time}" ${isBooked ? 'disabled' : ''} onchange="updateAdminSelectedPreview()" style="position: absolute; opacity: 0; inset: 0;">
                                         <span style="font-size: 0.9rem; font-weight: 700; color: #334155;">${s.time}</span>
                                         ${isBooked ? '<span style="font-size: 0.7rem; color: #ef4444; font-weight: 700;">Full</span>' : ''}
                                     </label>
@@ -4291,9 +4361,14 @@ async function loadAdminSchedules(classId) {
         style.textContent = `
             .admin-accordion-item.is-active .admin-accordion-content { display: block !important; }
             .admin-accordion-item.is-active i[data-lucide="chevron-down"] { transform: rotate(180deg); }
-            label:has(input[type="radio"]:checked) { border-color: #6366f1 !important; background: #eff6ff !important; box-shadow: 0 0 0 1px #6366f1; }
+            label:has(input[type="checkbox"]:checked) { border-color: #6366f1 !important; background: #eff6ff !important; box-shadow: 0 0 0 1px #6366f1; }
         `;
         document.head.appendChild(style);
+
+        const startDateInput = document.getElementById('start_date');
+        if (startDateInput) {
+            startDateInput.addEventListener('change', updateAdminSelectedPreview);
+        }
 
     } catch (error) {
         console.error(error);
@@ -4301,22 +4376,54 @@ async function loadAdminSchedules(classId) {
     }
 }
 
-function updateAdminSelectedPreview(radio) {
+function updateAdminSelectedPreview() {
+    const checkedItems = Array.from(document.querySelectorAll('#admin-schedule-container input[name="schedule_ids[]"]:checked'));
     const preview = document.getElementById('admin-selected-preview');
     const tags = document.getElementById('admin-selected-tags');
     
-    if (radio.checked) {
+    const startDateInput = document.getElementById('start_date');
+    let startDayName = '';
+    if (startDateInput && startDateInput.value) {
+        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        startDayName = days[new Date(startDateInput.value).getDay()];
+    }
+
+    if (checkedItems.length > 0) {
         preview.style.display = 'block';
-        tags.innerHTML = `
-            <span style="display: inline-flex; align-items: center; gap: 0.5rem; background: #6366f1; color: #fff; padding: 0.4rem 0.8rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600;">
-                ${radio.dataset.label}
-                <i data-lucide="x" onclick="document.querySelector('input[name=\\'schedule_id\\'][value=\\'${radio.value}\\']').checked = false; updateAdminSelectedPreview({checked:false});" style="width: 14px; height: 14px; cursor: pointer;"></i>
+        tags.innerHTML = checkedItems.map(radio => {
+            const isFirst = startDayName && radio.dataset.label.startsWith(startDayName);
+            const bgColor = isFirst ? '#059669' : '#6366f1';
+            return `
+            <span style="display: inline-flex; align-items: center; gap: 0.5rem; background: ${bgColor}; color: #fff; padding: 0.4rem 0.8rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600;" ${isFirst ? 'title="Jadwal pertemuan pertama"' : ''}>
+                ${radio.dataset.label} ${isFirst ? '⭐ (Start)' : ''}
+                <i data-lucide="x" onclick="const tgt=document.querySelector('#admin-schedule-container input[name=\\'schedule_ids[]\\'][value=\\'${radio.value}\\']'); if(tgt){tgt.checked = false; tgt.dispatchEvent(new Event(\\'change\\'));}" style="width: 14px; height: 14px; cursor: pointer;"></i>
             </span>
-        `;
+            `;
+        }).join('');
         if (window.lucide) window.lucide.createIcons();
     } else {
         preview.style.display = 'none';
         tags.innerHTML = '';
+    }
+
+    let err = document.getElementById('admin-start-date-error');
+    if (!err && startDateInput) {
+        err = document.createElement('div');
+        err.id = 'admin-start-date-error';
+        err.className = 'validation-error-msg';
+        err.style.cssText = 'display:none; color:#ef4444; font-size:0.75rem; margin-top:0.4rem;';
+        startDateInput.parentNode.appendChild(err);
+    }
+    
+    if (startDayName && err) {
+        let matchFound = false;
+        checkedItems.forEach(chk => { if (chk.dataset.label.startsWith(startDayName)) matchFound = true; });
+        if (!matchFound && checkedItems.length > 0) {
+            err.textContent = `Peringatan: Tanggal mulai Anda hari ${startDayName}, pastikan Anda memilih setidaknya satu jam di hari ${startDayName}.`;
+            err.style.display = 'block';
+        } else {
+            err.style.display = 'none';
+        }
     }
 }
 
