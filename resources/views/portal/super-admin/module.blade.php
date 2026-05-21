@@ -90,7 +90,99 @@
     .table-wrap table td.col-address {
         white-space: normal;
         max-width: 250px;
-        word-break: break-word;
+        word-break: normal;
+        overflow-wrap: break-word;
+    }
+
+    .teacher-table-wrap {
+        overflow-x: auto;
+    }
+
+    .teacher-table {
+        width: 100%;
+        min-width: 0;
+        table-layout: fixed !important;
+    }
+
+    .teacher-table th,
+    .teacher-table td {
+        padding-left: 0.55rem !important;
+        padding-right: 0.55rem !important;
+        font-size: 0.76rem !important;
+    }
+
+    .teacher-table th {
+        font-size: 0.68rem !important;
+        letter-spacing: 0.02em !important;
+    }
+
+    .teacher-table th:nth-child(1),
+    .teacher-table td:nth-child(1) { width: 15%; }
+
+    .teacher-table th:nth-child(2),
+    .teacher-table td:nth-child(2) { width: 18%; }
+
+    .teacher-table th:nth-child(3),
+    .teacher-table td:nth-child(3) { width: 12%; }
+
+    .teacher-table th:nth-child(4),
+    .teacher-table td:nth-child(4) {
+        width: 17%;
+        min-width: 0;
+    }
+
+    .teacher-table th:nth-child(5),
+    .teacher-table td:nth-child(5) { width: 11%; }
+
+    .teacher-table th:nth-child(6),
+    .teacher-table td:nth-child(6) { width: 7%; }
+
+    .teacher-table th:nth-child(7),
+    .teacher-table td:nth-child(7) {
+        width: 8%;
+        padding-right: 0.65rem !important;
+    }
+
+    .teacher-table th:nth-child(8),
+    .teacher-table td:nth-child(8) {
+        width: 108px !important;
+        min-width: 108px !important;
+        padding-left: 0.45rem !important;
+        padding-right: 0.45rem !important;
+        overflow: visible;
+    }
+
+    .teacher-table th:nth-child(8) {
+        text-align: center !important;
+    }
+
+    .teacher-table td:nth-child(8) .action-icons {
+        justify-content: center;
+        gap: 0.3rem;
+    }
+
+    .teacher-table td:not(.col-address):not(:last-child) {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .teacher-table .col-address,
+    .teacher-table td:nth-child(7) {
+        max-width: none !important;
+        white-space: nowrap !important;
+        word-break: normal !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .teacher-address-preview,
+    .teacher-class-preview {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100%;
+        line-height: 1.5;
     }
 
     .table-wrap table tbody tr:last-child td {
@@ -1529,15 +1621,62 @@
     </div>
 
     <section class="card" data-searchable>
-        <div class="card-header-flex">
+        <div class="card-header-flex" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <h3>Daftar Guru</h3>
-            <button type="button" class="btn-add-student" onclick="openTeacherModal()">
-                <i data-lucide="user-plus"></i>
-                Tambah Teacher Baru
-            </button>
+            <div style="display: flex; align-items: center; gap: 1rem; flex: 1; justify-content: flex-end;">
+                <div class="search-box" style="position: relative; max-width: 300px; width: 100%;">
+                    <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 18px; height: 18px;"></i>
+                    <input type="text" id="teacherSearchInput" placeholder="Cari nama guru..." style="width: 100%; padding: 0.6rem 1rem 0.6rem 2.5rem; border: 1px solid #e2e8f0; border-radius: 0.75rem; font-size: 0.85rem; color: #1e293b; background: #f8fafc; transition: all 0.3s ease; box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.02);" onfocus="this.style.background='#ffffff'; this.style.borderColor='#6366f1'; this.style.boxShadow='0 0 0 3px rgba(99, 102, 241, 0.1)';" onblur="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='inset 0 2px 4px 0 rgba(0,0,0,0.02)';">
+                </div>
+                <button type="button" class="btn-add-student" onclick="openTeacherModal()">
+                    <i data-lucide="user-plus"></i>
+                    Tambah Teacher Baru
+                </button>
+            </div>
         </div>
-        <div class="table-wrap">
-            <table>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const searchInput = document.getElementById('teacherSearchInput');
+                if (!searchInput) return;
+
+                searchInput.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase().trim();
+                    const table = this.closest('section').querySelector('table tbody');
+                    if (!table) return;
+
+                    const emptyMsg = table.querySelector('.teacher-search-empty-msg');
+                    if (emptyMsg) emptyMsg.remove();
+
+                    let hasVisibleRow = false;
+                    table.querySelectorAll('tr').forEach(row => {
+                        if (row.classList.contains('teacher-search-empty-msg')) return;
+
+                        const nameCell = row.querySelector('td[data-label="Nama"]');
+                        if (!nameCell) return;
+
+                        const rowText = row.textContent.toLowerCase();
+                        const isMatch = !searchTerm || rowText.includes(searchTerm);
+                        row.style.display = isMatch ? '' : 'none';
+                        if (isMatch) hasVisibleRow = true;
+                    });
+
+                    if (!hasVisibleRow && searchTerm) {
+                        const tr = document.createElement('tr');
+                        tr.className = 'teacher-search-empty-msg';
+                        tr.innerHTML = `<td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;">
+                            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
+                                <i data-lucide="search-x" style="width: 32px; height: 32px; color: #cbd5e1;"></i>
+                                <span>Tidak ada guru yang cocok dengan pencarian "<b>${e.target.value}</b>"</span>
+                            </div>
+                        </td>`;
+                        table.appendChild(tr);
+                        if (window.lucide) window.lucide.createIcons();
+                    }
+                });
+            });
+        </script>
+        <div class="table-wrap teacher-table-wrap">
+            <table class="teacher-table">
                 <thead>
                     <tr>
                         <th>Nama</th>
@@ -1556,10 +1695,16 @@
                             <td data-label="Nama">{{ $teacher->name }}</td>
                             <td data-label="Email">{{ $teacher->user?->email ?? '-' }}</td>
                             <td data-label="Nomor HP">{{ $teacher->phone ?? '-' }}</td>
-                            <td data-label="Alamat" class="col-address">{{ $teacher->address ?? '-' }}</td>
+                            <td data-label="Alamat" class="col-address">
+                                <span class="teacher-address-preview" title="{{ $teacher->address ?? '-' }}">{{ $teacher->address ?? '-' }}</span>
+                            </td>
                             <td data-label="Jenis Kelamin">{{ $teacher->gender ?? '-' }}</td>
                             <td data-label="Agama">{{ $teacher->religion ?? '-' }}</td>
-                            <td data-label="Class">{{ $teacher->musicClasses->pluck('name')->merge($teacher->classes->pluck('name'))->unique()->implode(', ') ?: '-' }}</td>
+                            <td data-label="Class">
+                                <span class="teacher-class-preview" title="{{ $teacher->musicClasses->pluck('name')->merge($teacher->classes->pluck('name'))->unique()->implode(', ') ?: '-' }}">
+                                    {{ $teacher->musicClasses->pluck('name')->merge($teacher->classes->pluck('name'))->unique()->implode(', ') ?: '-' }}
+                                </span>
+                            </td>
                             <td data-label="Aksi">
                                 <div class="action-icons">
                                     {{-- Detail Button --}}
@@ -4247,4 +4392,3 @@ window.filterRegSchedules = function(select, regId) {
     </div>
 </div>
 @endpush
-
