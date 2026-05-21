@@ -24,9 +24,11 @@
 
     .table-wrap:has(details.action-popover[open]),
     .portal-content:has(details.action-popover[open]),
+    .portal-content > *:has(details.action-popover[open]),
     .portal-main:has(details.action-popover[open]),
     .portal-shell:has(details.action-popover[open]) {
         transform: none !important;
+        animation: none !important;
         overflow: visible !important;
         min-height: 100vh !important;
     }
@@ -368,12 +370,12 @@
 
     details.action-popover[open] .action-popover-form {
         position: fixed !important;
-        top: 2vh !important;
+        top: 50% !important;
         left: 50% !important;
-        transform: translateX(-50%) !important;
+        transform: translate(-50%, -50%) !important;
         width: min(850px, 95vw) !important;
         height: auto !important;
-        max-height: 82vh !important;
+        max-height: calc(100dvh - 2rem) !important;
         background: #ffffff !important;
         border-radius: 1.5rem !important;
         z-index: 100001 !important;
@@ -387,8 +389,8 @@
     }
 
     @keyframes modalFadeIn {
-        from { opacity: 0; transform: translate(-50%, 10px) scale(0.98); }
-        to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+        from { opacity: 0; transform: translate(-50%, calc(-50% + 10px)) scale(0.98); }
+        to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     }
 
     .registration-modal-header {
@@ -4245,6 +4247,4 @@ window.filterRegSchedules = function(select, regId) {
     </div>
 </div>
 @endpush
-
-
 
