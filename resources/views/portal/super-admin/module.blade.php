@@ -1651,11 +1651,9 @@
                                             </footer>
                                         </div>
                                     </details>
-                                    <details class="action-popover" id="teacher-edit-{{ $teacher->id }}">
+                                    <details class="action-popover registration-style-popover" id="teacher-edit-{{ $teacher->id }}">
                                         <summary class="btn-icon" title="Edit" aria-label="Edit"><i data-lucide="pencil-line"></i></summary>
-                                        <form class="action-popover-form teacher-edit-modal" method="POST" enctype="multipart/form-data" action="{{ route($portal['prefix'] . '.teachers.update', $teacher) }}" id="teacher-edit-form-{{ $teacher->id }}" novalidate>
-                                            @csrf
-                                            @method('PUT')
+                                        <div class="action-popover-form registration-edit-form teacher-edit-modal">
                                             {{-- ─── HEADER ─── --}}
                                             <header class="registration-modal-header">
                                                 <div class="registration-modal-header-left">
@@ -1674,63 +1672,97 @@
 
                                             {{-- ─── BODY ─── --}}
                                             <div class="registration-modal-body">
-                                                <div class="module-form-grid">
-                                                    <label>Nama
-                                                        <input type="text" name="name" value="{{ $teacher->name }}" placeholder="Masukkan nama lengkap" required>
-                                                    </label>
-                                                    <label>Jenis Kelamin
-                                                        <select name="gender" required>
-                                                            <option value="" disabled>Pilih jenis kelamin</option>
-                                                            <option value="laki-laki" @selected($teacher->gender === 'laki-laki')>Laki-laki</option>
-                                                            <option value="perempuan" @selected($teacher->gender === 'perempuan')>Perempuan</option>
-                                                        </select>
-                                                    </label>
-                                                    <label>Email
-                                                        <input type="email" name="email" value="{{ $teacher->user?->email }}" placeholder="contoh@email.com" required>
-                                                    </label>
-                                                    <label>Agama
-                                                        <input type="text" name="religion" value="{{ $teacher->religion }}" placeholder="Masukkan agama" required>
-                                                    </label>
-                                                    <label>Nomor HP
-                                                        <input type="text" name="phone" value="{{ $teacher->phone }}" placeholder="08xxxxxxxxxx" required>
-                                                    </label>
-                                                    <label>Bidang / Instrumen
-                                                        <input type="text" name="instrument" value="{{ $teacher->instrument }}" placeholder="Drum, Piano, Vocal, dll">
-                                                    </label>
-                                                    <label>Assign Class (Pilih satu atau lebih)
-                                                        <select name="class_ids[]" multiple style="height: 100px;">
-                                                            @foreach ($classesForManagement as $classOption)
-                                                                <option value="{{ $classOption->id }}" @selected($teacher->musicClasses->contains($classOption->id) || $teacher->classes->contains($classOption->id))>{{ $classOption->name }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                        <small style="color: #64748b; font-size: 0.75rem;">Tahan Ctrl/Cmd untuk memilih lebih dari satu.</small>
-                                                    </label>
-                                                    <label>Password Baru (opsional)
-                                                        <input type="password" name="password" placeholder="Kosongkan jika tidak diganti">
-                                                    </label>
-                                                    <label>Upload Foto Profile
-                                                        <input type="file" name="photo" accept="image/*">
-                                                    </label>
-                                                    <label style="grid-column: span 2;">Upload KTP Guru
-                                                        <input type="file" name="ktp" accept="image/*">
-                                                        @if($teacher->ktp_path)
-                                                            <small style="color: #059669;">KTP sudah ada.</small>
+                                                <div class="registration-modal-summary">
+                                                    <div class="registration-modal-summary-left">
+                                                        @if($teacher->photo_path)
+                                                            <img src="{{ asset('storage/' . $teacher->photo_path) }}" class="registration-modal-avatar" style="object-fit: cover;" onclick="showLightbox(this.src)">
+                                                        @else
+                                                            <div class="registration-modal-avatar">
+                                                                {{ strtoupper(substr($teacher->name, 0, 1)) }}
+                                                            </div>
                                                         @endif
-                                                    </label>
-                                                    <label style="grid-column: span 2;">Alamat
-                                                        <textarea name="address" rows="3" placeholder="Masukkan alamat lengkap" required>{{ $teacher->address }}</textarea>
-                                                    </label>
+                                                        <div>
+                                                            <p>Nama Guru</p>
+                                                            <p class="registration-modal-summary-name">{{ $teacher->name }}</p>
+                                                        </div>
+                                                    </div>
+                                                    <x-ui.badge :type="$teacher->is_active ? 'success' : 'warning'">
+                                                        {{ $teacher->is_active ? 'ACTIVE' : 'INACTIVE' }}
+                                                    </x-ui.badge>
                                                 </div>
+
+                                                <form method="POST" enctype="multipart/form-data" action="{{ route($portal['prefix'] . '.teachers.update', $teacher) }}" id="teacher-edit-form-{{ $teacher->id }}" novalidate>
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <div class="registration-modal-grid">
+                                                        <div class="premium-field">
+                                                            <label>Nama</label>
+                                                            <input type="text" name="name" class="premium-input" value="{{ $teacher->name }}" placeholder="Masukkan nama lengkap" required>
+                                                        </div>
+                                                        <div class="premium-field">
+                                                            <label>Jenis Kelamin</label>
+                                                            <select name="gender" class="premium-select" required>
+                                                                <option value="" disabled>Pilih jenis kelamin</option>
+                                                                <option value="laki-laki" @selected($teacher->gender === 'laki-laki')>Laki-laki</option>
+                                                                <option value="perempuan" @selected($teacher->gender === 'perempuan')>Perempuan</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="premium-field">
+                                                            <label>Email</label>
+                                                            <input type="email" name="email" class="premium-input" value="{{ $teacher->user?->email }}" placeholder="contoh@email.com" required>
+                                                        </div>
+                                                        <div class="premium-field">
+                                                            <label>Agama</label>
+                                                            <input type="text" name="religion" class="premium-input" value="{{ $teacher->religion }}" placeholder="Masukkan agama" required>
+                                                        </div>
+                                                        <div class="premium-field">
+                                                            <label>Nomor HP</label>
+                                                            <input type="text" name="phone" class="premium-input" value="{{ $teacher->phone }}" placeholder="08xxxxxxxxxx" required>
+                                                        </div>
+                                                        <div class="premium-field">
+                                                            <label>Bidang / Instrumen</label>
+                                                            <input type="text" name="instrument" class="premium-input" value="{{ $teacher->instrument }}" placeholder="Drum, Piano, Vocal, dll">
+                                                        </div>
+                                                        <div class="premium-field">
+                                                            <label>Password Baru</label>
+                                                            <input type="password" name="password" class="premium-input" placeholder="(Opsional)">
+                                                        </div>
+                                                        <div class="premium-field">
+                                                            <label>Upload Foto</label>
+                                                            <input type="file" name="photo" class="premium-input" accept="image/*" style="padding: 0.3rem;">
+                                                        </div>
+                                                        <div class="premium-field">
+                                                            <label>Upload KTP</label>
+                                                            <input type="file" name="ktp" class="premium-input" accept="image/*" style="padding: 0.3rem;">
+                                                            @if($teacher->ktp_path)
+                                                                <small style="color: #059669; font-weight: 500;">Sudah ada.</small>
+                                                            @endif
+                                                        </div>
+                                                        <div class="premium-field registration-modal-item-full">
+                                                            <label>Assign Class (Pilih satu atau lebih)</label>
+                                                            <select name="class_ids[]" class="premium-select" multiple style="height: 90px;">
+                                                                @foreach ($classesForManagement as $classOption)
+                                                                    <option value="{{ $classOption->id }}" @selected($teacher->musicClasses->contains($classOption->id) || $teacher->classes->contains($classOption->id))>{{ $classOption->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                            <small style="color: #64748b; font-size: 0.75rem; margin-top: 0.25rem;">Tahan Ctrl/Cmd untuk memilih lebih dari satu.</small>
+                                                        </div>
+                                                        <div class="premium-field registration-modal-item-full">
+                                                            <label>Alamat</label>
+                                                            <textarea name="address" class="premium-textarea" rows="2" placeholder="Masukkan alamat lengkap" required>{{ $teacher->address }}</textarea>
+                                                        </div>
+                                                    </div>
+                                                </form>
                                             </div>
 
                                             {{-- ─── FOOTER ─── --}}
                                             <footer class="registration-modal-footer">
                                                 <button type="button" class="registration-modal-btn registration-modal-btn-secondary action-popover-close"><i data-lucide="x"></i> Batal</button>
-                                                <button type="submit" class="registration-modal-btn registration-modal-btn-primary">
+                                                <button type="submit" form="teacher-edit-form-{{ $teacher->id }}" class="registration-modal-btn registration-modal-btn-primary">
                                                     <i data-lucide="save"></i> Simpan Perubahan
                                                 </button>
                                             </footer>
-                                        </form>
+                                        </div>
                                     </details>
                                     <form class="delete-form" method="POST" action="{{ route($portal['prefix'] . '.teachers.destroy', $teacher) }}" onsubmit="return confirm('Hapus teacher ini?');">
                                         @csrf
@@ -1980,13 +2012,69 @@
 
 @if ($moduleKey === 'students')
     <section class="card" data-searchable>
-        <div class="card-header-flex">
+        <div class="card-header-flex" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <h3>Daftar Seluruh Siswa</h3>
-            <button type="button" class="btn-add-student" onclick="const modal = document.getElementById('modal-create-student'); if(modal) modal.style.display = 'flex';">
-                <i data-lucide="user-plus"></i>
-                Tambah Siswa Baru
-            </button>
+            <div style="display: flex; align-items: center; gap: 1rem; flex: 1; justify-content: flex-end;">
+                <div class="search-box" style="position: relative; max-width: 300px; width: 100%;">
+                    <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 18px; height: 18px;"></i>
+                    <input type="text" id="studentSearchInput" placeholder="Cari nama siswa..." style="width: 100%; padding: 0.6rem 1rem 0.6rem 2.5rem; border: 1px solid #e2e8f0; border-radius: 0.75rem; font-size: 0.85rem; color: #1e293b; background: #f8fafc; transition: all 0.3s ease; box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.02);" onfocus="this.style.background='#ffffff'; this.style.borderColor='#6366f1'; this.style.boxShadow='0 0 0 3px rgba(99, 102, 241, 0.1)';" onblur="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='inset 0 2px 4px 0 rgba(0,0,0,0.02)';">
+                </div>
+                <button type="button" class="btn-add-student" onclick="const modal = document.getElementById('modal-create-student'); if(modal) modal.style.display = 'flex';">
+                    <i data-lucide="user-plus"></i>
+                    Tambah Siswa Baru
+                </button>
+            </div>
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const searchInput = document.getElementById('studentSearchInput');
+                if (searchInput) {
+                    searchInput.addEventListener('input', function(e) {
+                        const searchTerm = e.target.value.toLowerCase();
+                        const table = this.closest('section').querySelector('table tbody');
+                        if (table) {
+                            const rows = table.querySelectorAll('tr');
+                            let hasVisibleRow = false;
+                            
+                            // Remove empty state message if it exists
+                            const emptyMsg = table.querySelector('.search-empty-msg');
+                            if (emptyMsg) emptyMsg.remove();
+
+                            rows.forEach(row => {
+                                // Ignore empty state rows that don't have data-label="Nama"
+                                const nameCell = row.querySelector('td[data-label="Nama"]');
+                                if (nameCell) {
+                                    const name = nameCell.textContent.toLowerCase();
+                                    if (name.includes(searchTerm)) {
+                                        row.style.display = '';
+                                        hasVisibleRow = true;
+                                    } else {
+                                        row.style.display = 'none';
+                                    }
+                                }
+                            });
+
+                            // Show "not found" message if no rows match
+                            if (!hasVisibleRow && searchTerm.trim() !== '') {
+                                const tr = document.createElement('tr');
+                                tr.className = 'search-empty-msg';
+                                tr.innerHTML = `<td colspan="6" style="text-align: center; padding: 2rem; color: #64748b;">
+                                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
+                                        <i data-lucide="search-x" style="width: 32px; height: 32px; color: #cbd5e1;"></i>
+                                        <span>Tidak ada siswa yang cocok dengan pencarian "<b>${e.target.value}</b>"</span>
+                                    </div>
+                                </td>`;
+                                table.appendChild(tr);
+                                if (window.lucide) {
+                                    window.lucide.createIcons();
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        </script>
         <div class="table-wrap">
             <table>
                 <thead>
