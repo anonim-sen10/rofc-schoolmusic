@@ -1736,7 +1736,7 @@
             <div style="display: flex; align-items: center; gap: 1rem; flex: 1; justify-content: flex-end;">
                 <div class="search-box" style="position: relative; max-width: 300px; width: 100%;">
                     <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 18px; height: 18px;"></i>
-                    <input type="text" id="teacherSearchInput" placeholder="Cari nama guru..." style="width: 100%; padding: 0.6rem 1rem 0.6rem 2.5rem; border: 1px solid #e2e8f0; border-radius: 0.75rem; font-size: 0.85rem; color: #1e293b; background: #f8fafc; transition: all 0.3s ease; box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.02);" onfocus="this.style.background='#ffffff'; this.style.borderColor='#6366f1'; this.style.boxShadow='0 0 0 3px rgba(99, 102, 241, 0.1)';" onblur="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='inset 0 2px 4px 0 rgba(0,0,0,0.02)';">
+                    <input type="text" id="teacherSearchInput" placeholder="Cari nama, class, telepon, email..." style="width: 100%; padding: 0.6rem 1rem 0.6rem 2.5rem; border: 1px solid #e2e8f0; border-radius: 0.75rem; font-size: 0.85rem; color: #1e293b; background: #f8fafc; transition: all 0.3s ease; box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.02);" onfocus="this.style.background='#ffffff'; this.style.borderColor='#6366f1'; this.style.boxShadow='0 0 0 3px rgba(99, 102, 241, 0.1)';" onblur="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='inset 0 2px 4px 0 rgba(0,0,0,0.02)';">
                 </div>
                 <button type="button" class="btn-add-student" onclick="openTeacherModal()">
                     <i data-lucide="user-plus"></i>
@@ -2278,7 +2278,7 @@
             <div style="display: flex; align-items: center; gap: 1rem; flex: 1; justify-content: flex-end;">
                 <div class="search-box" style="position: relative; max-width: 300px; width: 100%;">
                     <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 18px; height: 18px;"></i>
-                    <input type="text" id="studentSearchInput" placeholder="Cari nama siswa..." style="width: 100%; padding: 0.6rem 1rem 0.6rem 2.5rem; border: 1px solid #e2e8f0; border-radius: 0.75rem; font-size: 0.85rem; color: #1e293b; background: #f8fafc; transition: all 0.3s ease; box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.02);" onfocus="this.style.background='#ffffff'; this.style.borderColor='#6366f1'; this.style.boxShadow='0 0 0 3px rgba(99, 102, 241, 0.1)';" onblur="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='inset 0 2px 4px 0 rgba(0,0,0,0.02)';">
+                    <input type="text" id="studentSearchInput" placeholder="Cari nama, class, telepon, email..." style="width: 100%; padding: 0.6rem 1rem 0.6rem 2.5rem; border: 1px solid #e2e8f0; border-radius: 0.75rem; font-size: 0.85rem; color: #1e293b; background: #f8fafc; transition: all 0.3s ease; box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.02);" onfocus="this.style.background='#ffffff'; this.style.borderColor='#6366f1'; this.style.boxShadow='0 0 0 3px rgba(99, 102, 241, 0.1)';" onblur="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='inset 0 2px 4px 0 rgba(0,0,0,0.02)';">
                 </div>
                 <button type="button" class="btn-add-student" onclick="const modal = document.getElementById('modal-create-student'); if(modal) modal.style.display = 'flex';">
                     <i data-lucide="user-plus"></i>
@@ -2303,17 +2303,24 @@
                             if (emptyMsg) emptyMsg.remove();
 
                             rows.forEach(row => {
-                                // Ignore empty state rows that don't have data-label="Nama"
-                                const nameCell = row.querySelector('td[data-label="Nama"]');
-                                if (nameCell) {
-                                    const name = nameCell.textContent.toLowerCase();
-                                    if (name.includes(searchTerm)) {
-                                        row.style.display = '';
-                                        hasVisibleRow = true;
-                                    } else {
-                                        row.style.display = 'none';
-                                    }
-                                }
+                                if (row.classList.contains('search-empty-msg')) return;
+
+                                const searchableCells = [
+                                    row.querySelector('td[data-label="Nama"]'),
+                                    row.querySelector('td[data-label="Email"]'),
+                                    row.querySelector('td[data-label="Telepon"]'),
+                                    row.querySelector('td[data-label="Kelas"]'),
+                                ].filter(Boolean);
+
+                                if (searchableCells.length === 0) return;
+
+                                const rowText = searchableCells
+                                    .map(cell => cell.textContent.toLowerCase())
+                                    .join(' ');
+                                const isMatch = !searchTerm.trim() || rowText.includes(searchTerm.trim());
+
+                                row.style.display = isMatch ? '' : 'none';
+                                if (isMatch) hasVisibleRow = true;
                             });
 
                             // Show "not found" message if no rows match
