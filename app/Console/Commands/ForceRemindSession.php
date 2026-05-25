@@ -88,16 +88,17 @@ class ForceRemindSession extends Command
         $timeFormatted = \Carbon\Carbon::parse($session->time)->format('H:i');
         $dateFormatted = \Carbon\Carbon::parse($session->session_date)->locale('id')->isoFormat('dddd, D MMMM YYYY');
 
-        $message = "🔔 *PENGINGAT KELAS (MANUAL) - ROFC MUSIC SCHOOL* 🔔\n\n";
-        $message .= "Halo *Coach {$teacher->name}*,\n\n";
-        $message .= "Ini adalah pesan pengingat manual bahwa Anda memiliki sesi kelas pada:\n\n";
-        $message .= "Siswa: *{$studentName}*\n";
-        $message .= "Kelas: *{$className}*\n";
-        $message .= "Tanggal: *{$dateFormatted}*\n";
+        $teacherName = $teacher->name;
+
+        $message = "📢 *INFO JADWAL KELAS ROFC MUSIC*\n\n";
+        $message .= "Mohon perhatian kepada instruktur yang bertugas hari ini:\n\n";
+        $message .= "🎸 *Coach {$teacherName}*\n";
+        $message .= "Siswa: {$studentName}\n";
+        $message .= "Kelas: {$className}\n";
         $message .= "Jam: *{$timeFormatted} WIB*\n\n";
-        $message .= "_Harap segera berkoordinasi dengan siswa jika ada penyesuaian waktu. Jangan lupa mengisi kehadiran (Mark Attendance) setelah kelas selesai. Semangat! 🔥_\n\n";
+        $message .= "_Sesi akan segera dimulai. Jangan lupa untuk bersiap dan mengisi kehadiran (Mark Attendance) setelah kelas selesai. Semangat! 🔥_\n\n";
         $message .= "🔗 *Link Login Portal Guru:*\n";
-        $message .= url('/login');
+        $message .= url('/login') . "\n";
 
         $fonnteToken = env('FONNTE_TOKEN');
         $groupId = env('FONNTE_GROUP_ID');
