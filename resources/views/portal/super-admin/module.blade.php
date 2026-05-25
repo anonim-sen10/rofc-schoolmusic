@@ -4301,13 +4301,105 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Dynamic Schedule Loader for Admin Create Student Modal
-async function loadAdminSchedules(classId) {
+let adminAllSchedulesData = {};
+
+function renderAdminSchedules() {
     const container = document.getElementById('admin-schedule-container');
+    const teacherSelect = document.getElementById('admin-teacher-select');
+    const filterTeacherId = teacherSelect?.value;
+
+    if (Object.keys(adminAllSchedulesData).length === 0) {
+        container.innerHTML = '<p style="padding: 1.5rem; color: #ef4444; font-size: 0.9rem; text-align: center;">Tidak ada jadwal tersedia untuk instrumen ini.</p>';
+        return;
+    }
+
+    let html = '';
+    let foundAny = false;
+
+    for (const day in adminAllSchedulesData) {
+        const schedules = adminAllSchedulesData[day].filter(s => !filterTeacherId || String(s.teacher_id) === String(filterTeacherId));
+        
+        if (schedules.length === 0) continue;
+        foundAny = true;
+
+        const isActive = 'is-active';
+        html += `
+            <div class="accordion-item ${isActive}" style="border-bottom: 1px solid #e2e8f0;">
+                <button type="button" class="accordion-header" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0.9rem 1.1rem; background: #fff; border: 0; cursor: pointer; text-align: left; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
+                    <h4 style="margin: 0; font-size: 0.9rem; font-weight: 600; color: #1e293b;">${day}</h4>
+                    <svg class="accordion-icon" style="width: 1.2rem; height: 1.2rem; transition: transform 0.3s ease;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                <div class="accordion-content" style="background: #fcfdfe;">
+                    <div class="schedule-options" style="padding: 1rem 1.1rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.6rem;">
+                        ${schedules.map(s => {
+                            const isBooked = String(s.status).toLowerCase() === 'booked';
+                            return `
+                                <label class="schedule-opt ${isBooked ? 'is-booked' : ''}" style="position: relative; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 0.2rem; padding: 0.6rem 0.8rem; border: 1px solid ${isBooked ? '#e2e8f0' : '#e2e8f0'}; border-radius: 0.6rem; background: ${isBooked ? '#f1f5f9' : '#fff'}; cursor: ${isBooked ? 'not-allowed' : 'pointer'}; transition: all 0.2s; opacity: ${isBooked ? '0.7' : '1'};">
+                                    <input type="checkbox" name="schedule_ids[]" value="${s.id}" data-label="${day} ${s.time} (${s.teacher_name})" ${isBooked ? 'disabled' : ''} style="position: absolute; opacity: 0; cursor: pointer; width: 0; height: 0;">
+                                    <div class="schedule-time" style="font-size: 0.85rem; font-weight: 600; color: #334155;">${s.time}</div>
+                                    ${isBooked ? '<div class="schedule-status" style="font-size: 0.7rem; color: #ef4444; font-weight: 700;">(Full)</div>' : `<div style="font-size: 0.7rem; color: #64748b; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${s.teacher_name}</div>`}
+                                </label>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    if (!foundAny) {
+        container.innerHTML = '<p style="padding: 1.5rem; color: #eab308; font-size: 0.9rem; text-align: center;">Tidak ada jadwal tersedia untuk kriteria yang dipilih.</p>';
+    } else {
+        container.innerHTML = html;
+        
+        container.querySelectorAll('.accordion-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const item = header.parentElement;
+                const wasActive = item.classList.contains('is-active');
+                container.querySelectorAll('.accordion-item').forEach(i => i.classList.remove('is-active'));
+                if (!wasActive) item.classList.add('is-active');
+            });
+        });
+
+        container.querySelectorAll('input[name="schedule_ids[]"]').forEach(checkbox => {
+            checkbox.closest('.schedule-opt')?.classList.toggle('is-selected', checkbox.checked);
+            checkbox.addEventListener('change', () => {
+                const opt = checkbox.closest('.schedule-opt');
+                if (checkbox.checked) {
+                    opt.classList.add('is-selected');
+                    opt.style.borderColor = '#2563eb';
+                    opt.style.background = '#eff6ff';
+                    opt.style.boxShadow = '0 0 0 1px #2563eb';
+                } else {
+                    opt.classList.remove('is-selected');
+                    opt.style.borderColor = '#e2e8f0';
+                    opt.style.background = '#fff';
+                    opt.style.boxShadow = 'none';
+                }
+                updateAdminSelectedPreview();
+            });
+        });
+
+        updateAdminSelectedPreview();
+    }
+}
+
+async function loadAdminSchedules() {
+    const classId = document.getElementById('admin_class_id').value;
+    const container = document.getElementById('admin-schedule-container');
+    const teacherSelectField = document.getElementById('admin-teacher-selection-field');
+    const teacherSelect = document.getElementById('admin-teacher-select');
     const preview = document.getElementById('admin-selected-preview');
-    const tags = document.getElementById('admin-selected-tags');
     
+    const checked = document.querySelectorAll('#admin-schedule-container input[name="schedule_ids[]"]:checked');
+    checked.forEach(i => i.checked = false);
+    updateAdminSelectedPreview();
+
     if (!classId) {
         container.innerHTML = '<p style="padding: 1.5rem; color: #64748b; font-size: 0.9rem; font-style: italic; text-align: center;">Silakan pilih instrumen terlebih dahulu.</p>';
+        teacherSelectField.style.display = 'none';
         preview.style.display = 'none';
         return;
     }
@@ -4317,53 +4409,41 @@ async function loadAdminSchedules(classId) {
     try {
         const response = await fetch(`/schedules/by-class/${classId}`);
         const data = await response.json();
-        const grouped = data.grouped || {};
+        adminAllSchedulesData = data.grouped || {};
 
-        if (Object.keys(grouped).length === 0) {
-            container.innerHTML = '<p style="padding: 1.5rem; color: #ef4444; font-size: 0.9rem; text-align: center;">Tidak ada jadwal tersedia untuk instrumen ini.</p>';
-            return;
+        const teachers = [];
+        const seenTeacherIds = new Set();
+        
+        Object.values(adminAllSchedulesData).flat().forEach(s => {
+            if (!seenTeacherIds.has(s.teacher_id)) {
+                seenTeacherIds.add(s.teacher_id);
+                teachers.push({ id: s.teacher_id, name: s.teacher_name });
+            }
+        });
+
+        if (teachers.length > 1) {
+            teacherSelectField.style.display = 'block';
+            teacherSelect.innerHTML = '<option value="">Pilih Guru</option>' + 
+                teachers.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+        } else {
+            teacherSelectField.style.display = 'none';
+            teacherSelect.innerHTML = '';
         }
 
-        let html = '<div class="admin-schedule-accordion">';
-        let index = 0;
-        for (const day in grouped) {
-            const isActive = index === 0 ? 'is-active' : '';
-            html += `
-                <div class="admin-accordion-item ${isActive}" style="border-bottom: 1px solid #e2e8f0;">
-                    <button type="button" onclick="this.parentElement.classList.toggle('is-active')" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; background: #fff; border: 0; cursor: pointer; text-align: left;">
-                        <span style="font-weight: 700; color: #1e293b;">${day}</span>
-                        <i data-lucide="chevron-down" style="width: 1.25rem; height: 1.25rem; transition: transform 0.2s;"></i>
-                    </button>
-                    <div class="admin-accordion-content" style="display: none; padding: 0.75rem 1rem 1.25rem; background: #f8fafc;">
-                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.5rem;">
-                            ${grouped[day].map(s => {
-                                const isBooked = String(s.status).toLowerCase() === 'booked';
-                                return `
-                                    <label style="position: relative; display: flex; flex-direction: column; align-items: center; padding: 0.75rem 0.5rem; border: 1.5px solid ${isBooked ? '#e2e8f0' : '#e2e8f0'}; border-radius: 0.75rem; background: ${isBooked ? '#f1f5f9' : '#fff'}; cursor: ${isBooked ? 'not-allowed' : 'pointer'}; transition: all 0.2s; opacity: ${isBooked ? '0.6' : '1'};">
-                                        <input type="checkbox" name="schedule_ids[]" value="${s.id}" data-label="${day} ${s.time}" ${isBooked ? 'disabled' : ''} onchange="updateAdminSelectedPreview()" style="position: absolute; opacity: 0; inset: 0;">
-                                        <span style="font-size: 0.9rem; font-weight: 700; color: #334155;">${s.time}</span>
-                                        ${isBooked ? '<span style="font-size: 0.7rem; color: #ef4444; font-weight: 700;">Full</span>' : ''}
-                                    </label>
-                                `;
-                            }).join('')}
-                        </div>
-                    </div>
-                </div>
+        renderAdminSchedules();
+
+        if (!document.getElementById('admin-schedule-styles')) {
+            const style = document.createElement('style');
+            style.id = 'admin-schedule-styles';
+            style.textContent = `
+                .accordion-item .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
+                .accordion-item.is-active .accordion-content { max-height: 400px; }
+                .accordion-item.is-active .accordion-icon { transform: rotate(180deg) !important; }
+                .schedule-opt:hover:not(.is-booked) { border-color: #2563eb !important; background: #f0f7ff !important; }
+                @keyframes tag-pop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
             `;
-            index++;
+            document.head.appendChild(style);
         }
-        html += '</div>';
-        container.innerHTML = html;
-        if (window.lucide) window.lucide.createIcons();
-
-        // Style for accordion active state
-        const style = document.createElement('style');
-        style.textContent = `
-            .admin-accordion-item.is-active .admin-accordion-content { display: block !important; }
-            .admin-accordion-item.is-active i[data-lucide="chevron-down"] { transform: rotate(180deg); }
-            label:has(input[type="checkbox"]:checked) { border-color: #6366f1 !important; background: #eff6ff !important; box-shadow: 0 0 0 1px #6366f1; }
-        `;
-        document.head.appendChild(style);
 
         const startDateInput = document.getElementById('start_date');
         if (startDateInput) {
@@ -4392,17 +4472,32 @@ function updateAdminSelectedPreview() {
         preview.style.display = 'block';
         tags.innerHTML = checkedItems.map(radio => {
             const isFirst = startDayName && radio.dataset.label.startsWith(startDayName);
-            const bgColor = isFirst ? '#059669' : '#6366f1';
-            return `
-            <span style="display: inline-flex; align-items: center; gap: 0.5rem; background: ${bgColor}; color: #fff; padding: 0.4rem 0.8rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600;" ${isFirst ? 'title="Jadwal pertemuan pertama"' : ''}>
-                ${radio.dataset.label} ${isFirst ? '⭐ (Start)' : ''}
-                <i data-lucide="x" onclick="const tgt=document.querySelector('#admin-schedule-container input[name=\\'schedule_ids[]\\'][value=\\'${radio.value}\\']'); if(tgt){tgt.checked = false; tgt.dispatchEvent(new Event(\\'change\\'));}" style="width: 14px; height: 14px; cursor: pointer;"></i>
-            </span>
-            `;
+            const bgColor = isFirst ? '#059669' : '#2563eb';
+            return \`
+            <span style="display: inline-flex; align-items: center; gap: 0.4rem; background: \${bgColor}; color: #fff; padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; animation: tag-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);" \${isFirst ? 'title="Jadwal pertemuan pertama"' : ''}>
+                \${radio.dataset.label} \${isFirst ? '⭐ (Start)' : ''}
+                <svg onclick="const tgt=document.querySelector('#admin-schedule-container input[name=\\'schedule_ids[]\\'][value=\\'\${radio.value}\\']'); if(tgt){tgt.checked = false; tgt.dispatchEvent(new Event(\\'change\\'));}" style="width: 14px; height: 14px; cursor: pointer;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </span>\`;
         }).join('');
-        if (window.lucide) window.lucide.createIcons();
     } else {
         preview.style.display = 'none';
+        tags.innerHTML = '';
+    }
+
+    const err = document.getElementById('admin-start-date-error');
+    if (startDayName && err) {
+        let matchFound = false;
+        checkedItems.forEach(chk => { if (chk.dataset.label.startsWith(startDayName)) matchFound = true; });
+        if (!matchFound && checkedItems.length > 0) {
+            err.textContent = \`Peringatan: Tanggal mulai Anda hari \${startDayName}, pastikan Anda memilih setidaknya satu jam di hari \${startDayName}.\`;
+            err.style.display = 'block';
+        } else {
+            err.style.display = 'none';
+        }
+    }
+}view.style.display = 'none';
         tags.innerHTML = '';
     }
 
@@ -4587,7 +4682,7 @@ window.filterRegSchedules = function(select, regId) {
                 <div class="premium-form-grid">
                     <div class="premium-field">
                         <label for="admin_class_id">Instrumen</label>
-                        <select id="admin_class_id" name="class_id" class="premium-select" required onchange="loadAdminSchedules(this.value);">
+                        <select id="admin_class_id" name="class_id" class="premium-select" required onchange="loadAdminSchedules();">
                             <option value="">Pilih Instrumen</option>
                             @foreach($classesForManagement as $classItem)
                                 <option value="{{ $classItem->id }}" @selected(old('class_id') == $classItem->id)>
@@ -4597,9 +4692,18 @@ window.filterRegSchedules = function(select, regId) {
                         </select>
                     </div>
 
+                    <!-- Teacher Selection (Dynamic) -->
+                    <div class="premium-field" id="admin-teacher-selection-field" style="display: none;">
+                        <label for="admin-teacher-select">Pilih Guru</label>
+                        <select id="admin-teacher-select" class="premium-select" onchange="renderAdminSchedules();">
+                            <option value="">Pilih Guru</option>
+                        </select>
+                    </div>
+
                     <div class="premium-field">
                         <label for="start_date">Tanggal Mulai Belajar</label>
                         <input type="date" id="start_date" name="start_date" class="premium-input" value="{{ old('start_date', date('Y-m-d')) }}">
+                        <div id="admin-start-date-error" class="validation-error-msg" style="color: #ef4444; font-size: 0.75rem; font-weight: 600; margin-top: 0.4rem; display: none;">Hari pada tanggal mulai tidak ada di pilihan jadwal Anda.</div>
                     </div>
 
                     <div class="premium-field">
@@ -4617,15 +4721,17 @@ window.filterRegSchedules = function(select, regId) {
                         <label>Pilih Jadwal</label>
                         <div style="margin-top: 0.5rem;">
                             <!-- Selected Preview -->
-                            <div id="admin-selected-preview" style="display: none; margin-bottom: 1rem; padding: 0.75rem; background: #f0f7ff; border: 1px dashed #6366f1; border-radius: 0.75rem;">
-                                <span style="font-size: 0.75rem; font-weight: 700; color: #6366f1; text-transform: uppercase; display: block; margin-bottom: 0.25rem;">Jadwal Terpilih:</span>
-                                <div id="admin-selected-tags" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
+                            <div id="admin-selected-preview" class="selected-preview-wrap" style="display: none; margin-bottom: 1.2rem; padding: 0.8rem; background: #f0f7ff; border: 1px dashed #2563eb; border-radius: 0.8rem;">
+                                <span class="selected-preview-title" style="font-size: 0.75rem; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.5rem;">Jadwal Terpilih:</span>
+                                <div id="admin-selected-tags" class="selected-tags" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
                             </div>
 
                             <!-- Schedule Container -->
-                            <div id="admin-schedule-container" style="border: 1px solid #e2e8f0; border-radius: 1rem; overflow: hidden; background: #fff;">
+                            <div id="admin-schedule-container" class="schedule-accordion" style="border: 1px solid #e2e8f0; border-radius: 0.8rem; overflow: hidden; background: #fff;">
                                 <p style="padding: 1.5rem; color: #64748b; font-size: 0.9rem; font-style: italic; text-align: center;">Silakan pilih instrumen terlebih dahulu.</p>
                             </div>
+                            
+                            <div id="admin-schedule-error" class="validation-error-msg" style="color: #ef4444; font-size: 0.75rem; font-weight: 600; margin-top: 0.4rem; display: none;">Silakan pilih minimal satu jadwal belajar.</div>
                         </div>
                     </div>
 
