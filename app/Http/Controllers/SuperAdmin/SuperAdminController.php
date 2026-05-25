@@ -161,10 +161,32 @@ class SuperAdminController extends Controller
             ->first();
         $topUserName = $topUserRow ? (User::find($topUserRow->user_id)?->name ?? 'System') : '-';
 
+        $selectedDate = request('schedule_date', now()->toDateString());
+        $todaySchedules = \App\Models\ScheduleSession::query()
+            ->whereDate('session_date', $selectedDate)
+            ->with([
+                'musicClass:id,name',
+                'student:id,name',
+                'teacher:id,name',
+                'attendance'
+            ])
+            ->orderBy('time')
+            ->get();
+
+        $todayScheduleStats = [
+            'total' => $todaySchedules->count(),
+            'completed' => $todaySchedules->where('status', 'completed')->count(),
+            'rescheduled' => $todaySchedules->where('status', 'rescheduled')->count(),
+            'booked' => $todaySchedules->where('status', 'booked')->count(),
+        ];
+
         return view('portal.super-admin.dashboard', [
             'roleKey' => auth()->user()->hasRole('super_admin') ? 'super_admin' : 'admin',
             'portal' => $this->portalConfig(),
             'kpis' => $kpis,
+            'selectedDate' => $selectedDate,
+            'todaySchedules' => $todaySchedules,
+            'todayScheduleStats' => $todayScheduleStats,
             'stats' => [
                 ['label' => 'Total Users', 'value' => User::count()],
                 ['label' => 'Active Students', 'value' => Student::where('is_active', true)->count()],
