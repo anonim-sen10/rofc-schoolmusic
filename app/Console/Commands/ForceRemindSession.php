@@ -32,7 +32,7 @@ class ForceRemindSession extends Command
         $teacherName = $this->option('teacher');
         $time = $this->option('time');
 
-        $query = ScheduleSession::with(['teacher', 'student', 'class']);
+        $query = ScheduleSession::with(['teacher', 'student', 'musicClass']);
 
         if ($id) {
             $query->where('id', $id);
@@ -84,7 +84,7 @@ class ForceRemindSession extends Command
         }
 
         $studentName = $session->student->name ?? 'Siswa';
-        $className = $session->class->name ?? 'Kelas';
+        $className = $session->musicClass->name ?? 'Kelas';
         $timeFormatted = \Carbon\Carbon::parse($session->time)->format('H:i');
         $dateFormatted = \Carbon\Carbon::parse($session->session_date)->locale('id')->isoFormat('dddd, D MMMM YYYY');
 
