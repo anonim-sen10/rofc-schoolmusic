@@ -89,7 +89,7 @@ class ForceRemindSession extends Command
         $dateFormatted = \Carbon\Carbon::parse($session->session_date)->locale('id')->isoFormat('dddd, D MMMM YYYY');
 
         $message = "🔔 *PENGINGAT KELAS (MANUAL) - ROFC MUSIC SCHOOL* 🔔\n\n";
-        $message .= "Halo *Kak {$teacher->name}*,\n\n";
+        $message .= "Halo *Coach {$teacher->name}*,\n\n";
         $message .= "Ini adalah pesan pengingat manual bahwa Anda memiliki sesi kelas pada:\n\n";
         $message .= "Siswa: *{$studentName}*\n";
         $message .= "Kelas: *{$className}*\n";
