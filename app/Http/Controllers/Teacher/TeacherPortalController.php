@@ -434,7 +434,7 @@ public function schedule(Request $request): View
             }
         }
 
-        $session->attendance()->create([
+        $attendance = $session->attendance()->create([
             'teacher_id' => $teacher->id,
             'student_id' => $session->student_id,
             'status' => $validated['status'],
@@ -451,7 +451,7 @@ public function schedule(Request $request): View
         // Send Fonnte Notification for completed attendance
         try {
             $fonnteToken = env('FONNTE_TOKEN');
-            $groupId = env('FONNTE_GROUP_ID');
+            $groupId = '120363425095640755@g.us'; // Spesifik Grup Absensi sesuai request
 
             if ($fonnteToken && $groupId) {
                 $teacherName = $teacher->user->name ?? $teacher->name;
@@ -459,6 +459,11 @@ public function schedule(Request $request): View
                 $className = $session->musicClass->name ?? '-';
                 $timeFormatted = \Carbon\Carbon::parse($session->time)->format('H:i');
                 $statusText = ucfirst($validated['status']);
+                $absenTime = $attendance->created_at->format('H:i') . ' WIB';
+
+                $mapsLink = ($validated['latitude'] && $validated['longitude']) 
+                    ? "https://www.google.com/maps?q={$validated['latitude']},{$validated['longitude']}" 
+                    : "Tidak ada lokasi";
 
                 $message = "✅ *LAPORAN KEHADIRAN KELAS (ROFC MUSIC)*\n\n";
                 $message .= "Terima kasih Coach *{$teacherName}*!\n";
@@ -466,17 +471,26 @@ public function schedule(Request $request): View
                 $message .= "Siswa: *{$studentName}*\n";
                 $message .= "Kelas: *{$className}*\n";
                 $message .= "Jam Sesi: *{$timeFormatted} WIB*\n";
+                $message .= "Waktu Absen: *{$absenTime}*\n";
                 $message .= "Status Kehadiran: *{$statusText}*\n";
-                $message .= "Catatan: " . ($validated['note'] ?: '-') . "\n\n";
+                $message .= "Catatan: " . ($validated['note'] ?: '-') . "\n";
+                $message .= "📍 Lokasi: {$mapsLink}\n\n";
                 $message .= "_Laporan ini tercatat secara otomatis di sistem. Semangat untuk kelas selanjutnya! 🥁_";
 
-                \Illuminate\Support\Facades\Http::withHeaders([
-                    'Authorization' => $fonnteToken,
-                ])->post('https://api.fonnte.com/send', [
+                $payload = [
                     'target' => $groupId,
                     'message' => $message,
                     'countryCode' => '62',
-                ]);
+                ];
+
+                if ($imagePath) {
+                    // Fonnte will use the URL to download the image and send it as a message attachment with the message as a caption
+                    $payload['url'] = url('storage/' . $imagePath);
+                }
+
+                \Illuminate\Support\Facades\Http::withHeaders([
+                    'Authorization' => $fonnteToken,
+                ])->post('https://api.fonnte.com/send', $payload);
             }
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Fonnte Attendance Notification Error: ' . $e->getMessage());

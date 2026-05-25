@@ -93,8 +93,12 @@ class ForceAttendanceNotification extends Command
         $attendance = $session->attendance;
         $statusText = $attendance ? ucfirst($attendance->status) : 'Hadir (Manual Test)';
         $noteText = $attendance ? ($attendance->note ?: '-') : '-';
-
+        $absenTime = $attendance ? $attendance->created_at->format('H:i') . ' WIB' : 'Sekarang';
         $teacherName = $teacher->user->name ?? $teacher->name;
+
+        $mapsLink = ($attendance && $attendance->latitude && $attendance->longitude) 
+            ? "https://www.google.com/maps?q={$attendance->latitude},{$attendance->longitude}" 
+            : "Tidak ada lokasi";
 
         $message = "✅ *LAPORAN KEHADIRAN KELAS (ROFC MUSIC)*\n\n";
         $message .= "Terima kasih Coach *{$teacherName}*!\n";
@@ -102,27 +106,35 @@ class ForceAttendanceNotification extends Command
         $message .= "Siswa: *{$studentName}*\n";
         $message .= "Kelas: *{$className}*\n";
         $message .= "Jam Sesi: *{$timeFormatted} WIB*\n";
+        $message .= "Waktu Absen: *{$absenTime}*\n";
         $message .= "Status Kehadiran: *{$statusText}*\n";
-        $message .= "Catatan: {$noteText}\n\n";
+        $message .= "Catatan: {$noteText}\n";
+        $message .= "📍 Lokasi: {$mapsLink}\n\n";
         $message .= "_Laporan ini tercatat secara otomatis di sistem. Semangat untuk kelas selanjutnya! 🥁_";
 
         $fonnteToken = env('FONNTE_TOKEN');
-        $groupId = env('FONNTE_GROUP_ID');
+        $groupId = '120363425095640755@g.us';
 
-        if (!$fonnteToken || !$groupId) {
-            $this->error('Fonnte token atau Group ID belum disetting di .env');
+        if (!$fonnteToken) {
+            $this->error('Fonnte token belum disetting di .env');
             return;
         }
 
         $this->info('Mengirim ke Fonnte...');
 
-        $response = Http::withHeaders([
-            'Authorization' => $fonnteToken,
-        ])->post('https://api.fonnte.com/send', [
+        $payload = [
             'target' => $groupId,
             'message' => $message,
             'countryCode' => '62',
-        ]);
+        ];
+
+        if ($attendance && $attendance->image_path) {
+            $payload['url'] = url('storage/' . $attendance->image_path);
+        }
+
+        $response = Http::withHeaders([
+            'Authorization' => $fonnteToken,
+        ])->post('https://api.fonnte.com/send', $payload);
 
         if ($response->successful()) {
             $this->info('Sukses! Pesan laporan absen berhasil terkirim ke Grup WhatsApp.');
