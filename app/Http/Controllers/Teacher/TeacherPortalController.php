@@ -448,6 +448,40 @@ public function schedule(Request $request): View
 
         $session->update(['status' => 'completed']);
 
+        // Send Fonnte Notification for completed attendance
+        try {
+            $fonnteToken = env('FONNTE_TOKEN');
+            $groupId = env('FONNTE_GROUP_ID');
+
+            if ($fonnteToken && $groupId) {
+                $teacherName = $teacher->user->name ?? $teacher->name;
+                $studentName = $session->student->user->name ?? ($session->student->name ?? 'Siswa');
+                $className = $session->musicClass->name ?? '-';
+                $timeFormatted = \Carbon\Carbon::parse($session->time)->format('H:i');
+                $statusText = ucfirst($validated['status']);
+
+                $message = "✅ *LAPORAN KEHADIRAN KELAS (ROFC MUSIC)*\n\n";
+                $message .= "Terima kasih Coach *{$teacherName}*!\n";
+                $message .= "Kehadiran untuk kelas berikut telah berhasil dicatat:\n\n";
+                $message .= "Siswa: *{$studentName}*\n";
+                $message .= "Kelas: *{$className}*\n";
+                $message .= "Jam Sesi: *{$timeFormatted} WIB*\n";
+                $message .= "Status Kehadiran: *{$statusText}*\n";
+                $message .= "Catatan: " . ($validated['note'] ?: '-') . "\n\n";
+                $message .= "_Laporan ini tercatat secara otomatis di sistem. Semangat untuk kelas selanjutnya! 🥁_";
+
+                \Illuminate\Support\Facades\Http::withHeaders([
+                    'Authorization' => $fonnteToken,
+                ])->post('https://api.fonnte.com/send', [
+                    'target' => $groupId,
+                    'message' => $message,
+                    'countryCode' => '62',
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Fonnte Attendance Notification Error: ' . $e->getMessage());
+        }
+
         return back()->with('success', 'Attendance recorded successfully.');
     }
 
