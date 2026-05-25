@@ -232,10 +232,10 @@
 
                     {{-- Camera/Image Capture Section --}}
                     <div class="group relative mb-8 overflow-hidden rounded-2xl border-[4px] border-slate-50 bg-slate-900 shadow-xl">
-                        <div class="aspect-[4/3] relative w-full overflow-hidden">
-                            <video id="webcam" autoplay playsinline class="h-full w-full object-cover grayscale-[0.2]"></video>
+                        <div class="relative w-full overflow-hidden flex items-center justify-center bg-black min-h-[300px]">
+                            <video id="webcam" autoplay playsinline class="w-full h-auto max-h-[60vh] object-contain grayscale-[0.2]"></video>
                             <canvas id="canvas" class="hidden"></canvas>
-                            <img id="captured_image" class="hidden h-full w-full object-cover">
+                            <img id="captured_image" class="hidden w-full h-auto max-h-[60vh] object-contain">
                             
                             {{-- Scanner Animation Effect --}}
                             <div id="scanner-line" class="absolute left-0 top-0 hidden h-1 w-full bg-gradient-to-r from-transparent via-blue-400 to-transparent shadow-[0_0_20px_rgba(96,165,250,1)] animate-scan z-10"></div>

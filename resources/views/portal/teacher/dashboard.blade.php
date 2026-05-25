@@ -273,10 +273,10 @@
 
                     {{-- Camera Section --}}
                     <div class="group relative mb-8 overflow-hidden rounded-3xl border-4 border-slate-100 bg-slate-900 shadow-inner">
-                        <div class="aspect-[4/3] relative w-full overflow-hidden">
-                            <video id="webcam" autoplay playsinline class="h-full w-full object-cover"></video>
+                        <div class="relative w-full overflow-hidden flex items-center justify-center bg-black min-h-[300px]">
+                            <video id="webcam" autoplay playsinline class="w-full h-auto max-h-[60vh] object-contain"></video>
                             <canvas id="canvas" class="hidden"></canvas>
-                            <img id="captured_image" class="hidden h-full w-full object-cover">
+                            <img id="captured_image" class="hidden w-full h-auto max-h-[60vh] object-contain">
                             
                             {{-- Scanner Effect --}}
                             <div id="scanner-line" class="absolute left-0 top-0 hidden h-1 w-full bg-gradient-to-r from-transparent via-blue-400 to-transparent shadow-[0_0_15px_rgba(96,165,250,0.8)] animate-scan"></div>
