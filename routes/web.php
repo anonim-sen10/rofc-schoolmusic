@@ -15,6 +15,7 @@ use App\Http\Controllers\Teacher\TeacherStudentController;
 use App\Models\Registration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SitemapController;
 
 Route::get('/', function () {
     return view('pages.home');
@@ -108,6 +109,8 @@ Route::view('/contact', 'pages.contact')->name('contact');
 Route::get('/register', [RegistrationController::class, 'create'])->name('register');
 Route::get('/schedules/by-class/{class_id}', [RegistrationController::class, 'getSchedulesByClass'])->name('register.schedules.by-class');
 Route::get('/get-available-schedules/{class_id}/{day}', [RegistrationController::class, 'getAvailableSchedules'])->name('register.schedules.available');
+Route::get('/sitemap.xml', [SitemapController::class, 'index']);
+
 
 Route::post('/contact', function (Request $request) {
     $validated = $request->validate([
