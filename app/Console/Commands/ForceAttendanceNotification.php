@@ -100,20 +100,9 @@ class ForceAttendanceNotification extends Command
             ? "https://www.google.com/maps?q={$attendance->latitude},{$attendance->longitude}" 
             : "Tidak ada lokasi";
 
-        $message = "✅ *LAPORAN KEHADIRAN KELAS (ROFC MUSIC)*\n\n";
-        $message .= "Terima kasih Coach *{$teacherName}*!\n";
-        $message .= "Kehadiran untuk kelas berikut telah berhasil dicatat:\n\n";
-        $message .= "Siswa: *{$studentName}*\n";
-        $message .= "Kelas: *{$className}*\n";
-        $message .= "Jam Sesi: *{$timeFormatted} WIB*\n";
-        $message .= "Waktu Absen: *{$absenTime}*\n";
-        $message .= "Status Kehadiran: *{$statusText}*\n";
-        $message .= "Catatan: {$noteText}\n";
-        $message .= "📍 Lokasi: {$mapsLink}\n\n";
-        $message .= "_Laporan ini tercatat secara otomatis di sistem. Semangat untuk kelas selanjutnya! 🥁_";
-
         $fonnteToken = env('FONNTE_TOKEN');
-        $groupId = '120363425095640755@g.us';
+        $groupFull = '120363425095640755@g.us';
+        $groupBasic = '120363426453491701@g.us';
 
         if (!$fonnteToken) {
             $this->error('Fonnte token belum disetting di .env');
@@ -122,25 +111,62 @@ class ForceAttendanceNotification extends Command
 
         $this->info('Mengirim ke Fonnte...');
 
-        $payload = [
-            'target' => $groupId,
-            'message' => $message,
+        // 1. Pesan Lengkap (Full)
+        $messageFull = "✅ *LAPORAN KEHADIRAN KELAS LENGKAP (ROFC MUSIC)*\n\n";
+        $messageFull .= "Terima kasih Coach *{$teacherName}*!\n";
+        $messageFull .= "Kehadiran untuk kelas berikut telah berhasil dicatat:\n\n";
+        $messageFull .= "Siswa: *{$studentName}*\n";
+        $messageFull .= "Kelas: *{$className}*\n";
+        $messageFull .= "Jam Sesi: *{$timeFormatted} WIB*\n";
+        $messageFull .= "Waktu Absen: *{$absenTime}*\n";
+        $messageFull .= "Status Kehadiran: *{$statusText}*\n";
+        $messageFull .= "Catatan: {$noteText}\n";
+        $messageFull .= "📍 Lokasi: {$mapsLink}\n\n";
+        $messageFull .= "_Laporan ini tercatat secara otomatis di sistem. Semangat untuk kelas selanjutnya! 🥁_";
+
+        $payloadFull = [
+            'target' => $groupFull,
+            'message' => $messageFull,
             'countryCode' => '62',
         ];
 
         if ($attendance && $attendance->image_path) {
-            $payload['url'] = url('storage/' . $attendance->image_path);
+            $payloadFull['url'] = url('storage/' . $attendance->image_path);
         }
 
-        $response = Http::withHeaders([
+        $responseFull = Http::withHeaders([
             'Authorization' => $fonnteToken,
-        ])->post('https://api.fonnte.com/send', $payload);
+        ])->post('https://api.fonnte.com/send', $payloadFull);
 
-        if ($response->successful()) {
-            $this->info('Sukses! Pesan laporan absen berhasil terkirim ke Grup WhatsApp.');
+        if ($responseFull->successful()) {
+            $this->info('Sukses! Laporan absen LENGKAP berhasil terkirim ke Grup WA Lengkap.');
         } else {
-            $this->error('Gagal mengirim pesan via Fonnte.');
-            $this->line($response->body());
+            $this->error('Gagal mengirim pesan LENGKAP via Fonnte.');
+            $this->line($responseFull->body());
+        }
+
+        // 2. Pesan Biasa (Basic)
+        $messageBasic = "✅ *INFO KEHADIRAN KELAS (ROFC MUSIC)*\n\n";
+        $messageBasic .= "Coach *{$teacherName}* baru saja mencatat kehadiran untuk sesi:\n\n";
+        $messageBasic .= "Siswa: *{$studentName}*\n";
+        $messageBasic .= "Kelas: *{$className}*\n";
+        $messageBasic .= "Jam Sesi: *{$timeFormatted} WIB*\n";
+        $messageBasic .= "Status Kehadiran: *{$statusText}*\n\n";
+        $messageBasic .= "_Laporan ini tercatat secara otomatis di sistem._";
+
+        $responseBasic = Http::withHeaders([
+            'Authorization' => $fonnteToken,
+        ])->post('https://api.fonnte.com/send', [
+            'target' => $groupBasic,
+            'message' => $messageBasic,
+            'countryCode' => '62',
+        ]);
+
+        if ($responseBasic->successful()) {
+            $this->info('Sukses! Laporan absen BIASA berhasil terkirim ke Grup WA Biasa.');
+        } else {
+            $this->error('Gagal mengirim pesan BIASA via Fonnte.');
+            $this->line($responseBasic->body());
         }
     }
 }

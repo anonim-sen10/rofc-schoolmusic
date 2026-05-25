@@ -451,9 +451,10 @@ public function schedule(Request $request): View
         // Send Fonnte Notification for completed attendance
         try {
             $fonnteToken = env('FONNTE_TOKEN');
-            $groupId = '120363425095640755@g.us'; // Spesifik Grup Absensi sesuai request
+            $groupFull = '120363425095640755@g.us'; // Grup laporan lengkap
+            $groupBasic = '120363426453491701@g.us'; // Grup laporan biasa
 
-            if ($fonnteToken && $groupId) {
+            if ($fonnteToken) {
                 $teacherName = $teacher->user->name ?? $teacher->name;
                 $studentName = $session->student->user->name ?? ($session->student->name ?? 'Siswa');
                 $className = $session->musicClass->name ?? '-';
@@ -465,32 +466,50 @@ public function schedule(Request $request): View
                     ? "https://www.google.com/maps?q={$validated['latitude']},{$validated['longitude']}" 
                     : "Tidak ada lokasi";
 
-                $message = "✅ *LAPORAN KEHADIRAN KELAS (ROFC MUSIC)*\n\n";
-                $message .= "Terima kasih Coach *{$teacherName}*!\n";
-                $message .= "Kehadiran untuk kelas berikut telah berhasil dicatat:\n\n";
-                $message .= "Siswa: *{$studentName}*\n";
-                $message .= "Kelas: *{$className}*\n";
-                $message .= "Jam Sesi: *{$timeFormatted} WIB*\n";
-                $message .= "Waktu Absen: *{$absenTime}*\n";
-                $message .= "Status Kehadiran: *{$statusText}*\n";
-                $message .= "Catatan: " . ($validated['note'] ?: '-') . "\n";
-                $message .= "📍 Lokasi: {$mapsLink}\n\n";
-                $message .= "_Laporan ini tercatat secara otomatis di sistem. Semangat untuk kelas selanjutnya! 🥁_";
+                // 1. Pesan Lengkap (Full)
+                $messageFull = "✅ *LAPORAN KEHADIRAN KELAS LENGKAP (ROFC MUSIC)*\n\n";
+                $messageFull .= "Terima kasih Coach *{$teacherName}*!\n";
+                $messageFull .= "Kehadiran untuk kelas berikut telah berhasil dicatat:\n\n";
+                $messageFull .= "Siswa: *{$studentName}*\n";
+                $messageFull .= "Kelas: *{$className}*\n";
+                $messageFull .= "Jam Sesi: *{$timeFormatted} WIB*\n";
+                $messageFull .= "Waktu Absen: *{$absenTime}*\n";
+                $messageFull .= "Status Kehadiran: *{$statusText}*\n";
+                $messageFull .= "Catatan: " . ($validated['note'] ?: '-') . "\n";
+                $messageFull .= "📍 Lokasi: {$mapsLink}\n\n";
+                $messageFull .= "_Laporan ini tercatat secara otomatis di sistem. Semangat untuk kelas selanjutnya! 🥁_";
 
-                $payload = [
-                    'target' => $groupId,
-                    'message' => $message,
+                $payloadFull = [
+                    'target' => $groupFull,
+                    'message' => $messageFull,
                     'countryCode' => '62',
                 ];
 
                 if ($imagePath) {
-                    // Fonnte will use the URL to download the image and send it as a message attachment with the message as a caption
-                    $payload['url'] = url('storage/' . $imagePath);
+                    $payloadFull['url'] = url('storage/' . $imagePath);
                 }
 
                 \Illuminate\Support\Facades\Http::withHeaders([
                     'Authorization' => $fonnteToken,
-                ])->post('https://api.fonnte.com/send', $payload);
+                ])->post('https://api.fonnte.com/send', $payloadFull);
+
+
+                // 2. Pesan Biasa (Basic)
+                $messageBasic = "✅ *INFO KEHADIRAN KELAS (ROFC MUSIC)*\n\n";
+                $messageBasic .= "Coach *{$teacherName}* baru saja mencatat kehadiran untuk sesi:\n\n";
+                $messageBasic .= "Siswa: *{$studentName}*\n";
+                $messageBasic .= "Kelas: *{$className}*\n";
+                $messageBasic .= "Jam Sesi: *{$timeFormatted} WIB*\n";
+                $messageBasic .= "Status Kehadiran: *{$statusText}*\n\n";
+                $messageBasic .= "_Laporan ini tercatat secara otomatis di sistem._";
+
+                \Illuminate\Support\Facades\Http::withHeaders([
+                    'Authorization' => $fonnteToken,
+                ])->post('https://api.fonnte.com/send', [
+                    'target' => $groupBasic,
+                    'message' => $messageBasic,
+                    'countryCode' => '62',
+                ]);
             }
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Fonnte Attendance Notification Error: ' . $e->getMessage());
