@@ -460,7 +460,7 @@ public function schedule(Request $request): View
                 $className = $session->musicClass->name ?? '-';
                 $timeFormatted = \Carbon\Carbon::parse($session->time)->format('H:i');
                 $statusText = ucfirst($validated['status']);
-                $absenTime = $attendance->created_at->format('H:i') . ' WIB';
+                $absenTime = $attendance->created_at->timezone('Asia/Jakarta')->format('H:i') . ' WIB';
 
                 $mapsLink = ($validated['latitude'] && $validated['longitude']) 
                     ? "https://www.google.com/maps?q={$validated['latitude']},{$validated['longitude']}" 
@@ -477,7 +477,7 @@ public function schedule(Request $request): View
                 $messageFull .= "Status Kehadiran: *{$statusText}*\n";
                 $messageFull .= "Catatan: " . ($validated['note'] ?: '-') . "\n";
                 $messageFull .= "📍 Lokasi: {$mapsLink}\n\n";
-                $messageFull .= "_Laporan ini tercatat secara otomatis di sistem. Semangat untuk kelas selanjutnya! 🥁_";
+                $messageFull .= "_Laporan ini tercatat secara otomatis di sistem. Semangat untuk kelas selanjutnya! _";
 
                 $payloadFull = [
                     'target' => $groupFull,

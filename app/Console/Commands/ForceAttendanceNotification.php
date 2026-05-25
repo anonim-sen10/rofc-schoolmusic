@@ -93,7 +93,7 @@ class ForceAttendanceNotification extends Command
         $attendance = $session->attendance;
         $statusText = $attendance ? ucfirst($attendance->status) : 'Hadir (Manual Test)';
         $noteText = $attendance ? ($attendance->note ?: '-') : '-';
-        $absenTime = $attendance ? $attendance->created_at->format('H:i') . ' WIB' : 'Sekarang';
+        $absenTime = $attendance ? $attendance->created_at->timezone('Asia/Jakarta')->format('H:i') . ' WIB' : 'Sekarang';
         $teacherName = $teacher->user->name ?? $teacher->name;
 
         $mapsLink = ($attendance && $attendance->latitude && $attendance->longitude) 
