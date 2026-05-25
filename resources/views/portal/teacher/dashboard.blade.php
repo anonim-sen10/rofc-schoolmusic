@@ -296,6 +296,13 @@
                                     GPS STANDBY
                                 </div>
                             </div>
+
+                            {{-- Switch Camera Button --}}
+                            <div class="absolute right-4 top-4 z-30">
+                                <button type="button" onclick="switchCamera()" id="btn_switch_camera" class="hidden flex h-9 w-9 items-center justify-center rounded-full bg-slate-900/60 text-white backdrop-blur-md border border-white/10 transition-all hover:bg-slate-900/80 active:scale-95" title="Switch Camera">
+                                    <i data-lucide="refresh-ccw" class="h-4 w-4"></i>
+                                </button>
+                            </div>
                         </div>
 
                         {{-- Camera Action Bar --}}
@@ -386,6 +393,7 @@
 
 <script>
     let stream = null;
+    let currentFacingMode = 'environment';
 
     // Realtime Clock
     function updateClock() {
@@ -422,7 +430,7 @@
 
         try {
             stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: 'environment' },
+                video: { facingMode: currentFacingMode },
                 audio: false 
             });
             video.srcObject = stream;
@@ -430,6 +438,8 @@
             if (scanner) scanner.classList.remove('hidden');
             btnStart.classList.add('hidden');
             btnCapture.classList.remove('hidden');
+            const btnSwitch = document.getElementById('btn_switch_camera');
+            if (btnSwitch) btnSwitch.classList.remove('hidden');
             
             // Update Stepper
             document.getElementById('step-1-indicator').classList.remove('opacity-40');
@@ -502,6 +512,8 @@
                 img.classList.remove('hidden');
                 btnCapture.classList.add('hidden');
                 btnRetake.classList.remove('hidden');
+                const btnSwitch = document.getElementById('btn_switch_camera');
+                if (btnSwitch) btnSwitch.classList.add('hidden');
                 if (scanner) scanner.classList.add('hidden');
                 
                 // Update Badge
@@ -550,6 +562,8 @@
         if (btnCapture) btnCapture.classList.add('hidden');
         if (btnRetake) btnRetake.classList.add('hidden');
         if (overlay) overlay.classList.remove('hidden');
+        const btnSwitch = document.getElementById('btn_switch_camera');
+        if (btnSwitch) btnSwitch.classList.add('hidden');
         
         if (badgeGps) {
             badgeGps.innerHTML = '<div class="h-1.5 w-1.5 rounded-full bg-slate-400"></div> GPS STANDBY';
@@ -565,6 +579,12 @@
 
         submitBtn.disabled = true;
         if (window.lucide) window.lucide.createIcons();
+    }
+
+    async function switchCamera() {
+        currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+        stopCamera();
+        await startCamera();
     }
 </script>
 @endsection
