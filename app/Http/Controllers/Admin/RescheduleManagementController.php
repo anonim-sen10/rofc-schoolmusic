@@ -114,7 +114,8 @@ class RescheduleManagementController extends Controller
             // Send Fonnte Notification
             try {
                 $fonnteToken = env('FONNTE_TOKEN');
-                $groupFull = '120363425095640755@g.us'; // Target group
+                $groupFull = '120363425095640755@g.us'; // Target group 1
+                $groupBasic = '120363426453491701@g.us'; // Target group 2
 
                 if ($fonnteToken && !empty($newSessionData)) {
                     $teacherPhone = $newSessionData['teacher_phone'];
@@ -138,10 +139,20 @@ class RescheduleManagementController extends Controller
                     $message .= "Jam: *{$newSessionData['new_time']} WIB*\n\n";
                     $message .= "_Perubahan jadwal ini telah dikonfirmasi oleh Admin._";
 
+                    // Send to Group 1
                     \Illuminate\Support\Facades\Http::withHeaders([
                         'Authorization' => $fonnteToken,
                     ])->post('https://api.fonnte.com/send', [
                         'target' => $groupFull,
+                        'message' => $message,
+                        'countryCode' => '62',
+                    ]);
+                    
+                    // Send to Group 2
+                    \Illuminate\Support\Facades\Http::withHeaders([
+                        'Authorization' => $fonnteToken,
+                    ])->post('https://api.fonnte.com/send', [
+                        'target' => $groupBasic,
                         'message' => $message,
                         'countryCode' => '62',
                     ]);
