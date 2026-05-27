@@ -106,6 +106,8 @@
                                         <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
                                         <span class="text-[9px] font-extrabold tracking-widest uppercase">Finished</span>
                                     </div>
+                                @elseif($schedule->status === 'rescheduled')
+                                    <span class="text-[10px] font-bold text-slate-300 tracking-widest uppercase italic opacity-60">Rescheduled</span>
                                 @elseif($schedule->attendance)
                                     @php 
                                         $status = strtolower($schedule->attendance->status);
