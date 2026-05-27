@@ -247,7 +247,8 @@ class RegistrationController extends Controller
         // Send Fonnte Notification for new registration
         try {
             $fonnteToken = env('FONNTE_TOKEN');
-            $groupId = env('FONNTE_GROUP_ID');
+            // Hanya kirim ke grup Admin spesifik sesuai request user
+            $groupId = env('FONNTE_ADMIN_GROUP_ID', '120363425095640755@g.us');
             if ($fonnteToken && $groupId) {
                 $message = "🎉 *PENDAFTARAN SISWA BARU (ROFC)* 🎉\n\n";
                 $message .= "👤 *Nama:* " . $registration->nama_lengkap . "\n";
