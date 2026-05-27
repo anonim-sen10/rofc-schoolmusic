@@ -65,6 +65,7 @@
                                         type="button" 
                                         class="btn-reschedule"
                                         data-old-id="{{ $sched->id }}"
+                                        data-schedule-id="{{ $sched->schedule_id }}"
                                         data-old-label="{{ $sched->session_date->translatedFormat('l, d M Y') }} - {{ \Carbon\Carbon::parse($sched->time)->format('H:i') }}"
                                         data-teacher-id="{{ $sched->teacher_id }}"
                                         data-class-id="{{ $sched->class_id }}"
@@ -178,6 +179,7 @@ function openRescheduleModal(btn) {
     const oldLabel = btn.getAttribute('data-old-label');
     const teacherId = btn.getAttribute('data-teacher-id');
     const classId = btn.getAttribute('data-class-id');
+    const scheduleId = btn.getAttribute('data-schedule-id');
 
     document.getElementById('old_session_id').value = oldId;
     document.getElementById('old_schedule_label').value = oldLabel;
@@ -191,6 +193,15 @@ function openRescheduleModal(btn) {
         .then(res => res.json())
         .then(data => {
             select.innerHTML = '<option value="">-- Select New Slot --</option>';
+
+            const pushGroup = document.createElement('optgroup');
+            pushGroup.label = "Opsi Jadwal Rutin";
+            const pushOpt = document.createElement('option');
+            pushOpt.value = scheduleId;
+            pushOpt.textContent = "➡️ Lewati minggu ini (Dorong Mundur 1 Minggu)";
+            pushGroup.appendChild(pushOpt);
+            select.appendChild(pushGroup);
+
             if (data.grouped) {
                 Object.keys(data.grouped).forEach(day => {
                     const group = document.createElement('optgroup');
