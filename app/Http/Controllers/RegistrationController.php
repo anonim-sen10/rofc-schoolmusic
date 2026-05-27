@@ -244,6 +244,29 @@ class RegistrationController extends Controller
             $registration->schedules()->sync($validated['schedule_ids']);
         }
 
+        // Send Fonnte Notification for new registration
+        try {
+            $fonnteToken = env('FONNTE_TOKEN');
+            $groupId = env('FONNTE_GROUP_ID');
+            if ($fonnteToken && $groupId) {
+                $message = "🎉 *PENDAFTARAN SISWA BARU (ROFC)* 🎉\n\n";
+                $message .= "👤 *Nama:* " . $registration->nama_lengkap . "\n";
+                $message .= "🎸 *Instrumen:* " . $registration->instrumen . "\n";
+                $message .= "📱 *No HP:* " . $registration->no_hp_siswa . "\n";
+                $message .= "📅 *Jadwal Terpilih:* " . $scheduleTexts . "\n\n";
+                $message .= "Silakan login ke portal Super Admin untuk melakukan konfirmasi/approve.";
+
+                \Illuminate\Support\Facades\Http::withHeaders([
+                    'Authorization' => $fonnteToken,
+                ])->post('https://api.fonnte.com/send', [
+                    'target' => $groupId,
+                    'message' => $message,
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Fonnte Registration Notification Error: ' . $e->getMessage());
+        }
+
         return back()->with('success', 'Pendaftaran Anda berhasil dikirim. Kami akan menghubungi Anda untuk proses berikutnya.');
     }
 
