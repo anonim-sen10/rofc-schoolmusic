@@ -19,6 +19,7 @@ class ScheduleSession extends Model
         'session_date',
         'time',
         'status',
+        'is_reminder_sent',
     ];
 
     protected $casts = [
