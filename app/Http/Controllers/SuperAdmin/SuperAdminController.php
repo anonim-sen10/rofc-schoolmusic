@@ -319,6 +319,11 @@ class SuperAdminController extends Controller
             case 'finance':
                 $data['studentsForFinance'] = Student::query()->orderBy('name')->get(['id', 'name']);
                 $data['classesForFinance'] = MusicClass::query()->orderBy('name')->get(['id', 'name']);
+                $data['financeSummary'] = [
+                    'total_invoice' => Payment::count(),
+                    'successful_payments' => Payment::where('status', 'paid')->sum('amount'),
+                ];
+                $data['paymentsForFinance'] = Payment::with(['student', 'musicClass'])->latest()->get();
                 break;
             case 'blog':
                 $data['postsForManagement'] = DB::table('posts')->latest()->get();
