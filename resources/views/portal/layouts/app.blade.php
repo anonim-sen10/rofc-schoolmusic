@@ -6,7 +6,7 @@
     $legacyMenuItems = $menuItems ?? [];
     $roleLabel = ucwords(str_replace('_', ' ', $resolvedRoleKey));
     $summaryData = $summary ?? [];
-    $notifCount = ($summaryData['registrations_pending'] ?? 0) + ($summaryData['reschedule_requests_pending'] ?? 0);
+    $notifCount = ($summaryData['registrations_pending'] ?? \App\Models\Registration::where('status', 'pending')->count()) + ($summaryData['reschedule_requests_pending'] ?? \App\Models\RescheduleRequest::where('status', 'pending')->count());
     $brandLogoCandidates = [
         'brand/rofc-logo.png',
         'brand/rofc-logo.jpg',
@@ -71,19 +71,21 @@ $iconMap = [
         $badge = null;
         $badgeColor = 'bg-red-500';
         if (in_array($key, ['registrations', 'registrations_requests'])) {
-            $badge = $summaryData['registrations_pending'] ?? 0;
+            $badge = $summaryData['registrations_pending'] ?? \App\Models\Registration::where('status', 'pending')->count();
             $badgeColor = 'bg-red-500';
         } elseif (in_array($key, ['reschedule', 'reschedule_requests'])) {
-            $badge = $summaryData['reschedule_requests_pending'] ?? 0;
+            $badge = $summaryData['reschedule_requests_pending'] ?? \App\Models\RescheduleRequest::where('status', 'pending')->count();
             $badgeColor = 'bg-red-500';
         } elseif (in_array($key, ['finance'])) {
-            $badge = $summaryData['invoices_unpaid'] ?? 0;
+            $badge = $summaryData['invoices_unpaid'] ?? \App\Models\Invoice::whereIn('status', ['draft', 'issued', 'overdue'])->count();
             $badgeColor = 'bg-amber-500'; // warning color for unpaid invoices
         } elseif (in_array($key, ['attendance', 'attendance_monitoring'])) {
-            $badge = ($summaryData['teacher_attendance_today'] ?? 0) + ($summaryData['student_attendance_today'] ?? 0);
+            $teacherAttendance = $summaryData['teacher_attendance_today'] ?? \App\Models\TeacherAttendance::whereDate('attendance_date', now()->toDateString())->count();
+            $studentAttendance = $summaryData['student_attendance_today'] ?? \App\Models\Attendance::whereDate('created_at', now()->toDateString())->count();
+            $badge = $teacherAttendance + $studentAttendance;
             $badgeColor = 'bg-blue-500'; // info color
         } elseif (in_array($key, ['reports'])) {
-            $badge = ($summaryData['progress_updates_today'] ?? 0);
+            $badge = $summaryData['progress_updates_today'] ?? \App\Models\StudentProgress::whereDate('created_at', now()->toDateString())->count();
             $badgeColor = 'bg-blue-500';
         } elseif (in_array($key, ['testimonials'])) {
             try {
