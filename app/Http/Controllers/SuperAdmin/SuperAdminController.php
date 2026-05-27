@@ -491,10 +491,21 @@ class SuperAdminController extends Controller
                             'Sabtu' => Carbon::SATURDAY,
                             'Minggu' => Carbon::SUNDAY,
                         ];
-                        $newDayNum = $dayMap[$r->newSchedule->day] ?? Carbon::MONDAY;
-                        $oldDate = Carbon::parse($r->oldSession->session_date);
-                        $newDate = $oldDate->copy()->startOfWeek()->addDays($newDayNum - 1);
-                        $newLabel = $newDate->translatedFormat('l, d M Y') . ' - ' . substr((string) $r->newSchedule->time, 0, 5);
+                        $isPushBack = ($r->new_schedule_id == $r->oldSession->schedule_id);
+
+                        if ($isPushBack) {
+                            $newLabel = '➡️ Dorong Mundur 1 Minggu';
+                        } else {
+                            $newDayNum = $dayMap[$r->newSchedule->day] ?? Carbon::MONDAY;
+                            $oldDate = Carbon::parse($r->oldSession->session_date);
+                            $newDate = $oldDate->copy()->startOfWeek()->addDays($newDayNum - 1);
+                            
+                            if ($newDate->lt(now()->startOfDay())) {
+                                $newDate->addWeek();
+                            }
+                            
+                            $newLabel = $newDate->translatedFormat('l, d M Y') . ' - ' . substr((string) $r->newSchedule->time, 0, 5);
+                        }
                     } else if ($r->newSchedule) {
                         $newLabel = $r->newSchedule->day . ' ' . substr((string) $r->newSchedule->time, 0, 5);
                     }
