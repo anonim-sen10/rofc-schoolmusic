@@ -5,7 +5,8 @@
     $userName = auth()->user()?->name ?? 'User';
     $legacyMenuItems = $menuItems ?? [];
     $roleLabel = ucwords(str_replace('_', ' ', $resolvedRoleKey));
-    $notifCount = ($summary['registrations_pending'] ?? 0) + ($summary['reschedule_requests_pending'] ?? 0);
+    $summaryData = $summary ?? [];
+    $notifCount = ($summaryData['registrations_pending'] ?? 0) + ($summaryData['reschedule_requests_pending'] ?? 0);
     $brandLogoCandidates = [
         'brand/rofc-logo.png',
         'brand/rofc-logo.jpg',
@@ -64,14 +65,42 @@ $iconMap = [
         'profile' => 'user-round',
     ];
 
-    $normalizedMenu = collect($legacyMenuItems)->map(function (array $item) use ($iconMap) {
+    $normalizedMenu = collect($legacyMenuItems)->map(function (array $item) use ($iconMap, $summaryData) {
         $key = strtolower($item['key'] ?? str_replace(' ', '_', $item['label'] ?? 'menu'));
+        
+        $badge = null;
+        $badgeColor = 'bg-red-500';
+        if (in_array($key, ['registrations', 'registrations_requests'])) {
+            $badge = $summaryData['registrations_pending'] ?? 0;
+            $badgeColor = 'bg-red-500';
+        } elseif (in_array($key, ['reschedule', 'reschedule_requests'])) {
+            $badge = $summaryData['reschedule_requests_pending'] ?? 0;
+            $badgeColor = 'bg-red-500';
+        } elseif (in_array($key, ['finance'])) {
+            $badge = $summaryData['invoices_unpaid'] ?? 0;
+            $badgeColor = 'bg-amber-500'; // warning color for unpaid invoices
+        } elseif (in_array($key, ['attendance', 'attendance_monitoring'])) {
+            $badge = ($summaryData['teacher_attendance_today'] ?? 0) + ($summaryData['student_attendance_today'] ?? 0);
+            $badgeColor = 'bg-blue-500'; // info color
+        } elseif (in_array($key, ['reports'])) {
+            $badge = ($summaryData['progress_updates_today'] ?? 0);
+            $badgeColor = 'bg-blue-500';
+        } elseif (in_array($key, ['testimonials'])) {
+            try {
+                $badge = \Illuminate\Support\Facades\DB::table('testimonials')->where('is_published', 0)->count();
+                $badgeColor = 'bg-amber-500'; // unpublished items needing review
+            } catch (\Exception $e) {
+                $badge = 0;
+            }
+        }
 
         return [
             'key' => $key,
             'label' => $item['label'] ?? ucfirst($key),
             'url' => $item['url'] ?? '#',
             'icon' => $item['icon'] ?? ($iconMap[$key] ?? 'circle'),
+            'badge' => $badge,
+            'badgeColor' => $badgeColor,
         ];
     });
 
@@ -90,6 +119,11 @@ $iconMap = [
     <meta http-equiv="Expires" content="0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/css/portal.css', 'resources/js/portal.js'])
+    <style>
+        html.sidebar-collapsed .portal-menu a .menu-badge {
+            display: none !important;
+        }
+    </style>
 </head>
 <body class="portal-body">
     @if(session('impersonator_id'))
@@ -136,7 +170,12 @@ $iconMap = [
                         class="transition-all duration-200 group {{ $isActive ? 'active' : '' }}" 
                         data-tooltip="{{ $item['label'] }}">
                         <i data-lucide="{{ $item['icon'] }}"></i>
-                        <span>{{ $item['label'] }}</span>
+                        <span class="flex-1">{{ $item['label'] }}</span>
+                        @if(!empty($item['badge']) && $item['badge'] > 0)
+                            <div class="menu-badge {{ $item['badgeColor'] ?? 'bg-red-500' }} text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center inline-flex items-center justify-center shadow-sm ml-auto transition-transform group-hover:scale-110">
+                                {{ $item['badge'] > 99 ? '99+' : $item['badge'] }}
+                            </div>
+                        @endif
                     </a>
                 @endforeach
             </nav>
