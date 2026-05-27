@@ -456,6 +456,18 @@ public function schedule(Request $request): View
 
             if ($fonnteToken) {
                 $teacherName = $teacher->user->name ?? $teacher->name;
+                
+                // Format nomor HP guru untuk tag WhatsApp
+                $teacherPhone = $teacher->phone ?? '';
+                $phoneTag = '';
+                if (!empty($teacherPhone)) {
+                    $cleanPhone = preg_replace('/[^0-9]/', '', $teacherPhone);
+                    if (str_starts_with($cleanPhone, '0')) {
+                        $cleanPhone = '62' . substr($cleanPhone, 1);
+                    }
+                    $phoneTag = " (@" . $cleanPhone . ")";
+                }
+
                 $studentName = $session->student->user->name ?? ($session->student->name ?? 'Siswa');
                 $className = $session->musicClass->name ?? '-';
                 $timeFormatted = \Carbon\Carbon::parse($session->time)->format('H:i');
@@ -468,7 +480,7 @@ public function schedule(Request $request): View
 
                 // 1. Pesan Lengkap (Full)
                 $messageFull = "✅ *LAPORAN KEHADIRAN KELAS LENGKAP (ROFC MUSIC)*\n\n";
-                $messageFull .= "Terima kasih Coach *{$teacherName}*!\n";
+                $messageFull .= "Terima kasih Coach *{$teacherName}*{$phoneTag}!\n";
                 $messageFull .= "Kehadiran untuk kelas berikut telah berhasil dicatat:\n\n";
                 $messageFull .= "Siswa: *{$studentName}*\n";
                 $messageFull .= "Kelas: *{$className}*\n";
@@ -496,7 +508,7 @@ public function schedule(Request $request): View
 
                 // 2. Pesan Biasa (Basic)
                 $messageBasic = "✅ *INFO KEHADIRAN KELAS (ROFC MUSIC)*\n\n";
-                $messageBasic .= "Coach *{$teacherName}* baru saja mencatat kehadiran untuk sesi:\n\n";
+                $messageBasic .= "Coach *{$teacherName}*{$phoneTag} baru saja mencatat kehadiran untuk sesi:\n\n";
                 $messageBasic .= "Siswa: *{$studentName}*\n";
                 $messageBasic .= "Kelas: *{$className}*\n";
                 $messageBasic .= "Jam Sesi: *{$timeFormatted} WIB*\n";

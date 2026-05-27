@@ -90,9 +90,20 @@ class ForceRemindSession extends Command
 
         $teacherName = $teacher->name;
 
+        // Format nomor HP guru untuk tag WhatsApp
+        $teacherPhone = $teacher->phone ?? '';
+        $phoneTag = '';
+        if (!empty($teacherPhone)) {
+            $cleanPhone = preg_replace('/[^0-9]/', '', $teacherPhone);
+            if (str_starts_with($cleanPhone, '0')) {
+                $cleanPhone = '62' . substr($cleanPhone, 1);
+            }
+            $phoneTag = " (@" . $cleanPhone . ")";
+        }
+
         $message = "📢 *INFO JADWAL KELAS ROFC MUSIC*\n\n";
         $message .= "Mohon perhatian kepada instruktur yang bertugas hari ini:\n\n";
-        $message .= "🎸 *Coach {$teacherName}*\n";
+        $message .= "🎸 *Coach {$teacherName}*{$phoneTag}\n";
         $message .= "Siswa: {$studentName}\n";
         $message .= "Kelas: {$className}\n";
         $message .= "Jam: *{$timeFormatted} WIB*\n\n";

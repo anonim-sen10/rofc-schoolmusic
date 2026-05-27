@@ -56,13 +56,25 @@ class SendClassReminders extends Command
             if ($diffInMinutes >= 0 && $diffInMinutes <= 30) {
                 
                 $teacherName = $session->teacher->user->name ?? ($session->teacher->name ?? 'Instruktur');
+                
+                // Format nomor HP guru untuk tag WhatsApp
+                $teacherPhone = $session->teacher->phone ?? '';
+                $phoneTag = '';
+                if (!empty($teacherPhone)) {
+                    $cleanPhone = preg_replace('/[^0-9]/', '', $teacherPhone);
+                    if (str_starts_with($cleanPhone, '0')) {
+                        $cleanPhone = '62' . substr($cleanPhone, 1);
+                    }
+                    $phoneTag = " (@" . $cleanPhone . ")";
+                }
+
                 $studentName = $session->student->user->name ?? ($session->student->name ?? 'Siswa');
                 $className = $session->musicClass->name ?? '-';
                 $timeFormatted = Carbon::parse($session->time)->format('H:i');
                 
                 $message = "📢 *INFO JADWAL KELAS ROFC MUSIC*\n\n";
                 $message .= "Mohon perhatian kepada instruktur yang bertugas hari ini:\n\n";
-                $message .= "🎸 *Coach {$teacherName}*\n";
+                $message .= "🎸 *Coach {$teacherName}*{$phoneTag}\n";
                 $message .= "Siswa: {$studentName}\n";
                 $message .= "Kelas: {$className}\n";
                 $message .= "Jam: *{$timeFormatted} WIB*\n\n";
