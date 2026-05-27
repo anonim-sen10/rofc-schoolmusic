@@ -118,19 +118,11 @@ class RescheduleManagementController extends Controller
                 $groupBasic = '120363426453491701@g.us'; // Target group 2
 
                 if ($fonnteToken && !empty($newSessionData)) {
-                    $teacherPhone = $newSessionData['teacher_phone'];
-                    $phoneTag = '';
-                    if (!empty($teacherPhone)) {
-                        $cleanPhone = preg_replace('/[^0-9]/', '', $teacherPhone);
-                        if (str_starts_with($cleanPhone, '0')) {
-                            $cleanPhone = '62' . substr($cleanPhone, 1);
-                        }
-                        $phoneTag = " @" . $cleanPhone;
-                    }
+
 
                     $message = "🔄 *INFO RESCHEDULE KELAS (DISETUJUI)*\n\n";
                     $message .= "Siswa: *{$newSessionData['student_name']}*\n";
-                    $message .= "Coach: *{$newSessionData['teacher_name']}*{$phoneTag}\n\n";
+                    $message .= "Coach: *{$newSessionData['teacher_name']}*\n\n";
                     $message .= "Jadwal Lama yang Dibatalkan:\n";
                     $message .= "Tanggal: {$newSessionData['old_date']}\n";
                     $message .= "Jam: {$newSessionData['old_time']} WIB\n\n";
@@ -145,9 +137,6 @@ class RescheduleManagementController extends Controller
                         'message' => $message,
                         'countryCode' => '62',
                     ];
-                    if (isset($cleanPhone) && !empty($cleanPhone)) {
-                        $payloadFull['mentions'] = $cleanPhone;
-                    }
                     \Illuminate\Support\Facades\Http::withHeaders([
                         'Authorization' => $fonnteToken,
                     ])->post('https://api.fonnte.com/send', $payloadFull);
@@ -158,9 +147,6 @@ class RescheduleManagementController extends Controller
                         'message' => $message,
                         'countryCode' => '62',
                     ];
-                    if (isset($cleanPhone) && !empty($cleanPhone)) {
-                        $payloadBasic['mentions'] = $cleanPhone;
-                    }
                     \Illuminate\Support\Facades\Http::withHeaders([
                         'Authorization' => $fonnteToken,
                     ])->post('https://api.fonnte.com/send', $payloadBasic);
