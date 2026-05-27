@@ -65,7 +65,7 @@ class SendClassReminders extends Command
                     if (str_starts_with($cleanPhone, '0')) {
                         $cleanPhone = '62' . substr($cleanPhone, 1);
                     }
-                    $phoneTag = " (@" . $cleanPhone . ")";
+                    $phoneTag = " @" . $cleanPhone;
                 }
 
                 $studentName = $session->student->user->name ?? ($session->student->name ?? 'Siswa');
@@ -83,12 +83,18 @@ class SendClassReminders extends Command
                 $message .= url('/login') . "\n";
 
                 try {
-                    $response = Http::withHeaders([
-                        'Authorization' => $token,
-                    ])->post('https://api.fonnte.com/send', [
+                    $payload = [
                         'target' => $groupId,
                         'message' => $message,
-                    ]);
+                    ];
+                    
+                    if (!empty($cleanPhone)) {
+                        $payload['mentions'] = $cleanPhone;
+                    }
+
+                    $response = Http::withHeaders([
+                        'Authorization' => $token,
+                    ])->post('https://api.fonnte.com/send', $payload);
 
                     if ($response->successful()) {
                         $session->update(['is_reminder_sent' => true]);

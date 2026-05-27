@@ -125,7 +125,7 @@ class RescheduleManagementController extends Controller
                         if (str_starts_with($cleanPhone, '0')) {
                             $cleanPhone = '62' . substr($cleanPhone, 1);
                         }
-                        $phoneTag = " (@" . $cleanPhone . ")";
+                        $phoneTag = " @" . $cleanPhone;
                     }
 
                     $message = "🔄 *INFO RESCHEDULE KELAS (DISETUJUI)*\n\n";
@@ -140,22 +140,30 @@ class RescheduleManagementController extends Controller
                     $message .= "_Perubahan jadwal ini telah dikonfirmasi oleh Admin._";
 
                     // Send to Group 1
-                    \Illuminate\Support\Facades\Http::withHeaders([
-                        'Authorization' => $fonnteToken,
-                    ])->post('https://api.fonnte.com/send', [
+                    $payloadFull = [
                         'target' => $groupFull,
                         'message' => $message,
                         'countryCode' => '62',
-                    ]);
-                    
-                    // Send to Group 2
+                    ];
+                    if (isset($cleanPhone) && !empty($cleanPhone)) {
+                        $payloadFull['mentions'] = $cleanPhone;
+                    }
                     \Illuminate\Support\Facades\Http::withHeaders([
                         'Authorization' => $fonnteToken,
-                    ])->post('https://api.fonnte.com/send', [
+                    ])->post('https://api.fonnte.com/send', $payloadFull);
+                    
+                    // Send to Group 2
+                    $payloadBasic = [
                         'target' => $groupBasic,
                         'message' => $message,
                         'countryCode' => '62',
-                    ]);
+                    ];
+                    if (isset($cleanPhone) && !empty($cleanPhone)) {
+                        $payloadBasic['mentions'] = $cleanPhone;
+                    }
+                    \Illuminate\Support\Facades\Http::withHeaders([
+                        'Authorization' => $fonnteToken,
+                    ])->post('https://api.fonnte.com/send', $payloadBasic);
                 }
             } catch (\Exception $e) {
                 // Ignore notification errors

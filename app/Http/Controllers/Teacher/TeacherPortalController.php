@@ -465,7 +465,7 @@ public function schedule(Request $request): View
                     if (str_starts_with($cleanPhone, '0')) {
                         $cleanPhone = '62' . substr($cleanPhone, 1);
                     }
-                    $phoneTag = " (@" . $cleanPhone . ")";
+                    $phoneTag = " @" . $cleanPhone;
                 }
 
                 $studentName = $session->student->user->name ?? ($session->student->name ?? 'Siswa');
@@ -497,6 +497,10 @@ public function schedule(Request $request): View
                     'countryCode' => '62',
                 ];
 
+                if (!empty($cleanPhone)) {
+                    $payloadFull['mentions'] = $cleanPhone;
+                }
+
                 if ($imagePath) {
                     $payloadFull['url'] = url('storage/' . $imagePath);
                 }
@@ -515,13 +519,19 @@ public function schedule(Request $request): View
                 $messageBasic .= "Status Kehadiran: *{$statusText}*\n\n";
                 $messageBasic .= "_Laporan ini tercatat secara otomatis di sistem._";
 
-                \Illuminate\Support\Facades\Http::withHeaders([
-                    'Authorization' => $fonnteToken,
-                ])->post('https://api.fonnte.com/send', [
+                $payloadBasic = [
                     'target' => $groupBasic,
                     'message' => $messageBasic,
                     'countryCode' => '62',
-                ]);
+                ];
+
+                if (!empty($cleanPhone)) {
+                    $payloadBasic['mentions'] = $cleanPhone;
+                }
+
+                \Illuminate\Support\Facades\Http::withHeaders([
+                    'Authorization' => $fonnteToken,
+                ])->post('https://api.fonnte.com/send', $payloadBasic);
             }
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Fonnte Attendance Notification Error: ' . $e->getMessage());

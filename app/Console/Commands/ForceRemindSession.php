@@ -98,7 +98,7 @@ class ForceRemindSession extends Command
             if (str_starts_with($cleanPhone, '0')) {
                 $cleanPhone = '62' . substr($cleanPhone, 1);
             }
-            $phoneTag = " (@" . $cleanPhone . ")";
+            $phoneTag = " @" . $cleanPhone;
         }
 
         $message = "📢 *INFO JADWAL KELAS ROFC MUSIC*\n\n";
@@ -121,13 +121,19 @@ class ForceRemindSession extends Command
 
         $this->info('Mengirim ke Fonnte...');
 
-        $response = Http::withHeaders([
-            'Authorization' => $fonnteToken,
-        ])->post('https://api.fonnte.com/send', [
+        $payload = [
             'target' => $groupId,
             'message' => $message,
             'countryCode' => '62',
-        ]);
+        ];
+
+        if (isset($cleanPhone) && !empty($cleanPhone)) {
+            $payload['mentions'] = $cleanPhone;
+        }
+
+        $response = Http::withHeaders([
+            'Authorization' => $fonnteToken,
+        ])->post('https://api.fonnte.com/send', $payload);
 
         if ($response->successful()) {
             $session->is_reminder_sent = true;
