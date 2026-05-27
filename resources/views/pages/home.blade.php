@@ -3,33 +3,41 @@
 @section('title', 'ROFC Private Music | Home')
 
 @section('content')
-<section class="cp-hero">
-    <div class="container cp-hero-grid">
-        <div class="cp-hero-copy">
+<section class="cp-hero" style="position: relative; overflow: hidden; background: linear-gradient(to right, #eef3fa 0%, #ffffff 100%); padding-bottom: 2rem; min-height: 85vh; display: flex; align-items: center;">
+    <!-- Fade mask image background -->
+    <div style="position: absolute; right: 0; top: 0; width: 55%; height: 100%; z-index: 0;" class="hidden lg:block">
+        <img src="{{ asset('images/hero-drummer.jpg') }}" alt="Drummer" style="width: 100%; height: 100%; object-fit: cover; object-position: right 10%; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 25%); mask-image: linear-gradient(to right, transparent 0%, black 25%);">
+    </div>
+
+    <div class="container cp-hero-grid" style="position: relative; z-index: 10; display: block; width: 100%;">
+        <div class="cp-hero-copy" style="max-width: 600px; background: transparent; border-radius: 0; padding: 2.6rem 0 1.7rem;">
             <span class="cp-kicker">ROFC Private Music</span>
-            <h1>Music for<br>a Better <span>Education</span></h1>
-            <p>ROFC Private Music hadir untuk mendukung sekolah dalam membangun program musik yang berkualitas, inspiratif, dan berkelanjutan.</p>
+            <h1 style="font-size: clamp(2.5rem, 4vw, 3.8rem);">Music for<br>a Better <span>Education</span></h1>
+            <p style="font-size: 1.1rem; max-width: 500px;">ROFC Private Music hadir untuk mendukung sekolah dalam membangun program musik yang berkualitas, inspiratif, dan berkelanjutan.</p>
             <div class="cp-hero-actions">
-                <a href="{{ route('about') }}" class="btn btn-primary">Tentang Kami</a>
-                <a href="{{ route('programs') }}" class="btn btn-outline cp-video-btn">Lihat Video</a>
+                <a href="{{ route('about') }}" class="btn btn-primary" style="border-radius: 999px;">Tentang Kami</a>
+                <button onclick="document.getElementById('videoModal').style.display = 'flex'" class="btn btn-outline cp-video-btn" style="border-radius: 999px; cursor: pointer;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; color: #1a56db;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    Lihat Video
+                </button>
             </div>
-            <div class="cp-pill-list">
-                <article>
-                    <span class="cp-pill-icon">M</span>
+            <div class="cp-pill-list" style="margin-top: 2rem;">
+                <article style="border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-radius: 1rem;">
+                    <span class="cp-pill-icon" style="background: #0f2554;">M</span>
                     <div>
                         <strong>Program Musik</strong>
                         <small>Berkualitas</small>
                     </div>
                 </article>
-                <article>
-                    <span class="cp-pill-icon">S</span>
+                <article style="border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-radius: 1rem;">
+                    <span class="cp-pill-icon" style="background: #0f2554;">S</span>
                     <div>
                         <strong>Pengembangan</strong>
                         <small>Bakat Siswa</small>
                     </div>
                 </article>
-                <article>
-                    <span class="cp-pill-icon">E</span>
+                <article style="border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-radius: 1rem;">
+                    <span class="cp-pill-icon" style="background: #0f2554;">E</span>
                     <div>
                         <strong>Edukasi Musik</strong>
                         <small>Berkelanjutan</small>
@@ -37,8 +45,20 @@
                 </article>
             </div>
         </div>
-        <div class="cp-hero-media">
-            <img src="https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=1400&q=80" alt="Siswa sekolah sedang belajar musik bersama">
+    </div>
+
+    <!-- Video Modal Popup -->
+    <div id="videoModal" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+        <!-- Background click to close -->
+        <div style="position: absolute; inset: 0;" onclick="document.getElementById('videoModal').style.display = 'none'; document.getElementById('youtubeVideo').contentWindow.postMessage('{\&quot;event\&quot;:\&quot;command\&quot;,\&quot;func\&quot;:\&quot;pauseVideo\&quot;,\&quot;args\&quot;:\"\"}', '*');"></div>
+        
+        <!-- Video Container -->
+        <div style="position: relative; width: 90%; max-width: 900px; aspect-ratio: 16/9; background: #000; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); z-index: 10001; overflow: hidden;">
+            <button onclick="document.getElementById('videoModal').style.display = 'none'; document.getElementById('youtubeVideo').contentWindow.postMessage('{\&quot;event\&quot;:\&quot;command\&quot;,\&quot;func\&quot;:\&quot;pauseVideo\&quot;,\&quot;args\&quot;:\"\"}', '*');" style="position: absolute; top: -40px; right: 0; background: transparent; color: white; border: none; font-size: 24px; cursor: pointer; opacity: 0.8;">✕</button>
+            
+            <!-- Ganti URL src di bawah ini dengan URL embed video YouTube/Google Drive Anda -->
+            <!-- Tambahkan ?enablejsapi=1 agar video berhenti saat modal ditutup -->
+            <iframe id="youtubeVideo" src="https://www.youtube.com/embed/NpEaa2P7qZI?enablejsapi=1" title="Video ROFC" style="width: 100%; height: 100%; border: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
     </div>
 </section>

@@ -29,7 +29,7 @@ class SendClassReminders extends Command
      */
     public function handle()
     {
-        $now = Carbon::now();
+        $now = Carbon::now('Asia/Jakarta');
         
         // Cari sesi hari ini yang belum dikirimi reminder dan statusnya bukan canceled/rescheduled
         $sessions = ScheduleSession::with(['teacher.user', 'student.user', 'student', 'musicClass'])
@@ -49,7 +49,7 @@ class SendClassReminders extends Command
         $sentCount = 0;
 
         foreach ($sessions as $session) {
-            $sessionTime = Carbon::parse($session->session_date->format('Y-m-d') . ' ' . $session->time);
+            $sessionTime = Carbon::parse($session->session_date->format('Y-m-d') . ' ' . $session->time, 'Asia/Jakarta');
             $diffInMinutes = $now->diffInMinutes($sessionTime, false);
 
             // Jika sesi akan dimulai dalam 0 hingga 30 menit ke depan
