@@ -2537,7 +2537,7 @@
                                                     
                                                     <div style="grid-column: span 2; margin-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.5rem;"><h4 style="font-size: 0.85rem; color: #818cf8;">Akademik & Status</h4></div>
                                                     <label style="grid-column: span 2;">Kelas Terdaftar
-                                                        <select name="class_ids[]" multiple style="height: 100px;">
+                                                        <select name="class_ids[]" multiple style="height: 100px;" onchange="filterEditSchedules(this)">
                                                             @foreach($classesForManagement as $classItem)
                                                                 <option value="{{ $classItem->id }}" @selected($student->classes->contains($classItem->id))>{{ $classItem->name }}</option>
                                                             @endforeach
@@ -2584,10 +2584,10 @@
                                                                                     && (int) $scheduleOption->student_id !== (int) $student->id
                                                                                     && ! $isSelected;
                                                                             @endphp
-                                                                            <label class="reg-slot-card {{ $isSelected ? 'is-selected' : '' }} {{ $isFull ? 'is-disabled' : '' }}" data-teacher-id="{{ $scheduleOption->teacher_id }}">
+                                                                            <label class="reg-slot-card {{ $isSelected ? 'is-selected' : '' }} {{ $isFull ? 'is-disabled' : '' }}" data-teacher-id="{{ $scheduleOption->teacher_id }}" data-class-id="{{ $scheduleOption->class_id }}">
                                                                                 <input type="checkbox" name="schedule_ids[]" value="{{ $scheduleOption->id }}" @checked($isSelected) @disabled($isFull) style="display: none;" onchange="this.parentElement.classList.toggle('is-selected', this.checked)">
                                                                                 <span class="reg-slot-time">{{ substr((string) $scheduleOption->time, 0, 5) }}</span>
-                                                                                <span class="reg-slot-teacher">{{ $scheduleOption->teacher->name ?? '-' }}</span>
+                                                                                <span class="reg-slot-teacher" style="font-size: 8px; color: #64748b; display: block; line-height: 1; margin-top: 2px; font-weight: 600;">{{ $scheduleOption->teacher->name ?? '-' }}</span>
                                                                                 @if($isFull)
                                                                                     <span class="reg-slot-badge">FULL</span>
                                                                                 @endif
@@ -4819,4 +4819,45 @@ window.filterRegSchedules = function(select, regId) {
         </form>
     </div>
 </div>
+<script>
+    function filterEditSchedules(selectElement) {
+        const form = selectElement.closest('form');
+        const scheduleContainer = form.querySelector('.registration-schedule-container');
+        if (!scheduleContainer) return;
+        
+        const selectedClassIds = Array.from(selectElement.selectedOptions).map(opt => opt.value);
+        const slotCards = scheduleContainer.querySelectorAll('.reg-slot-card');
+
+        slotCards.forEach(card => {
+            const classId = card.getAttribute('data-class-id');
+            if (selectedClassIds.length > 0 && selectedClassIds.includes(classId)) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+                const checkbox = card.querySelector('input[type="checkbox"]');
+                if (checkbox && checkbox.checked) {
+                    checkbox.checked = false;
+                    card.classList.remove('is-selected');
+                }
+            }
+        });
+
+        const dayGroups = scheduleContainer.querySelectorAll('.reg-day-group');
+        dayGroups.forEach(group => {
+            let groupHasVisible = false;
+            group.querySelectorAll('.reg-slot-card').forEach(card => {
+                if (card.style.display !== 'none') {
+                    groupHasVisible = true;
+                }
+            });
+            group.style.display = groupHasVisible ? 'block' : 'none';
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.registration-edit-form select[name="class_ids[]"]').forEach(select => {
+            filterEditSchedules(select);
+        });
+    });
+</script>
 @endpush
