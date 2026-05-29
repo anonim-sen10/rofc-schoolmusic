@@ -173,6 +173,7 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'role:su
     Route::delete('/users/{user}', [SuperAdminController::class, 'destroyUser'])->name('users.destroy');
     Route::post('/roles', [SuperAdminController::class, 'storeRole'])->name('roles.store');
     Route::get('/attendance', [AcademicManagementController::class, 'attendance'])->name('attendance.index');
+    Route::get('/attendance/export', [AcademicManagementController::class, 'exportAttendance'])->name('attendance.export');
     Route::put('/attendance/{id}', [AcademicManagementController::class, 'updateAttendance'])->name('attendance.update');
     Route::delete('/attendance/{id}', [AcademicManagementController::class, 'destroyAttendance'])->name('attendance.destroy');
     Route::get('/{module}', function (string $module) {
@@ -218,6 +219,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::delete('/schedule/{schedule}', [SuperAdminScheduleController::class, 'destroy'])->name('schedule.destroy');
     Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
     Route::get('/attendance', [AcademicManagementController::class, 'attendance'])->name('attendance.index');
+    Route::get('/attendance/export', [AcademicManagementController::class, 'exportAttendance'])->name('attendance.export');
     Route::put('/attendance/{id}', [AcademicManagementController::class, 'updateAttendance'])->name('attendance.update');
     Route::delete('/attendance/{id}', [AcademicManagementController::class, 'destroyAttendance'])->name('attendance.destroy');
 

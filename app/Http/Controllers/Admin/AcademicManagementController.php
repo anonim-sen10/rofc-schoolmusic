@@ -202,6 +202,49 @@ class AcademicManagementController extends Controller
         return view('portal.admin.attendance', compact('attendances', 'teachers', 'classes', 'date', 'teacherId', 'classId', 'routePrefix', 'totalCount', 'presentCount', 'absentCount', 'rescCount'));
     }
 
+    public function exportAttendance(Request $request)
+    {
+        $date = $request->input('date');
+        $teacherId = $request->input('teacher_id');
+        $classId = $request->input('class_id');
+
+        $query = \App\Models\Attendance::with([
+            'schedule.class',
+            'schedule.teacher',
+            'schedule.student.user'
+        ]);
+
+        if ($date) {
+            $query->whereDate('created_at', $date);
+        }
+        if ($teacherId) {
+            $query->where('teacher_id', $teacherId);
+        }
+        if ($classId) {
+            $query->whereHas('schedule', function ($q) use ($classId) {
+                $q->where('class_id', $classId);
+            });
+        }
+
+        $attendances = $query->latest()->get();
+        $teacher = $teacherId ? \App\Models\Teacher::find($teacherId) : null;
+        $class = $classId ? \App\Models\MusicClass::find($classId) : null;
+
+        $presentCount = $attendances->where('status', 'present')->count();
+        $absentCount = $attendances->where('status', 'absent')->count();
+        $rescCount = $attendances->where('status', 'reschedule')->count();
+        $totalCount = $attendances->count();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('portal.admin.pdf.attendance', compact(
+            'attendances', 'teacher', 'class', 'date', 'presentCount', 'absentCount', 'rescCount', 'totalCount'
+        ));
+
+        // Set paper size and orientation if needed
+        $pdf->setPaper('A4', 'landscape');
+
+        return $pdf->download('Rekap_Absensi_' . now()->format('Ymd_His') . '.pdf');
+    }
+
     public function updateAttendance(Request $request, $id): RedirectResponse
     {
         $attendance = \App\Models\Attendance::findOrFail($id);

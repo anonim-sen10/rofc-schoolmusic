@@ -453,6 +453,9 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
         <div class="filter-group" style="flex-direction: row; gap: 0.5rem;">
             <button type="submit" class="btn-filter">Filter</button>
             <a href="{{ $attendanceRoute }}" class="btn-reset">Reset</a>
+            <button type="submit" formaction="{{ $prefix === 'super-admin' ? route('super-admin.attendance.export') : route('admin.attendance.export') }}" formtarget="_blank" class="btn-filter" style="background: #ef4444; color: white;">
+                <i data-lucide="file-text" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> Export PDF
+            </button>
         </div>
     </form>
 
