@@ -251,8 +251,21 @@ class StudentPortalController extends Controller
         // Send Fonnte Notification for new reschedule request
         try {
             $fonnteToken = env('FONNTE_TOKEN');
-            $groupId = '120363425095640755@g.us'; // Only send to this specific group
-            if ($fonnteToken && $groupId) {
+            $groupId = '120363425095640755@g.us'; // Specific group ID
+
+            if ($fonnteToken) {
+                $teacherPhone = $oldSession->teacher->phone ?? null;
+                $target = $groupId;
+                
+                if ($teacherPhone) {
+                    // Format phone to 62...
+                    $formattedPhone = preg_replace('/[^0-9]/', '', $teacherPhone);
+                    if (str_starts_with($formattedPhone, '0')) {
+                        $formattedPhone = '62' . substr($formattedPhone, 1);
+                    }
+                    $target .= ',' . $formattedPhone;
+                }
+
                 $studentName = $student->name ?? 'Siswa';
                 $className = $oldSession->musicClass->name ?? 'Kelas';
                 $oldTime = $oldSession->session_date->format('d M Y') . ' ' . \Carbon\Carbon::parse($oldSession->time)->format('H:i');
@@ -277,7 +290,7 @@ class StudentPortalController extends Controller
                 \Illuminate\Support\Facades\Http::withHeaders([
                     'Authorization' => $fonnteToken,
                 ])->post('https://api.fonnte.com/send', [
-                    'target' => $groupId,
+                    'target' => $target,
                     'message' => $message,
                 ]);
             }

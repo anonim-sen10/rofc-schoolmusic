@@ -452,11 +452,19 @@ public function schedule(Request $request): View
         try {
             $fonnteToken = env('FONNTE_TOKEN');
             $groupFull = '120363425095640755@g.us'; // Grup laporan lengkap
-            $groupBasic = '120363426453491701@g.us'; // Grup laporan biasa
 
             if ($fonnteToken) {
                 $teacherName = $teacher->user->name ?? $teacher->name;
+                $teacherPhone = $teacher->phone ?? null;
+                $target = $groupFull;
                 
+                if ($teacherPhone) {
+                    $formattedPhone = preg_replace('/[^0-9]/', '', $teacherPhone);
+                    if (str_starts_with($formattedPhone, '0')) {
+                        $formattedPhone = '62' . substr($formattedPhone, 1);
+                    }
+                    $target .= ',' . $formattedPhone;
+                }
 
 
                 $studentName = $session->student->user->name ?? ($session->student->name ?? 'Siswa');
@@ -483,7 +491,7 @@ public function schedule(Request $request): View
                 $messageFull .= "_Laporan ini tercatat secara otomatis di sistem. Semangat untuk kelas selanjutnya! _";
 
                 $payloadFull = [
-                    'target' => $groupFull,
+                    'target' => $target,
                     'message' => $messageFull,
                     'countryCode' => '62',
                 ];
@@ -497,28 +505,6 @@ public function schedule(Request $request): View
                 \Illuminate\Support\Facades\Http::withHeaders([
                     'Authorization' => $fonnteToken,
                 ])->post('https://api.fonnte.com/send', $payloadFull);
-
-
-                // 2. Pesan Biasa (Basic)
-                $messageBasic = "✅ *INFO KEHADIRAN KELAS (ROFC MUSIC)*\n\n";
-                $messageBasic .= "Coach *{$teacherName}* baru saja mencatat kehadiran untuk sesi:\n\n";
-                $messageBasic .= "Siswa: *{$studentName}*\n";
-                $messageBasic .= "Kelas: *{$className}*\n";
-                $messageBasic .= "Jam Sesi: *{$timeFormatted} WIB*\n";
-                $messageBasic .= "Status Kehadiran: *{$statusText}*\n\n";
-                $messageBasic .= "_Laporan ini tercatat secara otomatis di sistem._";
-
-                $payloadBasic = [
-                    'target' => $groupBasic,
-                    'message' => $messageBasic,
-                    'countryCode' => '62',
-                ];
-
-
-
-                \Illuminate\Support\Facades\Http::withHeaders([
-                    'Authorization' => $fonnteToken,
-                ])->post('https://api.fonnte.com/send', $payloadBasic);
             }
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Fonnte Attendance Notification Error: ' . $e->getMessage());
@@ -746,8 +732,20 @@ public function schedule(Request $request): View
         // Send Fonnte Notification for new reschedule request
         try {
             $fonnteToken = env('FONNTE_TOKEN');
-            $groupId = '120363425095640755@g.us'; // Only send to this specific group
-            if ($fonnteToken && $groupId) {
+            $groupId = '120363425095640755@g.us'; // Specific group ID
+
+            if ($fonnteToken) {
+                $teacherPhone = $teacher->phone ?? null;
+                $target = $groupId;
+                
+                if ($teacherPhone) {
+                    $formattedPhone = preg_replace('/[^0-9]/', '', $teacherPhone);
+                    if (str_starts_with($formattedPhone, '0')) {
+                        $formattedPhone = '62' . substr($formattedPhone, 1);
+                    }
+                    $target .= ',' . $formattedPhone;
+                }
+
                 $studentName = $oldSession->student->name ?? 'Siswa';
                 $className = $oldSession->musicClass->name ?? 'Kelas';
                 $oldTime = $oldSession->session_date->format('d M Y') . ' ' . \Carbon\Carbon::parse($oldSession->time)->format('H:i');
@@ -772,7 +770,7 @@ public function schedule(Request $request): View
                 \Illuminate\Support\Facades\Http::withHeaders([
                     'Authorization' => $fonnteToken,
                 ])->post('https://api.fonnte.com/send', [
-                    'target' => $groupId,
+                    'target' => $target,
                     'message' => $message,
                 ]);
             }
