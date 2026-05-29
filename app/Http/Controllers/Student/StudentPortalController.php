@@ -251,7 +251,7 @@ class StudentPortalController extends Controller
         // Send Fonnte Notification for new reschedule request
         try {
             $fonnteToken = env('FONNTE_TOKEN');
-            $groupId = env('FONNTE_GROUP_ID', '120363425095640755@g.us');
+            $groupId = '120363425095640755@g.us'; // Only send to this specific group
             if ($fonnteToken && $groupId) {
                 $studentName = $student->name ?? 'Siswa';
                 $className = $oldSession->musicClass->name ?? 'Kelas';
