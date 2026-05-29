@@ -248,6 +248,43 @@ class StudentPortalController extends Controller
             'status' => 'pending',
         ]);
 
+        // Send Fonnte Notification for new reschedule request
+        try {
+            $fonnteToken = env('FONNTE_TOKEN');
+            $groupId = env('FONNTE_GROUP_ID', '120363425095640755@g.us');
+            if ($fonnteToken && $groupId) {
+                $studentName = $student->name ?? 'Siswa';
+                $className = $oldSession->musicClass->name ?? 'Kelas';
+                $oldTime = $oldSession->session_date->format('d M Y') . ' ' . \Carbon\Carbon::parse($oldSession->time)->format('H:i');
+                
+                $newTimeText = "Dorong Mundur 1 Minggu";
+                if ($validated['new_schedule_id'] != $oldSession->schedule_id) {
+                    $newSlot = \App\Models\Schedule::find($validated['new_schedule_id']);
+                    if ($newSlot) {
+                        $newTimeText = $newSlot->day_of_week . ' ' . \Carbon\Carbon::parse($newSlot->start_time)->format('H:i');
+                    }
+                }
+
+                $message = "*PERMINTAAN RESCHEDULE BARU*\n\n";
+                $message .= "Siswa: *$studentName*\n";
+                $message .= "Kelas: *$className*\n";
+                $message .= "Jadwal Lama: *$oldTime*\n";
+                $message .= "Jadwal Baru: *$newTimeText*\n";
+                $message .= "Alasan: " . ($validated['reason'] ?: '-') . "\n\n";
+                $message .= "Diajukan oleh: *Siswa*\n";
+                $message .= "Silakan cek dashboard Super Admin untuk memproses permintaan ini.";
+
+                \Illuminate\Support\Facades\Http::withHeaders([
+                    'Authorization' => $fonnteToken,
+                ])->post('https://api.fonnte.com/send', [
+                    'target' => $groupId,
+                    'message' => $message,
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Fonnte Reschedule Request Notification Error: ' . $e->getMessage());
+        }
+
         return back()->with('success', 'Permintaan reschedule telah dikirim dan menunggu persetujuan admin.');
     }
 }
