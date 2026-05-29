@@ -408,8 +408,8 @@ public function schedule(Request $request): View
             ->where('status', 'booked')
             ->firstOrFail();
 
-        if ($session->session_date->isFuture()) {
-            return back()->with('error', 'Cannot record attendance for a future session.');
+        if (now()->addMinutes(30)->lt(\Carbon\Carbon::parse($session->session_date->format('Y-m-d') . ' ' . $session->time))) {
+            return back()->with('error', 'Belum bisa absen. Absensi baru dibuka 30 menit sebelum jadwal kelas.');
         }
 
         if ($session->attendance()->exists()) {
@@ -663,5 +663,86 @@ public function schedule(Request $request): View
         }
 
         return back()->with('success', 'Profil berhasil diperbarui.');
+    }
+
+    public function availableSlots(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $teacherId = $request->query('teacher_id');
+        $classId = $request->query('class_id');
+        
+        if (!$teacherId || !$classId) return response()->json(['grouped' => []]);
+
+        $slots = \App\Models\Schedule::query()
+            ->where('teacher_id', $teacherId)
+            ->where('class_id', $classId)
+            ->where('status', 'available')
+            ->orderByRaw("FIELD(day, 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu')")
+            ->orderBy('time')
+            ->get(['id', 'day', 'time']);
+
+        $dayMap = [
+            'Senin' => \Carbon\Carbon::MONDAY,
+            'Selasa' => \Carbon\Carbon::TUESDAY,
+            'Rabu' => \Carbon\Carbon::WEDNESDAY,
+            'Kamis' => \Carbon\Carbon::THURSDAY,
+            'Jumat' => \Carbon\Carbon::FRIDAY,
+            'Sabtu' => \Carbon\Carbon::SATURDAY,
+            'Minggu' => \Carbon\Carbon::SUNDAY,
+        ];
+
+        $grouped = $slots->groupBy('day')->map(function($daySlots, $dayName) use ($dayMap) {
+            $carbonDay = $dayMap[$dayName] ?? \Carbon\Carbon::MONDAY;
+            
+            $now = \Carbon\Carbon::now();
+            if ($now->dayOfWeek === $carbonDay) {
+                $date = $now;
+            } else {
+                $date = $now->copy()->next($carbonDay);
+            }
+
+            return $daySlots->map(fn($s) => [
+                'id' => $s->id,
+                'day' => $s->day,
+                'date_label' => $date->translatedFormat('l, d M Y'),
+                'time' => substr((string)$s->time, 0, 5),
+            ]);
+        });
+
+        return response()->json(['grouped' => $grouped]);
+    }
+
+    public function requestReschedule(Request $request): RedirectResponse
+    {
+        $teacher = $this->teacherFromUser($request->user()->id);
+
+        $validated = $request->validate([
+            'old_session_id' => ['required', 'exists:schedule_sessions,id'],
+            'new_schedule_id' => ['required', 'exists:schedules,id'],
+            'reason' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $oldSession = \App\Models\ScheduleSession::where('id', $validated['old_session_id'])
+            ->where('teacher_id', $teacher->id)
+            ->where('status', 'booked')
+            ->firstOrFail();
+
+        $exists = \App\Models\RescheduleRequest::where('old_session_id', $validated['old_session_id'])
+            ->where('status', 'pending')
+            ->exists();
+
+        if ($exists) {
+            return back()->with('error', 'Sesi ini sudah memiliki permintaan reschedule yang sedang diproses.');
+        }
+
+        \App\Models\RescheduleRequest::create([
+            'student_id' => $oldSession->student_id,
+            'old_schedule_id' => $oldSession->schedule_id,
+            'old_session_id' => $oldSession->id,
+            'new_schedule_id' => $validated['new_schedule_id'],
+            'reason' => $validated['reason'],
+            'status' => 'pending',
+        ]);
+
+        return back()->with('success', 'Permintaan reschedule telah dikirim dan menunggu persetujuan admin.');
     }
 }

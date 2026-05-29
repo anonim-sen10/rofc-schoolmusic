@@ -278,6 +278,10 @@ Route::get('/my-classes', [TeacherPortalController::class, 'myClasses'])->name('
     Route::post('/schedule/attendance', [TeacherPortalController::class, 'storeScheduleAttendance'])->name('schedule.attendance.store');
     Route::get('/profile', [TeacherPortalController::class, 'profile'])->name('profile.index');
     Route::put('/profile', [TeacherPortalController::class, 'updateProfile'])->name('profile.update');
+    
+    // Reschedule
+    Route::get('/schedule/available-slots', [TeacherPortalController::class, 'availableSlots'])->name('schedule.available-slots');
+    Route::post('/schedule/reschedule', [TeacherPortalController::class, 'requestReschedule'])->name('schedule.reschedule.request');
 });
 
 Route::prefix('student')->name('student.')->middleware(['auth', 'role:student'])->group(function () {

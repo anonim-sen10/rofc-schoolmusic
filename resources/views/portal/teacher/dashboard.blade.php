@@ -95,13 +95,38 @@
                         </td>
                         <td class="px-6 py-4" data-label="Action">
                                 <div class="flex items-center justify-end gap-2">
+                                    @php
+                                        $pendingRequest = $schedule->rescheduleRequests->where('status', 'pending')->first();
+                                    @endphp
 
-                                    <button type="button" 
-                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 text-white text-[10px] font-bold shadow-sm hover:bg-blue-700 transition-all active:scale-95"
-                                        onclick="openAttendanceModal('{{ $schedule->id }}', '{{ $schedule->student?->name ?: 'N/A' }}', '{{ $schedule->musicClass?->name ?: 'N/A' }}', '{{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}')">
-                                        <i data-lucide="user-check" class="w-3 h-3"></i>
-                                        <span>ATTENDANCE</span>
-                                    </button>
+                                    @if($pendingRequest)
+                                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-amber-50 text-amber-600 text-[10px] font-bold border border-amber-100 uppercase tracking-widest animate-pulse">
+                                            RESCHEDULE REQ
+                                        </span>
+                                    @elseif(now()->addMinutes(30)->lt(\Carbon\Carbon::parse($schedule->session_date->format('Y-m-d') . ' ' . $schedule->time)))
+                                        <button type="button" 
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-500 text-[10px] font-bold shadow-sm hover:bg-slate-50 transition-all active:scale-95"
+                                            onclick="openRescheduleModal('{{ $schedule->id }}', '{{ $schedule->schedule_id }}', '{{ $schedule->session_date->translatedFormat('l, d M Y') }} - {{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}', '{{ $schedule->teacher_id }}', '{{ $schedule->class_id }}')">
+                                            <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                                            <span>RESCHEDULE</span>
+                                        </button>
+                                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-50 text-slate-400 text-[10px] font-bold border border-slate-100 uppercase tracking-widest">
+                                            UPCOMING
+                                        </span>
+                                    @else
+                                        <button type="button" 
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-500 text-[10px] font-bold shadow-sm hover:bg-slate-50 transition-all active:scale-95"
+                                            onclick="openRescheduleModal('{{ $schedule->id }}', '{{ $schedule->schedule_id }}', '{{ $schedule->session_date->translatedFormat('l, d M Y') }} - {{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}', '{{ $schedule->teacher_id }}', '{{ $schedule->class_id }}')">
+                                            <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                                            <span>RESCHEDULE</span>
+                                        </button>
+                                        <button type="button" 
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 text-white text-[10px] font-bold shadow-sm hover:bg-blue-700 transition-all active:scale-95"
+                                            onclick="openAttendanceModal('{{ $schedule->id }}', '{{ $schedule->student?->name ?: 'N/A' }}', '{{ $schedule->musicClass?->name ?: 'N/A' }}', '{{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}')">
+                                            <i data-lucide="user-check" class="w-3 h-3"></i>
+                                            <span>ATTENDANCE</span>
+                                        </button>
+                                    @endif
                                     <a href="{{ route('teacher.student-progress.input', $schedule->student_id) }}" 
                                         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-500 text-[10px] font-bold hover:bg-slate-50 transition-all active:scale-95">
                                         <i data-lucide="pencil-line" class="w-3 h-3"></i>
@@ -585,6 +610,134 @@
         currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
         stopCamera();
         await startCamera();
+    }
+</script>
+
+<!-- Reschedule Modal -->
+<div id="rescheduleModal" class="hidden items-center justify-center overflow-hidden px-4 transition-all duration-300" style="position: fixed !important; inset: 0 !important; z-index: 999999 !important;">
+    <div class="absolute inset-0 bg-slate-900/5 backdrop-blur-[2px] transition-opacity" onclick="closeRescheduleModal()" style="position: absolute !important; inset: 0 !important;"></div>
+    
+    <div class="relative w-full max-w-lg scale-95 opacity-0 transition-all duration-300" id="rescheduleModalContent">
+        <div class="relative overflow-hidden rounded-[2rem] bg-white shadow-2xl ring-1 ring-slate-100">
+            <!-- Header -->
+            <div class="relative bg-white px-8 pt-8 pb-6 border-b border-slate-50">
+                <div class="absolute right-6 top-6">
+                    <button type="button" onclick="closeRescheduleModal()" class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all">
+                        <i data-lucide="x" class="h-4 w-4"></i>
+                    </button>
+                </div>
+                <div>
+                    <div class="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-500 shadow-inner">
+                        <i data-lucide="refresh-cw" class="h-6 w-6"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900 tracking-tight leading-tight">Request Reschedule</h3>
+                    <p class="mt-1.5 text-xs font-medium text-slate-400">Pilih slot jadwal pengganti yang tersedia untuk sesi ini.</p>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <form action="{{ route('teacher.schedule.reschedule.request') }}" method="POST" id="rescheduleForm" class="px-8 py-6 flex flex-col gap-5">
+                @csrf
+                <input type="hidden" name="old_session_id" id="old_session_id">
+                
+                <!-- Current Schedule Box -->
+                <div class="rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
+                    <label class="mb-2 block text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Jadwal Saat Ini</label>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="calendar" class="w-4 h-4 text-slate-400"></i>
+                        <p id="old_schedule_label_text" class="text-xs font-bold text-slate-700">Loading...</p>
+                    </div>
+                </div>
+
+                <!-- New Schedule Select Box -->
+                <div class="rounded-2xl border border-slate-200 bg-white p-4 focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-50 transition-all">
+                    <label for="new_schedule_id" class="mb-2 block text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Jadwal Pengganti</label>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="clock" class="w-4 h-4 text-slate-400"></i>
+                        <select name="new_schedule_id" id="new_schedule_id" required 
+                            class="w-full bg-transparent text-slate-700 text-xs font-bold outline-none cursor-pointer appearance-none border-none p-0 focus:ring-0">
+                            <option value="">-- Pilih Slot Baru --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Reason Box -->
+                <div class="rounded-2xl border border-slate-200 bg-white p-4 focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-50 transition-all">
+                    <label for="reason" class="mb-2 block text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Alasan Reschedule (Opsional)</label>
+                    <textarea name="reason" id="reason" rows="2" 
+                        class="w-full bg-transparent text-slate-700 text-xs font-medium outline-none resize-none border-none p-0 focus:ring-0 placeholder:text-slate-300"
+                        placeholder="Tuliskan alasan singkat..."></textarea>
+                </div>
+
+                <!-- Footer Buttons -->
+                <div class="mt-2 flex gap-3">
+                    <button type="button" onclick="closeRescheduleModal()" class="flex-1 rounded-2xl bg-slate-50 py-3.5 text-[10px] font-extrabold text-slate-500 tracking-widest uppercase transition-all hover:bg-slate-100 active:scale-95">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-[2] rounded-2xl bg-amber-500 py-3.5 text-[10px] font-extrabold text-white tracking-[0.1em] shadow-xl shadow-amber-100 transition-all hover:bg-amber-600 active:scale-95 uppercase flex items-center justify-center gap-2">
+                        <i data-lucide="send" class="w-3.5 h-3.5"></i> Kirim Permintaan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    #rescheduleModal.active { display: flex !important; }
+    #rescheduleModal.active #rescheduleModalContent { transform: scale(1); opacity: 1; }
+</style>
+
+<script>
+    function openRescheduleModal(oldId, scheduleId, oldLabel, teacherId, classId) {
+        document.getElementById('old_session_id').value = oldId;
+        document.getElementById('old_schedule_label_text').textContent = oldLabel;
+        
+        const modal = document.getElementById('rescheduleModal');
+        modal.style.display = 'flex';
+        // force reflow
+        void modal.offsetWidth;
+        modal.classList.add('active');
+
+        const select = document.getElementById('new_schedule_id');
+        select.innerHTML = '<option value="">Loading slots...</option>';
+
+        fetch(`/teacher/schedule/available-slots?teacher_id=${teacherId}&class_id=${classId}`)
+            .then(res => res.json())
+            .then(data => {
+                select.innerHTML = '<option value="">-- Pilih Slot Baru --</option>';
+
+                const pushGroup = document.createElement('optgroup');
+                pushGroup.label = "Opsi Jadwal Rutin";
+                const pushOpt = document.createElement('option');
+                pushOpt.value = scheduleId;
+                pushOpt.textContent = "➡️ Lewati minggu ini (Dorong Mundur 1 Minggu)";
+                pushGroup.appendChild(pushOpt);
+                select.appendChild(pushGroup);
+
+                if (data.grouped) {
+                    Object.keys(data.grouped).forEach(day => {
+                        const group = document.createElement('optgroup');
+                        group.label = day;
+                        data.grouped[day].forEach(slot => {
+                            const opt = document.createElement('option');
+                            opt.value = slot.id;
+                            opt.textContent = `${slot.date_label} - ${slot.time}`;
+                            group.appendChild(opt);
+                        });
+                        select.appendChild(group);
+                    });
+                }
+                if (window.lucide) window.lucide.createIcons();
+            });
+    }
+
+    function closeRescheduleModal() {
+        const modal = document.getElementById('rescheduleModal');
+        modal.classList.remove('active');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
     }
 </script>
 @endsection
