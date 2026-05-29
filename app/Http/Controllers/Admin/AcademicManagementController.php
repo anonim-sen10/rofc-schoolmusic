@@ -181,12 +181,25 @@ class AcademicManagementController extends Controller
         $teachers = \App\Models\Teacher::orderBy('name')->get();
         $classes = \App\Models\MusicClass::orderBy('name')->get();
 
+        // Calculate summary across all pages, not just the current paginated view
+        $totalCount = $attendances->total();
+        
+        // Clone query to count statuses accurately across all results
+        $presentQuery = clone $query;
+        $presentCount = $presentQuery->where('status', 'present')->count();
+
+        $absentQuery = clone $query;
+        $absentCount = $absentQuery->where('status', 'absent')->count();
+
+        $rescQuery = clone $query;
+        $rescCount = $rescQuery->where('status', 'reschedule')->count();
+
         // Detect whether we are in super-admin or admin context
         $routePrefix = str_contains($request->route()->getName() ?? '', 'super-admin.')
             ? 'super-admin'
             : 'admin';
 
-        return view('portal.admin.attendance', compact('attendances', 'teachers', 'classes', 'date', 'teacherId', 'classId', 'routePrefix'));
+        return view('portal.admin.attendance', compact('attendances', 'teachers', 'classes', 'date', 'teacherId', 'classId', 'routePrefix', 'totalCount', 'presentCount', 'absentCount', 'rescCount'));
     }
 
     public function updateAttendance(Request $request, $id): RedirectResponse

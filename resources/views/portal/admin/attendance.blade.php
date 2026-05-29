@@ -457,12 +457,6 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
     </form>
 
     <!-- SUMMARY CARDS -->
-    @php
-        $totalCount   = $attendances->total();
-        $presentCount = $attendances->getCollection()->where('status', 'present')->count();
-        $absentCount  = $attendances->getCollection()->where('status', 'absent')->count();
-        $rescCount    = $attendances->getCollection()->where('status', 'reschedule')->count();
-    @endphp
     <div class="att-summary">
         <div class="att-summary-card">
             <div class="count">{{ $totalCount }}</div>
