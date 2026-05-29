@@ -128,23 +128,6 @@ $iconMap = [
     </style>
 </head>
 <body class="portal-body">
-    @if(session('impersonator_id'))
-        <div class="bg-slate-900 text-white py-3 px-6 flex justify-between items-center sticky top-0 z-[999999] shadow-2xl backdrop-blur-md border-b border-white/10">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
-                    <i data-lucide="shield-alert" class="w-4 h-4 text-blue-400"></i>
-                </div>
-                <div>
-                    <p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold leading-none mb-1">Impersonation Mode Active</p>
-                    <p class="text-sm font-semibold">Logged in as <span class="text-blue-400">{{ auth()->user()->name }}</span></p>
-                </div>
-            </div>
-            <a href="{{ route('stop-impersonate') }}" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-red-500/20 active:scale-95">
-                <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-                STOP IMPERSONATE
-            </a>
-        </div>
-    @endif
     <div class="portal-shell">
         <aside class="portal-sidebar" data-portal-sidebar>
             <div class="portal-sidebar-header">
@@ -196,6 +179,24 @@ $iconMap = [
             />
 
             <main class="portal-content portal-content--saas px-6 pb-8 lg:px-10 flex-1">
+                @if(session('impersonator_id'))
+                    <div class="mb-6 rounded-2xl bg-slate-900 text-white p-4 lg:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-xl border border-slate-700 relative overflow-hidden">
+                        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-400 via-transparent to-transparent pointer-events-none"></div>
+                        <div class="flex items-center gap-4 relative z-10">
+                            <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30 flex-shrink-0">
+                                <i data-lucide="shield-alert" class="w-5 h-5 text-blue-400"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold leading-none mb-1.5">Impersonation Mode Active</p>
+                                <p class="text-sm font-semibold">Logged in as <span class="text-blue-400">{{ auth()->user()->name }}</span></p>
+                            </div>
+                        </div>
+                        <a href="{{ route('stop-impersonate') }}" class="relative z-10 bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-red-500/20 active:scale-95 w-full sm:w-auto justify-center">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                            STOP IMPERSONATE
+                        </a>
+                    </div>
+                @endif
                 @yield('content')
             </main>
 
