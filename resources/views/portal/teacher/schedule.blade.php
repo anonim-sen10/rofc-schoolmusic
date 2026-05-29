@@ -91,7 +91,9 @@
                                 $pendingRequest = $schedule->rescheduleRequests->where('status', 'pending')->first();
                             @endphp
 
-                            @if($schedule->status === 'rescheduled')
+                            @if(!$schedule->student->is_active)
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-500 text-[9px] font-extrabold border border-slate-200 tracking-wider">INACTIVE</span>
+                            @elseif($schedule->status === 'rescheduled')
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-[9px] font-extrabold border border-slate-200 tracking-wider">RESCHEDULED</span>
                             @elseif($pendingRequest)
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-[9px] font-extrabold border border-amber-200 tracking-wider animate-pulse">RESCHEDULE REQ</span>
@@ -101,7 +103,12 @@
                         </td>
                         <td class="px-8 py-5">
                             <div class="flex items-center justify-end">
-                                @if($schedule->status === 'completed')
+                                @if(!$schedule->student->is_active)
+                                    <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 text-slate-500 border border-slate-200">
+                                        <i data-lucide="user-x" class="w-3.5 h-3.5"></i>
+                                        <span class="text-[9px] font-extrabold tracking-widest uppercase">Inactive</span>
+                                    </div>
+                                @elseif($schedule->status === 'completed')
                                     <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-green-50 text-green-700 border border-green-100">
                                         <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
                                         <span class="text-[9px] font-extrabold tracking-widest uppercase">Finished</span>
@@ -114,6 +121,7 @@
                                         $class = $status === 'present' ? 'bg-blue-50 text-blue-700 border-blue-100' : ($status === 'absent' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-amber-50 text-amber-700 border-amber-100');
                                     @endphp
                                     <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl {{ $class }} border">
+                                        <i data-lucide="{{ $status === 'present' ? 'check' : ($status === 'absent' ? 'x' : 'clock') }}" class="w-3.5 h-3.5"></i>
                                         <span class="text-[9px] font-extrabold tracking-widest uppercase">{{ $status }}</span>
                                     </div>
                                 @elseif(now()->addMinutes(30)->lt(\Carbon\Carbon::parse($schedule->session_date->format('Y-m-d') . ' ' . $schedule->time)))

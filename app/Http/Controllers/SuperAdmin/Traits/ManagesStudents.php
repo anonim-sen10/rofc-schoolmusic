@@ -127,6 +127,14 @@ trait ManagesStudents
                 'student_id' => null,
                 'status' => 'available'
             ]);
+            
+            // Delete future schedule sessions that haven't happened yet
+            \App\Models\ScheduleSession::query()
+                ->where('student_id', $student->id)
+                ->where('status', 'booked')
+                ->where('session_date', '>=', now()->toDateString())
+                ->delete();
+
             $payload['schedule_id'] = null;
         }
 
