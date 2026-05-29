@@ -2351,6 +2351,7 @@
                         <th>Email</th>
                         <th>Telepon</th>
                         <th>Kelas</th>
+                        <th>Jadwal</th>
                         <th>Status</th>
                         <th>Aksi</th>
                     </tr>
@@ -2368,6 +2369,38 @@
                                     {{ $student->classes->pluck('name')->join(', ') }}
                                 @else
                                     -
+                                @endif
+                            </td>
+                            <td data-label="Jadwal" class="class-schedule-cell">
+                                @php
+                                    $bookedSchedules = $student->schedules->filter(function ($schedule) {
+                                        return strtolower((string) $schedule->status) === 'booked';
+                                    });
+                                    $bookedDays = $bookedSchedules->pluck('day')->unique()->values();
+                                    
+                                    $dayOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+                                    $sortedDays = $bookedDays->sortBy(function($day) use ($dayOrder) {
+                                        return array_search(ucfirst(strtolower($day)), $dayOrder);
+                                    });
+                                @endphp
+
+                                @if($sortedDays->isNotEmpty())
+                                    <div class="schedule-tooltip-wrap">
+                                        <span>{{ $sortedDays->implode(', ') }}</span>
+                                        <div class="schedule-tooltip">
+                                            <div class="tooltip-header"><i data-lucide="clock" style="width: 10px; height: 10px;"></i> Waktu Belajar Siswa</div>
+                                            @foreach($sortedDays as $day)
+                                                <div class="tooltip-row">
+                                                    <span class="tooltip-day">{{ ucfirst(strtolower($day)) }}</span>
+                                                    <span class="tooltip-time">
+                                                        {{ $bookedSchedules->where('day', $day)->pluck('time')->map(fn($t) => substr((string)$t, 0, 5))->implode(', ') }}
+                                                    </span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @else
+                                    <span style="color: #cbd5e1;">-</span>
                                 @endif
                             </td>
                             <td data-label="Status">

@@ -131,6 +131,7 @@
                     <tr class="bg-slate-50/50">
                         <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nama Student</th>
                         <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Class</th>
+                        <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Jadwal</th>
                         <th class="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
                         <th class="px-8 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Aksi</th>
                     </tr>
@@ -155,6 +156,31 @@
                                     $displayClass = !empty($classNames) ? implode(', ', $classNames) : '-';
                                 @endphp
                                 <span class="text-xs font-medium text-slate-500">{{ $displayClass }}</span>
+                            </td>
+                            <td class="px-8 py-5" data-label="Jadwal">
+                                @php
+                                    $bookedSchedules = $student->schedules->filter(function ($schedule) {
+                                        return strtolower((string) $schedule->status) === 'booked';
+                                    });
+                                    $bookedDays = $bookedSchedules->pluck('day')->unique()->values();
+                                    
+                                    $dayOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+                                    $sortedDays = $bookedDays->sortBy(function($day) use ($dayOrder) {
+                                        return array_search(ucfirst(strtolower($day)), $dayOrder);
+                                    });
+                                @endphp
+
+                                @if($sortedDays->isNotEmpty())
+                                    <div class="flex flex-col gap-1">
+                                        @foreach($sortedDays as $day)
+                                            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                                {{ $day }}: <span class="text-blue-600">{{ $bookedSchedules->where('day', $day)->pluck('time')->map(fn($t) => substr((string)$t, 0, 5))->implode(', ') }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <span class="text-xs font-medium text-slate-400">-</span>
+                                @endif
                             </td>
                             <td class="px-8 py-5" data-label="Status">
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-lg {{ $student->is_active ? 'bg-green-50 text-green-700 border-green-100' : 'bg-amber-50 text-amber-700 border-amber-100' }} text-[10px] font-bold border">
