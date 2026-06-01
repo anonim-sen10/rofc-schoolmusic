@@ -154,6 +154,7 @@ class AcademicManagementController extends Controller
     public function attendance(Request $request): View
     {
         $date = $request->input('date');
+        $month = $request->input('month');
         $teacherId = $request->input('teacher_id');
         $classId = $request->input('class_id');
 
@@ -165,6 +166,11 @@ class AcademicManagementController extends Controller
 
         if ($date) {
             $query->whereDate('created_at', $date);
+        }
+
+        if ($month) {
+            $query->whereYear('created_at', substr($month, 0, 4))
+                  ->whereMonth('created_at', substr($month, 5, 2));
         }
 
         if ($teacherId) {
@@ -199,12 +205,13 @@ class AcademicManagementController extends Controller
             ? 'super-admin'
             : 'admin';
 
-        return view('portal.admin.attendance', compact('attendances', 'teachers', 'classes', 'date', 'teacherId', 'classId', 'routePrefix', 'totalCount', 'presentCount', 'absentCount', 'rescCount'));
+        return view('portal.admin.attendance', compact('attendances', 'teachers', 'classes', 'date', 'month', 'teacherId', 'classId', 'routePrefix', 'totalCount', 'presentCount', 'absentCount', 'rescCount'));
     }
 
     public function exportAttendance(Request $request)
     {
         $date = $request->input('date');
+        $month = $request->input('month');
         $teacherId = $request->input('teacher_id');
         $classId = $request->input('class_id');
 
@@ -216,6 +223,10 @@ class AcademicManagementController extends Controller
 
         if ($date) {
             $query->whereDate('created_at', $date);
+        }
+        if ($month) {
+            $query->whereYear('created_at', substr($month, 0, 4))
+                  ->whereMonth('created_at', substr($month, 5, 2));
         }
         if ($teacherId) {
             $query->where('teacher_id', $teacherId);
@@ -236,7 +247,7 @@ class AcademicManagementController extends Controller
         $totalCount = $attendances->count();
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('portal.admin.pdf.attendance', compact(
-            'attendances', 'teacher', 'class', 'date', 'presentCount', 'absentCount', 'rescCount', 'totalCount'
+            'attendances', 'teacher', 'class', 'date', 'month', 'presentCount', 'absentCount', 'rescCount', 'totalCount'
         ));
 
         // Set paper size and orientation if needed

@@ -76,8 +76,8 @@
     <div class="summary-box">
         <table>
             <tr>
-                <td width="15%"><strong>Filter Tanggal</strong></td>
-                <td width="35%">: {{ $date ? \Carbon\Carbon::parse($date)->format('d F Y') : 'Semua Waktu' }}</td>
+                <td width="15%"><strong>Filter Waktu</strong></td>
+                <td width="35%">: {{ $date ? \Carbon\Carbon::parse($date)->format('d F Y') : ($month ?? false ? \Carbon\Carbon::parse($month . '-01')->format('F Y') : 'Semua Waktu') }}</td>
                 <td width="15%"><strong>Total Data</strong></td>
                 <td width="35%">: {{ $totalCount }} Sesi</td>
             </tr>

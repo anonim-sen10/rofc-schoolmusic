@@ -430,7 +430,11 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
     <form method="GET" action="{{ $attendanceRoute }}" class="att-filters">
         <div class="filter-group">
             <label for="att-date">Date</label>
-            <input type="date" id="att-date" name="date" value="{{ $date }}">
+            <input type="date" id="att-date" name="date" value="{{ $date ?? '' }}">
+        </div>
+        <div class="filter-group">
+            <label for="att-month">Month</label>
+            <input type="month" id="att-month" name="month" value="{{ $month ?? '' }}">
         </div>
         <div class="filter-group">
             <label for="att-teacher">Teacher</label>
