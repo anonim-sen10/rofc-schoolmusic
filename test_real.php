@@ -32,7 +32,8 @@ $message .= "_Perubahan jadwal ini telah dikonfirmasi oleh Admin._";
     'countryCode' => '62',
 ]);
 
-// Send to Group 2
+// Send to Group 2 - Dinonaktifkan
+/*
 \Illuminate\Support\Facades\Http::withHeaders([
     'Authorization' => $fonnteToken,
 ])->post('https://api.fonnte.com/send', [
@@ -40,5 +41,6 @@ $message .= "_Perubahan jadwal ini telah dikonfirmasi oleh Admin._";
     'message' => $message,
     'countryCode' => '62',
 ]);
+*/
 
 echo "Pesan berhasil dikirim ke dua grup secara nyata!\n";

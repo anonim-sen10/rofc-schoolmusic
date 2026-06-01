@@ -141,7 +141,8 @@ class RescheduleManagementController extends Controller
                         'Authorization' => $fonnteToken,
                     ])->post('https://api.fonnte.com/send', $payloadFull);
                     
-                    // Send to Group 2
+                    // Send to Group 2 - Dinonaktifkan
+                    /*
                     $payloadBasic = [
                         'target' => $groupBasic,
                         'message' => $message,
@@ -150,6 +151,7 @@ class RescheduleManagementController extends Controller
                     \Illuminate\Support\Facades\Http::withHeaders([
                         'Authorization' => $fonnteToken,
                     ])->post('https://api.fonnte.com/send', $payloadBasic);
+                    */
                 }
             } catch (\Exception $e) {
                 // Ignore notification errors

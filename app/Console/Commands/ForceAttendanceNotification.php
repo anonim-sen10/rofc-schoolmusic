@@ -145,7 +145,8 @@ class ForceAttendanceNotification extends Command
             $this->line($responseFull->body());
         }
 
-        // 2. Pesan Biasa (Basic)
+        // 2. Pesan Biasa (Basic) - Dinonaktifkan
+        /*
         $messageBasic = "✅ *INFO KEHADIRAN KELAS (ROFC MUSIC)*\n\n";
         $messageBasic .= "Coach *{$teacherName}* baru saja mencatat kehadiran untuk sesi:\n\n";
         $messageBasic .= "Siswa: *{$studentName}*\n";
@@ -168,5 +169,6 @@ class ForceAttendanceNotification extends Command
             $this->error('Gagal mengirim pesan BIASA via Fonnte.');
             $this->line($responseBasic->body());
         }
+        */
     }
 }
