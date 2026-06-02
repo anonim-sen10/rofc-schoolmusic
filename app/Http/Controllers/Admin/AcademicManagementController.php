@@ -159,9 +159,10 @@ class AcademicManagementController extends Controller
         $classId = $request->input('class_id');
 
         $query = \App\Models\Attendance::with([
-            'schedule.class',
-            'schedule.teacher',
-            'schedule.student.user'
+            'schedule',
+            'musicClass',
+            'teacher',
+            'student.user'
         ]);
 
         if ($date) {
@@ -216,9 +217,10 @@ class AcademicManagementController extends Controller
         $classId = $request->input('class_id');
 
         $query = \App\Models\Attendance::with([
-            'schedule.class',
-            'schedule.teacher',
-            'schedule.student.user'
+            'schedule',
+            'musicClass',
+            'teacher',
+            'student.user'
         ]);
 
         if ($date) {
