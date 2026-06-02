@@ -190,8 +190,8 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'role:su
         ->whereIn('module', ['users', 'roles', 'classes', 'teachers', 'schedule', 'students', 'registrations', 'reschedule', 'finance', 'reports', 'blog', 'gallery', 'events', 'testimonials', 'settings', 'logs', 'attendance'])
         ->name('module');
     // Reschedule management
-    Route::post('/reschedule/{id}/approve', [\App\Http\Controllers\Admin\RescheduleManagementController::class, 'approve'])->name('reschedule.approve');
-    Route::post('/reschedule/{id}/reject', [\App\Http\Controllers\Admin\RescheduleManagementController::class, 'reject'])->name('reschedule.reject');
+    Route::match(['get', 'post'], '/reschedule/{id}/approve', [\App\Http\Controllers\Admin\RescheduleManagementController::class, 'approve'])->name('reschedule.approve');
+    Route::match(['get', 'post'], '/reschedule/{id}/reject', [\App\Http\Controllers\Admin\RescheduleManagementController::class, 'reject'])->name('reschedule.reject');
 });
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_admin'])->group(function () {
@@ -242,8 +242,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
         ->name('module');
 
     // Reschedule management
-    Route::post('/reschedule/{id}/approve', [\App\Http\Controllers\Admin\RescheduleManagementController::class, 'approve'])->name('reschedule.approve');
-    Route::post('/reschedule/{id}/reject', [\App\Http\Controllers\Admin\RescheduleManagementController::class, 'reject'])->name('reschedule.reject');
+    Route::match(['get', 'post'], '/reschedule/{id}/approve', [\App\Http\Controllers\Admin\RescheduleManagementController::class, 'approve'])->name('reschedule.approve');
+    Route::match(['get', 'post'], '/reschedule/{id}/reject', [\App\Http\Controllers\Admin\RescheduleManagementController::class, 'reject'])->name('reschedule.reject');
 });
 
 Route::prefix('finance')->name('finance.')->middleware(['auth', 'role:finance'])->group(function () {
