@@ -80,7 +80,7 @@ class Student extends Model
         return $this->belongsTo(Schedule::class, 'schedule_id');
     }
 
-    public function class(): BelongsTo
+    public function musicClass(): BelongsTo
     {
         return $this->belongsTo(MusicClass::class, 'class_id');
     }

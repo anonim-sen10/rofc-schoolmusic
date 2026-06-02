@@ -519,7 +519,7 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
                                     {{ $att->student->name ?? '-' }}
                                 </span>
                             </td>
-                            <td style="white-space: nowrap; font-weight: 500; color: #475569;">{{ $att->class->name ?? '-' }}</td>
+                            <td style="white-space: nowrap; font-weight: 500; color: #475569;">{{ $att->musicClass->name ?? '-' }}</td>
                             <td>
                                 <span class="att-badge att-badge-{{ $status }}">
                                     @if($status === 'present') ✔
@@ -657,7 +657,7 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
                     </article>
                     <article>
                         <p>Kelas</p>
-                        <p>{{ $att->class->name ?? '-' }}</p>
+                        <p>{{ $att->musicClass->name ?? '-' }}</p>
                     </article>
                     <article class="registration-modal-item-full">
                         <p>Guru Pengajar</p>
@@ -729,7 +729,7 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
                 </div>
                 <div class="att-modal-body">
                     <div style="margin-bottom: 1rem; background: #eff6ff; padding: 0.6rem 0.8rem; border-radius: 6px; border: 1px solid #bfdbfe; font-size: 0.775rem; color: #1e40af; line-height: 1.4;">
-                        Mengubah presensi kelas <strong>{{ $att->class->name ?? '-' }}</strong> untuk siswa <strong>{{ $att->student->name ?? '-' }}</strong>.
+                        Mengubah presensi kelas <strong>{{ $att->musicClass->name ?? '-' }}</strong> untuk siswa <strong>{{ $att->student->name ?? '-' }}</strong>.
                     </div>
 
                     <div style="margin-bottom: 1rem;">

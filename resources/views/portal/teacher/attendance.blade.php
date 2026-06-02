@@ -242,7 +242,7 @@
                 @foreach($records as $row)
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="px-8 py-4 text-xs text-slate-500">{{ optional($row->attendance_date)->format('d/m/Y') }}</td>
-                        <td class="px-8 py-4 text-xs font-bold text-slate-700">{{ $row->class?->name }}</td>
+                        <td class="px-8 py-4 text-xs font-bold text-slate-700">{{ $row->musicClass?->name }}</td>
                         <td class="px-8 py-4 text-xs font-bold text-slate-700">{{ $row->student?->name }}</td>
                         <td class="px-8 py-4 text-right">
                             <span class="inline-flex items-center px-2 py-0.5 rounded-lg {{ $row->status === 'present' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-slate-50 text-slate-500' }} text-[9px] font-bold border uppercase">

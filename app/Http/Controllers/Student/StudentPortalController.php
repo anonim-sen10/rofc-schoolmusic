@@ -72,7 +72,7 @@ class StudentPortalController extends Controller
         $student = $this->studentFromUser($request->user()->id, $request->user()->name, $request->user()->email);
         
         // Load the main class assigned to the student (via class_id column)
-        $assignedClass = $student->class()->with('teacher')->first();
+        $assignedClass = $student->musicClass()->with('teacher')->first();
 
         return view('portal.student.my-class', [
             'student' => $student,

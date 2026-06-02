@@ -2363,8 +2363,8 @@
                             <td data-label="Email">{{ $student->email ?: '-' }}</td>
                             <td data-label="Telepon">{{ $student->phone ?: '-' }}</td>
                             <td data-label="Kelas">
-                                @if($student->class)
-                                    {{ $student->class->name }}
+                                @if($student->musicClass)
+                                    {{ $student->musicClass->name }}
                                 @elseif($student->classes->isNotEmpty())
                                     {{ $student->classes->pluck('name')->join(', ') }}
                                 @else
@@ -2462,8 +2462,8 @@
                                                     <article class="registration-modal-item-full">
                                                         <p>Kelas Terdaftar</p>
                                                         <p>
-                                                            @if($student->class)
-                                                                {{ $student->class->name }}
+                                                            @if($student->musicClass)
+                                                                {{ $student->musicClass->name }}
                                                             @elseif($student->classes->isNotEmpty())
                                                                 {{ $student->classes->pluck('name')->join(', ') }}
                                                             @else
@@ -2846,7 +2846,7 @@
                             $emailOrtu = $registrationItem->email_ortu ?: ($legacyNotesMap['Email Ortu'] ?? '-');
 
                             $instrumenValue = $registrationItem->instrumen ?: ($legacyNotesMap['Instrumen'] ?? '');
-                            $instrumenText = $instrumenValue !== '' ? $instrumenValue : ($registrationItem->class?->name ?? '-');
+                            $instrumenText = $instrumenValue !== '' ? $instrumenValue : ($registrationItem->musicClass?->name ?? '-');
 
                             $hariPilihanText = $registrationItem->preferred_schedule ?? '-';
                             $hariPilihanArray = is_array($registrationItem->hari_pilihan)
@@ -2920,7 +2920,7 @@
                                 'experienceDescription' => $deskripsiPengalaman,
                                 'status' => strtoupper($registrationStatus),
                                 'statusValue' => $registrationStatus,
-                                'selectedClass' => $registrationItem->class?->name ?? '-',
+                                'selectedClass' => $registrationItem->musicClass?->name ?? '-',
                                 'classId' => (string) ($registrationItem->class_id ?? ''),
                                 'instrumentValue' => $instrumenValue,
                                 'additionalProgramRaw' => $programTambahanArray,
@@ -3035,7 +3035,7 @@
                                                     <article><p>Pengalaman Belajar</p><p>{{ $pengalamanText }}</p></article>
                                                     <article class="registration-modal-item-full"><p>Deskripsi Pengalaman</p><p>{{ $deskripsiPengalaman }}</p></article>
                                                     <article><p>Status</p><p>{{ strtoupper($registrationStatus) }}</p></article>
-                                                    <article><p>Kelas Terpilih</p><p>{{ $registrationItem->class?->name ?? '-' }}</p></article>
+                                                    <article><p>Kelas Terpilih</p><p>{{ $registrationItem->musicClass?->name ?? '-' }}</p></article>
                                                 </section>
                                             </div>
                                             <footer class="registration-modal-footer">
@@ -3105,7 +3105,7 @@
                                                         }
                                                     @endphp
                                                     
-                                                    @if($registrationItem->class_id && $registrationItem->class)
+                                                    @if($registrationItem->class_id && $registrationItem->musicClass)
                                                         <label>Filter Guru (Lihat Jadwal Guru Tertentu)
                                                             <select onchange="filterRegSchedules(this, '{{ $registrationItem->id }}')" class="premium-select-filter">
                                                                 <option value="">Semua Guru</option>
@@ -3839,7 +3839,7 @@
                                                                 'name' => $student?->user?->name ?? ($student?->name ?? '-'),
                                                                 'phone' => $student?->phone ?? '-',
                                                                 'address' => $student?->address ?? '-',
-                                                                'class_name' => $student->class?->name ?? $student->classes?->pluck('name')->implode(', ') ?? $className,
+                                                                'class_name' => $student->musicClass?->name ?? $student->classes?->pluck('name')->implode(', ') ?? $className,
                                                                 'teacher_name' => $teacherName
                                                             ] : null;
                                                         @endphp

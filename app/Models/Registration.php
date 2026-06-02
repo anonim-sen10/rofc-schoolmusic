@@ -53,7 +53,7 @@ class Registration extends Model
         'pengalaman' => 'bool',
     ];
 
-    public function class(): BelongsTo
+    public function musicClass(): BelongsTo
     {
         return $this->belongsTo(MusicClass::class, 'class_id');
     }

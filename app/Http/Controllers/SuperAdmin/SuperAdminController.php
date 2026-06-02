@@ -212,7 +212,7 @@ class SuperAdminController extends Controller
             'recentRegistrations' => Registration::latest()->take(8)->get(),
             'recentPayments' => Payment::with('student')->latest()->take(8)->get(),
             'recentTeacherAttendances' => TeacherAttendance::with('teacher')->latest('attendance_date')->take(8)->get(),
-            'recentStudentAttendances' => Attendance::with(['student', 'class'])->latest('created_at')->take(8)->get(),
+            'recentStudentAttendances' => Attendance::with(['student', 'musicClass'])->latest('created_at')->take(8)->get(),
             'recentProgress' => StudentProgress::latest()->take(8)->get(),
             'totalActivities' => $totalActivities,
             'todayActivities' => $todayActivities,
@@ -296,10 +296,10 @@ class SuperAdminController extends Controller
                     : collect();
                 break;
             case 'students':
-                $data['studentsForManagement'] = Student::query()->with(['class', 'classes', 'scheduleSessions.schedule'])->latest()->get();
+                $data['studentsForManagement'] = Student::query()->with(['musicClass', 'classes', 'scheduleSessions.schedule'])->latest()->get();
                 $data['classesForManagement'] = MusicClass::query()->orderBy('name')->get(['id', 'name']);
                 $data['approvedRegistrationsForStudents'] = Registration::query()
-                    ->with('class')
+                    ->with('musicClass')
                     ->where('status', 'accepted')
                     ->latest('updated_at')
                     ->get();
@@ -312,7 +312,7 @@ class SuperAdminController extends Controller
                     : collect();
                 break;
             case 'registrations':
-                $data['registrationsForManagement'] = Registration::query()->with(['class', 'schedules'])->latest()->get();
+                $data['registrationsForManagement'] = Registration::query()->with(['musicClass', 'schedules'])->latest()->get();
                 $data['classesForManagement'] = MusicClass::query()->orderBy('name')->get(['id', 'name']);
                 $data['schedulesForManagement'] = $scheduleFeatureReady ? Schedule::where('status', 'available')->get() : collect();
                 break;
@@ -471,11 +471,11 @@ class SuperAdminController extends Controller
                 'title' => 'Registrations',
                 'description' => 'Data pendaftaran masuk website.',
                 'columns' => ['Nama', 'Email', 'Telepon', 'Instrumen', 'Jadwal', 'Status'],
-                'rows' => Registration::with(['class', 'schedules'])->latest()->take(50)->get()->map(fn (Registration $registration) => [
+                'rows' => Registration::with(['musicClass', 'schedules'])->latest()->take(50)->get()->map(fn (Registration $registration) => [
                     $registration->full_name,
                     $registration->email,
                     $registration->phone,
-                    $registration->class?->name ?? ($registration->instrumen ?? '-'),
+                    $registration->musicClass?->name ?? ($registration->instrumen ?? '-'),
                     $registration->schedules->count() . ' Slot',
                     strtoupper((string) $registration->status),
                 ])->all(),

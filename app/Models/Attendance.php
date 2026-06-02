@@ -46,7 +46,7 @@ class Attendance extends Model
         return $this->belongsTo(Schedule::class);
     }
 
-    public function class(): \Illuminate\Database\Eloquent\Relations\HasOneThrough
+    public function musicClass(): \Illuminate\Database\Eloquent\Relations\HasOneThrough
     {
         return $this->hasOneThrough(
             MusicClass::class,

@@ -161,7 +161,7 @@
                             <td>{{ $att->created_at->format('d M Y') }}</td>
                             <td>{{ $att->schedule ? \Carbon\Carbon::parse($att->schedule->time)->format('H:i') : '-' }}</td>
                             <td>{{ $att->student->name ?? '-' }}</td>
-                            <td>{{ $att->class->name ?? '-' }}</td>
+                            <td>{{ $att->musicClass->name ?? '-' }}</td>
                             <td class="text-center">
                                 @php $status = strtolower($att->status); @endphp
                                 <span class="badge badge-{{ $status }}">{{ $status }}</span>

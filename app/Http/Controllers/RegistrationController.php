@@ -276,7 +276,7 @@ class RegistrationController extends Controller
         try {
             DB::transaction(function () use ($id): void {
                 $registration = Registration::query()
-                    ->with(['schedules', 'class'])
+                    ->with(['schedules', 'musicClass'])
                     ->lockForUpdate()
                     ->findOrFail($id);
 

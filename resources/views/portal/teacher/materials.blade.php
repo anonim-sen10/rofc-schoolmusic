@@ -108,9 +108,9 @@
                                 </div>
                             </td>
                             <td class="px-8 py-5">
-                                @if($row->class)
+                                @if($row->musicClass)
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-lg bg-blue-50 text-blue-600 text-[10px] font-bold border border-blue-100">
-                                        {{ $row->class->name }}
+                                        {{ $row->musicClass->name }}
                                     </span>
                                 @else
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-lg bg-slate-50 text-slate-400 text-[10px] font-bold border border-slate-100 uppercase tracking-wider">

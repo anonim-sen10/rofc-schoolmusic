@@ -127,7 +127,7 @@ public function dashboard(Request $request): View
             'classOptions' => $classes,
             'hasAssignedClasses' => $hasAssignedClasses,
             'classStudents' => $classStudents,
-            'records' => Attendance::with(['class', 'student'])->where('teacher_id', $teacher->id)->latest('created_at')->take(20)->get(),
+            'records' => Attendance::with(['musicClass', 'student'])->where('teacher_id', $teacher->id)->latest('created_at')->take(20)->get(),
             'teacherRecords' => TeacherAttendance::with('teacher')->where('teacher_id', $teacher->id)->latest('attendance_date')->take(20)->get(),
             'hasTeacherAttendanceToday' => $hasTeacherAttendanceToday,
         ]);
