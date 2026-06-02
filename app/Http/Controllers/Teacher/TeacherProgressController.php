@@ -31,16 +31,25 @@ class TeacherProgressController extends Controller
         $student = Student::query()
             ->where('id', $studentId)
             ->where(function($query) use ($teacher) {
-                // Cek lewat Kelas
-                $query->whereHas('classes', function ($q) use ($teacher) {
-                    $q->where(fn($sq) => $sq->where('classes.teacher_id', $teacher->id)
-                        ->orWhereHas('teachers', fn($t) => $t->where('teachers.id', $teacher->id))
-                    );
-                })
-                // ATAU Cek lewat Jadwal
-                ->orWhereHas('scheduleSessions', function ($q) use ($teacher) {
-                    $q->where('schedule_sessions.teacher_id', $teacher->id);
-                });
+                $teacherId = $teacher->id;
+                $classIds = $teacher->musicClasses()->pluck('classes.id')
+                    ->merge($teacher->classes()->pluck('id'))
+                    ->unique();
+
+                // 1. Siswa yang punya jadwal eksplisit dengan guru ini
+                $query->whereHas('schedules', fn($q) => $q->where('teacher_id', $teacherId))
+                      ->orWhereHas('scheduleSessions', fn($q) => $q->where('teacher_id', $teacherId))
+                      // 2. ATAU siswa di kelas guru ini, TAPI tidak punya jadwal dengan guru LAIN di kelas tersebut
+                      ->orWhereHas('classes', function ($q) use ($classIds, $teacherId) {
+                          $q->whereIn('classes.id', $classIds)
+                            ->whereNotExists(function ($sub) use ($teacherId) {
+                                $sub->select(\Illuminate\Support\Facades\DB::raw(1))
+                                    ->from('schedules')
+                                    ->whereColumn('schedules.student_id', 'class_students.student_id')
+                                    ->whereColumn('schedules.class_id', 'class_students.class_id')
+                                    ->where('schedules.teacher_id', '!=', $teacherId);
+                            });
+                      });
             })
             ->with([
                 'classes' => function ($query) use ($teacher) {

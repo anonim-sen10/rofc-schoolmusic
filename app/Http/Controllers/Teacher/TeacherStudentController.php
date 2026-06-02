@@ -31,16 +31,25 @@ class TeacherStudentController extends Controller
             ->merge($teacher->classes()->pluck('id'))
             ->unique();
         
-        // 2. Ambil ID Siswa dari tabel ScheduleSession
-        $studentIdsFromSchedule = \App\Models\ScheduleSession::where('teacher_id', $teacher->id)
-            ->pluck('student_id')
-            ->unique();
+        $teacherId = $teacher->id;
 
         $students = Student::query()
             ->select(['students.id', 'students.name', 'students.is_active', 'students.phone', 'students.email', 'students.address'])
-            ->where(function($query) use ($classIds, $studentIdsFromSchedule) {
-                $query->whereHas('classes', fn ($q) => $q->whereIn('classes.id', $classIds))
-                      ->orWhereIn('students.id', $studentIdsFromSchedule);
+            ->where(function($query) use ($classIds, $teacherId) {
+                // 1. Siswa yang punya jadwal eksplisit dengan guru ini
+                $query->whereHas('schedules', fn($q) => $q->where('teacher_id', $teacherId))
+                      ->orWhereHas('scheduleSessions', fn($q) => $q->where('teacher_id', $teacherId))
+                      // 2. ATAU siswa di kelas guru ini, TAPI tidak punya jadwal dengan guru LAIN di kelas tersebut
+                      ->orWhereHas('classes', function ($q) use ($classIds, $teacherId) {
+                          $q->whereIn('classes.id', $classIds)
+                            ->whereNotExists(function ($sub) use ($teacherId) {
+                                $sub->select(\Illuminate\Support\Facades\DB::raw(1))
+                                    ->from('schedules')
+                                    ->whereColumn('schedules.student_id', 'class_students.student_id')
+                                    ->whereColumn('schedules.class_id', 'class_students.class_id')
+                                    ->where('schedules.teacher_id', '!=', $teacherId);
+                            });
+                      });
             })
             ->with([
                 'classes' => fn($q) => $q->select(['classes.id', 'classes.name'])
