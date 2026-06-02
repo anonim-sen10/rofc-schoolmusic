@@ -485,42 +485,10 @@ class SuperAdminController extends Controller
                 'description' => 'Permintaan pindah jadwal dari siswa.',
                 'columns' => ['Siswa', 'Lama', 'Baru', 'Guru', 'Status', 'Aksi'],
                 'rows' => \App\Models\RescheduleRequest::with(['student', 'oldSession', 'newSchedule.teacher'])->latest()->take(50)->get()->map(function ($r) {
-                    $newLabel = '-';
-                    if ($r->newSchedule && $r->oldSession) {
-                        $dayMap = [
-                            'Senin' => Carbon::MONDAY,
-                            'Selasa' => Carbon::TUESDAY,
-                            'Rabu' => Carbon::WEDNESDAY,
-                            'Kamis' => Carbon::THURSDAY,
-                            'Jumat' => Carbon::FRIDAY,
-                            'Sabtu' => Carbon::SATURDAY,
-                            'Minggu' => Carbon::SUNDAY,
-                        ];
-                        $isPushBack = ($r->new_schedule_id == $r->oldSession->schedule_id);
-
-                        if ($isPushBack) {
-                            $newLabel = '➡️ Dorong Mundur 1 Minggu';
-                        } else {
-                            $newDayNum = $dayMap[$r->newSchedule->day] ?? Carbon::MONDAY;
-                            $oldDate = Carbon::parse($r->oldSession->session_date);
-                            $newDate = $oldDate->copy()->startOfWeek()->addDays($newDayNum - 1);
-                            
-                            if ($newDate->lt(now()->startOfDay())) {
-                                $newDate->addWeek();
-                            }
-                            
-                            $newLabel = $newDate->translatedFormat('l, d M Y') . ' - ' . substr((string) $r->newSchedule->time, 0, 5);
-                        }
-                    } else if ($r->newSchedule) {
-                        $newLabel = $r->newSchedule->day . ' ' . substr((string) $r->newSchedule->time, 0, 5);
-                    }
-
                     return [
                         $r->student->name,
-                        $r->oldSession
-                            ? $r->oldSession->session_date->format('l, d M Y') . ' - ' . substr((string) $r->oldSession->time, 0, 5)
-                            : ($r->oldSchedule ? $r->oldSchedule->day . ' ' . substr((string) $r->oldSchedule->time, 0, 5) : '-'),
-                        $newLabel,
+                        $r->old_label,
+                        $r->new_label,
                         $r->newSchedule->teacher->name ?? '-',
                         strtoupper((string) $r->status),
                         $r

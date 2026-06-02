@@ -33,8 +33,8 @@ $requests = \App\Models\RescheduleRequest::with(['student', 'oldSchedule', 'newS
                 @endphp
                 <tr>
                     <td>{{ $req->student->name }}</td>
-                    <td>{{ $req->oldSchedule->day }} {{ substr((string)$req->oldSchedule->time, 0, 5) }}</td>
-                    <td>{{ $req->newSchedule->day }} {{ substr((string)$req->newSchedule->time, 0, 5) }}</td>
+                    <td>{{ $req->old_label }}</td>
+                    <td>{{ $req->new_label }}</td>
                     <td>{{ $req->newSchedule->teacher->name ?? '-' }}</td>
                     <td><x-ui.badge :type="$badgeType">{{ strtoupper($status) }}</x-ui.badge></td>
                     <td>

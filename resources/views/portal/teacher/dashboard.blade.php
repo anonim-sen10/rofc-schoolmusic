@@ -175,13 +175,11 @@
                     <tr class="hover:bg-slate-50/50 transition-colors">
                         <td class="px-8 py-4 text-sm font-bold text-slate-700" data-label="Student">{{ $request->student->name }}</td>
                         <td class="px-8 py-4 text-xs font-medium text-slate-500" data-label="Old Slot">
-                            @if($request->oldSession)
-                                {{ $request->oldSession->session_date->translatedFormat('l, d M Y') }} - {{ substr($request->oldSession->time, 0, 5) }}
-                            @else
-                                {{ ucfirst($request->oldSchedule->day) }} {{ substr($request->oldSchedule->time, 0, 5) }}
-                            @endif
+                            {{ $request->old_label }}
                         </td>
-                        <td class="px-8 py-4 text-xs font-medium text-slate-500" data-label="New Slot">{{ ucfirst($request->newSchedule->day) }} {{ substr($request->newSchedule->time, 0, 5) }}</td>
+                        <td class="px-8 py-4 text-xs font-medium text-slate-500" data-label="New Slot">
+                            {{ $request->new_label }}
+                        </td>
                         <td class="px-8 py-4 text-right" data-label="Status">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">
                                 PENDING ADMIN

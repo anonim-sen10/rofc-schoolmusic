@@ -676,25 +676,54 @@ public function schedule(Request $request): View
             'Minggu' => \Carbon\Carbon::SUNDAY,
         ];
 
-        $grouped = $slots->groupBy('day')->map(function($daySlots, $dayName) use ($dayMap) {
+        $allSlots = [];
+        $slots->groupBy('day')->each(function($daySlots, $dayName) use ($dayMap, &$allSlots) {
             $carbonDay = $dayMap[$dayName] ?? \Carbon\Carbon::MONDAY;
             
             $now = \Carbon\Carbon::now();
             if ($now->dayOfWeek === $carbonDay) {
-                $date = $now;
+                $dateThisWeek = $now->copy();
             } else {
-                $date = $now->copy()->next($carbonDay);
+                $dateThisWeek = $now->copy()->next($carbonDay);
             }
+            
+            $dateLastWeek = $dateThisWeek->copy()->subWeek();
+            $dateNextWeek = $dateThisWeek->copy()->addWeek();
 
-            return $daySlots->map(fn($s) => [
-                'id' => $s->id,
-                'day' => $s->day,
-                'date_label' => $date->translatedFormat('l, d M Y'),
-                'time' => substr((string)$s->time, 0, 5),
-            ]);
+            foreach ($daySlots as $s) {
+                $allSlots[] = [
+                    'id' => $s->id . '|' . $dateLastWeek->format('Y-m-d'),
+                    'day' => $s->day,
+                    'date_label' => $dateLastWeek->translatedFormat('l, d M Y'),
+                    'time' => substr((string)$s->time, 0, 5),
+                    'group' => 'Minggu Lalu'
+                ];
+                $allSlots[] = [
+                    'id' => $s->id . '|' . $dateThisWeek->format('Y-m-d'),
+                    'day' => $s->day,
+                    'date_label' => $dateThisWeek->translatedFormat('l, d M Y'),
+                    'time' => substr((string)$s->time, 0, 5),
+                    'group' => 'Minggu Ini'
+                ];
+                $allSlots[] = [
+                    'id' => $s->id . '|' . $dateNextWeek->format('Y-m-d'),
+                    'day' => $s->day,
+                    'date_label' => $dateNextWeek->translatedFormat('l, d M Y'),
+                    'time' => substr((string)$s->time, 0, 5),
+                    'group' => 'Minggu Depan'
+                ];
+            }
         });
+        
+        $grouped = collect($allSlots)->groupBy('group');
+        
+        $orderedGrouped = [
+            'Minggu Lalu' => $grouped->get('Minggu Lalu')?->sortBy(fn($s) => explode('|', $s['id'])[1])->values()->all() ?? [],
+            'Minggu Ini' => $grouped->get('Minggu Ini')?->sortBy(fn($s) => explode('|', $s['id'])[1])->values()->all() ?? [],
+            'Minggu Depan' => $grouped->get('Minggu Depan')?->sortBy(fn($s) => explode('|', $s['id'])[1])->values()->all() ?? [],
+        ];
 
-        return response()->json(['grouped' => $grouped]);
+        return response()->json(['grouped' => array_filter($orderedGrouped)]);
     }
 
     public function requestReschedule(Request $request): RedirectResponse
@@ -703,9 +732,20 @@ public function schedule(Request $request): View
 
         $validated = $request->validate([
             'old_session_id' => ['required', 'exists:schedule_sessions,id'],
-            'new_schedule_id' => ['required', 'exists:schedules,id'],
+            'new_schedule_id' => ['required', 'string'], // format: schedule_id|date or just schedule_id
             'reason' => ['nullable', 'string', 'max:500'],
         ]);
+        
+        $newScheduleIdRaw = $validated['new_schedule_id'];
+        $newDate = null;
+
+        if (str_contains($newScheduleIdRaw, '|')) {
+            [$parsedId, $parsedDate] = explode('|', $newScheduleIdRaw);
+            $newScheduleId = $parsedId;
+            $newDate = $parsedDate;
+        } else {
+            $newScheduleId = $newScheduleIdRaw;
+        }
 
         $oldSession = \App\Models\ScheduleSession::where('id', $validated['old_session_id'])
             ->where('teacher_id', $teacher->id)
@@ -724,7 +764,8 @@ public function schedule(Request $request): View
             'student_id' => $oldSession->student_id,
             'old_schedule_id' => $oldSession->schedule_id,
             'old_session_id' => $oldSession->id,
-            'new_schedule_id' => $validated['new_schedule_id'],
+            'new_schedule_id' => $newScheduleId,
+            'new_date' => $newDate,
             'reason' => $validated['reason'],
             'status' => 'pending',
         ]);

@@ -117,9 +117,24 @@
                 <input type="hidden" id="old_schedule_label">
             </div>
 
+            <!-- Period Selection -->
+            <div class="border border-gray-200 rounded-xl p-4 bg-gray-50 focus-within:border-blue-300 transition-all mb-4">
+                <label for="week_selector" class="text-xs text-gray-500 block mb-1 cursor-pointer">Pilih Periode</label>
+                <div class="flex items-center gap-2">
+                    <i data-lucide="calendar" class="w-4 h-4 text-gray-400"></i>
+                    <select id="week_selector" class="w-full bg-transparent text-gray-800 text-sm font-semibold outline-none cursor-pointer appearance-none" onchange="filterSlotsByWeek()">
+                        <option value="">-- Pilih Periode --</option>
+                        <option value="routine">➡️ Lewati minggu ini (Dorong Mundur)</option>
+                        <option value="Minggu Lalu">Minggu Lalu</option>
+                        <option value="Minggu Ini">Minggu Ini</option>
+                        <option value="Minggu Depan">Minggu Depan</option>
+                    </select>
+                </div>
+            </div>
+
             <!-- New Schedule Select Box -->
-            <div class="border border-gray-200 rounded-xl p-4 bg-gray-50 focus-within:border-blue-300 transition-all">
-                <label for="new_schedule_id" class="text-xs text-gray-500 block mb-1 cursor-pointer">New Schedule</label>
+            <div id="slot_selector_container" class="border border-gray-200 rounded-xl p-4 bg-gray-50 focus-within:border-blue-300 transition-all mb-4" style="display: none;">
+                <label for="new_schedule_id" class="text-xs text-gray-500 block mb-1 cursor-pointer">Jadwal Pengganti</label>
                 <div class="flex items-center gap-2">
                     <i data-lucide="clock" class="w-4 h-4 text-gray-400"></i>
                     <select name="new_schedule_id" id="new_schedule_id" required 
@@ -186,36 +201,74 @@ function openRescheduleModal(btn) {
     document.getElementById('old_schedule_label_text').textContent = oldLabel;
     document.getElementById('rescheduleModal').style.display = 'flex';
 
-    const select = document.getElementById('new_schedule_id');
-    select.innerHTML = '<option value="">Loading slots...</option>';
+    window.availableSlotsData = {};
+    window.routineScheduleId = scheduleId;
+
+    document.getElementById('week_selector').value = '';
+    filterSlotsByWeek();
 
     fetch(`/student/schedule/available-slots?teacher_id=${teacherId}&class_id=${classId}`)
         .then(res => res.json())
         .then(data => {
-            select.innerHTML = '<option value="">-- Select New Slot --</option>';
-
-            const pushGroup = document.createElement('optgroup');
-            pushGroup.label = "Opsi Jadwal Rutin";
-            const pushOpt = document.createElement('option');
-            pushOpt.value = scheduleId;
-            pushOpt.textContent = "➡️ Lewati minggu ini (Dorong Mundur 1 Minggu)";
-            pushGroup.appendChild(pushOpt);
-            select.appendChild(pushGroup);
-
             if (data.grouped) {
-                Object.keys(data.grouped).forEach(day => {
-                    const group = document.createElement('optgroup');
-                    group.label = day;
-                    data.grouped[day].forEach(slot => {
-                        const opt = document.createElement('option');
-                        opt.value = slot.id;
-                        opt.textContent = `${slot.date_label} - ${slot.time}`;
-                        group.appendChild(opt);
-                    });
-                    select.appendChild(group);
-                });
+                window.availableSlotsData = data.grouped;
             }
         });
+}
+
+function filterSlotsByWeek() {
+    const week = document.getElementById('week_selector').value;
+    const container = document.getElementById('slot_selector_container');
+    const select = document.getElementById('new_schedule_id');
+    
+    select.innerHTML = '<option value="">-- Pilih Slot Baru --</option>';
+    
+    if (!week) {
+        container.style.display = 'none';
+        select.removeAttribute('required');
+        return;
+    }
+
+    container.style.display = 'block';
+    select.setAttribute('required', 'required');
+
+    if (week === 'routine') {
+        const opt = document.createElement('option');
+        opt.value = window.routineScheduleId;
+        opt.textContent = "➡️ Lewati minggu ini (Dorong Mundur 1 Minggu)";
+        select.appendChild(opt);
+        select.value = window.routineScheduleId;
+        return;
+    }
+
+    const slots = window.availableSlotsData[week];
+    if (slots && slots.length > 0) {
+        // Group slots by date_label
+        const groupedByDate = {};
+        slots.forEach(slot => {
+            if (!groupedByDate[slot.date_label]) {
+                groupedByDate[slot.date_label] = [];
+            }
+            groupedByDate[slot.date_label].push(slot);
+        });
+
+        // Create optgroups for each date
+        Object.keys(groupedByDate).forEach(dateLabel => {
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = dateLabel; // e.g. "Senin, 08 Jun 2026"
+            
+            groupedByDate[dateLabel].forEach(slot => {
+                const opt = document.createElement('option');
+                opt.value = slot.id;
+                opt.textContent = slot.time + " WIB";
+                optgroup.appendChild(opt);
+            });
+            
+            select.appendChild(optgroup);
+        });
+    } else {
+        select.innerHTML = '<option value="">-- Tidak ada slot tersedia --</option>';
+    }
 }
 
 function closeRescheduleModal() {

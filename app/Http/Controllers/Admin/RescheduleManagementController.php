@@ -45,24 +45,32 @@ class RescheduleManagementController extends Controller
                         // Buat sesi baru 1 minggu setelah sesi paling ujung
                         $newSessionDate = \Carbon\Carbon::parse($maxDate)->addWeek();
                     } else {
-                        // Logika Ganti Hari di minggu yang sama (Original logic)
-                        $dayMap = [
-                            'Senin' => \Carbon\Carbon::MONDAY,
-                            'Selasa' => \Carbon\Carbon::TUESDAY,
-                            'Rabu' => \Carbon\Carbon::WEDNESDAY,
-                            'Kamis' => \Carbon\Carbon::THURSDAY,
-                            'Jumat' => \Carbon\Carbon::FRIDAY,
-                            'Sabtu' => \Carbon\Carbon::SATURDAY,
-                            'Minggu' => \Carbon\Carbon::SUNDAY,
-                        ];
-                        
-                        $newDay = $dayMap[$newScheduleTemplate->day] ?? \Carbon\Carbon::MONDAY;
-                        $oldDate = \Carbon\Carbon::parse($oldSession->session_date);
-                        $newSessionDate = $oldDate->copy()->startOfWeek()->addDays($newDay - 1);
-                        
-                        // Jika ternyata tanggal baru berada di masa lalu, pindahkan ke minggu depan
-                        if ($newSessionDate->lt(now()->startOfDay())) {
-                            $newSessionDate->addWeek();
+                        if ($resRequest->new_date) {
+                            $newSessionDate = \Carbon\Carbon::parse($resRequest->new_date);
+                        } else {
+                            // Fallback untuk request lama yang belum punya new_date
+                            $dayMap = [
+                                'Senin' => \Carbon\Carbon::MONDAY,
+                                'Selasa' => \Carbon\Carbon::TUESDAY,
+                                'Rabu' => \Carbon\Carbon::WEDNESDAY,
+                                'Kamis' => \Carbon\Carbon::THURSDAY,
+                                'Jumat' => \Carbon\Carbon::FRIDAY,
+                                'Sabtu' => \Carbon\Carbon::SATURDAY,
+                                'Minggu' => \Carbon\Carbon::SUNDAY,
+                            ];
+                            
+                            $carbonDay = $dayMap[$newScheduleTemplate->day] ?? \Carbon\Carbon::MONDAY;
+                            
+                            $requestDate = \Carbon\Carbon::parse($resRequest->created_at);
+                            if ($requestDate->dayOfWeek === $carbonDay) {
+                                $newSessionDate = $requestDate->copy();
+                            } else {
+                                $newSessionDate = $requestDate->copy()->next($carbonDay);
+                            }
+                            
+                            if ($newSessionDate->lt(now()->startOfDay())) {
+                                $newSessionDate->addWeek();
+                            }
                         }
                     }
                     
