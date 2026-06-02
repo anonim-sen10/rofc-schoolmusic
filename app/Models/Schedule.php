@@ -25,10 +25,7 @@ class Schedule extends Model
         return $this->belongsTo(Student::class);
     }
 
-    public function musicClass(): BelongsTo
-    {
-        return $this->belongsTo(MusicClass::class, 'class_id');
-    }
+    
 
     public function musicClass(): BelongsTo
     {
