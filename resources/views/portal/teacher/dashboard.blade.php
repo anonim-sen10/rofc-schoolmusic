@@ -369,12 +369,12 @@
                             </label>
 
                             <label class="relative cursor-pointer group">
-                                <input type="radio" name="status" value="reschedule" required class="peer sr-only">
+                                <input type="radio" name="status" value="late" required class="peer sr-only">
                                 <div class="flex flex-col items-center gap-2 rounded-2xl border-2 border-slate-50 bg-slate-50 p-4 transition-all group-hover:bg-slate-100 peer-checked:border-amber-500 peer-checked:bg-amber-50 peer-checked:text-amber-600 peer-checked:shadow-md">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-400 peer-checked:bg-amber-100 peer-checked:text-amber-600 shadow-sm">
-                                        <i data-lucide="calendar-range" class="h-6 w-6"></i>
+                                        <i data-lucide="clock" class="h-6 w-6"></i>
                                     </div>
-                                    <span class="text-xs font-bold">RESCHEDULE</span>
+                                    <span class="text-xs font-bold">LATE</span>
                                 </div>
                             </label>
                         </div>

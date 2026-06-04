@@ -396,7 +396,7 @@ public function schedule(Request $request): View
 
         $validated = $request->validate([
             'session_id' => 'required|exists:schedule_sessions,id',
-            'status' => 'required|in:present,absent,reschedule',
+            'status' => 'required|in:present,absent,late',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'note' => 'nullable|string',
@@ -493,7 +493,6 @@ public function schedule(Request $request): View
                 $payloadFull = [
                     'target' => $target,
                     'message' => $messageFull,
-                    'countryCode' => '62',
                 ];
 
 

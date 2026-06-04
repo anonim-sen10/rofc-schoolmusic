@@ -1,9 +1,9 @@
 <?php
-$f = 'app/Http/Controllers/Student/StudentPortalController.php';
-file_put_contents($f, str_replace('->class()->', '->musicClass()->', file_get_contents($f)));
+require 'vendor/autoload.php';
+$app = require_once 'bootstrap/app.php';
+$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
-$f = 'resources/views/portal/super-admin/module.blade.php';
-file_put_contents($f, str_replace('->class)', '->musicClass)', file_get_contents($f)));
-
-$f = 'resources/views/portal/teacher/materials.blade.php';
-file_put_contents($f, str_replace('->class)', '->musicClass)', file_get_contents($f)));
+$teachers = \App\Models\Teacher::all();
+foreach($teachers as $t) {
+    echo "ID: " . $t->id . " Name: " . $t->name . "\n";
+}
