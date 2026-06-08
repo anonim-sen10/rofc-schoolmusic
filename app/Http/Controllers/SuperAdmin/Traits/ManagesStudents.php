@@ -272,6 +272,67 @@ trait ManagesStudents
         ][strtolower($day)] ?? strtolower($day);
     }
 
+    public function extendStudent(Request $request, Student $student): RedirectResponse
+    {
+        $scheduleId = $student->schedule_id;
+
+        if (!$scheduleId) {
+            return back()->with('error', 'Siswa ini belum memiliki slot jadwal. Silakan gunakan fitur Edit untuk menambahkan jadwal terlebih dahulu.');
+        }
+
+        $schedule = Schedule::find($scheduleId);
+        if (!$schedule) {
+            return back()->with('error', 'Jadwal siswa tidak ditemukan.');
+        }
+
+        DB::transaction(function () use ($student, $schedule) {
+            // Cari sesi terakhir siswa ini di jadwal yang sama
+            $lastSession = ScheduleSession::where('student_id', $student->id)
+                ->where('schedule_id', $schedule->id)
+                ->orderBy('session_date', 'desc')
+                ->first();
+
+            if ($lastSession) {
+                // 1 minggu dari sesi terakhir
+                $startDate = Carbon::parse($lastSession->session_date)->addWeek();
+            } else {
+                // Jika belum ada jadwal sama sekali, mulai dari hari terdekat yang sesuai dengan jadwal
+                $startDate = now();
+                $dayName = $this->mapScheduleDayToEnglish((string) $schedule->day);
+                if (strtolower($startDate->format('l')) !== $dayName) {
+                    $startDate->modify("next {$dayName}");
+                }
+            }
+
+            // Generate 4 sesi untuk 1 bulan
+            $totalSessions = 4;
+            $currentDate = $startDate->copy();
+
+            for ($i = 0; $i < $totalSessions; $i++) {
+                ScheduleSession::query()->create([
+                    'schedule_id' => $schedule->id,
+                    'student_id' => $student->id,
+                    'teacher_id' => $schedule->teacher_id,
+                    'class_id' => $schedule->class_id,
+                    'session_date' => $currentDate->toDateString(),
+                    'time' => $schedule->time,
+                    'status' => 'booked',
+                ]);
+
+                $currentDate->addWeek();
+            }
+
+            // Update data siswa
+            $student->update([
+                'start_date' => $startDate->toDateString(),
+                'duration_months' => 1,
+                'end_date' => $startDate->copy()->addMonths(1)->toDateString(),
+            ]);
+        });
+
+        return back()->with('success', 'Berhasil memperpanjang jadwal siswa selama 1 bulan ke depan.');
+    }
+
     public function destroyStudent(Student $student): RedirectResponse
     {
         DB::transaction(function () use ($student) {

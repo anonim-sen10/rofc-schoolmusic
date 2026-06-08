@@ -148,6 +148,7 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'role:su
     Route::delete('/classes/{class}', [SuperAdminController::class, 'destroyClass'])->name('classes.destroy');
     Route::post('/students', [SuperAdminController::class, 'storeStudent'])->name('students.store');
     Route::put('/students/{student}', [SuperAdminController::class, 'updateStudent'])->name('students.update');
+    Route::post('/students/{student}/extend', [SuperAdminController::class, 'extendStudent'])->name('students.extend');
     Route::delete('/students/{student}', [SuperAdminController::class, 'destroyStudent'])->name('students.destroy');
     Route::post('/registrations', [SuperAdminController::class, 'storeRegistration'])->name('registrations.store');
     Route::post('/registrations/{id}/approve', [RegistrationController::class, 'approve'])->name('registrations.approve');
@@ -201,6 +202,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::delete('/classes/{class}', [SuperAdminController::class, 'destroyClass'])->name('classes.destroy');
     Route::post('/students', [SuperAdminController::class, 'storeStudent'])->name('students.store');
     Route::put('/students/{student}', [SuperAdminController::class, 'updateStudent'])->name('students.update');
+    Route::post('/students/{student}/extend', [SuperAdminController::class, 'extendStudent'])->name('students.extend');
     Route::delete('/students/{student}', [SuperAdminController::class, 'destroyStudent'])->name('students.destroy');
     Route::post('/registrations', [SuperAdminController::class, 'storeRegistration'])->name('registrations.store');
     Route::post('/registrations/{id}/approve', [RegistrationController::class, 'approve'])->name('registrations.approve');

@@ -2629,6 +2629,12 @@
                                         </form>
                                     </details>
 
+                                    {{-- Extend Button --}}
+                                    <form class="extend-form" method="POST" action="{{ route($portal['prefix'] . '.students.extend', $student) }}" onsubmit="return confirm('Perpanjang jadwal siswa ini selama 1 bulan menggunakan jadwal yang sama?');">
+                                        @csrf
+                                        <button type="submit" class="btn-icon" style="color: #10b981; background: rgba(16, 185, 129, 0.1);" title="Perpanjang 1 Bulan" aria-label="Perpanjang 1 Bulan"><i data-lucide="calendar-plus"></i></button>
+                                    </form>
+
                                     {{-- Delete Button --}}
                                     <form class="delete-form" method="POST" action="{{ route($portal['prefix'] . '.students.destroy', $student) }}" onsubmit="return confirm('Hapus siswa ini?');">
                                         @csrf
