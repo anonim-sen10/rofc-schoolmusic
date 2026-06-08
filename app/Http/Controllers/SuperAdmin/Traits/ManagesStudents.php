@@ -228,6 +228,7 @@ trait ManagesStudents
         $hasFutureSessions = ScheduleSession::query()
             ->where('student_id', $student->id)
             ->where('schedule_id', $schedule->id)
+            ->where('status', 'booked')
             ->where('session_date', '>=', now()->toDateString())
             ->exists();
 
