@@ -168,7 +168,7 @@ trait ManagesStudents
             ->values()
             ->all();
 
-        DB::transaction(function () use ($student, $scheduleIds): void {
+        DB::transaction(function () use ($student, $scheduleIds, $force): void {
             $selectedSchedules = Schedule::query()
                 ->whereIn('id', $scheduleIds)
                 ->lockForUpdate()
