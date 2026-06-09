@@ -2606,6 +2606,10 @@
                                                     </div>
                                                     <label>Mulai Kursus <input type="date" name="start_date" class="edit-start-date" value="{{ $student->start_date }}"></label>
                                                     <label>Durasi (Bulan) <input type="number" name="duration_months" value="{{ $student->duration_months }}"></label>
+                                                    <label style="grid-column: span 2; display: flex; align-items: center; gap: 0.5rem; background: #f0fdf4; padding: 0.75rem; border-radius: 6px; border: 1px dashed #22c55e;">
+                                                        <input type="checkbox" name="force_generate_sessions" value="1" style="width: auto; height: auto;">
+                                                        <span style="font-size: 11px; color: #166534;"><b>[Force Generate]</b> Centang jika Anda ingin sistem memaksa membuat ulang sesi jadwal (4 sesi per bulan) mulai dari Tanggal Mulai di atas. (Gunakan jika ingin mereset/mengganti jadwal).</span>
+                                                    </label>
                                                     <label>Status
                                                         <select name="is_active" required>
                                                             <option value="1" @selected($student->is_active)>Aktif</option>

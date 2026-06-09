@@ -280,6 +280,10 @@ $homeRoute = route('admin.dashboard');
                                                         @endforeach
                                                     </select>
                                                 </label>
+                                                <label style="grid-column: span 2; display: flex; align-items: center; gap: 0.5rem; background: #f0fdf4; padding: 0.75rem; border-radius: 6px; border: 1px dashed #22c55e;">
+                                                    <input type="checkbox" name="force_generate_sessions" value="1" style="width: auto; height: auto;">
+                                                    <span style="font-size: 11px; color: #166534;"><b>[Force Generate]</b> Centang jika Anda ingin sistem memaksa membuat ulang sesi jadwal (4 sesi per bulan) mulai dari Tanggal Mulai di atas. (Gunakan jika ingin mereset/mengganti jadwal).</span>
+                                                </label>
                                                 <label style="grid-column: span 2;">Status Akun
                                                     <select name="is_active">
                                                         <option value="1" @selected($student->is_active)>Aktif</option>

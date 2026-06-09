@@ -152,13 +152,14 @@ trait ManagesStudents
         $student->classes()->sync($data['class_ids'] ?? []);
 
         if ($request->boolean('schedule_sync')) {
-            $this->syncStudentScheduleSlots($student->fresh(), $data['schedule_ids'] ?? []);
+            $force = $request->boolean('force_generate_sessions');
+            $this->syncStudentScheduleSlots($student->fresh(), $data['schedule_ids'] ?? [], $force);
         }
 
         return back()->with('success', 'Data siswa berhasil diperbarui.');
     }
 
-    private function syncStudentScheduleSlots(Student $student, array $scheduleIds): void
+    private function syncStudentScheduleSlots(Student $student, array $scheduleIds, bool $force = false): void
     {
         $scheduleIds = collect($scheduleIds)
             ->map(fn ($id) => (int) $id)
@@ -218,22 +219,24 @@ trait ManagesStudents
 
                 $student->classes()->syncWithoutDetaching([$schedule->class_id]);
 
-                $this->generateStudentSessionsForSchedule($student, $schedule);
+                $this->generateStudentSessionsForSchedule($student, $schedule, $force);
             }
         });
     }
 
-    private function generateStudentSessionsForSchedule(Student $student, Schedule $schedule): void
+    private function generateStudentSessionsForSchedule(Student $student, Schedule $schedule, bool $force = false): void
     {
-        $hasFutureSessions = ScheduleSession::query()
-            ->where('student_id', $student->id)
-            ->where('schedule_id', $schedule->id)
-            ->where('status', 'booked')
-            ->where('session_date', '>=', now()->toDateString())
-            ->exists();
+        if (!$force) {
+            $hasFutureSessions = ScheduleSession::query()
+                ->where('student_id', $student->id)
+                ->where('schedule_id', $schedule->id)
+                ->where('status', 'booked')
+                ->where('session_date', '>=', now()->toDateString())
+                ->exists();
 
-        if ($hasFutureSessions) {
-            return;
+            if ($hasFutureSessions) {
+                return;
+            }
         }
 
         $currentDate = Carbon::parse($student->start_date ?: now()->toDateString());
