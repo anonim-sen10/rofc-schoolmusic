@@ -209,6 +209,67 @@ $homeRoute = route('admin.dashboard');
                                                     </select>
                                                     <small>Tahan Ctrl/Cmd untuk memilih lebih dari satu.</small>
                                                 </label>
+                                                @php
+                                                    $studentScheduleIds = $student->scheduleSessions
+                                                        ->pluck('schedule_id')
+                                                        ->filter()
+                                                        ->unique()
+                                                        ->values();
+
+                                                    if ($studentScheduleIds->isEmpty() && $student->schedule_id) {
+                                                        $studentScheduleIds = collect([$student->schedule_id]);
+                                                    }
+
+                                                    $studentScheduleOptions = $schedulesForManagement
+                                                        ->filter(fn($scheduleOption) => strtolower((string) $scheduleOption->status) === 'available'
+                                                            || (int) $scheduleOption->student_id === (int) $student->id
+                                                            || $studentScheduleIds->contains($scheduleOption->id))
+                                                        ->sortBy(function ($scheduleOption) {
+                                                            $dayOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+                                                            $dayIndex = array_search($scheduleOption->day, $dayOrder, true);
+
+                                                            return sprintf('%02d-%s', $dayIndex === false ? 99 : $dayIndex, $scheduleOption->time);
+                                                        });
+                                                @endphp
+                                                <div style="grid-column: span 2;">
+                                                    <label class="premium-label" style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 0.75rem; display: block;">Jadwal Siswa (Double Time: pilih lebih dari satu)</label>
+                                                    <input type="hidden" name="schedule_sync" value="1">
+                                                    <div class="registration-schedule-container">
+                                                        @php
+                                                            $studentGroupedSchedules = $studentScheduleOptions->groupBy('day');
+                                                        @endphp
+
+                                                        @forelse($studentGroupedSchedules as $day => $slots)
+                                                            <div class="reg-day-group">
+                                                                <div class="reg-day-header">{{ $day }}</div>
+                                                                <div class="reg-day-slots">
+                                                                    @foreach($slots as $scheduleOption)
+                                                                        @php
+                                                                            $isSelected = $studentScheduleIds->contains($scheduleOption->id);
+                                                                            $isFull = strtolower((string) $scheduleOption->status) === 'booked'
+                                                                                && (int) $scheduleOption->student_id !== (int) $student->id
+                                                                                && ! $isSelected;
+                                                                        @endphp
+                                                                        <label class="reg-slot-card {{ $isSelected ? 'is-selected' : '' }} {{ $isFull ? 'is-disabled' : '' }}" data-teacher-id="{{ $scheduleOption->teacher_id }}" data-class-id="{{ $scheduleOption->class_id }}">
+                                                                            <input type="checkbox" name="schedule_ids[]" value="{{ $scheduleOption->id }}" @checked($isSelected) @disabled($isFull) style="display: none;" onchange="this.parentElement.classList.toggle('is-selected', this.checked)">
+                                                                            <span class="reg-slot-time">{{ substr((string) $scheduleOption->time, 0, 5) }}</span>
+                                                                            <span class="reg-slot-teacher" style="font-size: 8px; color: #64748b; display: block; line-height: 1; margin-top: 2px; font-weight: 600;">{{ $scheduleOption->teacher->name ?? '-' }}</span>
+                                                                            @if($isFull)
+                                                                                <span class="reg-slot-badge">FULL</span>
+                                                                            @endif
+                                                                        </label>
+                                                                    @endforeach
+                                                                </div>
+                                                            </div>
+                                                        @empty
+                                                            <div class="reg-empty-state">
+                                                                <i data-lucide="calendar-x2"></i>
+                                                                <span>Tidak ada jadwal tersedia.</span>
+                                                            </div>
+                                                        @endforelse
+                                                    </div>
+                                                    <small style="color: #64748b; display: block; margin-top: 0.5rem;">Pilih jadwal slot. Slot yang sudah dipakai siswa lain akan dikunci.</small>
+                                                </div>
                                                 <label>Mulai Kursus
                                                     <input type="date" name="start_date" value="{{ $student->start_date ? \Carbon\Carbon::parse($student->start_date)->format('Y-m-d') : '' }}">
                                                 </label>
