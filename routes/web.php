@@ -164,6 +164,7 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'role:su
     Route::put('/teachers/{teacher}', [SuperAdminController::class, 'updateTeacher'])->name('teachers.update');
     Route::delete('/teachers/{teacher}', [SuperAdminController::class, 'destroyTeacher'])->name('teachers.destroy');
     Route::post('/schedule', [SuperAdminScheduleController::class, 'store'])->name('schedule.store');
+    Route::post('/schedule/substitute', [SuperAdminScheduleController::class, 'assignSubstitute'])->name('schedule.substitute');
     Route::put('/schedule/{schedule}', [SuperAdminScheduleController::class, 'update'])->name('schedule.update');
     Route::delete('/schedule/{schedule}', [SuperAdminScheduleController::class, 'destroy'])->name('schedule.destroy');
     Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
@@ -217,6 +218,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::put('/teachers/{teacher}', [SuperAdminController::class, 'updateTeacher'])->name('teachers.update');
     Route::delete('/teachers/{teacher}', [SuperAdminController::class, 'destroyTeacher'])->name('teachers.destroy');
     Route::post('/schedule', [SuperAdminScheduleController::class, 'store'])->name('schedule.store');
+    Route::post('/schedule/substitute', [SuperAdminScheduleController::class, 'assignSubstitute'])->name('schedule.substitute');
     Route::put('/schedule/{schedule}', [SuperAdminScheduleController::class, 'update'])->name('schedule.update');
     Route::delete('/schedule/{schedule}', [SuperAdminScheduleController::class, 'destroy'])->name('schedule.destroy');
     Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');

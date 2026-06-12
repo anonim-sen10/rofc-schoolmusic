@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ScheduleSession;
 use App\Models\MusicClass;
 use App\Models\Schedule;
 use Illuminate\Http\RedirectResponse;
@@ -149,5 +150,35 @@ class ScheduleController extends Controller
     private function hasSchedulesTable(): bool
     {
         return Schema::hasTable('schedules');
+    }
+
+    public function assignSubstitute(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'original_teacher_id' => ['required', 'integer', 'exists:teachers,id'],
+            'substitute_teacher_id' => ['required', 'integer', 'exists:teachers,id', 'different:original_teacher_id'],
+            'student_id' => ['nullable', 'integer', 'exists:students,id'],
+            'start_date' => ['required', 'date'],
+            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
+        ]);
+
+        $query = ScheduleSession::query()
+            ->where('teacher_id', $data['original_teacher_id'])
+            ->whereBetween('session_date', [$data['start_date'], $data['end_date']]);
+
+        if (!empty($data['student_id'])) {
+            $query->where('student_id', $data['student_id']);
+        }
+
+        $updatedCount = $query->update([
+            'substitute_teacher_id' => $data['substitute_teacher_id']
+        ]);
+
+        $msg = "Berhasil menugaskan guru pengganti untuk {$updatedCount} sesi kelas.";
+        if (!empty($data['student_id'])) {
+            $msg = "Berhasil menugaskan guru pengganti untuk {$updatedCount} sesi kelas siswa yang dipilih.";
+        }
+
+        return back()->with('success', $msg);
     }
 }

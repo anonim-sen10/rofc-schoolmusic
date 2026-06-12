@@ -73,6 +73,38 @@ $homeRoute = route('admin.dashboard');
     </x-ui.card>
 </div>
 
+<x-ui.card title="Assign Substitute Teacher (Guru Pengganti)" subtitle="Alihkan jadwal guru yang sedang cuti ke guru lain pada rentang tanggal tertentu">
+    <form class="module-form module-form-grid" method="POST" action="{{ route('admin.schedule.substitute') }}">
+        @csrf
+        <label>Guru Asli (Yang Cuti)
+            <select name="original_teacher_id" required>
+                <option value="">Pilih guru asli</option>
+                @foreach($teachers as $teacher)
+                    <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
+                @endforeach
+            </select>
+        </label>
+        <label>Guru Pengganti
+            <select name="substitute_teacher_id" required>
+                <option value="">Pilih guru pengganti</option>
+                @foreach($teachers as $teacher)
+                    <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
+                @endforeach
+            </select>
+        </label>
+        <label>Tanggal Mulai
+            <input type="date" name="start_date" required>
+        </label>
+        <label>Tanggal Selesai
+            <input type="date" name="end_date" required>
+        </label>
+        <div class="form-actions">
+            <button type="submit">Assign Pengganti</button>
+            <button type="reset" class="btn-secondary">Cancel</button>
+        </div>
+    </form>
+</x-ui.card>
+
 <x-ui.card title="Ringkasan Schedule" subtitle="Status assignment terbaru per kelas" data-searchable>
     @if ($classList->isNotEmpty())
         <x-ui.table :headers="['Class', 'Pengajar', 'Status Jadwal', 'Jumlah Siswa', 'Daftar Siswa', 'Catatan Respon']">

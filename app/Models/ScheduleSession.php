@@ -20,6 +20,7 @@ class ScheduleSession extends Model
         'time',
         'status',
         'is_reminder_sent',
+        'substitute_teacher_id',
     ];
 
     protected $casts = [
@@ -39,6 +40,11 @@ class ScheduleSession extends Model
     public function teacher(): BelongsTo
     {
         return $this->belongsTo(Teacher::class);
+    }
+
+    public function substituteTeacher(): BelongsTo
+    {
+        return $this->belongsTo(Teacher::class, 'substitute_teacher_id');
     }
 
     public function musicClass(): BelongsTo

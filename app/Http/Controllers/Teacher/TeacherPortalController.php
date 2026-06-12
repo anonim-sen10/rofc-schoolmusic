@@ -59,7 +59,10 @@ public function dashboard(Request $request): View
         
         // Get today's sessions (booked only)
         $todaySchedules = \App\Models\ScheduleSession::query()
-            ->where('teacher_id', $teacher->id)
+            ->where(function ($query) use ($teacher) {
+                $query->where('teacher_id', $teacher->id)->whereNull('substitute_teacher_id')
+                      ->orWhere('substitute_teacher_id', $teacher->id);
+            })
             ->where('session_date', $today)
             ->where('status', 'booked')
             ->with([
@@ -377,7 +380,10 @@ public function schedule(Request $request): View
         $teacher = $this->teacherFromUser($request->user()->id);
 
         $schedules = \App\Models\ScheduleSession::query()
-            ->where('teacher_id', $teacher->id)
+            ->where(function ($query) use ($teacher) {
+                $query->where('teacher_id', $teacher->id)->whereNull('substitute_teacher_id')
+                      ->orWhere('substitute_teacher_id', $teacher->id);
+            })
             ->whereIn('status', ['booked', 'rescheduled', 'completed'])
             ->with(['musicClass', 'student.user', 'attendance', 'rescheduleRequests'])
             ->orderBy('session_date')
@@ -404,7 +410,10 @@ public function schedule(Request $request): View
         ]);
 
         $session = \App\Models\ScheduleSession::where('id', $validated['session_id'])
-            ->where('teacher_id', $teacher->id)
+            ->where(function ($query) use ($teacher) {
+                $query->where('teacher_id', $teacher->id)->whereNull('substitute_teacher_id')
+                      ->orWhere('substitute_teacher_id', $teacher->id);
+            })
             ->where('status', 'booked')
             ->firstOrFail();
 

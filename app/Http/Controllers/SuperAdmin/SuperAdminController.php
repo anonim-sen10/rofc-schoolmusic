@@ -294,6 +294,21 @@ class SuperAdminController extends Controller
                             return array_search($schedule->day, $dayOrder);
                         })
                     : collect();
+                
+                $teacherStudents = [];
+                foreach ($data['schedulesForManagement'] as $schedule) {
+                    if ($schedule->student) {
+                        $teacherId = $schedule->teacher_id ?? $schedule->musicClass?->teacher_id;
+                        if ($teacherId) {
+                            $teacherStudents[$teacherId][$schedule->student->id] = [
+                                'id' => $schedule->student->id,
+                                'name' => $schedule->student->name,
+                            ];
+                        }
+                    }
+                }
+                $data['teacherStudentsJson'] = json_encode(array_map('array_values', $teacherStudents));
+                $data['studentsForSubstitute'] = Student::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']);
                 break;
             case 'students':
                 $data['studentsForManagement'] = Student::query()->with(['musicClass', 'classes', 'scheduleSessions.schedule'])->latest()->get();

@@ -3756,6 +3756,9 @@
         x-data="{ 
             studentModalOpen: false, 
             addModalOpen: false,
+            substituteModalOpen: false,
+            teacherStudentsMap: {{ $teacherStudentsJson ?? '{}' }},
+            selectedOriginalTeacher: '',
             studentData: {},
             showStudent(data) {
                 this.studentData = data;
@@ -3773,7 +3776,11 @@
                 <h1 class="text-xl font-bold text-gray-900 tracking-tight">Schedule Dashboard</h1>
                 <p class="text-gray-400 text-[11px] font-medium tracking-wide uppercase">Music School Management System</p>
             </div>
-            <div>
+            <div class="flex items-center gap-2">
+                <button @click="substituteModalOpen = true" class="inline-flex items-center px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-[12px] font-bold rounded-lg transition-all shadow-md shadow-amber-100 active:scale-95">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5 mr-1.5"></i>
+                    Assign Substitute
+                </button>
                 <button @click="addModalOpen = true" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[12px] font-bold rounded-lg transition-all shadow-md shadow-indigo-100 active:scale-95">
                     <i data-lucide="plus" class="w-3.5 h-3.5 mr-1.5"></i>
                     Add Schedule
@@ -3981,6 +3988,84 @@
                                 Create Schedule
                             </button>
                             <button type="button" @click="addModalOpen = false" class="w-full mt-2 py-2 text-[10px] font-bold text-gray-400 hover:text-gray-600 text-center transition-colors">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {{-- Modal for Assign Substitute --}}
+            <div x-show="substituteModalOpen" x-cloak 
+                class="absolute inset-0 z-[100] flex items-center justify-center"
+                style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(4px);">
+                
+                <div x-show="substituteModalOpen" 
+                    x-transition:enter="ease-out duration-200" 
+                    x-transition:enter-start="opacity-0 scale-95" 
+                    x-transition:enter-end="opacity-100 scale-100" 
+                    @click.away="substituteModalOpen = false"
+                    class="relative bg-white rounded-3xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.15)] w-full max-w-[360px] border border-gray-100/50 overflow-hidden transform -translate-y-5">
+                    
+                    <form method="POST" action="{{ route($portal['prefix'] . '.schedule.substitute') }}" class="p-6">
+                        @csrf
+                        <div class="flex items-center justify-between mb-5">
+                            <h3 class="text-[14px] font-bold text-gray-900 tracking-tight">Assign Substitute Teacher</h3>
+                            <button type="button" @click="substituteModalOpen = false" class="text-gray-300 hover:text-amber-600 transition-colors">
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Guru Asli (Yang Cuti)</label>
+                                <select name="original_teacher_id" x-model="selectedOriginalTeacher" required class="w-full h-10 px-3 bg-white border border-gray-200 rounded-lg focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-[12px] font-bold text-gray-700 transition-all">
+                                    <option value="">Pilih guru asli</option>
+                                    @foreach($teachersForClassOptions as $teacher)
+                                        <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Guru Pengganti</label>
+                                <select name="substitute_teacher_id" required class="w-full h-10 px-3 bg-white border border-gray-200 rounded-lg focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-[12px] font-bold text-gray-700 transition-all">
+                                    <option value="">Pilih guru pengganti</option>
+                                    @foreach($teachersForClassOptions as $teacher)
+                                        <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Siswa (Opsional)</label>
+                                <select name="student_id" class="w-full h-10 px-3 bg-white border border-gray-200 rounded-lg focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-[12px] font-bold text-gray-700 transition-all">
+                                    <option value="">Semua Siswa</option>
+                                    <template x-for="student in (teacherStudentsMap[selectedOriginalTeacher] || [])" :key="student.id">
+                                        <option :value="student.id" x-text="student.name"></option>
+                                    </template>
+                                </select>
+                                <p class="text-[8px] text-gray-400 mt-1 italic">Hanya siswa milik guru asli yang akan muncul. Kosongkan untuk mengalihkan semua siswa.</p>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Tanggal Mulai</label>
+                                    <input type="date" name="start_date" required class="w-full h-9 px-3 bg-white border border-gray-200 rounded-lg focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-[12px] font-bold text-gray-700 transition-all">
+                                </div>
+                                <div>
+                                    <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Tanggal Selesai</label>
+                                    <input type="date" name="end_date" required class="w-full h-9 px-3 bg-white border border-gray-200 rounded-lg focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-[12px] font-bold text-gray-700 transition-all">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-8">
+                            <button type="submit" class="w-full py-3 flex items-center justify-center bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-[11px] transition-all shadow-lg shadow-amber-100 active:scale-95">
+                                <i data-lucide="user-check" class="w-4 h-4 mr-2"></i>
+                                Assign Substitute
+                            </button>
+                            <button type="button" @click="substituteModalOpen = false" class="w-full mt-2 py-2 text-[10px] font-bold text-gray-400 hover:text-gray-600 text-center transition-colors">
                                 Cancel
                             </button>
                         </div>
