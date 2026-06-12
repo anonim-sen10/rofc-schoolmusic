@@ -4925,15 +4925,14 @@ window.filterRegSchedules = function(select, regId) {
 
         slotCards.forEach(card => {
             const classId = card.getAttribute('data-class-id');
-            if (selectedClassIds.length > 0 && selectedClassIds.includes(classId)) {
+            const checkbox = card.querySelector('input[type="checkbox"]');
+            
+            // Jika kelasnya dipilih ATAU jadwalnya sudah tercentang (jadwal lama), tetap tampilkan!
+            if ((selectedClassIds.length > 0 && selectedClassIds.includes(classId)) || (checkbox && checkbox.checked)) {
                 card.style.display = 'flex';
             } else {
                 card.style.display = 'none';
-                const checkbox = card.querySelector('input[type="checkbox"]');
-                if (checkbox && checkbox.checked) {
-                    checkbox.checked = false;
-                    card.classList.remove('is-selected');
-                }
+                // Jangan otomatis uncheck, biarkan state-nya apa adanya.
             }
         });
 
