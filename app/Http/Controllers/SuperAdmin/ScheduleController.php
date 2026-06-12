@@ -166,6 +166,8 @@ class ScheduleController extends Controller
             ->where('teacher_id', $data['original_teacher_id'])
             ->whereDate('session_date', '>=', $data['start_date'])
             ->whereDate('session_date', '<=', $data['end_date']);
+            
+        \Illuminate\Support\Facades\Log::info('Assign Substitute Request Data: ', $data);
 
         if (!empty($data['student_id'])) {
             $query->where('student_id', $data['student_id']);
@@ -174,6 +176,8 @@ class ScheduleController extends Controller
         $updatedCount = $query->update([
             'substitute_teacher_id' => $data['substitute_teacher_id']
         ]);
+
+        \Illuminate\Support\Facades\Log::info('Assign Substitute Updated Count: ' . $updatedCount);
 
         $msg = "Berhasil menugaskan guru pengganti untuk {$updatedCount} sesi kelas.";
         if (!empty($data['student_id'])) {
