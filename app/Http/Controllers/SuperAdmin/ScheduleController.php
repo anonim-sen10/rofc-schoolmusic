@@ -164,7 +164,8 @@ class ScheduleController extends Controller
 
         $query = ScheduleSession::query()
             ->where('teacher_id', $data['original_teacher_id'])
-            ->whereBetween('session_date', [$data['start_date'], $data['end_date']]);
+            ->whereDate('session_date', '>=', $data['start_date'])
+            ->whereDate('session_date', '<=', $data['end_date']);
 
         if (!empty($data['student_id'])) {
             $query->where('student_id', $data['student_id']);
