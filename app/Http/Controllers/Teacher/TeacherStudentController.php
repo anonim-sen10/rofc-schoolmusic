@@ -38,7 +38,7 @@ class TeacherStudentController extends Controller
             ->where(function($query) use ($classIds, $teacherId) {
                 // 1. Siswa yang punya jadwal eksplisit dengan guru ini
                 $query->whereHas('schedules', fn($q) => $q->where('teacher_id', $teacherId))
-                      ->orWhereHas('scheduleSessions', fn($q) => $q->where('teacher_id', $teacherId))
+                      ->orWhereHas('scheduleSessions', fn($q) => $q->where('teacher_id', $teacherId)->orWhere('substitute_teacher_id', $teacherId))
                       // 2. ATAU siswa di kelas guru ini, TAPI tidak punya jadwal dengan guru LAIN di kelas tersebut
                       ->orWhereHas('classes', function ($q) use ($classIds, $teacherId) {
                           $q->whereIn('classes.id', $classIds)
@@ -56,7 +56,7 @@ class TeacherStudentController extends Controller
                     ->where(fn($sq) => $sq->where('classes.teacher_id', $teacher->id)
                         ->orWhereHas('teachers', fn($t) => $t->where('teachers.id', $teacher->id))
                     ),
-                'scheduleSessions' => fn($q) => $q->where('teacher_id', $teacher->id)->with('musicClass:id,name')
+                'scheduleSessions' => fn($q) => $q->where(fn($sq) => $sq->where('teacher_id', $teacher->id)->orWhere('substitute_teacher_id', $teacher->id))->with('musicClass:id,name')
             ])
             ->orderBy('students.name')
             ->get();
