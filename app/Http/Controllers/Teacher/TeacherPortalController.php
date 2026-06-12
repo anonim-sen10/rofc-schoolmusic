@@ -26,9 +26,18 @@ class TeacherPortalController extends Controller
 
     private function teacherAcceptedClassesQuery($teacherId)
     {
-        return MusicClass::query()->whereHas('teachers', function ($q) use ($teacherId) {
-            $q->where('teachers.id', $teacherId);
-        })->orWhere('teacher_id', $teacherId); // Keep orWhere for backward compatibility during migration
+        $activeLeaves = \App\Models\TeacherLeave::where('substitute_teacher_id', $teacherId)
+            ->whereDate('start_date', '<=', now())
+            ->whereDate('end_date', '>=', now())
+            ->pluck('teacher_id');
+
+        return MusicClass::query()->where(function ($query) use ($teacherId, $activeLeaves) {
+            $query->whereHas('teachers', function ($q) use ($teacherId, $activeLeaves) {
+                $q->where('teachers.id', $teacherId)
+                  ->orWhereIn('teachers.id', $activeLeaves);
+            })->orWhere('teacher_id', $teacherId)
+              ->orWhereIn('teacher_id', $activeLeaves);
+        });
     }
 
     private function teacherFromUser($userId): Teacher
