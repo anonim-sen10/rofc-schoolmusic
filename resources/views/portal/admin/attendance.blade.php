@@ -506,7 +506,7 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
                     @foreach($attendances as $att)
                         @php $status = strtolower($att->status); @endphp
                         <tr>
-                            <td>{{ $att->created_at->format('d M Y') }}</td>
+                            <td>{{ $att->session && $att->session->session_date ? \Carbon\Carbon::parse($att->session->session_date)->format('d M Y') : $att->created_at->format('d M Y') }}</td>
                             <td style="white-space: nowrap;">{{ $att->schedule ? \Carbon\Carbon::parse($att->schedule->time)->format('H:i') : '-' }}</td>
                             <td style="white-space: nowrap;"><small class="text-slate-500">{{ $att->created_at->format('H:i:s') }}</small></td>
                             <td>
@@ -645,7 +645,7 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
                 <section class="registration-modal-grid">
                     <article>
                         <p>Tanggal</p>
-                        <p>{{ $att->created_at->format('d M Y') }}</p>
+                        <p>{{ $att->session && $att->session->session_date ? \Carbon\Carbon::parse($att->session->session_date)->format('d M Y') : $att->created_at->format('d M Y') }}</p>
                     </article>
                     <article>
                         <p>Waktu (Jadwal)</p>
