@@ -61,4 +61,20 @@ class ScheduleSession extends Model
     {
         return $this->hasMany(RescheduleRequest::class, 'old_session_id');
     }
+
+    protected static function booted()
+    {
+        static::creating(function ($session) {
+            if ($session->teacher_id && $session->session_date) {
+                $leave = TeacherLeave::where('teacher_id', $session->teacher_id)
+                    ->whereDate('start_date', '<=', $session->session_date)
+                    ->whereDate('end_date', '>=', $session->session_date)
+                    ->first();
+                
+                if ($leave) {
+                    $session->substitute_teacher_id = $leave->substitute_teacher_id;
+                }
+            }
+        });
+    }
 }

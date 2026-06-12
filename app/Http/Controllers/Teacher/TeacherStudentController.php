@@ -33,12 +33,24 @@ class TeacherStudentController extends Controller
         
         $teacherId = $teacher->id;
 
+        $activeLeaves = \App\Models\TeacherLeave::where('substitute_teacher_id', $teacherId)
+            ->whereDate('start_date', '<=', now())
+            ->whereDate('end_date', '>=', now())
+            ->pluck('teacher_id');
+
+        if ($activeLeaves->isNotEmpty()) {
+            $leaveClassIds = \Illuminate\Support\Facades\DB::table('class_teacher')
+                ->whereIn('teacher_id', $activeLeaves)
+                ->pluck('class_id');
+            $classIds = $classIds->merge($leaveClassIds)->unique();
+        }
+
         $students = Student::query()
             ->select(['students.id', 'students.name', 'students.is_active', 'students.phone', 'students.email', 'students.address'])
-            ->where(function($query) use ($classIds, $teacherId) {
+            ->where(function($query) use ($classIds, $teacherId, $activeLeaves) {
                 // 1. Siswa yang punya jadwal eksplisit dengan guru ini
-                $query->whereHas('schedules', fn($q) => $q->where('teacher_id', $teacherId))
-                      ->orWhereHas('scheduleSessions', fn($q) => $q->where(fn($sq) => $sq->where('teacher_id', $teacherId)->orWhere('substitute_teacher_id', $teacherId)))
+                $query->whereHas('schedules', fn($q) => $q->where('teacher_id', $teacherId)->orWhereIn('teacher_id', $activeLeaves))
+                      ->orWhereHas('scheduleSessions', fn($q) => $q->where(fn($sq) => $sq->where('teacher_id', $teacherId)->orWhere('substitute_teacher_id', $teacherId)->orWhereIn('teacher_id', $activeLeaves)))
                       // 2. ATAU siswa di kelas guru ini, TAPI tidak punya jadwal dengan guru LAIN di kelas tersebut
                       ->orWhereHas('classes', function ($q) use ($classIds, $teacherId) {
                           $q->whereIn('classes.id', $classIds)

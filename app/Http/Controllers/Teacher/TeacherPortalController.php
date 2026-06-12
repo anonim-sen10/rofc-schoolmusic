@@ -264,11 +264,17 @@ public function dashboard(Request $request): View
             ->orderBy('name')
             ->get();
 
+        $activeLeaves = \App\Models\TeacherLeave::where('substitute_teacher_id', $teacher->id)
+            ->whereDate('start_date', '<=', now())
+            ->whereDate('end_date', '>=', now())
+            ->pluck('teacher_id');
+
         // Ambil siswa dari kelas resmi
         $studentsFromClasses = $classes->flatMap(fn (MusicClass $class) => $class->students);
 
         // Ambil siswa dari Jadwal (Schedule)
-        $studentsFromSchedule = Student::whereHas('scheduleSessions', fn($q) => $q->where('teacher_id', $teacher->id)->orWhere('substitute_teacher_id', $teacher->id))
+        $studentsFromSchedule = Student::whereHas('scheduleSessions', fn($q) => $q->where(fn($sq) => $sq->where('teacher_id', $teacher->id)->orWhere('substitute_teacher_id', $teacher->id)->orWhereIn('teacher_id', $activeLeaves)))
+            ->orWhereHas('schedules', fn($q) => $q->whereIn('teacher_id', $activeLeaves))
             ->select(['id', 'name'])
             ->get();
 

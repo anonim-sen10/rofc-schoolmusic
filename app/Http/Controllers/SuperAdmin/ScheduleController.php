@@ -182,6 +182,19 @@ class ScheduleController extends Controller
         $msg = "Berhasil menugaskan guru pengganti untuk {$updatedCount} sesi kelas.";
         if (!empty($data['student_id'])) {
             $msg = "Berhasil menugaskan guru pengganti untuk {$updatedCount} sesi kelas siswa yang dipilih.";
+        } else {
+            // Jika mengalihkan semua siswa, berarti guru tersebut sedang cuti total di rentang tanggal tersebut.
+            \App\Models\TeacherLeave::updateOrCreate(
+                [
+                    'teacher_id' => $data['original_teacher_id'],
+                    'start_date' => $data['start_date'],
+                    'end_date' => $data['end_date'],
+                ],
+                [
+                    'substitute_teacher_id' => $data['substitute_teacher_id'],
+                ]
+            );
+            $msg .= " Status cuti guru berhasil dicatat di sistem secara menyeluruh.";
         }
 
         return back()->with('success', $msg);
