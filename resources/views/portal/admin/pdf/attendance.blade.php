@@ -112,7 +112,8 @@
             
             // Jadwal mengajar setiap hari (mengambil hari dari tanggal absen)
             $dayNames = $teacherAttendances->map(function($att) use ($daysMap) {
-                return $daysMap[$att->created_at->format('l')] ?? '';
+                $dateObj = $att->session && $att->session->session_date ? \Carbon\Carbon::parse($att->session->session_date) : $att->created_at;
+                return $daysMap[$dateObj->format('l')] ?? '';
             })->unique()->implode(', ');
             
             // Total hadir per siswa
@@ -158,7 +159,7 @@
                     @foreach($teacherAttendances as $index => $att)
                         <tr>
                             <td class="text-center">{{ $index + 1 }}</td>
-                            <td>{{ $att->created_at->format('d M Y') }}</td>
+                            <td>{{ $att->session && $att->session->session_date ? \Carbon\Carbon::parse($att->session->session_date)->format('d M Y') : $att->created_at->format('d M Y') }}</td>
                             <td>{{ $att->schedule ? \Carbon\Carbon::parse($att->schedule->time)->format('H:i') : '-' }}</td>
                             <td>{{ $att->student->name ?? '-' }}</td>
                             <td>{{ $att->musicClass->name ?? '-' }}</td>
