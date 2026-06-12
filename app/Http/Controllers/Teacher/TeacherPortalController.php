@@ -268,7 +268,7 @@ public function dashboard(Request $request): View
         $studentsFromClasses = $classes->flatMap(fn (MusicClass $class) => $class->students);
 
         // Ambil siswa dari Jadwal (Schedule)
-        $studentsFromSchedule = Student::whereHas('scheduleSessions', fn($q) => $q->where('teacher_id', $teacher->id))
+        $studentsFromSchedule = Student::whereHas('scheduleSessions', fn($q) => $q->where('teacher_id', $teacher->id)->orWhere('substitute_teacher_id', $teacher->id))
             ->select(['id', 'name'])
             ->get();
 
