@@ -1,6 +1,6 @@
 @props([
     'title' => 'Dashboard',
-    'subtitle' => 'ROFC Private Music Management Information System',
+    'subtitle' => 'Sistem Informasi Manajemen Kursus Musik Privat ROFC',
     'userName' => 'User',
     'roleLabel' => 'USER',
     'notificationCount' => 0,
@@ -104,11 +104,11 @@
                     <span class="profile-menu-role">{{ $roleLabel }}</span>
                     <a href="{{ route('teacher.profile.index') }}" class="profile-menu-item">
                         <i data-lucide="user-round"></i>
-                        <span>Profile</span>
+                        <span>Profil Saya</span>
                     </a>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="profile-menu-logout">Logout</button>
+                        <button type="submit" class="profile-menu-logout">Keluar (Logout)</button>
                     </form>
                 </div>
             </details>

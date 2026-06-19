@@ -1,10 +1,29 @@
     @php
     $resolvedRoleKey = $roleKey ?? (auth()->user()->primaryRole() ?? 'custom_role');
+    $roleTranslations = [
+        'super_admin' => 'Super Admin',
+        'admin' => 'Admin',
+        'teacher' => 'Guru',
+        'student' => 'Siswa',
+        'finance' => 'Bagian Keuangan',
+    ];
+    $resolvedRoleKeyLower = strtolower($resolvedRoleKey);
+    $roleLabel = $roleTranslations[$resolvedRoleKeyLower] ?? ucwords(str_replace('_', ' ', $resolvedRoleKey));
+
+    $panelTranslations = [
+        'admin dashboard' => 'Dashboard Admin',
+        'super admin dashboard' => 'Dashboard Super Admin',
+        'student portal' => 'Portal Siswa',
+        'teacher portal' => 'Portal Guru',
+        'finance dashboard' => 'Dashboard Keuangan',
+        'schoolmusic portal' => 'Portal SchoolMusic',
+    ];
     $resolvedPanelTitle = $panelTitle ?? ($portal['title'] ?? 'SchoolMusic Portal');
+    $resolvedPanelTitle = $panelTranslations[strtolower($resolvedPanelTitle)] ?? $resolvedPanelTitle;
+
     $resolvedHomeRoute = $homeRoute ?? (($portal['prefix'] ?? null) ? route($portal['prefix'].'.dashboard') : route('portal.redirect'));
     $userName = auth()->user()?->name ?? 'User';
     $legacyMenuItems = $menuItems ?? [];
-    $roleLabel = ucwords(str_replace('_', ' ', $resolvedRoleKey));
     $summaryData = $summary ?? [];
     $notifCount = ($summaryData['registrations_pending'] ?? \App\Models\Registration::where('status', 'pending')->count()) + ($summaryData['reschedule_requests_pending'] ?? \App\Models\RescheduleRequest::where('status', 'pending')->count());
     $brandLogoCandidates = [
@@ -96,9 +115,43 @@ $iconMap = [
             }
         }
 
+        $translations = [
+            'dashboard' => 'Dashboard',
+            'classes' => 'Daftar Kelas',
+            'my_classes' => 'Kelas Saya',
+            'teachers' => 'Data Guru',
+            'students' => 'Data Siswa',
+            'my_students' => 'Siswa Saya',
+            'registrations' => 'Pendaftaran',
+            'schedule' => 'Jadwal',
+            'my_schedule' => 'Jadwal Saya',
+            'attendance_monitoring' => 'Monitoring Kehadiran',
+            'reschedule_requests' => 'Permintaan Reschedule',
+            'reschedule' => 'Permintaan Reschedule',
+            'gallery' => 'Galeri',
+            'blog' => 'Blog',
+            'events' => 'Acara / Kegiatan',
+            'testimonials' => 'Testimoni',
+            'invoices' => 'Tagihan',
+            'payments' => 'Pembayaran',
+            'expenses' => 'Pengeluaran',
+            'teacher_salary' => 'Gaji Guru',
+            'financial_reports' => 'Laporan Keuangan',
+            'transactions' => 'Transaksi',
+            'progress' => 'Laporan Progress',
+            'student_progress' => 'Progres Siswa',
+            'materials' => 'Materi Belajar',
+            'profile' => 'Profil Saya',
+            'payment' => 'Pembayaran',
+            'my class' => 'Kelas Saya',
+        ];
+
+        $rawLabel = $item['label'] ?? ucfirst($key);
+        $label = $translations[strtolower(trim($rawLabel))] ?? ($translations[$key] ?? $rawLabel);
+
         return [
             'key' => $key,
-            'label' => $item['label'] ?? ucfirst($key),
+            'label' => $label,
             'url' => $item['url'] ?? '#',
             'icon' => $item['icon'] ?? ($iconMap[$key] ?? 'circle'),
             'badge' => $badge,
