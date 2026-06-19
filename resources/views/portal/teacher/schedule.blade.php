@@ -77,7 +77,7 @@
                         <td class="px-8 py-5">
                             <div class="flex flex-col gap-0.5">
                                 <span class="text-xs font-bold text-slate-700">{{ $schedule->musicClass->name ?? '-' }}</span>
-                                <span class="text-[9px] font-medium text-slate-400 uppercase tracking-wider">Private Session</span>
+                                <span class="text-[9px] font-medium text-slate-400 uppercase tracking-wider">Sesi Privat</span>
                             </div>
                         </td>
                         <td class="px-8 py-5">
@@ -92,13 +92,13 @@
                             @endphp
 
                             @if(!$schedule->student->is_active)
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-500 text-[9px] font-extrabold border border-slate-200 tracking-wider">INACTIVE</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-500 text-[9px] font-extrabold border border-slate-200 tracking-wider">TIDAK AKTIF</span>
                             @elseif($schedule->status === 'rescheduled')
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-[9px] font-extrabold border border-slate-200 tracking-wider">RESCHEDULED</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-[9px] font-extrabold border border-slate-200 tracking-wider">DIJADWAL ULANG</span>
                             @elseif($pendingRequest)
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-[9px] font-extrabold border border-amber-200 tracking-wider animate-pulse">RESCHEDULE REQ</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-[9px] font-extrabold border border-amber-200 tracking-wider animate-pulse">REQ RESCHEDULE</span>
                             @else
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-[9px] font-extrabold border border-green-200 tracking-wider">ACTIVE</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-[9px] font-extrabold border border-green-200 tracking-wider">AKTIF</span>
                             @endif
                         </td>
                         <td class="px-8 py-5">
@@ -106,23 +106,29 @@
                                 @if(!$schedule->student->is_active)
                                     <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 text-slate-500 border border-slate-200">
                                         <i data-lucide="user-x" class="w-3.5 h-3.5"></i>
-                                        <span class="text-[9px] font-extrabold tracking-widest uppercase">Inactive</span>
+                                        <span class="text-[9px] font-extrabold tracking-widest uppercase">Tidak Aktif</span>
                                     </div>
                                 @elseif($schedule->status === 'completed')
                                     <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-green-50 text-green-700 border border-green-100">
                                         <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
-                                        <span class="text-[9px] font-extrabold tracking-widest uppercase">Finished</span>
+                                        <span class="text-[9px] font-extrabold tracking-widest uppercase">Selesai</span>
                                     </div>
                                 @elseif($schedule->status === 'rescheduled')
-                                    <span class="text-[10px] font-bold text-slate-300 tracking-widest uppercase italic opacity-60">Rescheduled</span>
+                                    <span class="text-[10px] font-bold text-slate-300 tracking-widest uppercase italic opacity-60">Dijadwal Ulang</span>
                                 @elseif($schedule->attendance)
                                     @php 
                                         $status = strtolower($schedule->attendance->status);
+                                        $statusIndo = [
+                                            'present' => 'Hadir',
+                                            'absent' => 'Absen',
+                                            'sick' => 'Sakit',
+                                            'permit' => 'Izin',
+                                        ][$status] ?? ucfirst($status);
                                         $class = $status === 'present' ? 'bg-blue-50 text-blue-700 border-blue-100' : ($status === 'absent' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-amber-50 text-amber-700 border-amber-100');
                                     @endphp
                                     <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl {{ $class }} border">
                                         <i data-lucide="{{ $status === 'present' ? 'check' : ($status === 'absent' ? 'x' : 'clock') }}" class="w-3.5 h-3.5"></i>
-                                        <span class="text-[9px] font-extrabold tracking-widest uppercase">{{ $status }}</span>
+                                        <span class="text-[9px] font-extrabold tracking-widest uppercase">{{ $statusIndo }}</span>
                                     </div>
                                 @elseif(now()->addMinutes(30)->lt(\Carbon\Carbon::parse($schedule->session_date->format('Y-m-d') . ' ' . $schedule->time)))
                                     <div class="flex items-center gap-2">
@@ -134,7 +140,7 @@
                                                 <span>RESCHEDULE</span>
                                             </button>
                                         @endif
-                                        <span class="text-[10px] font-bold text-slate-300 tracking-widest uppercase italic opacity-60">Upcoming</span>
+                                        <span class="text-[10px] font-bold text-slate-300 tracking-widest uppercase italic opacity-60">Mendatang</span>
                                     </div>
                                 @else
                                     <div class="flex items-center gap-2">
@@ -143,14 +149,14 @@
                                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-500 text-[10px] font-bold shadow-sm hover:bg-slate-50 transition-all active:scale-95"
                                                 onclick="openRescheduleModal('{{ $schedule->id }}', '{{ $schedule->schedule_id }}', '{{ $schedule->session_date->translatedFormat('l, d M Y') }} - {{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}', '{{ $schedule->teacher_id }}', '{{ $schedule->class_id }}')">
                                                 <i data-lucide="refresh-cw" class="w-3 h-3"></i>
-                                                <span>RESCHEDULE</span>
+                                                <span>JADWAL ULANG</span>
                                             </button>
                                         @endif
                                         <button type="button" 
                                             class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-[10px] font-extrabold shadow-lg shadow-blue-100 hover:bg-blue-700 active:scale-95 transition-all duration-300"
                                             onclick="openAttendanceModal('{{ $schedule->id }}', '{{ $schedule->student->name }}', '{{ $schedule->musicClass->name }}', '{{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}')">
                                             <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
-                                            <span>ATTENDANCE</span>
+                                            <span>ABSENSI</span>
                                         </button>
                                     </div>
                                 @endif
