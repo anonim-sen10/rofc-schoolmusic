@@ -31,6 +31,19 @@ Route::get('/run-migration', function () {
     }
 });
 
+Route::get('/debug-student-schedules', function () {
+    $students = \App\Models\Student::with(['schedules', 'classes', 'scheduleSessions'])->get();
+    return response()->json($students->map(function ($s) {
+        return [
+            'id' => $s->id,
+            'name' => $s->name,
+            'classes' => $s->classes->pluck('name'),
+            'schedules_table' => $s->schedules->map(fn($sch) => "{$sch->day} {$sch->time} (ID: {$sch->id})"),
+            'sessions' => $s->scheduleSessions->filter(fn($sess) => $sess->status === 'booked')->map(fn($sess) => "{$sess->session_date} {$sess->time}")->unique()->values(),
+        ];
+    }));
+});
+
 // TEMPORARY: Clear cache from browser
 Route::get('/clear-cache', function () {
     try {
