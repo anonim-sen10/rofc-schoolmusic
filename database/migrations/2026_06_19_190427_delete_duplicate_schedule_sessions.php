@@ -38,6 +38,16 @@ return new class extends Migration
                     ->where('id', '!=', $keepId)
                     ->delete();
             }
+        // Delete Saddam's booked (un-attended) and upcoming schedule sessions
+        $saddam = \Illuminate\Support\Facades\DB::table('students')
+            ->where('name', 'like', '%saddam%')
+            ->first();
+
+        if ($saddam) {
+            \Illuminate\Support\Facades\DB::table('schedule_sessions')
+                ->where('student_id', $saddam->id)
+                ->where('status', 'booked')
+                ->delete();
         }
     }
 
