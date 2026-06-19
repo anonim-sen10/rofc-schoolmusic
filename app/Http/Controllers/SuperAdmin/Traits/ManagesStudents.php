@@ -198,12 +198,16 @@ trait ManagesStudents
                     'status' => 'available',
                 ]);
 
-            ScheduleSession::query()
+            $sessionQuery = ScheduleSession::query()
                 ->where('student_id', $student->id)
-                ->whereNotIn('schedule_id', $scheduleIds ?: [0])
                 ->where('status', 'booked')
-                ->where('session_date', '>=', now()->toDateString())
-                ->delete();
+                ->where('session_date', '>=', now()->toDateString());
+
+            if (!$force) {
+                $sessionQuery->whereNotIn('schedule_id', $scheduleIds ?: [0]);
+            }
+
+            $sessionQuery->delete();
 
             $primarySchedule = $selectedSchedules->first();
             $student->forceFill([
