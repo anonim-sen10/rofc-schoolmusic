@@ -31,15 +31,6 @@ Route::get('/run-migration', function () {
     }
 });
 
-Route::get('/debug-migration-check', function () {
-    $migrationFiles = glob(database_path('migrations/*.php'));
-    $dbMigrations = \Illuminate\Support\Facades\DB::table('migrations')->pluck('migration')->toArray();
-    return response()->json([
-        'files' => array_map('basename', $migrationFiles),
-        'db' => $dbMigrations,
-    ]);
-});
-
 // TEMPORARY: Clear cache from browser
 Route::get('/clear-cache', function () {
     try {
