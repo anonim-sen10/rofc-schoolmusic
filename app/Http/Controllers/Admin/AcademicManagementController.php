@@ -91,7 +91,7 @@ class AcademicManagementController extends Controller
     public function students(): View
     {
         return view('portal.admin.students', [
-            'students' => Student::with('classes')->latest()->get(),
+            'students' => Student::with(['classes', 'schedules'])->latest()->get(),
             'classList' => MusicClass::orderBy('name')->get(),
         ]);
     }

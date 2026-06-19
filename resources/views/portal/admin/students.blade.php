@@ -210,8 +210,8 @@ $homeRoute = route('admin.dashboard');
                                                     <small>Tahan Ctrl/Cmd untuk memilih lebih dari satu.</small>
                                                 </label>
                                                 @php
-                                                    $studentScheduleIds = $student->scheduleSessions
-                                                        ->pluck('schedule_id')
+                                                    $studentScheduleIds = $student->schedules
+                                                        ->pluck('id')
                                                         ->filter()
                                                         ->unique()
                                                         ->values();

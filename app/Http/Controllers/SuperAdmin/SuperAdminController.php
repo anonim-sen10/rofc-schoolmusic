@@ -311,7 +311,7 @@ class SuperAdminController extends Controller
                 $data['studentsForSubstitute'] = Student::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']);
                 break;
             case 'students':
-                $data['studentsForManagement'] = Student::query()->with(['musicClass', 'classes', 'scheduleSessions.schedule'])->latest()->get();
+                $data['studentsForManagement'] = Student::query()->with(['musicClass', 'classes', 'schedules', 'scheduleSessions.schedule'])->latest()->get();
                 $data['classesForManagement'] = MusicClass::query()->orderBy('name')->get(['id', 'name']);
                 $data['approvedRegistrationsForStudents'] = Registration::query()
                     ->with('musicClass')

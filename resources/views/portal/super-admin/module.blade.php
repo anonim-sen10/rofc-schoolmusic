@@ -2544,8 +2544,8 @@
                                                         </select>
                                                     </label>
                                                     @php
-                                                        $studentScheduleIds = $student->scheduleSessions
-                                                            ->pluck('schedule_id')
+                                                        $studentScheduleIds = $student->schedules
+                                                            ->pluck('id')
                                                             ->filter()
                                                             ->unique()
                                                             ->values();
