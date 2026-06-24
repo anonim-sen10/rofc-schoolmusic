@@ -783,7 +783,7 @@ public function schedule(Request $request): View
             return back()->with('error', 'Sesi ini sudah memiliki permintaan reschedule yang sedang diproses.');
         }
 
-        \App\Models\RescheduleRequest::create([
+        $resRequest = \App\Models\RescheduleRequest::create([
             'student_id' => $oldSession->student_id,
             'old_schedule_id' => $oldSession->schedule_id,
             'old_session_id' => $oldSession->id,
@@ -793,55 +793,8 @@ public function schedule(Request $request): View
             'status' => 'pending',
         ]);
 
-        // Send Fonnte Notification for new reschedule request
-        try {
-            $fonnteToken = env('FONNTE_TOKEN');
-            $groupId = '120363425095640755@g.us'; // Specific group ID
+        \App\Models\RescheduleRequest::autoApprove($resRequest);
 
-            if ($fonnteToken) {
-                $teacherPhone = $teacher->phone ?? null;
-                $target = $groupId;
-                
-                if ($teacherPhone) {
-                    $formattedPhone = preg_replace('/[^0-9]/', '', $teacherPhone);
-                    if (str_starts_with($formattedPhone, '0')) {
-                        $formattedPhone = '62' . substr($formattedPhone, 1);
-                    }
-                    $target .= ',' . $formattedPhone;
-                }
-
-                $studentName = $oldSession->student->name ?? 'Siswa';
-                $className = $oldSession->musicClass->name ?? 'Kelas';
-                $oldTime = $oldSession->session_date->format('d M Y') . ' ' . \Carbon\Carbon::parse($oldSession->time)->format('H:i');
-                
-                $newTimeText = "Dorong Mundur 1 Minggu";
-                if ($validated['new_schedule_id'] != $oldSession->schedule_id) {
-                    $newSlot = \App\Models\Schedule::find($validated['new_schedule_id']);
-                    if ($newSlot) {
-                        $newTimeText = $newSlot->day_of_week . ' ' . \Carbon\Carbon::parse($newSlot->start_time)->format('H:i');
-                    }
-                }
-
-                $message = "*PERMINTAAN RESCHEDULE BARU*\n\n";
-                $message .= "Siswa: *$studentName*\n";
-                $message .= "Kelas: *$className*\n";
-                $message .= "Jadwal Lama: *$oldTime*\n";
-                $message .= "Jadwal Baru: *$newTimeText*\n";
-                $message .= "Alasan: " . ($validated['reason'] ?: '-') . "\n\n";
-                $message .= "Diajukan oleh: *Guru ({$teacher->name})*\n";
-                $message .= "Silakan cek dashboard Super Admin untuk memproses permintaan ini.";
-
-                \Illuminate\Support\Facades\Http::withHeaders([
-                    'Authorization' => $fonnteToken,
-                ])->post('https://api.fonnte.com/send', [
-                    'target' => $target,
-                    'message' => $message,
-                ]);
-            }
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Fonnte Reschedule Request Notification Error: ' . $e->getMessage());
-        }
-
-        return back()->with('success', 'Permintaan reschedule telah dikirim dan menunggu persetujuan admin.');
+        return back()->with('success', 'Reschedule berhasil diajukan dan disetujui otomatis.');
     }
 }
