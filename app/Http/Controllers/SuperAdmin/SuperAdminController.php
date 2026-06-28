@@ -311,7 +311,7 @@ class SuperAdminController extends Controller
                 $data['studentsForSubstitute'] = Student::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']);
                 break;
             case 'students':
-                $data['studentsForManagement'] = Student::query()->with(['musicClass', 'classes', 'schedules', 'scheduleSessions.schedule'])->latest()->get();
+                $data['studentsForManagement'] = Student::query()->with(['musicClass', 'classes', 'schedules.teacher', 'schedules.musicClass', 'scheduleSessions.schedule'])->latest()->get();
                 $data['classesForManagement'] = MusicClass::query()->orderBy('name')->get(['id', 'name']);
                 $data['approvedRegistrationsForStudents'] = Registration::query()
                     ->with('musicClass')
@@ -473,12 +473,13 @@ class SuperAdminController extends Controller
             'students' => [
                 'title' => 'Students',
                 'description' => 'Daftar siswa aktif dan manajemen profil.',
-                'columns' => ['Nama', 'Email', 'Telepon', 'Kelas', 'Status'],
-                'rows' => Student::with('classes')->latest()->take(30)->get()->map(fn (Student $student) => [
+                'columns' => ['Nama', 'Email', 'Telepon', 'Kelas', 'Guru Pembimbing', 'Status'],
+                'rows' => Student::with(['classes', 'schedules.teacher', 'schedules.musicClass'])->latest()->take(30)->get()->map(fn (Student $student) => [
                     $student->name,
                     $student->email,
                     $student->phone,
                     $student->classes->pluck('name')->join(', '),
+                    $student->schedules->filter(fn($s) => strtolower((string)$s->status) === 'booked')->map(fn($s) => $s->teacher?->name ?? ($s->musicClass?->teacher?->name ?? null))->filter()->unique()->join(', ') ?: '-',
                     $student->is_active ? 'ACTIVE' : 'INACTIVE',
                 ])->all(),
             ],

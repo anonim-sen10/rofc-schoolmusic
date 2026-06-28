@@ -83,5 +83,5 @@ $requests = \App\Models\RescheduleRequest::with(['student', 'oldSchedule', 'newS
     .btn-res-reject:hover { background: #991b1b; color: #fff; }
     .btn-res-approve i, .btn-res-reject i { width: 16px; height: 16px; }
     .text-muted { color: var(--muted); font-style: italic; font-size: 0.85rem; }
-</style>
+</style>    
 @endsection

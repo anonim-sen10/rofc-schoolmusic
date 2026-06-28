@@ -2310,6 +2310,7 @@
                                     row.querySelector('td[data-label="Email"]'),
                                     row.querySelector('td[data-label="Telepon"]'),
                                     row.querySelector('td[data-label="Kelas"]'),
+                                    row.querySelector('td[data-label="Guru Pembimbing"]'),
                                 ].filter(Boolean);
 
                                 if (searchableCells.length === 0) return;
@@ -2327,7 +2328,7 @@
                             if (!hasVisibleRow && searchTerm.trim() !== '') {
                                 const tr = document.createElement('tr');
                                 tr.className = 'search-empty-msg';
-                                tr.innerHTML = `<td colspan="6" style="text-align: center; padding: 2rem; color: #64748b;">
+                                tr.innerHTML = `<td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;">
                                     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
                                         <i data-lucide="search-x" style="width: 32px; height: 32px; color: #cbd5e1;"></i>
                                         <span>Tidak ada siswa yang cocok dengan pencarian "<b>${e.target.value}</b>"</span>
@@ -2351,6 +2352,7 @@
                         <th>Email</th>
                         <th>Telepon</th>
                         <th>Kelas</th>
+                        <th>Guru Pembimbing</th>
                         <th>Jadwal</th>
                         <th>Status</th>
                         <th>Aksi</th>
@@ -2369,6 +2371,20 @@
                                     {{ $student->classes->pluck('name')->join(', ') }}
                                 @else
                                     -
+                                @endif
+                            </td>
+                            <td data-label="Guru Pembimbing">
+                                @php
+                                    $teachers = $student->schedules->filter(function ($s) {
+                                        return strtolower((string) $s->status) === 'booked';
+                                    })->map(function ($s) {
+                                        return $s->teacher?->name ?? ($s->musicClass?->teacher?->name ?? null);
+                                    })->filter()->unique();
+                                @endphp
+                                @if($teachers->isNotEmpty())
+                                    {{ $teachers->join(', ') }}
+                                @else
+                                    <span style="color: #cbd5e1;">-</span>
                                 @endif
                             </td>
                             <td data-label="Jadwal" class="class-schedule-cell">
@@ -2469,6 +2485,19 @@
                                                             @else
                                                                 -
                                                             @endif
+                                                        </p>
+                                                    </article>
+                                                    <article class="registration-modal-item-full">
+                                                        <p>Guru Pembimbing</p>
+                                                        <p>
+                                                            @php
+                                                                $teachers = $student->schedules->filter(function ($s) {
+                                                                    return strtolower((string) $s->status) === 'booked';
+                                                                })->map(function ($s) {
+                                                                    return $s->teacher?->name ?? ($s->musicClass?->teacher?->name ?? null);
+                                                                })->filter()->unique();
+                                                            @endphp
+                                                            {{ $teachers->isNotEmpty() ? $teachers->join(', ') : '-' }}
                                                         </p>
                                                     </article>
                                                     <article><p>Mulai Kursus</p><p>{{ $student->start_date ? \Carbon\Carbon::parse($student->start_date)->format('d M Y') : '-' }}</p></article>
