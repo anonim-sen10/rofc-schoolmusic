@@ -2280,7 +2280,7 @@
                     <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 18px; height: 18px;"></i>
                     <input type="text" id="studentSearchInput" placeholder="Cari nama, class, telepon, email..." style="width: 100%; padding: 0.6rem 1rem 0.6rem 2.5rem; border: 1px solid #e2e8f0; border-radius: 0.75rem; font-size: 0.85rem; color: #1e293b; background: #f8fafc; transition: all 0.3s ease; box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.02);" onfocus="this.style.background='#ffffff'; this.style.borderColor='#6366f1'; this.style.boxShadow='0 0 0 3px rgba(99, 102, 241, 0.1)';" onblur="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='inset 0 2px 4px 0 rgba(0,0,0,0.02)';">
                 </div>
-                <button type="button" class="btn-add-student" onclick="const modal = document.getElementById('modal-create-student'); if(modal) modal.style.display = 'flex';">
+                <button type="button" class="btn-add-student" onclick="const modal = document.getElementById('modal-create-student'); if(modal) { modal.style.display = 'flex'; if(typeof loadAdminSchedules === 'function' && document.getElementById('admin_class_id')?.value) loadAdminSchedules(); }">
                     <i data-lucide="user-plus"></i>
                     Tambah Siswa Baru
                 </button>
@@ -4455,6 +4455,11 @@ document.addEventListener('DOMContentLoaded', () => {
         input.dispatchEvent(new Event('change', { bubbles: true }));
     });
 
+    const adminClassSelect = document.getElementById('admin_class_id');
+    if (adminClassSelect && adminClassSelect.value && typeof loadAdminSchedules === 'function') {
+        loadAdminSchedules();
+    }
+
 });
 
 // Dynamic Schedule Loader for Admin Create Student Modal
@@ -4618,6 +4623,8 @@ function updateAdminSelectedPreview() {
     const preview = document.getElementById('admin-selected-preview');
     const tags = document.getElementById('admin-selected-tags');
     
+    if (!preview || !tags) return;
+
     const startDateInput = document.getElementById('start_date');
     let startDayName = '';
     if (startDateInput && startDateInput.value) {
@@ -4628,38 +4635,24 @@ function updateAdminSelectedPreview() {
     if (checkedItems.length > 0) {
         preview.style.display = 'block';
         tags.innerHTML = checkedItems.map(radio => {
-            const isFirst = startDayName && radio.dataset.label.startsWith(startDayName);
+            const label = radio.dataset.label || '';
+            const isFirst = startDayName && label.startsWith(startDayName);
             const bgColor = isFirst ? '#059669' : '#2563eb';
-            return \`
-            <span style="display: inline-flex; align-items: center; gap: 0.4rem; background: \${bgColor}; color: #fff; padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; animation: tag-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);" \${isFirst ? 'title="Jadwal pertemuan pertama"' : ''}>
-                \${radio.dataset.label} \${isFirst ? '⭐ (Start)' : ''}
-                <svg onclick="const tgt=document.querySelector('#admin-schedule-container input[name=\\'schedule_ids[]\\'][value=\\'\${radio.value}\\']'); if(tgt){tgt.checked = false; tgt.dispatchEvent(new Event(\\'change\\'));}" style="width: 14px; height: 14px; cursor: pointer;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            return `
+            <span style="display: inline-flex; align-items: center; gap: 0.4rem; background: ${bgColor}; color: #fff; padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; animation: tag-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);" ${isFirst ? 'title="Jadwal pertemuan pertama"' : ''}>
+                ${label} ${isFirst ? '⭐ (Start)' : ''}
+                <svg onclick="const tgt=document.querySelector('#admin-schedule-container input[name=\\'schedule_ids[]\\'][value=\\'${radio.value}\\']'); if(tgt){tgt.checked = false; tgt.dispatchEvent(new Event(\\'change\\'));}" style="width: 14px; height: 14px; cursor: pointer;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
-            </span>\`;
+            </span>`;
         }).join('');
     } else {
         preview.style.display = 'none';
         tags.innerHTML = '';
     }
 
-    const err = document.getElementById('admin-start-date-error');
-    if (startDayName && err) {
-        let matchFound = false;
-        checkedItems.forEach(chk => { if (chk.dataset.label.startsWith(startDayName)) matchFound = true; });
-        if (!matchFound && checkedItems.length > 0) {
-            err.textContent = \`Peringatan: Tanggal mulai Anda hari \${startDayName}, pastikan Anda memilih setidaknya satu jam di hari \${startDayName}.\`;
-            err.style.display = 'block';
-        } else {
-            err.style.display = 'none';
-        }
-    }
-}view.style.display = 'none';
-        tags.innerHTML = '';
-    }
-
     let err = document.getElementById('admin-start-date-error');
-    if (!err && startDateInput) {
+    if (!err && startDateInput && startDateInput.parentNode) {
         err = document.createElement('div');
         err.id = 'admin-start-date-error';
         err.className = 'validation-error-msg';
@@ -4669,7 +4662,7 @@ function updateAdminSelectedPreview() {
     
     if (startDayName && err) {
         let matchFound = false;
-        checkedItems.forEach(chk => { if (chk.dataset.label.startsWith(startDayName)) matchFound = true; });
+        checkedItems.forEach(chk => { if (chk.dataset.label && chk.dataset.label.startsWith(startDayName)) matchFound = true; });
         if (!matchFound && checkedItems.length > 0) {
             err.textContent = `Peringatan: Tanggal mulai Anda hari ${startDayName}, pastikan Anda memilih setidaknya satu jam di hari ${startDayName}.`;
             err.style.display = 'block';
