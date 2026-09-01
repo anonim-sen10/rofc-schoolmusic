@@ -16,9 +16,42 @@ trait ManagesStudents
     public function storeStudent(StoreStudentRequest $request): RedirectResponse
     {
         $data = $request->validated();
+        $studentName = trim($data['name']);
+
+        // Generate or resolve email
+        $email = !empty($data['email']) ? strtolower(trim($data['email'])) : null;
+        if (!$email) {
+            $slugName = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $studentName));
+            if (empty($slugName)) {
+                $slugName = 'student';
+            }
+            $email = $slugName . rand(100, 999) . '@studentrofc.com';
+            while (\App\Models\User::where('email', $email)->exists() || Student::where('email', $email)->exists()) {
+                $email = $slugName . rand(1000, 9999) . '@studentrofc.com';
+            }
+        }
+
+        // Create User account if not existing
+        $user = \App\Models\User::where('email', $email)->first();
+        if (!$user) {
+            $user = \App\Models\User::query()->create([
+                'name' => $studentName,
+                'email' => $email,
+                'password' => \Illuminate\Support\Facades\Hash::make('123456'),
+            ]);
+            $studentRole = \App\Models\Role::query()->firstOrCreate(
+                ['slug' => 'student'],
+                ['name' => 'Student', 'description' => 'Portal siswa.']
+            );
+            $user->roles()->syncWithoutDetaching([$studentRole->id]);
+            if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'role')) {
+                $user->update(['role' => 'student']);
+            }
+        }
 
         $student = Student::query()->create([
-            'name' => $data['name'],
+            'user_id' => $user->id,
+            'name' => $studentName,
             'nama_panggilan' => $data['nama_panggilan'] ?? null,
             'jenis_kelamin' => $data['jenis_kelamin'] ?? null,
             'tempat_lahir' => $data['tempat_lahir'] ?? null,
@@ -26,7 +59,7 @@ trait ManagesStudents
             'kewarganegaraan' => $data['kewarganegaraan'] ?? 'Indonesia',
             'age' => $data['age'] ?? null,
             'phone' => $data['phone'] ?? null,
-            'email' => $data['email'] ?? null,
+            'email' => $email,
             'address' => $data['address'] ?? null,
             'nama_ortu' => $data['nama_ortu'] ?? null,
             'pekerjaan_ortu' => $data['pekerjaan_ortu'] ?? null,
@@ -46,9 +79,13 @@ trait ManagesStudents
         $student->class_id = $data['class_id'];
         $student->save();
         $student->classes()->sync([$data['class_id']]);
-        $this->syncStudentScheduleSlots($student, [$data['schedule_id']]);
 
-        return back()->with('success', 'Siswa berhasil ditambahkan.');
+        $scheduleIds = $data['schedule_ids'] ?? ($request->input('schedule_id') ? [$request->input('schedule_id')] : []);
+        if (!empty($scheduleIds)) {
+            $this->syncStudentScheduleSlots($student, $scheduleIds);
+        }
+
+        return back()->with('success', 'Siswa berhasil ditambahkan dan akun berhasil dibuat.');
     }
 
     public function updateStudent(Request $request, Student $student): RedirectResponse

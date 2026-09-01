@@ -8,7 +8,7 @@ class StoreStudentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->hasRole('super_admin');
+        return $this->user() && ($this->user()->hasRole('super_admin') || $this->user()->hasRole('admin'));
     }
 
     public function rules(): array
@@ -22,7 +22,7 @@ class StoreStudentRequest extends FormRequest
             'kewarganegaraan' => ['nullable', 'string', 'max:120'],
             'age' => ['nullable', 'integer', 'min:0', 'max:120'],
             'phone' => ['nullable', 'string', 'max:30'],
-            'email' => ['nullable', 'email', 'max:120', 'unique:students,email'],
+            'email' => ['nullable', 'email', 'max:120'],
             'address' => ['nullable', 'string', 'max:500'],
             'nama_ortu' => ['nullable', 'string', 'max:120'],
             'pekerjaan_ortu' => ['nullable', 'string', 'max:120'],
@@ -30,9 +30,11 @@ class StoreStudentRequest extends FormRequest
             'email_ortu' => ['nullable', 'email', 'max:120'],
             'is_active' => ['required', 'in:1,0'],
             'class_id' => ['required', 'integer', 'exists:classes,id'],
-            'schedule_id' => ['required', 'integer', 'exists:schedules,id'],
+            'schedule_id' => ['nullable', 'integer', 'exists:schedules,id'],
+            'schedule_ids' => ['required', 'array', 'min:1'],
+            'schedule_ids.*' => ['integer', 'exists:schedules,id'],
             'start_date' => ['nullable', 'date'],
-            'duration_months' => ['nullable', 'integer', 'in:1,2,3,6,12'],
+            'duration_months' => ['nullable', 'integer', 'in:1,2,3,4,6,12'],
             'program_tambahan' => ['nullable', 'array'],
             'program_tambahan.*' => ['string', 'max:120'],
             'pengalaman' => ['nullable', 'boolean'],
@@ -40,6 +42,15 @@ class StoreStudentRequest extends FormRequest
             'favorite_song' => ['nullable', 'string', 'max:120'],
             'ig_siswa' => ['nullable', 'string', 'max:100'],
             'ig_ortu' => ['nullable', 'string', 'max:100'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'schedule_ids.required' => 'Silakan pilih minimal satu jadwal belajar.',
+            'schedule_ids.min' => 'Silakan pilih minimal satu jadwal belajar.',
+            'class_id.required' => 'Silakan pilih instrumen kelas.',
         ];
     }
 }
