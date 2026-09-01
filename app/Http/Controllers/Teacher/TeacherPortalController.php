@@ -390,11 +390,13 @@ public function dashboard(Request $request): View
         ]);
     }
 
-public function schedule(Request $request): View
+    public function schedule(Request $request): View
     {
         $teacher = $this->teacherFromUser($request->user()->id);
 
-        $schedules = \App\Models\ScheduleSession::query()
+        $selectedMonth = $request->query('month');
+
+        $allSchedules = \App\Models\ScheduleSession::query()
             ->where(function ($query) use ($teacher) {
                 $query->where('teacher_id', $teacher->id)->whereNull('substitute_teacher_id')
                       ->orWhere('substitute_teacher_id', $teacher->id);
@@ -405,9 +407,65 @@ public function schedule(Request $request): View
             ->orderBy('time')
             ->get();
 
+        // Unique available months list for dropdown & tabs
+        $availableMonths = $allSchedules->map(function ($s) {
+            return [
+                'key' => $s->session_date->format('Y-m'),
+                'label' => $s->session_date->translatedFormat('F Y'),
+                'short_label' => $s->session_date->translatedFormat('M Y'),
+                'year' => $s->session_date->format('Y'),
+                'month' => $s->session_date->format('m'),
+                'count' => 0,
+            ];
+        })->unique('key')->values();
+
+        // Calculate count per month
+        $availableMonths->transform(function ($item) use ($allSchedules) {
+            $item['count'] = $allSchedules->filter(fn($s) => $s->session_date->format('Y-m') === $item['key'])->count();
+            return $item;
+        });
+
+        // Default month selection logic
+        if (!$selectedMonth) {
+            $currentKey = now()->format('Y-m');
+            $hasCurrent = $availableMonths->contains('key', $currentKey);
+            $selectedMonth = $hasCurrent ? $currentKey : ($availableMonths->first()['key'] ?? 'all');
+        }
+
+        // Filter schedules by selected month
+        $filteredSchedules = $allSchedules;
+        if ($selectedMonth && $selectedMonth !== 'all') {
+            $filteredSchedules = $allSchedules->filter(function ($s) use ($selectedMonth) {
+                return $s->session_date->format('Y-m') === $selectedMonth;
+            })->values();
+        }
+
+        // Group filtered schedules by Month Year
+        $groupedSchedules = $filteredSchedules->groupBy(function ($s) {
+            return $s->session_date->translatedFormat('F Y');
+        });
+
+        // Compute monthly summary statistics
+        $totalSessions = $filteredSchedules->count();
+        $completedSessions = $filteredSchedules->filter(fn($s) => $s->status === 'completed' || $s->attendance)->count();
+        $upcomingSessions = $filteredSchedules->filter(fn($s) => $s->status === 'booked' && !$s->attendance && $s->session_date->isFuture())->count();
+        $rescheduledCount = $filteredSchedules->filter(fn($s) => $s->status === 'rescheduled')->count();
+        $activeStudentsCount = $filteredSchedules->pluck('student_id')->unique()->count();
+
         return view('portal.teacher.schedule', [
             'teacher' => $teacher,
-            'schedules' => $schedules,
+            'schedules' => $filteredSchedules,
+            'allSchedules' => $allSchedules,
+            'groupedSchedules' => $groupedSchedules,
+            'availableMonths' => $availableMonths,
+            'selectedMonth' => $selectedMonth,
+            'monthlyStats' => [
+                'total' => $totalSessions,
+                'completed' => $completedSessions,
+                'upcoming' => $upcomingSessions,
+                'rescheduled' => $rescheduledCount,
+                'students' => $activeStudentsCount,
+            ],
         ]);
     }
 

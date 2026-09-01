@@ -20,6 +20,98 @@
 
 @section('content')
 
+{{-- REKAP BULANAN HEADER & STATS --}}
+<div class="mb-6 space-y-5">
+    {{-- Month Filter Bar --}}
+    <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+                <i data-lucide="calendar" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Rekap Jadwal Mengajar</h2>
+                <p class="text-xs font-semibold text-slate-400 mt-0.5">Filter dan pantau rekap sesi mengajar per bulan secara akurat</p>
+            </div>
+        </div>
+
+        {{-- Month Filter Dropdown & Controls --}}
+        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            <form method="GET" action="{{ route('teacher.schedule.index') }}" class="flex items-center gap-2 w-full md:w-auto">
+                <div class="relative w-full md:w-auto min-w-[220px]">
+                    <i data-lucide="calendar-days" class="w-4 h-4 text-blue-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                    <select name="month" onchange="this.form.submit()" class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl pl-10 pr-8 py-2.5 appearance-none focus:outline-none focus:border-blue-500 focus:bg-white transition-all cursor-pointer shadow-sm">
+                        <option value="all" @selected($selectedMonth === 'all')>🗓️ Semua Bulan (Rekap Akumulasi)</option>
+                        @foreach($availableMonths as $m)
+                            <option value="{{ $m['key'] }}" @selected($selectedMonth === $m['key'])>
+                                📅 {{ $m['label'] }} ({{ $m['count'] }} Sesi)
+                            </option>
+                        @endforeach
+                    </select>
+                    <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Quick Month Tabs --}}
+    @if(count($availableMonths) > 0)
+        <div class="flex items-center gap-2 overflow-x-auto pb-2 custom-scrollbar">
+            <a href="{{ route('teacher.schedule.index', ['month' => 'all']) }}" 
+               class="px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap transition-all duration-200 flex items-center gap-2 shadow-sm {{ $selectedMonth === 'all' ? 'bg-blue-600 text-white shadow-blue-500/25' : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100' }}">
+                <span>Semua Bulan</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] {{ $selectedMonth === 'all' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500' }}">{{ $allSchedules->count() }}</span>
+            </a>
+            @foreach($availableMonths as $m)
+                <a href="{{ route('teacher.schedule.index', ['month' => $m['key']]) }}" 
+                   class="px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap transition-all duration-200 flex items-center gap-2 shadow-sm {{ $selectedMonth === $m['key'] ? 'bg-blue-600 text-white shadow-blue-500/25' : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100' }}">
+                    <span>{{ $m['label'] }}</span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] {{ $selectedMonth === $m['key'] ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500' }}">{{ $m['count'] }}</span>
+                </a>
+            @endforeach
+        </div>
+    @endif
+
+    {{-- Summary Stat Cards --}}
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center gap-3">
+            <div class="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                <i data-lucide="book-open" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Sesi</p>
+                <p class="text-lg font-black text-slate-900">{{ $monthlyStats['total'] }} <span class="text-xs font-bold text-slate-400">Sesi</span></p>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center gap-3">
+            <div class="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Selesai / Hadir</p>
+                <p class="text-lg font-black text-emerald-600">{{ $monthlyStats['completed'] }} <span class="text-xs font-bold text-slate-400">Sesi</span></p>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center gap-3">
+            <div class="h-10 w-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+                <i data-lucide="clock" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mendatang</p>
+                <p class="text-lg font-black text-amber-600">{{ $monthlyStats['upcoming'] }} <span class="text-xs font-bold text-slate-400">Sesi</span></p>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center gap-3">
+            <div class="h-10 w-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
+                <i data-lucide="users" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Siswa Aktif</p>
+                <p class="text-lg font-black text-purple-600">{{ $monthlyStats['students'] }} <span class="text-xs font-bold text-slate-400">Siswa</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
 <section class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden mb-8 mt-2">
     <div class="px-8 py-5 border-b border-slate-50 flex items-center justify-between bg-slate-50/20">
         <div>
@@ -47,122 +139,140 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-50/80">
-                @forelse($schedules as $schedule)
-                    <tr class="hover:bg-blue-50/20 transition-all duration-300 group">
-                        <td class="px-8 py-5 whitespace-nowrap">
-                            <div class="flex flex-col gap-1">
-                                <span class="inline-flex items-center w-fit px-2.5 py-1 rounded-lg bg-blue-600 text-white text-[10px] font-extrabold shadow-sm tracking-tight">
-                                    {{ $schedule->session_date->translatedFormat('l, d M Y') }}
-                                </span>
-                                <span class="inline-flex items-center gap-1.5 px-0.5 text-[11px] font-bold text-slate-600">
-                                    <i data-lucide="clock" class="w-3 h-3 text-blue-500"></i>
-                                    {{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }} WIB
-                                </span>
-                            </div>
-                        </td>
-                        <td class="px-8 py-5">
-                            <div class="flex items-center gap-3">
-                                <div class="h-10 w-10 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-700 font-extrabold text-xs uppercase group-hover:scale-105 transition-transform duration-300">
-                                    @php
-                                        $initials = substr($schedule->student->user->name ?? ($schedule->student->name ?? '-'), 0, 2);
-                                    @endphp
-                                    <span class="bg-gradient-to-br from-slate-700 to-slate-900 bg-clip-text text-transparent">{{ $initials }}</span>
+                @forelse($groupedSchedules as $monthName => $monthSchedules)
+                    @if($selectedMonth === 'all')
+                        <tr class="bg-gradient-to-r from-blue-50/80 via-slate-50 to-white border-y border-blue-100/60">
+                            <td colspan="6" class="px-8 py-3">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="h-2.5 w-2.5 rounded-full bg-blue-600"></span>
+                                        <span class="text-xs font-black text-slate-800 tracking-wide uppercase">REKAP {{ $monthName }}</span>
+                                    </div>
+                                    <span class="px-3 py-1 rounded-full bg-blue-100/80 text-blue-700 text-[10px] font-extrabold">
+                                        {{ $monthSchedules->count() }} Sesi Mengajar
+                                    </span>
                                 </div>
-                                <div class="flex flex-col">
-                                    <span class="text-sm font-extrabold text-slate-800 leading-none">{{ $schedule->student->user->name ?? ($schedule->student->name ?? '-') }}</span>
-                                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">ID: {{ str_pad($schedule->student_id, 4, '0', STR_PAD_LEFT) }}</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-8 py-5">
-                            <div class="flex flex-col gap-0.5">
-                                <span class="text-xs font-bold text-slate-700">{{ $schedule->musicClass->name ?? '-' }}</span>
-                                <span class="text-[9px] font-medium text-slate-400 uppercase tracking-wider">Sesi Privat</span>
-                            </div>
-                        </td>
-                        <td class="px-8 py-5">
-                            <div class="flex items-start gap-1.5 text-[11px] font-semibold text-slate-500 max-w-[160px]">
-                                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-300 mt-0.5 shrink-0"></i>
-                                <span class="leading-snug">{{ $schedule->student->address ?? 'Alamat belum tersedia' }}</span>
-                            </div>
-                        </td>
-                        <td class="px-8 py-5">
-                            @php
-                                $pendingRequest = $schedule->rescheduleRequests->where('status', 'pending')->first();
-                            @endphp
+                            </td>
+                        </tr>
+                    @endif
 
-                            @if(!$schedule->student->is_active)
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-500 text-[9px] font-extrabold border border-slate-200 tracking-wider">TIDAK AKTIF</span>
-                            @elseif($schedule->status === 'rescheduled')
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-[9px] font-extrabold border border-slate-200 tracking-wider">DIJADWAL ULANG</span>
-                            @elseif($pendingRequest)
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-[9px] font-extrabold border border-amber-200 tracking-wider animate-pulse">REQ RESCHEDULE</span>
-                            @else
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-[9px] font-extrabold border border-green-200 tracking-wider">AKTIF</span>
-                            @endif
-                        </td>
-                        <td class="px-8 py-5">
-                            <div class="flex items-center justify-end">
+                    @foreach($monthSchedules as $schedule)
+                        <tr class="hover:bg-blue-50/20 transition-all duration-300 group">
+                            <td class="px-8 py-5 whitespace-nowrap">
+                                <div class="flex flex-col gap-1">
+                                    <span class="inline-flex items-center w-fit px-2.5 py-1 rounded-lg bg-blue-600 text-white text-[10px] font-extrabold shadow-sm tracking-tight">
+                                        {{ $schedule->session_date->translatedFormat('l, d M Y') }}
+                                    </span>
+                                    <span class="inline-flex items-center gap-1.5 px-0.5 text-[11px] font-bold text-slate-600">
+                                        <i data-lucide="clock" class="w-3 h-3 text-blue-500"></i>
+                                        {{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }} WIB
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="px-8 py-5">
+                                <div class="flex items-center gap-3">
+                                    <div class="h-10 w-10 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-700 font-extrabold text-xs uppercase group-hover:scale-105 transition-transform duration-300">
+                                        @php
+                                            $initials = substr($schedule->student->user->name ?? ($schedule->student->name ?? '-'), 0, 2);
+                                        @endphp
+                                        <span class="bg-gradient-to-br from-slate-700 to-slate-900 bg-clip-text text-transparent">{{ $initials }}</span>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-extrabold text-slate-800 leading-none">{{ $schedule->student->user->name ?? ($schedule->student->name ?? '-') }}</span>
+                                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">ID: {{ str_pad($schedule->student_id, 4, '0', STR_PAD_LEFT) }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-8 py-5">
+                                <div class="flex flex-col gap-0.5">
+                                    <span class="text-xs font-bold text-slate-700">{{ $schedule->musicClass->name ?? '-' }}</span>
+                                    <span class="text-[9px] font-medium text-slate-400 uppercase tracking-wider">Sesi Privat</span>
+                                </div>
+                            </td>
+                            <td class="px-8 py-5">
+                                <div class="flex items-start gap-1.5 text-[11px] font-semibold text-slate-500 max-w-[160px]">
+                                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-300 mt-0.5 shrink-0"></i>
+                                    <span class="leading-snug">{{ $schedule->student->address ?? 'Alamat belum tersedia' }}</span>
+                                </div>
+                            </td>
+                            <td class="px-8 py-5">
+                                @php
+                                    $pendingRequest = $schedule->rescheduleRequests->where('status', 'pending')->first();
+                                @endphp
+
                                 @if(!$schedule->student->is_active)
-                                    <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 text-slate-500 border border-slate-200">
-                                        <i data-lucide="user-x" class="w-3.5 h-3.5"></i>
-                                        <span class="text-[9px] font-extrabold tracking-widest uppercase">Tidak Aktif</span>
-                                    </div>
-                                @elseif($schedule->status === 'completed')
-                                    <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-green-50 text-green-700 border border-green-100">
-                                        <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
-                                        <span class="text-[9px] font-extrabold tracking-widest uppercase">Selesai</span>
-                                    </div>
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-500 text-[9px] font-extrabold border border-slate-200 tracking-wider">TIDAK AKTIF</span>
                                 @elseif($schedule->status === 'rescheduled')
-                                    <span class="text-[10px] font-bold text-slate-300 tracking-widest uppercase italic opacity-60">Dijadwal Ulang</span>
-                                @elseif($schedule->attendance)
-                                    @php 
-                                        $status = strtolower($schedule->attendance->status);
-                                        $statusIndo = [
-                                            'present' => 'Hadir',
-                                            'absent' => 'Absen',
-                                            'sick' => 'Sakit',
-                                            'permit' => 'Izin',
-                                        ][$status] ?? ucfirst($status);
-                                        $class = $status === 'present' ? 'bg-blue-50 text-blue-700 border-blue-100' : ($status === 'absent' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-amber-50 text-amber-700 border-amber-100');
-                                    @endphp
-                                    <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl {{ $class }} border">
-                                        <i data-lucide="{{ $status === 'present' ? 'check' : ($status === 'absent' ? 'x' : 'clock') }}" class="w-3.5 h-3.5"></i>
-                                        <span class="text-[9px] font-extrabold tracking-widest uppercase">{{ $statusIndo }}</span>
-                                    </div>
-                                @elseif(now()->addMinutes(30)->lt(\Carbon\Carbon::parse($schedule->session_date->format('Y-m-d') . ' ' . $schedule->time)))
-                                    <div class="flex items-center gap-2">
-                                        @if(!$pendingRequest)
-                                            <button type="button" 
-                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-500 text-[10px] font-bold shadow-sm hover:bg-slate-50 transition-all active:scale-95"
-                                                onclick="openRescheduleModal('{{ $schedule->id }}', '{{ $schedule->schedule_id }}', '{{ $schedule->session_date->translatedFormat('l, d M Y') }} - {{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}', '{{ $schedule->teacher_id }}', '{{ $schedule->class_id }}')">
-                                                <i data-lucide="refresh-cw" class="w-3 h-3"></i>
-                                                <span>RESCHEDULE</span>
-                                            </button>
-                                        @endif
-                                        <span class="text-[10px] font-bold text-slate-300 tracking-widest uppercase italic opacity-60">Mendatang</span>
-                                    </div>
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-[9px] font-extrabold border border-slate-200 tracking-wider">DIJADWAL ULANG</span>
+                                @elseif($pendingRequest)
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-[9px] font-extrabold border border-amber-200 tracking-wider animate-pulse">REQ RESCHEDULE</span>
                                 @else
-                                    <div class="flex items-center gap-2">
-                                        @if(!$pendingRequest)
-                                            <button type="button" 
-                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-500 text-[10px] font-bold shadow-sm hover:bg-slate-50 transition-all active:scale-95"
-                                                onclick="openRescheduleModal('{{ $schedule->id }}', '{{ $schedule->schedule_id }}', '{{ $schedule->session_date->translatedFormat('l, d M Y') }} - {{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}', '{{ $schedule->teacher_id }}', '{{ $schedule->class_id }}')">
-                                                <i data-lucide="refresh-cw" class="w-3 h-3"></i>
-                                                <span>JADWAL ULANG</span>
-                                            </button>
-                                        @endif
-                                        <button type="button" 
-                                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-[10px] font-extrabold shadow-lg shadow-blue-100 hover:bg-blue-700 active:scale-95 transition-all duration-300"
-                                            onclick="openAttendanceModal('{{ $schedule->id }}', '{{ $schedule->student->name }}', '{{ $schedule->musicClass->name }}', '{{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}')">
-                                            <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
-                                            <span>ABSENSI</span>
-                                        </button>
-                                    </div>
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-[9px] font-extrabold border border-green-200 tracking-wider">AKTIF</span>
                                 @endif
-                            </div>
-                        </td>
-                    </tr>
+                            </td>
+                            <td class="px-8 py-5">
+                                <div class="flex items-center justify-end">
+                                    @if(!$schedule->student->is_active)
+                                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 text-slate-500 border border-slate-200">
+                                            <i data-lucide="user-x" class="w-3.5 h-3.5"></i>
+                                            <span class="text-[9px] font-extrabold tracking-widest uppercase">Tidak Aktif</span>
+                                        </div>
+                                    @elseif($schedule->status === 'completed')
+                                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-green-50 text-green-700 border border-green-100">
+                                            <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+                                            <span class="text-[9px] font-extrabold tracking-widest uppercase">Selesai</span>
+                                        </div>
+                                    @elseif($schedule->status === 'rescheduled')
+                                        <span class="text-[10px] font-bold text-slate-300 tracking-widest uppercase italic opacity-60">Dijadwal Ulang</span>
+                                    @elseif($schedule->attendance)
+                                        @php 
+                                            $status = strtolower($schedule->attendance->status);
+                                            $statusIndo = [
+                                                'present' => 'Hadir',
+                                                'absent' => 'Absen',
+                                                'sick' => 'Sakit',
+                                                'permit' => 'Izin',
+                                            ][$status] ?? ucfirst($status);
+                                            $class = $status === 'present' ? 'bg-blue-50 text-blue-700 border-blue-100' : ($status === 'absent' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-amber-50 text-amber-700 border-amber-100');
+                                        @endphp
+                                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl {{ $class }} border">
+                                            <i data-lucide="{{ $status === 'present' ? 'check' : ($status === 'absent' ? 'x' : 'clock') }}" class="w-3.5 h-3.5"></i>
+                                            <span class="text-[9px] font-extrabold tracking-widest uppercase">{{ $statusIndo }}</span>
+                                        </div>
+                                    @elseif(now()->addMinutes(30)->lt(\Carbon\Carbon::parse($schedule->session_date->format('Y-m-d') . ' ' . $schedule->time)))
+                                        <div class="flex items-center gap-2">
+                                            @if(!$pendingRequest)
+                                                <button type="button" 
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-500 text-[10px] font-bold shadow-sm hover:bg-slate-50 transition-all active:scale-95"
+                                                    onclick="openRescheduleModal('{{ $schedule->id }}', '{{ $schedule->schedule_id }}', '{{ $schedule->session_date->translatedFormat('l, d M Y') }} - {{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}', '{{ $schedule->teacher_id }}', '{{ $schedule->class_id }}')">
+                                                    <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                                                    <span>RESCHEDULE</span>
+                                                </button>
+                                            @endif
+                                            <span class="text-[10px] font-bold text-slate-300 tracking-widest uppercase italic opacity-60">Mendatang</span>
+                                        </div>
+                                    @else
+                                        <div class="flex items-center gap-2">
+                                            @if(!$pendingRequest)
+                                                <button type="button" 
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-500 text-[10px] font-bold shadow-sm hover:bg-slate-50 transition-all active:scale-95"
+                                                    onclick="openRescheduleModal('{{ $schedule->id }}', '{{ $schedule->schedule_id }}', '{{ $schedule->session_date->translatedFormat('l, d M Y') }} - {{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}', '{{ $schedule->teacher_id }}', '{{ $schedule->class_id }}')">
+                                                    <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                                                    <span>JADWAL ULANG</span>
+                                                </button>
+                                            @endif
+                                            <button type="button" 
+                                                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-[10px] font-extrabold shadow-lg shadow-blue-100 hover:bg-blue-700 active:scale-95 transition-all duration-300"
+                                                onclick="openAttendanceModal('{{ $schedule->id }}', '{{ $schedule->student->name }}', '{{ $schedule->musicClass->name }}', '{{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }}')">
+                                                <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
+                                                <span>ABSENSI</span>
+                                            </button>
+                                        </div>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
                 @empty
                     <tr>
                         <td colspan="6" class="py-16 text-center">
