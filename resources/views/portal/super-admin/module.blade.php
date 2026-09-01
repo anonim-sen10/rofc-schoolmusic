@@ -4456,8 +4456,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const adminClassSelect = document.getElementById('admin_class_id');
-    if (adminClassSelect && adminClassSelect.value && typeof loadAdminSchedules === 'function') {
-        loadAdminSchedules();
+    if (adminClassSelect) {
+        ['change', 'input', 'click'].forEach(evt => {
+            adminClassSelect.addEventListener(evt, function() {
+                if (typeof loadAdminSchedules === 'function') {
+                    loadAdminSchedules();
+                }
+            });
+        });
+        if (adminClassSelect.value && typeof loadAdminSchedules === 'function') {
+            loadAdminSchedules();
+        }
+    }
+
+    const createStudentModal = document.getElementById('modal-create-student');
+    if (createStudentModal) {
+        const modalObserver = new MutationObserver(function() {
+            if (createStudentModal.style.display !== 'none' && createStudentModal.style.display !== '') {
+                const sel = document.getElementById('admin_class_id');
+                if (sel && sel.value && typeof loadAdminSchedules === 'function') {
+                    loadAdminSchedules();
+                }
+            }
+        });
+        modalObserver.observe(createStudentModal, { attributes: true, attributeFilter: ['style'] });
     }
 
 });
@@ -4549,20 +4571,24 @@ function renderAdminSchedules() {
 }
 
 async function loadAdminSchedules() {
-    const classId = document.getElementById('admin_class_id').value;
+    const classSelect = document.getElementById('admin_class_id');
+    if (!classSelect) return;
+    const classId = classSelect.value;
     const container = document.getElementById('admin-schedule-container');
     const teacherSelectField = document.getElementById('admin-teacher-selection-field');
     const teacherSelect = document.getElementById('admin-teacher-select');
     const preview = document.getElementById('admin-selected-preview');
     
+    if (!container) return;
+
     const checked = document.querySelectorAll('#admin-schedule-container input[name="schedule_ids[]"]:checked');
     checked.forEach(i => i.checked = false);
     updateAdminSelectedPreview();
 
     if (!classId) {
         container.innerHTML = '<p style="padding: 1.5rem; color: #64748b; font-size: 0.9rem; font-style: italic; text-align: center;">Silakan pilih instrumen terlebih dahulu.</p>';
-        teacherSelectField.style.display = 'none';
-        preview.style.display = 'none';
+        if (teacherSelectField) teacherSelectField.style.display = 'none';
+        if (preview) preview.style.display = 'none';
         return;
     }
 
