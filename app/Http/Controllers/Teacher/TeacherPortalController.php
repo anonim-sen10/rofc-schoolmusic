@@ -428,24 +428,26 @@ public function dashboard(Request $request): View
             $session->total_package_sessions = 4;
             $session->is_replacement = ($session->incomingReschedule !== null);
 
-            // Effective Month: If it's a replacement session, map to old session's package month
-            if ($session->incomingReschedule && $session->incomingReschedule->oldSession) {
-                $oldSess = $session->incomingReschedule->oldSession;
-                $session->effective_month = $oldSess->session_date->format('Y-m');
-                $session->effective_month_label = $oldSess->session_date->translatedFormat('F Y');
-            } else {
-                $session->effective_month = $session->session_date->format('Y-m');
-                $session->effective_month_label = $session->session_date->translatedFormat('F Y');
-            }
-
             if ($session->status === 'rescheduled') {
                 $allStudentSess = $allSessionsMap->get($session->student_id) ?? collect();
                 $index = $allStudentSess->search(fn($item) => $item->id === $session->id);
-                $session->session_number = ($index !== false) ? (($index % 4) + 1) : 1;
+                $sessionNum = ($index !== false) ? (($index % 4) + 1) : 1;
+                $blockFirstIndex = ($index !== false) ? (int)(floor($index / 4) * 4) : 0;
+                $firstSess = $allStudentSess->get($blockFirstIndex) ?? $session;
+
+                $session->session_number = $sessionNum;
+                $session->effective_month = $firstSess->session_date->format('Y-m');
+                $session->effective_month_label = $firstSess->session_date->translatedFormat('F Y');
             } else {
                 $validStudentSess = $validSessionsMap->get($session->student_id) ?? collect();
                 $index = $validStudentSess->search(fn($item) => $item->id === $session->id);
-                $session->session_number = ($index !== false) ? (($index % 4) + 1) : 1;
+                $sessionNum = ($index !== false) ? (($index % 4) + 1) : 1;
+                $blockFirstIndex = ($index !== false) ? (int)(floor($index / 4) * 4) : 0;
+                $firstSess = $validStudentSess->get($blockFirstIndex) ?? $session;
+
+                $session->session_number = $sessionNum;
+                $session->effective_month = $firstSess->session_date->format('Y-m');
+                $session->effective_month_label = $firstSess->session_date->translatedFormat('F Y');
             }
         });
 
