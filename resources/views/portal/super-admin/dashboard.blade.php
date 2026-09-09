@@ -133,22 +133,29 @@
                                     </x-ui.badge>
                                 </td>
                                 <td class="col-actions" style="text-align: center;">
-                                    @if($hasAttendance && ($hasAttendance->image_path || ($hasAttendance->latitude && $hasAttendance->longitude)))
-                                        <div class="actions-wrapper">
-                                            @if($hasAttendance->image_path)
-                                                <a href="{{ asset('storage/' . $hasAttendance->image_path) }}" target="_blank" class="btn-action detail" title="Lihat Bukti Foto">
-                                                    <i data-lucide="image"></i>
-                                                </a>
-                                            @endif
-                                            @if($hasAttendance->latitude && $hasAttendance->longitude)
-                                                <a href="https://www.google.com/maps?q={{ $hasAttendance->latitude }},{{ $hasAttendance->longitude }}" target="_blank" class="btn-action map" title="Lihat Lokasi GPS">
-                                                    <i data-lucide="map-pin"></i>
-                                                </a>
-                                            @endif
-                                        </div>
-                                    @else
-                                        <span class="no-actions">-</span>
-                                    @endif
+                                    <div class="actions-wrapper" style="display: flex; gap: 4px; align-items: center; justify-content: center;">
+                                        @if($hasAttendance && $hasAttendance->image_path)
+                                            <a href="{{ asset('storage/' . $hasAttendance->image_path) }}" target="_blank" class="btn-action detail" title="Lihat Bukti Foto">
+                                                <i data-lucide="image"></i>
+                                            </a>
+                                        @endif
+                                        @if($hasAttendance && $hasAttendance->latitude && $hasAttendance->longitude)
+                                            <a href="https://www.google.com/maps?q={{ $hasAttendance->latitude }},{{ $hasAttendance->longitude }}" target="_blank" class="btn-action map" title="Lihat Lokasi GPS">
+                                                <i data-lucide="map-pin"></i>
+                                            </a>
+                                        @endif
+                                        @if($status === 'completed' || $hasAttendance)
+                                            <form action="{{ route((request()->routeIs('admin.*') ? 'admin' : 'super-admin') . '.attendance.cancel-session', $session->id) }}" 
+                                                  method="POST" 
+                                                  onsubmit="return confirm('Apakah Anda yakin ingin membatalkan absen sesi ini? Status akan kembali AKTIF.')" 
+                                                  style="display: inline;">
+                                                @csrf
+                                                <button type="submit" class="btn-action" style="background: #f59e0b; color: white;" title="Batal Absen Sesi Ini">
+                                                    <i data-lucide="rotate-ccw"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach

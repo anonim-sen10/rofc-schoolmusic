@@ -274,9 +274,46 @@ class AcademicManagementController extends Controller
     public function destroyAttendance($id): RedirectResponse
     {
         $attendance = \App\Models\Attendance::findOrFail($id);
+
+        if ($attendance->session_id) {
+            $session = \App\Models\ScheduleSession::find($attendance->session_id);
+            if ($session) {
+                $hasReschedule = $session->incomingReschedule || $session->rescheduleRequest;
+                $session->update(['status' => $hasReschedule ? 'rescheduled' : 'booked']);
+            }
+        } elseif ($attendance->student_id) {
+            $session = \App\Models\ScheduleSession::where('student_id', $attendance->student_id)
+                ->whereDate('session_date', $attendance->created_at->toDateString())
+                ->first();
+            if ($session) {
+                $hasReschedule = $session->incomingReschedule || $session->rescheduleRequest;
+                $session->update(['status' => $hasReschedule ? 'rescheduled' : 'booked']);
+            }
+        }
+
         $attendance->delete();
 
-        return back()->with('success', 'Data absensi berhasil dihapus.');
+        return back()->with('success', 'Presensi/Absensi berhasil dibatalkan dan status sesi kembali AKTIF.');
+    }
+
+    public function cancelSessionAttendance($sessionId): RedirectResponse
+    {
+        $session = \App\Models\ScheduleSession::findOrFail($sessionId);
+
+        // Hapus record attendance terkait
+        if ($session->attendance) {
+            $session->attendance->delete();
+        }
+        \App\Models\Attendance::where('session_id', $session->id)->delete();
+        \App\Models\Attendance::where('student_id', $session->student_id)
+            ->whereDate('created_at', $session->session_date)
+            ->delete();
+
+        // Kembalikan status sesi
+        $hasReschedule = $session->incomingReschedule || $session->rescheduleRequest;
+        $session->update(['status' => $hasReschedule ? 'rescheduled' : 'booked']);
+
+        return back()->with('success', "Absensi untuk sesi siswa '{$session->student->name}' berhasil dibatalkan. Status sesi kembali AKTIF.");
     }
 
     public function assignScheduleTeacher(Request $request): RedirectResponse

@@ -572,15 +572,16 @@ $attendanceRoute = $isSuperAdmin ? route('super-admin.attendance.index') : route
                                         <i data-lucide="edit-2" style="width:13px;height:13px;"></i>
                                     </button>
 
-                                    <!-- Delete Button -->
+                                    <!-- Batal Absen Button -->
                                     <form action="{{ $prefix === 'super-admin' ? route('super-admin.attendance.destroy', $att->id) : route('admin.attendance.destroy', $att->id) }}" 
                                           method="POST" 
-                                          onsubmit="return confirm('Apakah Anda yakin ingin menghapus catatan absensi ini? Tindakan ini tidak dapat dibatalkan.')" 
+                                          onsubmit="return confirm('Apakah Anda yakin ingin membatalkan absen ini? Status sesi akan kembali AKTIF.')" 
                                           style="display: inline;">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn-action-icon delete" title="Hapus Catatan">
-                                            <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+                                        <button type="submit" style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px; background: #f59e0b; color: white; border: none; font-size: 11px; font-weight: 700; cursor: pointer;" title="Batal Absen">
+                                            <i data-lucide="rotate-ccw" style="width:12px;height:12px;"></i>
+                                            <span>Batal Absen</span>
                                         </button>
                                     </form>
                                 </div>

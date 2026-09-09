@@ -191,6 +191,7 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'role:su
     Route::get('/attendance/export', [AcademicManagementController::class, 'exportAttendance'])->name('attendance.export');
     Route::put('/attendance/{id}', [AcademicManagementController::class, 'updateAttendance'])->name('attendance.update');
     Route::delete('/attendance/{id}', [AcademicManagementController::class, 'destroyAttendance'])->name('attendance.destroy');
+    Route::post('/attendance/session/{sessionId}/cancel', [AcademicManagementController::class, 'cancelSessionAttendance'])->name('attendance.cancel-session');
     Route::get('/{module}', function (string $module) {
         if ($module === 'schedule') {
             return app(SuperAdminScheduleController::class)->index();
@@ -239,6 +240,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,super_ad
     Route::get('/attendance/export', [AcademicManagementController::class, 'exportAttendance'])->name('attendance.export');
     Route::put('/attendance/{id}', [AcademicManagementController::class, 'updateAttendance'])->name('attendance.update');
     Route::delete('/attendance/{id}', [AcademicManagementController::class, 'destroyAttendance'])->name('attendance.destroy');
+    Route::post('/attendance/session/{sessionId}/cancel', [AcademicManagementController::class, 'cancelSessionAttendance'])->name('attendance.cancel-session');
 
     Route::get('/{module}', function (string $module) {
         if ($module === 'schedule') {
