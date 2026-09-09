@@ -13,7 +13,10 @@ class AiAgentMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $expectedKey = env('AI_AGENT_API_KEY', 'PasswordRahasiaBotSaya123');
+        $expectedKey = env('AI_AGENT_API_KEY');
+        if (empty($expectedKey)) {
+            $expectedKey = 'PasswordRahasiaBotSaya123';
+        }
 
         // Check X-AI-API-KEY header, X-API-KEY header, Bearer token, or query parameter
         $providedKey = $request->header('X-AI-API-KEY')
@@ -21,7 +24,7 @@ class AiAgentMiddleware
             ?? $request->bearerToken()
             ?? $request->input('api_key');
 
-        if (empty($providedKey) || $providedKey !== $expectedKey) {
+        if (empty($providedKey) || (string)$providedKey !== (string)$expectedKey) {
             return response()->json([
                 'success' => false,
                 'error' => 'Unauthorized. API Key tidak valid atau belum diisi.'
