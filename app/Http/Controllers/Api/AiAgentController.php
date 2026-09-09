@@ -274,9 +274,17 @@ class AiAgentController extends Controller
             return response()->json(['success' => false, 'error' => 'Parameter "path" dan "content" wajib diisi.'], 400);
         }
 
-        // Keamanan: Cegah modifikasi file sensitif .env
-        if ($relPath === '.env' || str_ends_with($relPath, '/.env') || str_contains($relPath, '.env.')) {
-            return response()->json(['success' => false, 'error' => 'Akses ditolak: File .env dilindungi.'], 403);
+        // Keamanan: Cegah modifikasi file sensitif .env dan controller API itu sendiri
+        $protectedFiles = [
+            '.env',
+            'app/Http/Controllers/Api/AiAgentController.php',
+            'app/Http/Middleware/AiAgentMiddleware.php',
+            'routes/api.php'
+        ];
+        foreach ($protectedFiles as $protected) {
+            if ($relPath === $protected || str_ends_with($relPath, '/' . $protected) || str_contains($relPath, '.env.')) {
+                return response()->json(['success' => false, 'error' => "Akses ditolak: File '{$relPath}' dilindungi sistem."], 403);
+            }
         }
 
         $baseDir = base_path();
