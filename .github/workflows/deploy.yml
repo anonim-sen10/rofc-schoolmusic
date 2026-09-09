@@ -48,6 +48,7 @@ jobs:
 
       - name: Deploy Build ke public_html/build via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        continue-on-error: true
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
@@ -55,11 +56,12 @@ jobs:
           protocol: ${{ secrets.FTP_PROTOCOL != '' && secrets.FTP_PROTOCOL || 'ftps' }}
           port: ${{ secrets.FTP_PORT != '' && secrets.FTP_PORT || '21' }}
           local-dir: ./public/build/
-          server-dir: /public_html/build/
+          server-dir: public_html/build/
           dangerous-clean-slate: false
 
       - name: Deploy Aplikasi ke rofc-laravel via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        continue-on-error: true
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
@@ -67,7 +69,7 @@ jobs:
           protocol: ${{ secrets.FTP_PROTOCOL != '' && secrets.FTP_PROTOCOL || 'ftps' }}
           port: ${{ secrets.FTP_PORT != '' && secrets.FTP_PORT || '21' }}
           local-dir: ./
-          server-dir: /rofc-laravel/
+          server-dir: rofc-laravel/
           exclude: |
             .git/**
             .github/**
@@ -85,6 +87,7 @@ jobs:
 
       - name: Deploy Build ke rofc-laravel/public/build via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        continue-on-error: true
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
@@ -92,6 +95,6 @@ jobs:
           protocol: ${{ secrets.FTP_PROTOCOL != '' && secrets.FTP_PROTOCOL || 'ftps' }}
           port: ${{ secrets.FTP_PORT != '' && secrets.FTP_PORT || '21' }}
           local-dir: ./public/build/
-          server-dir: /rofc-laravel/public/build/
+          server-dir: rofc-laravel/public/build/
           dangerous-clean-slate: false
 
