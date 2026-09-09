@@ -402,13 +402,21 @@ public function dashboard(Request $request): View
                       ->orWhere('substitute_teacher_id', $teacher->id);
             })
             ->whereIn('status', ['booked', 'rescheduled', 'completed'])
-            ->with(['musicClass', 'student.user', 'attendance', 'rescheduleRequests'])
+            ->with(['musicClass', 'student.user', 'attendance', 'rescheduleRequests', 'incomingReschedule.oldSession'])
             ->orderBy('session_date')
             ->orderBy('time')
             ->get();
 
-        // Index all sessions for each student to calculate session numbers ("Pertemuan X dari 4")
-        $studentSessionsMap = \App\Models\ScheduleSession::query()
+        // Index active (valid) sessions vs old rescheduled sessions separately for accurate session numbers
+        $validSessionsMap = \App\Models\ScheduleSession::query()
+            ->whereIn('student_id', $allSchedules->pluck('student_id')->unique())
+            ->whereIn('status', ['booked', 'completed'])
+            ->orderBy('session_date')
+            ->orderBy('time')
+            ->get()
+            ->groupBy('student_id');
+
+        $allSessionsMap = \App\Models\ScheduleSession::query()
             ->whereIn('student_id', $allSchedules->pluck('student_id')->unique())
             ->whereIn('status', ['booked', 'rescheduled', 'completed'])
             ->orderBy('session_date')
@@ -416,17 +424,18 @@ public function dashboard(Request $request): View
             ->get()
             ->groupBy('student_id');
 
-        $allSchedules->each(function ($session) use ($studentSessionsMap) {
-            $studentSess = $studentSessionsMap->get($session->student_id) ?? collect();
-            $index = $studentSess->search(fn($item) => $item->id === $session->id);
-            if ($index !== false) {
-                $session->session_number = ($index % 4) + 1;
-                $session->total_package_sessions = 4;
-                $session->total_session_count = $index + 1;
+        $allSchedules->each(function ($session) use ($validSessionsMap, $allSessionsMap) {
+            $session->total_package_sessions = 4;
+            $session->is_replacement = ($session->incomingReschedule !== null);
+
+            if ($session->status === 'rescheduled') {
+                $allStudentSess = $allSessionsMap->get($session->student_id) ?? collect();
+                $index = $allStudentSess->search(fn($item) => $item->id === $session->id);
+                $session->session_number = ($index !== false) ? (($index % 4) + 1) : 1;
             } else {
-                $session->session_number = 1;
-                $session->total_package_sessions = 4;
-                $session->total_session_count = 1;
+                $validStudentSess = $validSessionsMap->get($session->student_id) ?? collect();
+                $index = $validStudentSess->search(fn($item) => $item->id === $session->id);
+                $session->session_number = ($index !== false) ? (($index % 4) + 1) : 1;
             }
         });
 

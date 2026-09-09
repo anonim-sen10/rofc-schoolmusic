@@ -34,9 +34,19 @@
                             <td>
                                 <div class="flex flex-col gap-1">
                                     <strong>{{ $sched->session_date->translatedFormat('l, d M Y') }} - {{ \Carbon\Carbon::parse($sched->time)->format('H:i') }}</strong>
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-extrabold border border-indigo-100/80 w-fit">
-                                        Pertemuan {{ $sched->session_number ?? 1 }}/{{ $sched->total_package_sessions ?? 4 }}
-                                    </span>
+                                    @if($sched->status === 'rescheduled')
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-extrabold border border-slate-200 w-fit">
+                                            Pertemuan {{ $sched->session_number ?? 1 }}/4 (Dijadwal Ulang)
+                                        </span>
+                                    @elseif($sched->is_replacement)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[10px] font-extrabold border border-amber-200/80 w-fit">
+                                            Pertemuan {{ $sched->session_number ?? 1 }}/4 (Reschedule)
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-extrabold border border-indigo-100/80 w-fit">
+                                            Pertemuan {{ $sched->session_number ?? 1 }}/4
+                                        </span>
+                                    @endif
                                 </div>
                             </td>
                             <td>{{ $sched->musicClass->name ?? '-' }}</td>

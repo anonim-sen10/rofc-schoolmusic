@@ -164,10 +164,22 @@
                                         <span class="inline-flex items-center w-fit px-2.5 py-1 rounded-lg bg-blue-600 text-white text-[10px] font-extrabold shadow-sm tracking-tight">
                                             {{ $schedule->session_date->translatedFormat('l, d M Y') }}
                                         </span>
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-extrabold border border-indigo-100/80">
-                                            <i data-lucide="bookmark" class="w-3 h-3 text-indigo-500"></i>
-                                            Pertemuan {{ $schedule->session_number ?? 1 }}/{{ $schedule->total_package_sessions ?? 4 }}
-                                        </span>
+                                        @if($schedule->status === 'rescheduled')
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-extrabold border border-slate-200">
+                                                <i data-lucide="refresh-cw" class="w-3 h-3 text-slate-400"></i>
+                                                Pertemuan {{ $schedule->session_number ?? 1 }}/4 (Dijadwal Ulang)
+                                            </span>
+                                        @elseif($schedule->is_replacement)
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[10px] font-extrabold border border-amber-200/80">
+                                                <i data-lucide="refresh-cw" class="w-3 h-3 text-amber-500"></i>
+                                                Pertemuan {{ $schedule->session_number ?? 1 }}/4 (Reschedule)
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-extrabold border border-indigo-100/80">
+                                                <i data-lucide="bookmark" class="w-3 h-3 text-indigo-500"></i>
+                                                Pertemuan {{ $schedule->session_number ?? 1 }}/4
+                                            </span>
+                                        @endif
                                     </div>
                                     <span class="inline-flex items-center gap-1.5 px-0.5 text-[11px] font-bold text-slate-600">
                                         <i data-lucide="clock" class="w-3 h-3 text-blue-500"></i>

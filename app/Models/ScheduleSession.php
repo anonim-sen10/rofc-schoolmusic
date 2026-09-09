@@ -62,6 +62,11 @@ class ScheduleSession extends Model
         return $this->hasMany(RescheduleRequest::class, 'old_session_id');
     }
 
+    public function incomingReschedule(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(RescheduleRequest::class, 'new_session_id');
+    }
+
     protected static function booted()
     {
         static::creating(function ($session) {

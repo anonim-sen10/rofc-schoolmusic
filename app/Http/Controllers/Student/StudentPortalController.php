@@ -87,15 +87,24 @@ class StudentPortalController extends Controller
         // Fetch booked sessions for this student
         $schedules = \App\Models\ScheduleSession::where('student_id', $student->id)
             ->whereIn('status', ['booked', 'rescheduled', 'completed'])
-            ->with(['musicClass', 'teacher', 'attendance'])
+            ->with(['musicClass', 'teacher', 'attendance', 'incomingReschedule.oldSession'])
             ->orderBy('session_date')
             ->orderBy('time')
             ->get();
 
-        $schedules->each(function ($session, $index) {
-            $session->session_number = ($index % 4) + 1;
+        $validSchedules = $schedules->filter(fn($s) => $s->status !== 'rescheduled')->values();
+
+        $schedules->each(function ($session) use ($validSchedules, $schedules) {
             $session->total_package_sessions = 4;
-            $session->total_session_count = $index + 1;
+            $session->is_replacement = ($session->incomingReschedule !== null);
+
+            if ($session->status === 'rescheduled') {
+                $idx = $schedules->search(fn($item) => $item->id === $session->id);
+                $session->session_number = ($idx !== false) ? (($idx % 4) + 1) : 1;
+            } else {
+                $idx = $validSchedules->search(fn($item) => $item->id === $session->id);
+                $session->session_number = ($idx !== false) ? (($idx % 4) + 1) : 1;
+            }
         });
 
         return view('portal.student.schedule', [
