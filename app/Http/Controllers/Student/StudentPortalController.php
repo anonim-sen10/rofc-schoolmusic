@@ -98,6 +98,15 @@ class StudentPortalController extends Controller
             $session->total_package_sessions = 4;
             $session->is_replacement = ($session->incomingReschedule !== null);
 
+            if ($session->incomingReschedule && $session->incomingReschedule->oldSession) {
+                $oldSess = $session->incomingReschedule->oldSession;
+                $session->effective_month = $oldSess->session_date->format('Y-m');
+                $session->effective_month_label = $oldSess->session_date->translatedFormat('F Y');
+            } else {
+                $session->effective_month = $session->session_date->format('Y-m');
+                $session->effective_month_label = $session->session_date->translatedFormat('F Y');
+            }
+
             if ($session->status === 'rescheduled') {
                 $idx = $schedules->search(fn($item) => $item->id === $session->id);
                 $session->session_number = ($idx !== false) ? (($idx % 4) + 1) : 1;

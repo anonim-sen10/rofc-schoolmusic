@@ -428,6 +428,16 @@ public function dashboard(Request $request): View
             $session->total_package_sessions = 4;
             $session->is_replacement = ($session->incomingReschedule !== null);
 
+            // Effective Month: If it's a replacement session, map to old session's package month
+            if ($session->incomingReschedule && $session->incomingReschedule->oldSession) {
+                $oldSess = $session->incomingReschedule->oldSession;
+                $session->effective_month = $oldSess->session_date->format('Y-m');
+                $session->effective_month_label = $oldSess->session_date->translatedFormat('F Y');
+            } else {
+                $session->effective_month = $session->session_date->format('Y-m');
+                $session->effective_month_label = $session->session_date->translatedFormat('F Y');
+            }
+
             if ($session->status === 'rescheduled') {
                 $allStudentSess = $allSessionsMap->get($session->student_id) ?? collect();
                 $index = $allStudentSess->search(fn($item) => $item->id === $session->id);
@@ -439,21 +449,22 @@ public function dashboard(Request $request): View
             }
         });
 
-        // Unique available months list for dropdown & tabs
+        // Unique available months list for dropdown & tabs based on effective_month
         $availableMonths = $allSchedules->map(function ($s) {
+            $monthDate = \Carbon\Carbon::parse($s->effective_month . '-01');
             return [
-                'key' => $s->session_date->format('Y-m'),
-                'label' => $s->session_date->translatedFormat('F Y'),
-                'short_label' => $s->session_date->translatedFormat('M Y'),
-                'year' => $s->session_date->format('Y'),
-                'month' => $s->session_date->format('m'),
+                'key' => $s->effective_month,
+                'label' => $s->effective_month_label,
+                'short_label' => $monthDate->translatedFormat('M Y'),
+                'year' => $monthDate->format('Y'),
+                'month' => $monthDate->format('m'),
                 'count' => 0,
             ];
         })->unique('key')->values();
 
-        // Calculate count per month
+        // Calculate count per effective month
         $availableMonths->transform(function ($item) use ($allSchedules) {
-            $item['count'] = $allSchedules->filter(fn($s) => $s->session_date->format('Y-m') === $item['key'])->count();
+            $item['count'] = $allSchedules->filter(fn($s) => $s->effective_month === $item['key'])->count();
             return $item;
         });
 
@@ -464,17 +475,17 @@ public function dashboard(Request $request): View
             $selectedMonth = $hasCurrent ? $currentKey : ($availableMonths->first()['key'] ?? 'all');
         }
 
-        // Filter schedules by selected month
+        // Filter schedules by selected month (using effective_month!)
         $filteredSchedules = $allSchedules;
         if ($selectedMonth && $selectedMonth !== 'all') {
             $filteredSchedules = $allSchedules->filter(function ($s) use ($selectedMonth) {
-                return $s->session_date->format('Y-m') === $selectedMonth;
+                return $s->effective_month === $selectedMonth;
             })->values();
         }
 
-        // Group filtered schedules by Month Year
+        // Group filtered schedules by effective_month_label
         $groupedSchedules = $filteredSchedules->groupBy(function ($s) {
-            return $s->session_date->translatedFormat('F Y');
+            return $s->effective_month_label;
         });
 
         // Compute monthly summary statistics
