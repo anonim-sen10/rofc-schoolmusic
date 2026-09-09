@@ -407,6 +407,29 @@ public function dashboard(Request $request): View
             ->orderBy('time')
             ->get();
 
+        // Index all sessions for each student to calculate session numbers ("Pertemuan X dari 4")
+        $studentSessionsMap = \App\Models\ScheduleSession::query()
+            ->whereIn('student_id', $allSchedules->pluck('student_id')->unique())
+            ->whereIn('status', ['booked', 'rescheduled', 'completed'])
+            ->orderBy('session_date')
+            ->orderBy('time')
+            ->get()
+            ->groupBy('student_id');
+
+        $allSchedules->each(function ($session) use ($studentSessionsMap) {
+            $studentSess = $studentSessionsMap->get($session->student_id) ?? collect();
+            $index = $studentSess->search(fn($item) => $item->id === $session->id);
+            if ($index !== false) {
+                $session->session_number = ($index % 4) + 1;
+                $session->total_package_sessions = 4;
+                $session->total_session_count = $index + 1;
+            } else {
+                $session->session_number = 1;
+                $session->total_package_sessions = 4;
+                $session->total_session_count = 1;
+            }
+        });
+
         // Unique available months list for dropdown & tabs
         $availableMonths = $allSchedules->map(function ($s) {
             return [

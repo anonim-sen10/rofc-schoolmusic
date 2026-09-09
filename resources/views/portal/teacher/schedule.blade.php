@@ -160,9 +160,15 @@
                         <tr class="hover:bg-blue-50/20 transition-all duration-300 group">
                             <td class="px-8 py-5 whitespace-nowrap">
                                 <div class="flex flex-col gap-1">
-                                    <span class="inline-flex items-center w-fit px-2.5 py-1 rounded-lg bg-blue-600 text-white text-[10px] font-extrabold shadow-sm tracking-tight">
-                                        {{ $schedule->session_date->translatedFormat('l, d M Y') }}
-                                    </span>
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        <span class="inline-flex items-center w-fit px-2.5 py-1 rounded-lg bg-blue-600 text-white text-[10px] font-extrabold shadow-sm tracking-tight">
+                                            {{ $schedule->session_date->translatedFormat('l, d M Y') }}
+                                        </span>
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-extrabold border border-indigo-100/80">
+                                            <i data-lucide="bookmark" class="w-3 h-3 text-indigo-500"></i>
+                                            Pertemuan {{ $schedule->session_number ?? 1 }}/{{ $schedule->total_package_sessions ?? 4 }}
+                                        </span>
+                                    </div>
                                     <span class="inline-flex items-center gap-1.5 px-0.5 text-[11px] font-bold text-slate-600">
                                         <i data-lucide="clock" class="w-3 h-3 text-blue-500"></i>
                                         {{ \Carbon\Carbon::parse($schedule->time)->format('H:i') }} WIB

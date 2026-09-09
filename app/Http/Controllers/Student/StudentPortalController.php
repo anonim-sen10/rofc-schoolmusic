@@ -92,6 +92,12 @@ class StudentPortalController extends Controller
             ->orderBy('time')
             ->get();
 
+        $schedules->each(function ($session, $index) {
+            $session->session_number = ($index % 4) + 1;
+            $session->total_package_sessions = 4;
+            $session->total_session_count = $index + 1;
+        });
+
         return view('portal.student.schedule', [
             'student' => $student,
             'schedules' => $schedules,

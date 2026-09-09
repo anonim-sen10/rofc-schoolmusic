@@ -31,7 +31,14 @@
                                 ->first();
                         @endphp
                         <tr>
-                            <td><strong>{{ $sched->session_date->translatedFormat('l, d M Y') }} - {{ \Carbon\Carbon::parse($sched->time)->format('H:i') }}</strong></td>
+                            <td>
+                                <div class="flex flex-col gap-1">
+                                    <strong>{{ $sched->session_date->translatedFormat('l, d M Y') }} - {{ \Carbon\Carbon::parse($sched->time)->format('H:i') }}</strong>
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-extrabold border border-indigo-100/80 w-fit">
+                                        Pertemuan {{ $sched->session_number ?? 1 }}/{{ $sched->total_package_sessions ?? 4 }}
+                                    </span>
+                                </div>
+                            </td>
                             <td>{{ $sched->musicClass->name ?? '-' }}</td>
                             <td>{{ $sched->teacher->name ?? '-' }}</td>
                             <td>
