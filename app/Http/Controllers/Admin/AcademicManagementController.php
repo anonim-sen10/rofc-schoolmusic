@@ -278,16 +278,14 @@ class AcademicManagementController extends Controller
         if ($attendance->session_id) {
             $session = \App\Models\ScheduleSession::find($attendance->session_id);
             if ($session) {
-                $hasReschedule = $session->incomingReschedule || $session->rescheduleRequest;
-                $session->update(['status' => $hasReschedule ? 'rescheduled' : 'booked']);
+                $session->update(['status' => 'booked']);
             }
         } elseif ($attendance->student_id) {
             $session = \App\Models\ScheduleSession::where('student_id', $attendance->student_id)
                 ->whereDate('session_date', $attendance->created_at->toDateString())
                 ->first();
             if ($session) {
-                $hasReschedule = $session->incomingReschedule || $session->rescheduleRequest;
-                $session->update(['status' => $hasReschedule ? 'rescheduled' : 'booked']);
+                $session->update(['status' => 'booked']);
             }
         }
 
@@ -306,12 +304,11 @@ class AcademicManagementController extends Controller
         }
         \App\Models\Attendance::where('session_id', $session->id)->delete();
         \App\Models\Attendance::where('student_id', $session->student_id)
-            ->whereDate('created_at', $session->session_date)
+            ->whereDate('session_date', $session->session_date)
             ->delete();
 
-        // Kembalikan status sesi
-        $hasReschedule = $session->incomingReschedule || $session->rescheduleRequest;
-        $session->update(['status' => $hasReschedule ? 'rescheduled' : 'booked']);
+        // Selalu kembalikan status sesi ke 'booked' agar bisa di-absen kembali
+        $session->update(['status' => 'booked']);
 
         return back()->with('success', "Absensi untuk sesi siswa '{$session->student->name}' berhasil dibatalkan. Status sesi kembali AKTIF.");
     }

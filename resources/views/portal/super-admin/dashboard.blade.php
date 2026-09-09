@@ -144,13 +144,13 @@
                                                 <i data-lucide="map-pin"></i>
                                             </a>
                                         @endif
-                                        @if($status === 'completed' || $hasAttendance)
+                                        @if($status === 'completed' || $status === 'rescheduled' || $hasAttendance)
                                             <form action="{{ route((request()->routeIs('admin.*') ? 'admin' : 'super-admin') . '.attendance.cancel-session', $session->id) }}" 
                                                   method="POST" 
-                                                  onsubmit="return confirm('Apakah Anda yakin ingin membatalkan absen sesi ini? Status akan kembali AKTIF.')" 
+                                                  onsubmit="return confirm('Apakah Anda yakin ingin membatalkan status/absen sesi ini dan mengaktifkannya kembali?')" 
                                                   style="display: inline;">
                                                 @csrf
-                                                <button type="submit" class="btn-action" style="background: #f59e0b; color: white;" title="Batal Absen Sesi Ini">
+                                                <button type="submit" class="btn-action" style="background: #f59e0b; color: white;" title="Batal Absen / Aktifkan Sesi Ini">
                                                     <i data-lucide="rotate-ccw"></i>
                                                 </button>
                                             </form>
