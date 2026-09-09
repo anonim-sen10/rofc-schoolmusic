@@ -17,7 +17,6 @@ class AiAgentController extends Controller
 {
     /**
      * Mengembalikan daftar semua tabel dan kolom dalam database.
-     * Berguna agar AI Bot Telegram tahu struktur data yang tersedia.
      */
     public function getSchema()
     {
@@ -62,7 +61,6 @@ class AiAgentController extends Controller
 
         $queryUpper = strtoupper($query);
 
-        // Keamanan dasar: Blokir perintah berbahaya seperti DROP, TRUNCATE, ALTER
         $forbidden = ['DROP ', 'TRUNCATE ', 'ALTER ', 'FLUSH '];
         foreach ($forbidden as $word) {
             if (strpos($queryUpper, $word) !== false) {
@@ -118,7 +116,6 @@ class AiAgentController extends Controller
 
     /**
      * Eksekusi Aksi Terstruktur (High-level Actions).
-     * Contoh: add_schedule, reschedule, add_student.
      */
     public function executeAction(Request $request)
     {
@@ -141,10 +138,26 @@ class AiAgentController extends Controller
                 case 'student_info':
                     return $this->handleGetStudent($request);
 
+                case 'list_files':
+                case 'get_file_tree':
+                    return $this->listFiles($request);
+
+                case 'read_file':
+                case 'view_file':
+                    return $this->readFile($request);
+
+                case 'write_file':
+                case 'edit_file':
+                    return $this->writeFile($request);
+
+                case 'search_code':
+                case 'grep':
+                    return $this->searchCode($request);
+
                 default:
                     return response()->json([
                         'success' => false,
-                        'error' => "Action '{$action}' tidak dikenal. Action yang tersedia: add_schedule, get_student."
+                        'error' => "Action '{$action}' tidak dikenal. Actions yang tersedia: add_schedule, get_student, list_files, read_file, write_file, search_code."
                     ], 400);
             }
         } catch (\Exception $e) {
@@ -153,6 +166,197 @@ class AiAgentController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Mengambil daftar struktur folder dan file project.
+     */
+    public function listFiles(Request $request)
+    {
+        $relPath = trim($request->input('path', ''), '/');
+        $baseDir = base_path();
+        $targetDir = $relPath ? $baseDir . '/' . $relPath : $baseDir;
+
+        if (!str_starts_with(realpath($targetDir) ?: '', realpath($baseDir))) {
+            return response()->json(['success' => false, 'error' => 'Akses ditolak: Path di luar project.'], 403);
+        }
+
+        if (!is_dir($targetDir)) {
+            return response()->json(['success' => false, 'error' => "Folder '{$relPath}' tidak ditemukan."], 404);
+        }
+
+        $ignoredDirs = ['.git', 'node_modules', 'vendor', '.idea', '.vscode', 'storage/framework', 'storage/logs'];
+        $items = [];
+
+        $scan = scandir($targetDir);
+        foreach ($scan as $item) {
+            if ($item === '.' || $item === '..') continue;
+
+            $itemRel = $relPath ? $relPath . '/' . $item : $item;
+            $fullPath = $targetDir . '/' . $item;
+
+            // Skip ignored
+            $isIgnored = false;
+            foreach ($ignoredDirs as $ig) {
+                if ($item === $ig || str_starts_with($itemRel, $ig)) {
+                    $isIgnored = true;
+                    break;
+                }
+            }
+            if ($isIgnored) continue;
+
+            $isDir = is_dir($fullPath);
+            $items[] = [
+                'name' => $item,
+                'path' => $itemRel,
+                'type' => $isDir ? 'directory' : 'file',
+                'size' => $isDir ? null : filesize($fullPath),
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'current_path' => $relPath ?: '/',
+            'total_items' => count($items),
+            'items' => $items
+        ]);
+    }
+
+    /**
+     * Membaca isi file tertentu di dalam project.
+     */
+    public function readFile(Request $request)
+    {
+        $relPath = trim($request->input('path', ''), '/');
+
+        if (empty($relPath)) {
+            return response()->json(['success' => false, 'error' => 'Parameter "path" tidak boleh kosong.'], 400);
+        }
+
+        // Keamanan: Cegah membaca file sensitif .env
+        if ($relPath === '.env' || str_ends_with($relPath, '/.env') || str_contains($relPath, '.env.')) {
+            return response()->json(['success' => false, 'error' => 'Akses ditolak: File .env dilindungi.'], 403);
+        }
+
+        $baseDir = base_path();
+        $fullPath = $baseDir . '/' . $relPath;
+        $realPath = realpath($fullPath);
+
+        if (!$realPath || !str_starts_with($realPath, realpath($baseDir))) {
+            return response()->json(['success' => false, 'error' => 'Akses ditolak atau file tidak ditemukan.'], 404);
+        }
+
+        if (!is_file($realPath)) {
+            return response()->json(['success' => false, 'error' => "Path '{$relPath}' adalah folder, bukan file."], 400);
+        }
+
+        $content = file_get_contents($realPath);
+        $lines = explode("\n", $content);
+
+        return response()->json([
+            'success' => true,
+            'path' => $relPath,
+            'lines_count' => count($lines),
+            'size_bytes' => strlen($content),
+            'content' => $content
+        ]);
+    }
+
+    /**
+     * Memperbarui / membuat file di dalam project.
+     */
+    public function writeFile(Request $request)
+    {
+        $relPath = trim($request->input('path', ''), '/');
+        $content = $request->input('content');
+
+        if (empty($relPath) || $content === null) {
+            return response()->json(['success' => false, 'error' => 'Parameter "path" dan "content" wajib diisi.'], 400);
+        }
+
+        // Keamanan: Cegah modifikasi file sensitif .env
+        if ($relPath === '.env' || str_ends_with($relPath, '/.env') || str_contains($relPath, '.env.')) {
+            return response()->json(['success' => false, 'error' => 'Akses ditolak: File .env dilindungi.'], 403);
+        }
+
+        $baseDir = base_path();
+        $fullPath = $baseDir . '/' . $relPath;
+
+        // Pastikan folder parent ada
+        $dir = dirname($fullPath);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        file_put_contents($fullPath, $content);
+
+        return response()->json([
+            'success' => true,
+            'message' => "File '{$relPath}' berhasil disimpan.",
+            'path' => $relPath,
+            'size_bytes' => strlen($content)
+        ]);
+    }
+
+    /**
+     * Mencari kata kunci/kode dalam file-file project.
+     */
+    public function searchCode(Request $request)
+    {
+        $query = $request->input('query', $request->input('keyword', ''));
+        $searchDir = trim($request->input('path', 'app'), '/');
+
+        if (empty($query)) {
+            return response()->json(['success' => false, 'error' => 'Parameter "query" atau "keyword" wajib diisi.'], 400);
+        }
+
+        $baseDir = base_path();
+        $targetDir = $baseDir . '/' . $searchDir;
+
+        if (!is_dir($targetDir)) {
+            return response()->json(['success' => false, 'error' => "Folder '{$searchDir}' tidak ditemukan."], 404);
+        }
+
+        $matches = [];
+        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($targetDir));
+
+        foreach ($iterator as $file) {
+            if ($file->isDir()) continue;
+            $filePath = $file->getPathname();
+
+            // Skip vendor/node_modules/.git
+            if (str_contains($filePath, '/vendor/') || str_contains($filePath, '/node_modules/') || str_contains($filePath, '/.git/')) {
+                continue;
+            }
+
+            $content = @file_get_contents($filePath);
+            if ($content && str_contains($content, $query)) {
+                $lines = explode("\n", $content);
+                $matchingLines = [];
+                foreach ($lines as $lineNum => $line) {
+                    if (str_contains($line, $query)) {
+                        $matchingLines[] = [
+                            'line' => $lineNum + 1,
+                            'content' => trim($line)
+                        ];
+                    }
+                }
+
+                $relFile = str_replace($baseDir . '/', '', str_replace('\\', '/', $filePath));
+                $matches[] = [
+                    'file' => $relFile,
+                    'match_count' => count($matchingLines),
+                    'lines' => array_slice($matchingLines, 0, 5) // Return max 5 matching lines per file
+                ];
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'keyword' => $query,
+            'total_files_matched' => count($matches),
+            'matches' => $matches
+        ]);
     }
 
     private function handleAddSchedule(Request $request)
@@ -171,13 +375,11 @@ class AiAgentController extends Controller
             return response()->json([
                 'success' => false,
                 'error' => "Siswa '{$studentName}' tidak ditemukan dalam database."
-            ], 44);
+            ], 404);
         }
 
-        // Format waktu
         $time = strlen($timeStr) === 5 ? $timeStr . ':00' : $timeStr;
 
-        // Resolve Class & Teacher
         $classId = $student->class_id ?? MusicClass::first()->id;
         $schedule = Schedule::where('student_id', $student->id)->first();
         $teacherId = $schedule ? $schedule->teacher_id : Teacher::first()->id;
@@ -218,7 +420,6 @@ class AiAgentController extends Controller
             }
         }
 
-        // Generate 4 sesi bulanan x durasi
         $totalSessions = $durationMonths * 4;
         $createdSessions = [];
         $currentDate = $startDate->copy();
